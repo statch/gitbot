@@ -26,4 +26,4 @@ Command syntax is themed after the git CLI.<br/>**The commands listed below are 
 - `git --uptime` - Bot's uptime
 - `git --ping` - Bot's ping
 
-If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)
+**If you have any problems or questions, feel free to join** [**the support server**](https://discord.gg/3e5fwpA)

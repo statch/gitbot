@@ -21,6 +21,7 @@ Command syntax is themed after the official GitHub CLI.<br/>**The commands liste
 
 ### Other commands:
 - `git --help` - a classic help message with commands
+- `git --privacy` - Bot's Privacy Policy
 - `git --aliases` - get a list of aliases for the Bot's commands
 - `git --uptime` - Bot's uptime
 - `git --ping` - Bot's ping

@@ -38,7 +38,7 @@ class Events(commands.Cog):
     async def on_guild_remove(self, guild):
         wulf = await self.client.fetch_user(user_id=548803750634979340)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
-        await wulf.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
+        await wulf.send(f"Removed from guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:

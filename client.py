@@ -9,7 +9,7 @@ load_dotenv()
 S = globals.Git
 
 intents = discord.Intents.default()
-client = commands.Bot(command_prefix="g! ", case_insensitive=True, intents=intents)
+client = commands.Bot(command_prefix="git ", case_insensitive=True, intents=intents)
 dir_paths: list = ['./cogs', './handle', './ext']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]
 client.remove_command("help")

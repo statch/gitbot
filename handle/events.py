@@ -42,7 +42,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
-        if message.clean_content == f'<@!{self.client.user.id}>' and await verify_send_perms(message.channel):
+        if self.client.user in message.mentions[:1] and len(message.content) < 23 and await verify_send_perms(message.channel):
             embed = discord.Embed(
                 color=0xefefef,
                 title=None,

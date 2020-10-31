@@ -3,7 +3,7 @@
 # GitHub Discord Bot
 
 This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.<br/>
-Command syntax is themed after the official GitHub CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
+Command syntax is themed after the git CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
 
 ### Some of the most notable commands are:
 - `git checkout --user -info {user}` - get information about a GitHub user

@@ -2,8 +2,8 @@
 
 # GitHub Discord Bot
 
-This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.<br/>
-Command syntax is themed after the git CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
+This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.
+Command syntax is themed after the `git` CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
 
 ### Some of the most notable commands are:
 - `git checkout --user -info {user}` - get information about a GitHub user
@@ -16,14 +16,19 @@ Command syntax is themed after the git CLI.<br/>**The commands listed below are 
 - `git checkout --repo -info {repo}` - get information about a GitHub repository
 - `git checkout --repo -src {repo}` - get the file structure of a GitHub repository
 
-### You can also customize it's behavior!
+There are some general information commands too, for example:
+- `git info --license {license}` - get info about a license, it's permissions, limitations and more!
+
+### You can also customize its behavior!
 `git config` will allow you to play around with the settings and make GitHub uniquely yours!
 
 ### Other commands:
 - `git --help` - a classic help message with commands
-- `git --privacy` - Bot's Privacy Policy
+- `git --privacy` - the Bot's privacy policy
 - `git --aliases` - get a list of aliases for the Bot's commands
 - `git --uptime` - Bot's uptime
 - `git --ping` - Bot's ping
 
-**If you have any problems or questions, feel free to join** [**the support server**](https://discord.gg/3e5fwpA)
+If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)
+
+**© 2020 wulf, Not affiliated with** [**GitHub Inc.**](https://github.com/)

@@ -17,10 +17,10 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def help_command(self, ctx) -> None:
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             lines: list = ["**In this section you'll find info and usage of my commands.**",
                            "\n**You can access specific parts by typing:**",
                            "`git --help checkout` for checkout commands",
+                           "`git --help info` for info commands",
                            "`git --help config` for configuration help",
                            "`git --help other` for other commands",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
@@ -36,7 +36,6 @@ class Help(commands.Cog):
     @help_command.command(name='checkout', aliases=['-checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def checkout_help(self, ctx) -> None:
-        await ctx.channel.trigger_typing()
         lines: list = ["The checkout command allows you to fetch information directly from GitHub.",
                        "\n**All commands listed below assume being prefixed with** `git checkout`",
                        "Words in curly braces symbolize arguments that the command requires",
@@ -59,7 +58,6 @@ class Help(commands.Cog):
     @help_command.command(name='other', aliases=['-other'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def other_help(self, ctx) -> None:
-        await ctx.channel.trigger_typing()
         lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
                        "\n`git --aliases` - get a list of command shorthands",
                        "`git --privacy` - the Bot's privacy policy",
@@ -77,7 +75,6 @@ class Help(commands.Cog):
     @help_command.command(name='config', aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_help(self, ctx) -> None:
-        await ctx.channel.trigger_typing()
         lines: list = ["**These commands affect the behavior of the Bot.**",
                        "`git --config` - get detailed info on your options",
                        "`git --config -show` - shows your userent settings"]
@@ -90,14 +87,28 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
     @guild_available()
+    @help_command.command(name="info", aliases=["-info", "--info"])
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    async def info_help(self, ctx):
+        lines: list = ["**These commands let you fetch various data related to Git and GitHub.**",
+                       "`git info --license {license}` - get info about a license"]
+        embed = discord.Embed(
+            title=f"{self.e}  Info Help",
+            color=0xefefef,
+            description="\n".join(lines)
+        )
+        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        await ctx.send(embed=embed)
+
+    @guild_available()
     @commands.group(name='--aliases', aliases=['aliases'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def alias_command(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             lines: list = ["**In this section you'll find shorthands of my commands**",
                            "\n**You can access specific parts by typing:**",
                            "`git --aliases checkout` - for checkout aliases",
+                           "`git --aliases info` - for info aliases",
                            "`git --aliases config` - for configuration aliases",
                            "`git --aliases other` - for other aliases"]
             embed = discord.Embed(
@@ -112,7 +123,6 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def checkout_aliases(self, ctx):
-        await ctx.channel.trigger_typing()
         lines: list = ["**All commands listed below begin with** `git checkout` **or** `git C`",
                        f"`--user -info` {self.ga} `-U -I`",
                        f"`--user -repos` {self.ga} `-U -R`",
@@ -132,7 +142,6 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def other_aliases(self, ctx):
-        await ctx.channel.trigger_typing()
         lines: list = [
             "**Shorthands for commands not tied to GitHub itself**",
             f"`git --uptime` {self.ga} `git --up`",
@@ -150,7 +159,6 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def config_aliases(self, ctx):
-        await ctx.channel.trigger_typing()
         lines: list = [
             "**Shorthands for configuration commands**",
             f"`git --config` {self.ga} `git -cfg`",
@@ -165,6 +173,22 @@ class Help(commands.Cog):
             description="\n".join(lines)
         )
         embed.set_footer(text=f"You can find usage of these commands by typing git --config")
+        await ctx.send(embed=embed)
+
+    @guild_available()
+    @alias_command.command(name="info", aliases=["-info", "--info"])
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    async def info_command_aliases(self, ctx):
+        lines: list = [
+            "**Shorthands for commands used to fetch data related to Git and GitHub**",
+            f"`git info --license` {self.ga} `git info -L`"
+        ]
+        embed = discord.Embed(
+            title=f"{self.e}  Info Aliases",
+            color=0xefefef,
+            description="\n".join(lines)
+        )
+        embed.set_footer(text=f"You can find usage of these commands by typing git --help info")
         await ctx.send(embed=embed)
 
 

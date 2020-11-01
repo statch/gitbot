@@ -6,7 +6,7 @@ import datetime
 start_time = datetime.datetime.utcnow()
 
 
-class Status(commands.Cog):
+class BotInfo(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.emoji: str = '<:github:772040411954937876>'
@@ -82,4 +82,4 @@ class Status(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Status(client))
+    client.add_cog(BotInfo(client))

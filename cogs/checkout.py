@@ -85,7 +85,7 @@ class Checkout(commands.Cog):
         await ctx.channel.trigger_typing()
         try:
             usr = Git.user.get_user(user)
-            repos: list = [x for x in usr.get_repos()[:15]]
+            repos: list = [x for x in usr.get_repos() if not x.private][:15]
         except UnknownObjectException:
             await ctx.send(f"{self.emoji} This user **doesn't exist!**")
             return
@@ -111,7 +111,7 @@ class Checkout(commands.Cog):
         await ctx.channel.trigger_typing()
         try:
             o = Git.user.get_organization(org)
-            repos: list = [x for x in o.get_repos()[:15]]
+            repos: list = [x for x in o.get_repos() if not x.private][:15]
         except UnknownObjectException:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return

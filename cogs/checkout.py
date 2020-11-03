@@ -282,7 +282,7 @@ class Checkout(commands.Cog):
         if org.location is not None:
             location: str = f"Is based in {org.location}\n"
         else:
-            location: str = "\n"
+            location: str = ""
         info: str = f"Created on {org.created_at.strftime('%e, %b %Y')}\n{repos}{members}{location}{email}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (org.blog, "Website")

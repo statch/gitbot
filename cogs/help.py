@@ -61,6 +61,7 @@ class Help(commands.Cog):
         lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
                        "\n`git --aliases` - get a list of command shorthands",
                        "`git --privacy` - the Bot's privacy policy",
+                       "`git --stats` - some stats regarding the Bot",
                        "`git --uptime` - see the time since the last restart of the Bot",
                        "`git --ping` - see the Bot's latency"]
         embed = discord.Embed(

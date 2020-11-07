@@ -11,7 +11,7 @@ S = globals.Git
 intents = discord.Intents.default()
 intents.members = True
 client = commands.Bot(command_prefix="git ", case_insensitive=True, intents=intents)
-dir_paths: list = ['./cogs', './handle', './ext']
+dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]
 client.remove_command("help")
 

@@ -5,4 +5,5 @@ python-dotenv==0.14.0
 fuzzywuzzy~=0.18.0
 python-Levenshtein==0.12.0
 motor==2.3.0
+dnspython==2.0.0
 psutil==5.7.2

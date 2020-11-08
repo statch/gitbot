@@ -16,6 +16,8 @@ class DiscordLabs(commands.Cog):
                 res = await res.json()
                 if str(res["error"]).lower() != "false":
                     print(f"\nbots.discordlabs API error:\n\n{res}\n")
+                else:
+                    print("bots.discordlabs stats posted successfully")
 
     @post_dlabs_stats.before_loop
     async def wait_until_ready(self):

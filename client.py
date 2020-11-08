@@ -28,6 +28,11 @@ for directory in dir_paths:
         if file.endswith('.py') and file not in exceptions:
             client.load_extension(f"{directory[2:]}.{file[:-3]}")
 
+# Load botlist cogs
+for cog in os.listdir('./core/botlists'):
+    if cog.endswith('.py'):
+        client.load_extension(f'core.botlists.{cog[:-3]}')
+
 
 @client.command(name='load', aliases=["--load"])
 @is_me()

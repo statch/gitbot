@@ -7,6 +7,7 @@ class DiscordLabs(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.token: str = getenv("DISCORDLABS")
+        self.post_dlabs_stats.start()
 
     @tasks.loop(minutes=30)
     async def post_dlabs_stats(self):

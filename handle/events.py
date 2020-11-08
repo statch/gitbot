@@ -16,8 +16,8 @@ class Events(commands.Cog):
     async def on_guild_join(self, guild):
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
         receiver = None
-        wulf = await self.client.fetch_user(user_id=548803750634979340)
-        await wulf.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
+        channel = await self.client.fetch_channel(id=775042132054376448)
+        await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
         async for channel in guild_text_channels(guild):
             if await verify_send_perms(channel):
                 receiver = channel
@@ -36,9 +36,9 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        wulf = await self.client.fetch_user(user_id=548803750634979340)
+        channel = await self.client.fetch_channel(id=775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
-        await wulf.send(f"Removed from guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
+        await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:

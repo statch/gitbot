@@ -26,6 +26,7 @@ There are some general information commands too, for example:
 - `git --help` - a classic help message with commands
 - `git --privacy` - the Bot's privacy policy
 - `git --aliases` - get a list of aliases for the Bot's commands
+- `git --stats` - some stats regarding the functioning of the Bot
 - `git --uptime` - Bot's uptime
 - `git --ping` - Bot's ping
 

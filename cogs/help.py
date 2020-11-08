@@ -17,12 +17,12 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def help_command(self, ctx) -> None:
         if ctx.invoked_subcommand is None:
-            lines: list = ["**In this section you'll find info and usage of my commands.**",
+            lines: list = ["In this section you'll find info and usage of my commands.",
                            "\n**You can access specific parts by typing:**",
-                           "`git --help checkout` for checkout commands",
-                           "`git --help info` for info commands",
-                           "`git --help config` for configuration help",
-                           "`git --help other` for other commands",
+                           "`git --help checkout` to fetch information about orgs, repos and users",
+                           "`git --help info` for commands that provide information about Git & GitHub",
+                           "`git --help config` to store your preferred orgs, repos and users",
+                           "`git --help utility` for commands related to the bot",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
             embed = discord.Embed(
                 title=f"{self.e}  Help",
@@ -33,7 +33,7 @@ class Help(commands.Cog):
             await ctx.send(embed=embed)
 
     @guild_available()
-    @help_command.command(name='checkout', aliases=['-checkout'])
+    @help_command.command(name='checkout', aliases=['-checkout', '--checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def checkout_help(self, ctx) -> None:
         lines: list = ["The checkout command allows you to fetch information directly from GitHub.",
@@ -55,9 +55,9 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
     @guild_available()
-    @help_command.command(name='other', aliases=['-other'])
+    @help_command.command(name='utility', aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def other_help(self, ctx) -> None:
+    async def utlity_help(self, ctx) -> None:
         lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
                        "\n`git --aliases` - get a list of command shorthands",
                        "`git --privacy` - the Bot's privacy policy",
@@ -65,7 +65,7 @@ class Help(commands.Cog):
                        "`git --uptime` - see the time since the last restart of the Bot",
                        "`git --ping` - see the Bot's latency"]
         embed = discord.Embed(
-            title=f"{self.e}  Other Help",
+            title=f"{self.e}  Utility Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -77,8 +77,8 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_help(self, ctx) -> None:
         lines: list = ["**These commands affect the behavior of the Bot.**",
-                       "`git --config` - get detailed info on your options",
-                       "`git --config -show` - shows your userent settings"]
+                       "`git config` - get detailed info on your options",
+                       "`git config -show` - shows your current settings"]
         embed = discord.Embed(
             title=f"{self.e}  Config Help",
             color=0xefefef,
@@ -91,7 +91,7 @@ class Help(commands.Cog):
     @help_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx):
-        lines: list = ["**These commands let you fetch various data related to Git and GitHub.**",
+        lines: list = ["These commands let you fetch various data related to Git and GitHub.",
                        "`git info --license {license}` - get info about a license"]
         embed = discord.Embed(
             title=f"{self.e}  Info Help",
@@ -106,12 +106,12 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def alias_command(self, ctx):
         if ctx.invoked_subcommand is None:
-            lines: list = ["**In this section you'll find shorthands of my commands**",
+            lines: list = ["In this section you'll find shorthands of my commands",
                            "\n**You can access specific parts by typing:**",
-                           "`git --aliases checkout` - for checkout aliases",
-                           "`git --aliases info` - for info aliases",
-                           "`git --aliases config` - for configuration aliases",
-                           "`git --aliases other` - for other aliases"]
+                           "`git --aliases checkout` - for checkout command aliases",
+                           "`git --aliases info` - for information fetching aliases",
+                           "`git --aliases config` - for configuration command aliases",
+                           "`git --aliases utility` - for other aliases"]
             embed = discord.Embed(
                 title=f"{self.e}  Aliases",
                 color=0xefefef,
@@ -120,7 +120,7 @@ class Help(commands.Cog):
             embed.set_footer(text=f"You can find usage of these commands by typing git --help")
             await ctx.send(embed=embed)
 
-    @alias_command.command(name="checkout")
+    @alias_command.command(name="checkout", aliases=['-checkout', '--checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def checkout_aliases(self, ctx):
@@ -139,12 +139,12 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find usage of these commands by typing git --help checkout")
         await ctx.send(embed=embed)
 
-    @alias_command.command(name="other")
+    @alias_command.command(name="utility", aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    async def other_aliases(self, ctx):
+    async def utility_aliases(self, ctx):
         lines: list = [
-            "**Shorthands for commands not tied to GitHub itself**",
+            "Shorthands for commands not tied to GitHub itself",
             f"`git --uptime` {self.ga} `git --up`",
             f"`git --ping` {self.ga} `git --p`"
         ]
@@ -153,27 +153,27 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help other")
+        embed.set_footer(text=f"You can find usage of these commands by typing git --help utility")
         await ctx.send(embed=embed)
 
-    @alias_command.command(name="config")
+    @alias_command.command(name="config", aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def config_aliases(self, ctx):
         lines: list = [
-            "**Shorthands for configuration commands**",
-            f"`git --config` {self.ga} `git -cfg`",
-            f"`git --config -show` {self.ga} `git -cfg -S`",
-            f"`git --config --user` {self.ga} `git -cfg -U`",
-            f"`git --config --org` {self.ga} `git -cfg -O`",
-            f"`git --config --repo` {self.ga} `git -cfg -R`",
+            "Shorthands for commands used to store your preferred orgs, repos and users",
+            f"`git config` {self.ga} `git -cfg`",
+            f"`git config -show` {self.ga} `git -cfg -S`",
+            f"`git config --user` {self.ga} `git -cfg -U`",
+            f"`git config --org` {self.ga} `git -cfg -O`",
+            f"`git config --repo` {self.ga} `git -cfg -R`",
         ]
         embed = discord.Embed(
             title=f"{self.e}  Config Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --config")
+        embed.set_footer(text=f"You can find usage of these commands by typing git config")
         await ctx.send(embed=embed)
 
     @guild_available()

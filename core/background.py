@@ -9,9 +9,9 @@ class Background(commands.Cog):
         self.next: int = 0
         self.status_changer.start()
 
-    @tasks.loop(minutes=randint(1, 3))
+    @tasks.loop(minutes=randint(2, 5))
     async def status_changer(self):
-        presences: list = [Game(f"on {len(self.client.guilds)} servers"),
+        presences: list = [Game(f"in {len(self.client.guilds)} servers"),
                            Activity(type=ActivityType.watching, name="git --help"),
                            Game(
                                f"for {sum([x.member_count for x in self.client.guilds])} users!"),

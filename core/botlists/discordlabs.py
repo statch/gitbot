@@ -11,7 +11,7 @@ class DiscordLabs(commands.Cog):
     @tasks.loop(minutes=30)
     async def post_dlabs_stats(self):
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"https://bots.discordlabs.org/v2/bot/{self.client.id}/stats",
+            async with session.post(f"https://bots.discordlabs.org/v2/bot/{self.client.user.id}/stats",
                                     data={"token": self.token, "server_count": len(self.client.guilds)}) as res:
                 res = await res.json()
                 if str(res["error"]).lower() != "false":

@@ -10,9 +10,10 @@ S = globals.Git
 
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix="git ", case_insensitive=True, intents=intents)
+client = commands.Bot(command_prefix="g! ", case_insensitive=True, intents=intents)
 dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]
+botlist_folders: list = []
 client.remove_command("help")
 
 
@@ -28,10 +29,13 @@ for directory in dir_paths:
         if file.endswith('.py') and file not in exceptions:
             client.load_extension(f"{directory[2:]}.{file[:-3]}")
 
-# Load botlist cogs
-for cog in os.listdir('./core/botlists'):
-    if cog.endswith('.py'):
-        client.load_extension(f'core.botlists.{cog[:-3]}')
+# Create a list of tuples consisting of a PATH and a string to load the extension
+for folder in os.listdir('./core/botlists'):
+    botlist_folders.append((f'./core/botlists/{folder}', f"core.botlists.{folder}"))
+
+for folder in botlist_folders:
+    for file in os.listdir(folder[0]):
+        client.load_extension(f"{folder[1]}.{file[:-3]}")
 
 
 @client.command(name='load', aliases=["--load"])

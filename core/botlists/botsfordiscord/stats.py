@@ -13,7 +13,7 @@ class BotsForDiscordStats(commands.Cog):
     async def post_bfd_stats(self) -> None:
         async with aiohttp.ClientSession() as session:
             async with session.post(f"https://botsfordiscord.com/api/bot/{self.client.user.id}",
-                                    data={"server_count": len(self.client.guilds)},
+                                    json={"server_count": len(self.client.guilds)},
                                     headers={"Content-Type": "application/json", "Authorization": self.token}) as res:
                 if res.status != 200:
                     res = await res.json()

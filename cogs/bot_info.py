@@ -27,7 +27,7 @@ def dir_line_count(dir):
     return sum(map(lambda item: item_line_count(join(dir, item)), os.listdir(dir)))
 
 
-LINES_OF_CODE = dir_line_count('.')
+LINES_OF_CODE = sum([dir_line_count('./cogs'), dir_line_count('./ext'), dir_line_count('./utils'), dir_line_count('./handle'), dir_line_count('./core')])
 
 
 class BotInfo(commands.Cog):

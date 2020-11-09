@@ -16,7 +16,7 @@ class Events(commands.Cog):
     async def on_guild_join(self, guild):
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
         receiver = None
-        channel = await self.client.fetch_channel(id=775042132054376448)
+        channel = self.client.get_channel(775042132054376448)
         await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
         async for channel in guild_text_channels(guild):
             if await verify_send_perms(channel):
@@ -36,7 +36,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        channel = await self.client.fetch_channel(id=775042132054376448)
+        channel = self.client.get_channel(775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
         await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
 

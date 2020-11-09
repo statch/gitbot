@@ -13,7 +13,7 @@ class DiscordBotsStats(commands.Cog):
     async def post_dbots_stats(self):
         async with aiohttp.ClientSession() as session:
             async with session.post(f"https://discord.bots.gg/api/v1/bots/{self.client.user.id}/stats",
-                                    data={"guildCount": len(self.client.guilds)},
+                                    json={"guildCount": len(self.client.guilds)},
                                     headers={"Content-Type": "application/json", "Authorization": self.token}) as res:
                 res_ = await res.json()
             if res.status != 200:

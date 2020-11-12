@@ -38,7 +38,7 @@ class Events(commands.Cog):
     async def on_guild_remove(self, guild):
         channel = self.client.get_channel(775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
-        await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
+        await channel.send(f"Removed from guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:

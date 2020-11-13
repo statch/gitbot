@@ -1,5 +1,7 @@
 ![GitHub Bot Banner](https://media.discordapp.net/attachments/756583860736753774/768421886937006100/github.png?width=1443&height=361)
 
+[![Discord Bots](https://top.gg/api/widget/761269120691470357.svg)](https://top.gg/bot/761269120691470357)
+
 # GitHub Discord Bot
 
 This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.

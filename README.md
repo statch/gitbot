@@ -1,10 +1,13 @@
 ![GitHub Bot Banner](https://media.discordapp.net/attachments/756583860736753774/768421886937006100/github.png?width=1443&height=361)
 
-[![Discord Bots](https://top.gg/api/widget/761269120691470357.svg)](https://top.gg/bot/761269120691470357)
+[![Bot Status](https://top.gg/api/widget/status/761269120691470357.svg?noavatar=true)](https://top.gg/bot/761269120691470357)
+[![Server Count](https://top.gg/api/widget/servers/761269120691470357.svg?noavatar=true)](https://top.gg/bot/761269120691470357)
+[![Support Server](https://img.shields.io/discord/737430006271311913?color=51B780&label=Discord%20Server)](https://discord.gg/3e5fwpA)
+
 
 # GitHub Discord Bot
 
-This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.
+This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.<br/>
 Command syntax is themed after the `git` CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
 
 ### Some of the most notable commands are:

@@ -10,10 +10,7 @@ class TopGG(commands.Cog):
         self.token = getenv("TOPGG")
         self.dblpy = dbl.DBLClient(self.client, self.token, autopost=True)
 
-    @commands.Cog.listener()
-    async def on_dbl_vote(self, data):
-        print(data)
-
+        
     async def on_guild_post(self):
         print("---------------------\nStats Posted to Top.gg\n---------------------")
 

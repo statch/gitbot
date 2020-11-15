@@ -3,10 +3,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from ext.decorators import is_me
-from cfg import globals
 
 load_dotenv()
-S = globals.Git
 
 intents = discord.Intents.default()
 intents.members = True

@@ -14,8 +14,9 @@ class Debug(commands.Cog):
     @is_me()
     @commands.command(aliases=["--rate"])
     async def rate(self, ctx) -> None:
+        rate = await Git.get_ratelimit()
         await ctx.send(
-            f"{self.emoji} Used **{Git.user.rate_limiting[1] - Git.user.rate_limiting[0]}** out of **{Git.user.rate_limiting[1]}** requests so far.\n\n**Resets at:** `{dt.datetime.fromtimestamp(Git.user.rate_limiting_resettime).strftime('%Y-%m-%d %H:%M:%S')}`")
+            f"{self.emoji} Used **{rate['rate']['used']}** out of **{rate['rate']['limit']}** requests so far.\n\n**Resets at:** `{dt.datetime.fromtimestamp(rate['rate']['reset']).strftime('%Y-%m-%d %H:%M:%S')}`")
 
 
 def setup(client):

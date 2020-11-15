@@ -1,4 +1,3 @@
-from cfg.api import Instance
+from cfg.api import API
 
-global Git
-Git = Instance()
+Git = API()

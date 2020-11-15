@@ -212,7 +212,7 @@ class Checkout(commands.Cog):
             url=u['html_url']
         )
         orgs_c: int = len(await Git.get_user_orgs(user))
-        if u['bio'] is not None and len(u['bio']) > 0:
+        if 'bio' in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=":notepad_spiral: Bio:", value=f"```{u['bio']}```")
         occupation: str = f'Works at {u["company"]}\n' if "company" in u and u["company"] is not None else 'Isn\'t part of a company\n'
         orgs: str = f"Belongs to {orgs_c} organizations\n" if orgs_c != 0 else "Doesn't belong to any organizations\n"

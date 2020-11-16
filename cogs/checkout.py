@@ -172,15 +172,18 @@ class Checkout(commands.Cog):
         if watch == 0:
             watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)"
         issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r['open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
-        stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far"
+        stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far\n"
         if star == 1:
-            stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far"
+            stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far\n"
         if r['open_issues_count'] == 1:
             issues: str = f"Has only one [open issue]({r['html_url']}/issues)"
         forks: str = f"No one has forked this repo, yet\n" if r['forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
         if r['forks_count'] == 1:
             forks: str = f"It's been forked [only once]({r['html_url']}/network/members)\n"
-        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}"
+        forked = ""
+        if 'fork' in r and r['fork'] is True:
+            forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})"
+        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         homepage: tuple = (
             r['homepage'] if 'homepage' in r else None,

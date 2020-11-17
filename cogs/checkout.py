@@ -30,7 +30,6 @@ class Checkout(commands.Cog):
     @commands.group(name='checkout', aliases=['c'])
     async def checkout(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             await ctx.send(
                 f"{self.emoji} Looks like you're lost! **Use the command** `git --help` **to get back on track.**")
 
@@ -38,7 +37,6 @@ class Checkout(commands.Cog):
     @checkout.group(name='--user', aliases=['-U', '-u'])
     async def user(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             lines: list = [f"**In this subcommand you have two options available:**",
                            f"{self.square} `-info` **|** Returns info about a user",
                            f"{self.square} `-repos` **|** Returns the user's repos"]
@@ -53,7 +51,6 @@ class Checkout(commands.Cog):
     @checkout.group(name='--organization', aliases=['--org', '-O', '-o'])
     async def org(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             lines: list = [f"**In this subcommand you have two options available:**",
                            f"{self.square} `-info` **|** Returns info about an organization",
                            f"{self.square} `-repos` **|** Returns the organization's repos"]
@@ -68,7 +65,6 @@ class Checkout(commands.Cog):
     @checkout.group(name="--repo", aliases=['--repository', '-R', '-r'])
     async def repo(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            await ctx.channel.trigger_typing()
             lines: list = [f"**In this subcommand you have two options available:**",
                            f"{self.square} `-info` **|** Returns info about a repository",
                            f"{self.square} `-source` **|** Returns the source code of the repository"]
@@ -84,7 +80,7 @@ class Checkout(commands.Cog):
     @user.command(name='-repos', aliases=['-repositories', '-R', '-r'])
     async def _repos(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
-        repos: list = [x for x in Git.get_user_repos(user)]
+        repos: list = [x for x in await Git.get_user_repos(user)]
         if u is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return
@@ -108,7 +104,7 @@ class Checkout(commands.Cog):
     @org.command(name='-repos', aliases=['-repositories', '-R', 'r'])
     async def _o_repos(self, ctx: commands.Context, *, org: str) -> None:
         o = await Git.get_org(org)
-        repos: list = [x for x in Git.get_org_repos(org)]
+        repos: list = [x for x in await Git.get_org_repos(org)]
         if o is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return
@@ -131,7 +127,7 @@ class Checkout(commands.Cog):
     @guild_available()
     @repo.command(name='-src', aliases=['-S', '-source', '-s', '-Src', '-sRc', '-srC', '-SrC'])
     async def files_command(self, ctx: commands.Context, *, repository: str) -> None:
-        r: Union[dict, None] = Git.get_repo(repository)
+        r: Union[dict, None] = await Git.get_repo(repository)
         if r is None:
             await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return

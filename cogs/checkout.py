@@ -94,7 +94,7 @@ class Checkout(commands.Cog):
             color=0xefefef,
             url=f"https://github.com/{user}"
         )
-        if int(u.raw_data["public_repos"]) > 15:
+        if int(u["public_repos"]) > 15:
             embed.set_footer(text=f"View {len(repos) - 15} more on GitHub")
         embed.set_thumbnail(url=u["avatar_url"])
         await ctx.send(embed=embed)
@@ -118,7 +118,7 @@ class Checkout(commands.Cog):
             color=0xefefef,
             url=f"https://github.com/{org}"
         )
-        if int(o.raw_data["public_repos"]) > 15:
+        if int(o["public_repos"]) > 15:
             embed.set_footer(text=f"View {len(repos) - 15} more on GitHub")
         embed.set_thumbnail(url=o["avatar_url"])
         await ctx.send(embed=embed)

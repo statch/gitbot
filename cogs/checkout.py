@@ -1,4 +1,3 @@
-import aiohttp
 import discord
 import discord.ext.commands as commands
 from ext.decorators import guild_available
@@ -7,15 +6,6 @@ from typing import Union
 from datetime import datetime
 
 Git = globals.Git
-
-
-async def chunks(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
-
-http_ses = aiohttp.ClientSession()
-assert http_ses.closed is False, "Client session closed"
 
 
 class Checkout(commands.Cog):
@@ -133,8 +123,7 @@ class Checkout(commands.Cog):
         if r is None:
             await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return
-        src_ = await http_ses.get(r["contents_url"][:-7])
-        src: list = await src_.json()
+        src = await Git.get_repo_files(repository)
         files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
                                                                           'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
                        for f in src[:15]]

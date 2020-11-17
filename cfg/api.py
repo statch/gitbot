@@ -3,7 +3,7 @@ import aiohttp
 import gidgethub.aiohttp as gh
 from gidgethub import BadRequest
 from dotenv import load_dotenv
-from typing import Union
+from typing import Union, List
 
 
 class API:
@@ -51,23 +51,22 @@ class API:
         except BadRequest:
             return None
 
-    async def get_repo_files(self, repo: str) -> Union[list, None]:
+    async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
         if '/' not in repo:
             return None
         try:
-            raw = await self.gh.getitem(f"/repos/{repo}/contents")
-            return list(await raw.json())
+            return await self.gh.getitem(f"/repos/{repo}/contents")
         except BadRequest:
-            return None
+            return []
 
-    async def get_user_orgs(self, user: str) -> Union[list, None]:
+    async def get_user_orgs(self, user: str) -> Union[List[dict], list]:
         try:
             return list(await self.gh.getitem(f"/users/{user}/orgs"))
         except BadRequest:
-            return None
+            return []
 
-    async def get_org_members(self, org: str) -> Union[list, None]:
+    async def get_org_members(self, org: str) -> Union[List[dict], list]:
         try:
             return list(await self.gh.getitem(f"/orgs/{org}/members"))
         except BadRequest:
-            return None
+            return []

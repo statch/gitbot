@@ -81,6 +81,7 @@ class Checkout(commands.Cog):
     async def _repos(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
         repos: list = [x for x in await Git.get_user_repos(user)]
+        form = 'Repos' if user[0].isupper() else 'repos'
         if u is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return
@@ -88,7 +89,7 @@ class Checkout(commands.Cog):
             await ctx.send(f"{self.emoji} This organization doesn't have any **public repos!**")
             return
         embed: discord.Embed = discord.Embed(
-            title=f"{user}'s Repos",
+            title=f"{user}'s {form}",
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=0xefefef,
@@ -105,6 +106,7 @@ class Checkout(commands.Cog):
     async def _o_repos(self, ctx: commands.Context, *, org: str) -> None:
         o = await Git.get_org(org)
         repos: list = [x for x in await Git.get_org_repos(org)]
+        form = 'Repos' if org[0].isupper() else 'repos'
         if o is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return
@@ -112,7 +114,7 @@ class Checkout(commands.Cog):
             await ctx.send(f"{self.emoji} This organization doesn't have any **public repos!**")
             return
         embed: discord.Embed = discord.Embed(
-            title=f"{org}'s Repos",
+            title=f"{org}'s {form}",
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=0xefefef,

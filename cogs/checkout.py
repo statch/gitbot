@@ -249,7 +249,9 @@ class Checkout(commands.Cog):
             url=org['html_url']
         )
         mem: list = await Git.get_org_members(organization)
-        members: str = f"Has {len(mem)} members\n"
+        members: str = f"Has [{len(mem)} public members](https://github.com/orgs/{organization}/people)\n"
+        if len(mem) == 1:
+            members: str = f"Has only [one public member](https://github.com/orgs/{organization}/people)\n"
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")

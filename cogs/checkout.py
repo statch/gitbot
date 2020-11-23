@@ -86,7 +86,8 @@ class Checkout(commands.Cog):
             url=f"https://github.com/{user}"
         )
         if int(u["public_repos"]) > 15:
-            embed.set_footer(text=f"View {len(repos) - 15} more on GitHub")
+            how_much: str = str(len(repos) - 15) if len(repos) - 15 < 15 else "15+"
+            embed.set_footer(text=f"View {how_much} more on GitHub")
         embed.set_thumbnail(url=u["avatar_url"])
         await ctx.send(embed=embed)
 
@@ -111,7 +112,8 @@ class Checkout(commands.Cog):
             url=f"https://github.com/{org}"
         )
         if int(o["public_repos"]) > 15:
-            embed.set_footer(text=f"View {len(repos) - 15} more on GitHub")
+            how_much: str = str(len(repos) - 15) if len(repos) - 15 < 15 else "15+"
+            embed.set_footer(text=f"View {how_much} more on GitHub")
         embed.set_thumbnail(url=o["avatar_url"])
         await ctx.send(embed=embed)
 
@@ -134,7 +136,8 @@ class Checkout(commands.Cog):
             url=r["html_url"]
         )
         if int(len(files)) > 15:
-            embed.set_footer(text=f"View {len(src) - 15} more on GitHub")
+            how_much: str = str(len(repos) - 15) if len(repos) - 15 < 15 else "15+"
+            embed.set_footer(text=f"View {how_much} more on GitHub")
         await ctx.send(embed=embed)
 
     @repo.command(name="-I", aliases=['-info'])

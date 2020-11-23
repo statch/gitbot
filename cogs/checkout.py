@@ -119,24 +119,38 @@ class Checkout(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    @repo.command(name='-src', aliases=['-S', '-source', '-s', '-Src', '-sRc', '-srC', '-SrC'])
+    @repo.command(name='-src', aliases=['-S', '-source', '-s', '-Src', '-sRc', '-srC', '-SrC', '-files'])
     async def files_command(self, ctx: commands.Context, *, repository: str) -> None:
-        r: Union[dict, None] = await Git.get_repo(repository)
-        if r is None:
-            await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
+        is_tree: bool = False
+        if repository.count('/') > 1:
+            repo = "/".join(repository.split("/", 2)[:2])
+            file = repository[len(repo):]
+            src = await Git.get_tree_file(repo, file)
+            is_tree = True
+        else:
+            src = await Git.get_repo_files(repository)
+        if not src:
+            if is_tree:
+                await ctx.send(f"{self.emoji} This path **doesn't exist!**")
+            else:
+                await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return
-        src = await Git.get_repo_files(repository)
         files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
                                                                           'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
                        for f in src[:15]]
+        if is_tree:
+            link: str = str(src[0]['_links']['html'])
+            link = link[:link.rindex('/')]
+        else:
+            link: str = f"https://github.com/{repository}"
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{repository}",
+            title=f"{repository}" if len(repository) <= 60 else "/".join(repository.split("/", 2)[:2]),
             description='\n'.join(files),
-            url=r["html_url"]
+            url=link
         )
         if int(len(files)) > 15:
-            how_much: str = str(len(repos) - 15) if len(repos) - 15 < 15 else "15+"
+            how_much: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
             embed.set_footer(text=f"View {how_much} more on GitHub")
         await ctx.send(embed=embed)
 

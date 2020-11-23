@@ -58,6 +58,16 @@ class API:
             return await self.gh.getitem(f"/repos/{repo}/contents")
         except BadRequest:
             return []
+        
+    async def get_tree_file(self, repo: str, path:str):
+    if '/' not in repo:
+        return []
+    if path[0] != '/':
+        path = '/' + str(path)
+    try:
+        return await self.gh.getitem(f"/repos/{repo}/contents{path}")
+    except BadRequest:
+        return []
 
     async def get_user_orgs(self, user: str) -> Union[List[dict], list]:
         try:

@@ -1,5 +1,6 @@
 import os
 import discord
+import logging
 from discord.ext import commands
 from dotenv import load_dotenv
 from ext.decorators import is_me
@@ -8,11 +9,23 @@ load_dotenv()
 
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix="git ", case_insensitive=True, intents=intents)
+intents.bans = False
+intents.voice_states = False
+
+client = commands.Bot(command_prefix="git ", case_insensitive=True,
+                      intents=intents, help_command=None,
+                      guild_ready_timeout=1, max_messages=100,
+                      description='Seamless GitHub-Discord integration.')
 dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]
 botlist_folders: list = []
-client.remove_command("help")
+    
+logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
+logging.getLogger('asyncio').setLevel(logging.WARNING)
+logging.getLogger('discord.gateway').setLevel(logging.WARNING)
+logger = logging.getLogger('main')
+
+client.logger = logger
 
 
 # Before a command is ran
@@ -25,6 +38,7 @@ client.before_invoke(before_invoke)
 for directory in dir_paths:
     for file in os.listdir(directory):
         if file.endswith('.py') and file not in exceptions:
+            logger.info(f'loading extension: {directory[2:]}.{file[:-3]}')
             client.load_extension(f"{directory[2:]}.{file[:-3]}")
 
 # Create a list of tuples consisting of a PATH and a string to load the extension
@@ -33,6 +47,7 @@ for folder in os.listdir('./core/botlists'):
 
 for folder in botlist_folders:
     for file in os.listdir(folder[0]):
+        logger.info(f'loading extension: {folder[1]}.{file[:-3]}')
         client.load_extension(f"{folder[1]}.{file[:-3]}")
 
 
@@ -98,7 +113,8 @@ async def _reload_extension(ctx, extension, path='cogs'):
 
 @client.event
 async def on_ready():
-    print(f'The bot is ready.\ndiscord.py version: {discord.__version__}\n')
+    logger.info(f'The bot is ready.')
+    logger.info(f'discord.py version: {discord.__version__}\n')
 
-
-client.run(os.getenv('BOT_TOKEN'))
+if __name__ == '__main__':
+    client.run(os.getenv('BOT_TOKEN'))

@@ -31,7 +31,7 @@ class Events(commands.Cog):
         )
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
-        embed.set_footer(text=f"© 2020 wulf, Team Orion")
+        embed.set_footer(text=f"© 2020 wulf, statch")
 
         embed_l = discord.Embed(
             title=f'{mgr.emojis["checkmark"]} Joined a new guild!',

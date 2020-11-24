@@ -17,12 +17,10 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        invite = None
         receiver = None
         async for channel in guild_text_channels(guild):
             if await verify_send_perms(channel):
                 receiver = channel
-                invite = await receiver.create_invite()
                 break
         embed = discord.Embed(
             color=0xefefef,
@@ -37,7 +35,6 @@ class Events(commands.Cog):
             title=f'{mgr.emojis["checkmark"]}  Joined a new guild!',
             description=None,
             color=0xefefef,
-            url=invite.url if invite is not None else "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         )
         owner = await self.client.fetch_user(guild.owner_id)
         embed_l.add_field(name='Name', value=str(guild))

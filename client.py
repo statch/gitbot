@@ -15,7 +15,8 @@ intents.voice_states = False
 client = commands.Bot(command_prefix="git ", case_insensitive=True,
                       intents=intents, help_command=None,
                       guild_ready_timeout=1, max_messages=None,
-                      description='Seamless GitHub-Discord integration.')
+                      description='Seamless GitHub-Discord integration.',
+                      fetch_offline_members=False)
 
 dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]

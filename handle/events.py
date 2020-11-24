@@ -34,7 +34,7 @@ class Events(commands.Cog):
             title=f'{mgr.emojis["checkmark"]} Joined a new guild!',
             description=None,
             color=0xefefef,
-            url=invite.url 
+            url=invite.url if invite is not None else "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         )
         owner = await self.client.fetch_user(guild.owner_id)
         embed.add_field(name='Name', value=str(guild))

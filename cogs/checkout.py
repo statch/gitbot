@@ -218,6 +218,7 @@ class Checkout(commands.Cog):
             description=None,
             url=u['html_url']
         )
+        contrib_count: Union[tuple, None] = await Git.get_contribution_count(user=user)
         orgs_c: int = len(await Git.get_user_orgs(user))
         if 'bio' in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=":notepad_spiral: Bio:", value=f"```{u['bio']}```")
@@ -235,7 +236,11 @@ class Checkout(commands.Cog):
         repos: str = "Has no repositories, yet\n" if u['public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['html_url']}?tab=repositories)\n"
         if u['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({u['html_url']}?tab=repositories)\n"
-        info: str = f"Joined GitHub on {datetime.strptime(u['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}"
+        if contrib_count is not None:
+            contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today"
+        else:
+            contrib: str = ""
+        info: str = f"Joined GitHub on {datetime.strptime(u['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (u['blog'], "Website")
         twitter: tuple = (

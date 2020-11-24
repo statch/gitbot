@@ -1,0 +1,14 @@
+{
+  user(login: %USER%) {
+    contributionsCollection(from: %FROM%, to: %TO%) {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            contributionCount
+          }
+        }
+      }
+    }
+  }
+}

@@ -22,7 +22,8 @@ class Debug(commands.Cog):
             "member_join": ctx.author,
             "member_remove": ctx.author
         }
-        if (e := cor.get(event, None)) is not None:
+        if cor.get(event, None) is not None:
+            e = cor.get(event, None)
             self.client.dispatch(event, e)
             await ctx.send(f"{self.emoji} Dispatched event `{event}`")
         else:

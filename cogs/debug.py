@@ -30,11 +30,27 @@ class Debug(commands.Cog):
             await ctx.send(f"{self.e}  Failed to dispatch event `{event}`")
 
     @is_me()
-    @commands.command(aliases=["--rate"])
+    @commands.command(aliases=["--rate", "--ratelimit"])
     async def rate(self, ctx) -> None:
         rate = await Git.get_ratelimit()
-        await ctx.send(
-            f"{self.emoji} Used **{rate['rate']['used']}** out of **{rate['rate']['limit']}** requests so far.\n\n**Resets at:** `{dt.datetime.fromtimestamp(rate['rate']['reset']).strftime('%Y-%m-%d %H:%M:%S')}`")
+        embed = discord.Embed(
+            color=0xefefef,
+            title=f"{self.e}  Rate-limiting",
+            description=None
+        )
+        graphql = rate['resources']['graphql']
+        rest = rate['rate']
+        search = rate['resources']['search']
+        embed.add_field(name="REST",
+                        value=f"{rest['used']}/{rate['rate']['limit']}\n\
+                        `{dt.datetime.fromtimestamp(rest['reset']).strftime('%X')}`")
+        embed.add_field(name='GraphQL',
+                        value=f"{graphql['used']}/{graphql['limit']}\n\
+                        `{dt.datetime.fromtimestamp(graphql['reset']).strftime('%X')}`")
+        embed.add_field(name='Search',
+                        value=f"{search['used']}/{search['limit']}\n\
+                        `{dt.datetime.fromtimestamp(search['reset']).strftime('%X')}`")
+        await ctx.send(embed=embed)
 
 
 def setup(client):

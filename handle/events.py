@@ -1,6 +1,9 @@
 import discord
 from discord.ext import commands
 from utils.explicit_checks import verify_send_perms
+from ext.manager import Manager
+
+mgr = Manager()
 
 
 async def guild_text_channels(guild: discord.Guild):

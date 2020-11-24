@@ -33,25 +33,25 @@ class Events(commands.Cog):
         embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
         embed.set_footer(text=f"© 2020 wulf, Team Orion")
 
-        embed = discord.Embed(
+        embed_l = discord.Embed(
             title=f'{mgr.emojis["checkmark"]} Joined a new guild!',
             description=None,
             color=0xefefef,
             url=invite.url if invite is not None else "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         )
         owner = await self.client.fetch_user(guild.owner_id)
-        embed.add_field(name='Name', value=str(guild))
-        embed.add_field(name='Members', value=str(guild.member_count))
-        embed.add_field(name='ID', value=f"`{str(guild.id)}`")
-        embed.add_field(name='Owner', value=str(owner))
-        embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
-        embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
-        embed.set_footer(text=f"Now in {len(self.client.guilds)} guilds")
+        embed_l.add_field(name='Name', value=str(guild))
+        embed_l.add_field(name='Members', value=str(guild.member_count))
+        embed_l.add_field(name='ID', value=f"`{str(guild.id)}`")
+        embed_l.add_field(name='Owner', value=str(owner))
+        embed_l.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
+        embed_l.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+        embed_l.set_footer(text=f"Now in {len(self.client.guilds)} guilds")
 
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
         channel = await self.client.fetch_channel(775042132054376448)  # Logging the join
-        await channel.send(embed=embed)
+        await channel.send(embed=embed_l)
 
         if receiver is not None: # Sending the join message
             await receiver.trigger_typing()

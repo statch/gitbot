@@ -13,14 +13,13 @@ class Events(commands.Cog):
         self.client = client
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
+    async def on_guild_join(self, guild: discord.Guild):
+        invite = None
         receiver = None
-        channel = self.client.get_channel(775042132054376448)
-        await channel.send(f"Joined guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
         async for channel in guild_text_channels(guild):
             if await verify_send_perms(channel):
                 receiver = channel
+                invite = await receiver.create_invite()
                 break
         embed = discord.Embed(
             color=0xefefef,
@@ -30,6 +29,26 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
         embed.set_footer(text=f"© 2020 wulf, Team Orion")
+
+        embed = discord.Embed(
+            title=f'{mgr.emojis["checkmark"]} Joined a new guild!',
+            description=None,
+            color=0xefefef,
+            url=invite.url 
+        )
+        owner = await self.client.fetch_user(guild.owner_id)
+        embed.add_field(name='Name', value=str(guild))
+        embed.add_field(name='Members', value=str(guild.member_count))
+        embed.add_field(name='ID', value=f"`{str(guild.id)}`")
+        embed.add_field(name='Owner', value=str(owner))
+        embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
+        embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+
+        print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
+
+        channel = await self.client.fetch_channel(775042132054376448)  # Logging the join
+        await channel.send(embed=embed)
+
         if receiver is not None:
             await receiver.trigger_typing()
             await receiver.send(embed=embed)

@@ -1,4 +1,5 @@
 import discord.ext.commands as commands
+import discord
 from ext.decorators import is_me
 from cfg import globals
 import datetime as dt

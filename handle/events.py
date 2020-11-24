@@ -47,6 +47,7 @@ class Events(commands.Cog):
         embed_l.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
         embed_l.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
         embed_l.set_footer(text=f"Now in {len(self.client.guilds)} guilds")
+        embed_l.set_thumbnail(url=guild.icon_url)
 
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
@@ -71,6 +72,7 @@ class Events(commands.Cog):
         embed_l.add_field(name='Owner', value=str(owner))
         embed_l.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
         embed_l.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+        embed_l.set_thumbnail(url=guild.icon_url)
         
         channel = self.client.get_channel(775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")

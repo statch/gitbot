@@ -34,7 +34,7 @@ class Events(commands.Cog):
         embed.set_footer(text=f"© 2020 wulf, statch")
 
         embed_l = discord.Embed(
-            title=f'{mgr.emojis["checkmark"]} Joined a new guild!',
+            title=f'{mgr.emojis["checkmark"]}  Joined a new guild!',
             description=None,
             color=0xefefef,
             url=invite.url if invite is not None else "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -59,9 +59,22 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        embed_l = discord.Embed(
+            title=f'{mgr.emojis["failure"]}  Removed from a guild.',
+            description=None,
+            color=0xefefef
+        )
+        owner = await self.client.fetch_user(guild.owner_id)
+        embed_l.add_field(name='Name', value=str(guild))
+        embed_l.add_field(name='Members', value=str(guild.member_count))
+        embed_l.add_field(name='ID', value=f"`{str(guild.id)}`")
+        embed_l.add_field(name='Owner', value=str(owner))
+        embed_l.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
+        embed_l.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+        
         channel = self.client.get_channel(775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
-        await channel.send(f"Removed from guild **{guild}** ({guild.id}) Now in {len(self.client.guilds)} guilds")
+        await channel.send(embed=embed_l)
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:

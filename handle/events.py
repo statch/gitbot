@@ -46,13 +46,14 @@ class Events(commands.Cog):
         embed.add_field(name='Owner', value=str(owner))
         embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
         embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+        embed.set_footer(text=f"Now in {len(self.client.guilds)} guilds")
 
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.client.guilds)} guilds")
 
         channel = await self.client.fetch_channel(775042132054376448)  # Logging the join
         await channel.send(embed=embed)
 
-        if receiver is not None:
+        if receiver is not None: # Sending the join message
             await receiver.trigger_typing()
             await receiver.send(embed=embed)
 

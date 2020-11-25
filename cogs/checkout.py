@@ -231,7 +231,7 @@ class Checkout(commands.Cog):
                                                             'followers'] == 0 else f"Has [{u['followers']} followers]({u['url']}?tab=followers)"
 
         if u['followers'] == 1:
-            followers: str = f"Has only [1 follower]({u['html_url']}?tab=followers)"
+            followers: str = f"Has only [1 follower]({u['url']}?tab=followers)"
         following: str = "doesn't follow anyone, yet" if u[
                                                              'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
         if u['following'] == 1:

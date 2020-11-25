@@ -19,7 +19,7 @@ client = commands.Bot(command_prefix="git ", case_insensitive=True,
                       fetch_offline_members=False)
 
 dir_paths: list = ['./cogs', './handle', './ext', './core']
-exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py"]
+exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py", "api.py"]
 botlist_folders: list = []
     
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')

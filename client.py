@@ -8,7 +8,6 @@ from ext.decorators import is_me
 load_dotenv()
 
 intents = discord.Intents.default()
-intents.members = True
 intents.bans = False
 intents.voice_states = False
 

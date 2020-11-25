@@ -216,35 +216,41 @@ class Checkout(commands.Cog):
             color=0xefefef,
             title=f"{user}'s {form}",
             description=None,
-            url=u['html_url']
+            url=u['url']
         )
-        contrib_count: Union[tuple, None] = await Git.get_contribution_count(user=user)
-        orgs_c: int = len(await Git.get_user_orgs(user))
-        if 'bio' in u and u['bio'] is not None and len(u['bio']) > 0:
+        contrib_count: Union[tuple, None] = u['contributions']
+        orgs_c: int = u['organizations']
+        if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=":notepad_spiral: Bio:", value=f"```{u['bio']}```")
-        occupation: str = f'Works at {u["company"]}\n' if "company" in u and u["company"] is not None else 'Isn\'t part of a company\n'
+        occupation: str = f'Works at {u["company"]}\n' if "company" in u and u[
+            "company"] is not None else 'Isn\'t part of a company\n'
         orgs: str = f"Belongs to {orgs_c} organizations\n" if orgs_c != 0 else "Doesn't belong to any organizations\n"
         if orgs_c == 1:
             orgs: str = "Belongs to 1 organization\n"
-        followers: str = "Isn\'t followed by anyone" if u['followers'] == 0 else f"Has [{u['followers']} followers]({u['html_url']}?tab=followers)"
+        followers: str = "Isn\'t followed by anyone" if u[
+                                                            'followers'] == 0 else f"Has [{u['followers']} followers]({u['url']}?tab=followers)"
+
         if u['followers'] == 1:
             followers: str = f"Has only [1 follower]({u['html_url']}?tab=followers)"
-        following: str = "doesn't follow anyone, yet" if u['following'] == 0 else f"follows [{u['following']} users]({u['html_url']}?tab=following)"
+        following: str = "doesn't follow anyone, yet" if u[
+                                                             'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
         if u['following'] == 1:
             following: str = f"follows only [1 person]({u['html_url']}?tab=following)"
         follow: str = followers + ' and ' + following
-        repos: str = "Has no repositories, yet\n" if u['public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['html_url']}?tab=repositories)\n"
+
+        repos: str = "Has no repositories, yet\n" if u['public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
         if u['public_repos'] == 1:
-            repos: str = f"Has only [1 repository]({u['html_url']}?tab=repositories)\n"
+            repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
         if contrib_count is not None:
             contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today"
         else:
             contrib: str = ""
-        info: str = f"Joined GitHub on {datetime.strptime(u['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}"
+        info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
-        blog: tuple = (u['blog'], "Website")
+        blog: tuple = (u['websiteUrl'], "Website")
         twitter: tuple = (
-            f'https://twitter.com/{u["twitter_username"]}' if "twitter_username" in u and u['twitter_username'] is not None else None, "Twitter")
+            f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u and u[
+                'twitterUsername'] is not None else None, "Twitter")
         links: list = [blog, twitter]
         link_strings: list = []
         for lnk in links:
@@ -252,7 +258,7 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
-        embed.set_thumbnail(url=u['avatar_url'])
+        embed.set_thumbnail(url=u['avatarUrl'])
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)

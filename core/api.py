@@ -9,16 +9,6 @@ from datetime import date, datetime
 BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
 
-with open('./graphql/contribution_count.txt') as f:
-    contrib_query = str(''.join(f.readlines()))
-
-
-def parse_contrib_graphql(user):
-    year_start: str = f'{date.today().year}-01-01T00:00:30Z'
-    to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')
-    return contrib_query.replace("%USER%", f'"{user}"', 1).replace('%FROM%', f'"{year_start}"', 1).replace('%TO%',
-                                                                                                           f'"{to}"', 1)
-
 
 class API:
     """Main Class used to interact with the GitHub API"""
@@ -32,12 +22,6 @@ class API:
 
     async def get_ratelimit(self) -> dict:
         return await self.gh.getitem("/rate_limit")
-
-    async def get_user(self, user: str) -> Optional[dict]:
-        try:
-            return await self.gh.getitem(f"/users/{user}")
-        except BadRequest:
-            return None
 
     async def get_user_repos(self, user: str) -> Optional[list]:
         try:
@@ -110,12 +94,61 @@ class API:
             return None
 
     # GraphQL
-    async def get_contribution_count(self, user: str) -> Union[tuple, None]:
+    async def get_user(self, user: str):
+        year_start: str = f'{date.today().year}-01-01T00:00:30Z'
+        to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')
+        query: str = """
+        {{ 
+          user(login: "{user}") {{
+            createdAt
+            company
+            location
+            bio
+            websiteUrl
+            avatarUrl
+            url
+            twitterUsername
+            organizations {{
+              totalCount
+            }}
+            followers {{
+              totalCount
+            }}
+            following {{
+              totalCount
+            }}
+            repositories {{
+              totalCount
+            }}
+            contributionsCollection(from: "{from_}", to: "{to}") {{
+              contributionCalendar {{
+                totalContributions
+                weeks {{
+                  contributionDays {{
+                    contributionCount
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+        """.format(user=user, from_=year_start, to=to)
         res = await self.ses.post(GRAPHQL,
-                                  json={"query": parse_contrib_graphql(user=user)},
+                                  json={"query": query},
                                   headers={"Authorization": f"token {self.token}"})
-        try:
-            data = dict(await res.json())['data']['user']['contributionsCollection']['contributionCalendar']
-            return data['totalContributions'], data['weeks'][-1]['contributionDays'][-1]['contributionCount']
-        except (KeyError, TypeError):
+
+        data = await res.json()
+        if not data['data']['user']:
             return None
+
+        data_ = data['data']['user']['contributionsCollection']['contributionCalendar']
+        data['data']['user']['contributions'] = data_['totalContributions'], data_['weeks'][-1]['contributionDays'][-1][
+            'contributionCount']
+        data = data['data']['user']
+        del data['contributionsCollection']
+        data['organizations'] = data['organizations']['totalCount']
+        data['public_repos'] = data['repositories']['totalCount']
+        data['following'] = data['following']['totalCount']
+        data['followers'] = data['followers']['totalCount']
+        return dict(data)
+

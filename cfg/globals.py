@@ -1,3 +1,3 @@
-from cfg.api import API
+from core.api import API
 
 Git = API()

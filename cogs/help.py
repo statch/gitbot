@@ -22,7 +22,7 @@ class Help(commands.Cog):
                            "`git --help checkout` to fetch information about orgs, repos and users",
                            "`git --help info` for commands that provide information about Git & GitHub",
                            "`git --help config` to store your preferred orgs, repos and users",
-                           "`git --help utility` for commands related to the bot",
+                           "`git --help utility` for other useful commands",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
             embed = discord.Embed(
                 title=f"{self.e}  Help",
@@ -92,7 +92,8 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx):
         lines: list = ["These commands let you fetch various data related to Git and GitHub.",
-                       "`git info --license {license}` - get info about a license"]
+                       "`git info --license {license}` - get info about a license",
+                      "`git --lines {link}` - get the lines mentioned in a GitHub or GitLab link"]
         embed = discord.Embed(
             title=f"{self.e}  Info Help",
             color=0xefefef,
@@ -182,7 +183,8 @@ class Help(commands.Cog):
     async def info_command_aliases(self, ctx):
         lines: list = [
             "**Shorthands for commands used to fetch data related to Git and GitHub**",
-            f"`git info --license` {self.ga} `git info -L`"
+            f"`git info --license` {self.ga} `git info -L`",
+            f"`git --lines` {self.ga} `git -L`"
         ]
         embed = discord.Embed(
             title=f"{self.e}  Info Aliases",

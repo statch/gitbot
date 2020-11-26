@@ -138,7 +138,7 @@ class Store(commands.Cog):
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access organization configured!** Use `git --config` to do it')
 
-    @config_command.group(name='-delete', aliases=['-D', '-del'])
+    @config_command.group(name='-delete', aliases=['-D', '-del', 'delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def delete_field(self, ctx: commands.Context) -> None:
@@ -146,7 +146,8 @@ class Store(commands.Cog):
             lines: list = ["**You can delete stored quick access data by running the following commands:**",
                            f"`git config -delete user`" + f' {self.ga} ' + 'delete the quick access user',
                            f"`git config -delete org`" + f' {self.ga} ' + 'delete the quick access organization',
-                           f"`git config -delete repo`" + f' {self.ga} ' + 'delete the quick access repo']
+                           f"`git config -delete repo`" + f' {self.ga} ' + 'delete the quick access repo',
+                           f"`git config -delete all`" + f' {self.ga} ' + 'delete all of your quick access data']
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{self.emoji}  Delete Quick Access Data",
@@ -198,6 +199,15 @@ class Store(commands.Cog):
                 await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         else:
             await ctx.send(f"{self.e}  You don't have a repo saved!")
+            
+    @delete_field.command(name='all', aliases=['-A', '-all'])
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    @guild_available()
+    async def delete_entire_record(self, ctx: commands.Context):
+        query = await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
+        if not query:
+            return await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
+        await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
 
 
 def setup(client):

@@ -104,6 +104,18 @@ class BotInfo(commands.Cog):
         )
         embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
         await ctx.send(embed=embed)
+        
+    @commands.command(name='--vote', aliases=['vote', '-vote'])
+    @commands.cooldown(15, 30, commands.BucketType.member)
+    @guild_available()
+    async def vote_command(self, ctx: commands.Context):
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            title=None,
+            description=f"[**top.gg**](https://top.gg/bot/761269120691470357) | [**botsfordiscord.com**](https://botsfordiscord.com/bot/761269120691470357)"
+        )
+        embed.set_author(name=f'Vote for {self.client.user.name}!', icon_url=self.client.user.avatar_url)
+        await ctx.send(embed=embed)
 
     @commands.command(name='--stats', aliases=['-stats', 'stats'])
     @commands.cooldown(15, 30, commands.BucketType.member)

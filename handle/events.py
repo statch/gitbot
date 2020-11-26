@@ -25,7 +25,7 @@ class Events(commands.Cog):
         embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=":tada: **Hi! I'm GitHub.**\n\n**My prefix is** `git`\n**Use the command `git --help` to get started.\n\nIf you have any problems, [join the support server!](https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
+            description=f":tada: **Hi! I'm {self.client.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git --help` to get started.\n\nIf you have any problems, [join the support server!](https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
         )
         embed.set_thumbnail(url=self.client.user.avatar_url)
         embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
@@ -82,7 +82,7 @@ class Events(commands.Cog):
             embed = discord.Embed(
                 color=0xefefef,
                 title=None,
-                description=f":tada: **Hi! I'm GitHub.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
+                description=f":tada: **Hi! I'm {self.client.user.name}.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
             )
             embed.set_thumbnail(url=self.client.user.avatar_url)
             embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)

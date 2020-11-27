@@ -174,7 +174,7 @@ class Checkout(commands.Cog):
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{r['description']}```")
         watchers: str = f"Has [{watch} watchers]({r['html_url']}/watchers) in total\n" if watch != 1 else f"Has only [one watcher]({r['html_url']}/watchers)\n"
         if watch == 0:
-            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)"
+            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)\n"
         issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r['open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
         stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far\n"
         if star == 1:

@@ -25,8 +25,7 @@ class Lines(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
 
     async def compile_text(self, url: str, data: tuple) -> Union[str, None]:
-        content_ = await self.ses.get(url)
-        content = await content_.text(encoding='utf-8')
+        content = await (await self.ses.get(url)).text(encoding='utf-8')
 
         extension = url[url.rindex('.') + 1:]
         extension = 'js' if extension == 'ts' else extension

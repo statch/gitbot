@@ -112,7 +112,7 @@ class BotInfo(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f"[**top.gg**](https://top.gg/bot/761269120691470357) | [**botsfordiscord.com**](https://botsfordiscord.com/bot/761269120691470357)"
+            description=f"[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**](https://botsfordiscord.com/bot/761269120691470357)"
         )
         embed.set_author(name=f'Vote for {self.client.user.name}!', icon_url=self.client.user.avatar_url)
         await ctx.send(embed=embed)

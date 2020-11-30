@@ -1,5 +1,6 @@
 from discord.ext import commands
 from ext.decorators import is_me
+import discord
 
 
 class Migrator(commands.Cog):
@@ -17,7 +18,7 @@ class Migrator(commands.Cog):
             for discrim in discriminators:
                 file.write(discrim + '\n')
             file.close()
-        await ctx.send('Done')
+            await ctx.send('Done!', file=discord.File(fp=file, filename='discrim.csv'))
 
 
 def setup(client: commands.Bot):

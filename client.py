@@ -25,7 +25,6 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(messag
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger = logging.getLogger('main')
-client.load_extension('migrations.migrator')
 
 client.logger = logger
 

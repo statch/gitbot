@@ -14,6 +14,7 @@ class Migrator(commands.Cog):
         for guild in self.client.guilds:
             new_discrims = [m.discriminator for m in await guild.fetch_members(limit=None).flatten()]
             discriminators += new_discrims
+            print("Another guild done!")
         with open('./migrations/discriminator.csv', mode='w+', newline='') as file:
             for discrim in discriminators:
                 file.write(discrim + '\n')

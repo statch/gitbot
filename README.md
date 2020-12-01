@@ -1,14 +1,9 @@
-![GitHub Bot Banner](https://media.discordapp.net/attachments/756583860736753774/768421886937006100/github.png?width=1443&height=361)
-
-[![Bot Status](https://top.gg/api/widget/status/761269120691470357.svg?noavatar=true)](https://top.gg/bot/761269120691470357)
-[![Server Count](https://top.gg/api/widget/servers/761269120691470357.svg?noavatar=true)](https://top.gg/bot/761269120691470357)
-[![Support Server](https://img.shields.io/discord/737430006271311913?color=51B780&label=Discord%20Server)](https://discord.gg/3e5fwpA)
-
+![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/775486381669220382/GitBot_1.png?width=1443&height=361)
 
 # GitHub Discord Bot
 
-This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.<br/>
-Command syntax is themed after the `git` CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
+This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.
+Command syntax is themed after `git` CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
 
 ### Some of the most notable commands are:
 - `git checkout --user -info {user}` - get information about a GitHub user
@@ -23,6 +18,7 @@ Command syntax is themed after the `git` CLI.<br/>**The commands listed below ar
 
 There are some general information commands too, for example:
 - `git info --license {license}` - get info about a license, it's permissions, limitations and more!
+- `git --lines {GitHub or GitLab link mentioning lines}` - get the lines mentioned in the link!
 
 ### You can also customize its behavior!
 `git config` will allow you to play around with the settings and make GitHub uniquely yours!
@@ -30,6 +26,7 @@ There are some general information commands too, for example:
 ### Other commands:
 - `git --help` - a classic help message with commands
 - `git --privacy` - the Bot's privacy policy
+- `git --vote` - vote for the Bot!
 - `git --aliases` - get a list of aliases for the Bot's commands
 - `git --stats` - some stats regarding the functioning of the Bot
 - `git --uptime` - Bot's uptime

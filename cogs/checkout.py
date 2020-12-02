@@ -69,15 +69,15 @@ class Checkout(commands.Cog):
     @guild_available()
     @user.command(name='-repos', aliases=['-repositories', '-R', '-r'])
     async def _repos(self, ctx: commands.Context, *, user: str) -> None:
-        u = await Git.get_user(user)
-        repos: list = [x for x in await Git.get_user_repos(user)]
-        form = 'Repos' if user[0].isupper() else 'repos'
+        u: Union[dict, None] = await Git.get_user(user)
+        repos = await Git.get_user_repos(user)
         if u is None:
-            await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
+            await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
             return
-        if len(repos) < 1:
-            await ctx.send(f"{self.emoji} This organization doesn't have any **public repos!**")
+        if not repos:
+            await ctx.send(f"{self.emoji} This user doesn't have any **public repos!**")
             return
+        form: str = 'Repos' if user[0].isupper() else 'repos'
         embed: discord.Embed = discord.Embed(
             title=f"{user}'s {form}",
             description='\n'.join(

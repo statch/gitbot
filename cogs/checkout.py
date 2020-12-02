@@ -95,13 +95,13 @@ class Checkout(commands.Cog):
     @guild_available()
     @org.command(name='-repos', aliases=['-repositories', '-R', 'r'])
     async def _o_repos(self, ctx: commands.Context, *, org: str) -> None:
-        o = await Git.get_org(org)
+        o: Union[dict, None] = await Git.get_org(org)
         repos: list = [x for x in await Git.get_org_repos(org)]
         form = 'Repos' if org[0].isupper() else 'repos'
         if o is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return
-        if len(repos) < 1:
+        if not repos:
             await ctx.send(f"{self.emoji} This organization doesn't have any **public repos!**")
             return
         embed: discord.Embed = discord.Embed(
@@ -158,7 +158,7 @@ class Checkout(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def repo_info_command(self, ctx: commands.Context, *, repository: str) -> None:
-        r = await Git.get_repo(str(repository))
+        r: Union[dict, None] = await Git.get_repo(str(repository))
         if r is None:
             await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return None
@@ -174,20 +174,27 @@ class Checkout(commands.Cog):
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{r['description']}```")
         watchers: str = f"Has [{watch} watchers]({r['html_url']}/watchers) in total\n" if watch != 1 else f"Has only [one watcher]({r['html_url']}/watchers)\n"
         if watch == 0:
-            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)\n"
-        issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r['open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
+            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)"
+        issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r[
+                                                                                          'open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
         stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far\n"
         if star == 1:
             stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far\n"
         if r['open_issues_count'] == 1:
             issues: str = f"Has only one [open issue]({r['html_url']}/issues)"
-        forks: str = f"No one has forked this repo, yet\n" if r['forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
+        forks: str = f"No one has forked this repo, yet\n" if r[
+                                                                  'forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
         if r['forks_count'] == 1:
             forks: str = f"It's been forked [only once]({r['html_url']}/network/members)\n"
         forked = ""
         if 'fork' in r and r['fork'] is True:
-            forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})"
-        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
+            forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})\n"
+        views: namedtuple = await Git.ghprofile_stats(name=repository.replace('/', '-'))
+        if views:
+            views = f"Has {views.all_time} all-time views, {views.day} today"
+        else:
+            ""
+        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}{views}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         homepage: tuple = (
             r['homepage'] if 'homepage' in r else None,
@@ -199,8 +206,15 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
+
+        extend = False
         if 'license' in r and r['license'] is not None:
-            embed.set_footer(text=f'Licensed under the {r["license"]["name"]}')
+            extend = True
+            embed.set_footer(text=f'')
+        if extend and len(views):
+            embed.set_footer(text=f'Licensed under the {r["license"]["name"]} | Views powered by ghprofile.me')
+        elif views != "":
+            embed.set_footer(text='Views powered by ghprofile.me')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -242,15 +256,20 @@ class Checkout(commands.Cog):
         if u['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
         if contrib_count is not None:
-            contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today"
+            contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today\n"
         else:
             contrib: str = ""
-        info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}"
+
+        views: namedtuple = await Git.ghprofile_stats(name=user)
+        if views:
+            views = f"Their profile has {views.all_time} all-time views, {views.day} today"
+        else:
+            ""
+        info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}{views}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (u['websiteUrl'], "Website")
         twitter: tuple = (
-            f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u and u[
-                'twitterUsername'] is not None else None, "Twitter")
+            f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u else None, "Twitter")
         links: list = [blog, twitter]
         link_strings: list = []
         for lnk in links:
@@ -259,6 +278,8 @@ class Checkout(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
+        if views != "":
+            embed.set_footer(text='Views powered by ghprofile.me')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)

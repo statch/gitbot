@@ -192,9 +192,9 @@ class Checkout(commands.Cog):
             forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})\n"
         views: namedtuple = await Git.ghprofile_stats(name=repository.replace('/', '-'))
         if views:
-            views = f"Has {views.all_time} all-time views, {views.day} today"
+            views: str = f"Has {views.all_time} all-time views, {views.day} today"
         else:
-            ""
+            views: str = ""
         info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}{views}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         homepage: tuple = (
@@ -263,9 +263,9 @@ class Checkout(commands.Cog):
 
         views: namedtuple = await Git.ghprofile_stats(name=user)
         if views:
-            views = f"Their profile has {views.all_time} all-time views, {views.day} today"
+            views: str  = f"Their profile has {views.all_time} all-time views, {views.day} today"
         else:
-            ""
+            views: str =  ""
         info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}{views}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (u['websiteUrl'], "Website")

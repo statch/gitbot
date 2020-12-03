@@ -11,7 +11,7 @@ intents = discord.Intents.default()
 intents.bans = False
 intents.voice_states = False
 
-client = commands.Bot(command_prefix="git ", case_insensitive=True,
+client = commands.Bot(command_prefix='%s ' % str(os.getenv('PREFIX')), case_insensitive=True,
                       intents=intents, help_command=None,
                       guild_ready_timeout=1, max_messages=None,
                       description='Seamless GitHub-Discord integration.',
@@ -19,6 +19,7 @@ client = commands.Bot(command_prefix="git ", case_insensitive=True,
 
 dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py", "api.py"]
+staging_exceptions: list = ['statcord.py', 'topgg.py']
 botlist_folders: list = []
     
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
@@ -38,18 +39,22 @@ client.before_invoke(before_invoke)
 
 for directory in dir_paths:
     for file in os.listdir(directory):
-        if file.endswith('.py') and file not in exceptions:
+        if file.endswith('.py') and file not in exceptions + staging_exceptions:
             logger.info(f'loading extension: {directory[2:]}.{file[:-3]}')
             client.load_extension(f"{directory[2:]}.{file[:-3]}")
 
-# Create a list of tuples consisting of a PATH and a string to load the extension
-for folder in os.listdir('./core/botlists'):
-    botlist_folders.append((f'./core/botlists/{folder}', f"core.botlists.{folder}"))
+if bool(int(os.getenv('PRODUCTION'))) is True:
+    # Create a list of tuples consisting of a path and a string to load the extension
+    for folder in os.listdir('./core/botlists'):
+        if os.path.isdir(f'./core/botlists/{folder}'):
+            logger.info(f'queueing {folder} to be loaded')
+            botlist_folders.append((f'./core/botlists/{folder}', f"core.botlists.{folder}"))
 
-for folder in botlist_folders:
-    for file in os.listdir(folder[0]):
-        logger.info(f'loading extension: {folder[1]}.{file[:-3]}')
-        client.load_extension(f"{folder[1]}.{file[:-3]}")
+    for folder in botlist_folders:
+        for file in os.listdir(folder[0]):
+            if file.endswith('.py'):
+                logger.info(f'loading extension: {folder[1]}.{file[:-3]}')
+                client.load_extension(f"{folder[1]}.{file[:-3]}")
 
 
 @client.command(name='load', aliases=["--load"])

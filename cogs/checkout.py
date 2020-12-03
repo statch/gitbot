@@ -4,6 +4,7 @@ from ext.decorators import guild_available
 from cfg import globals
 from typing import Union
 from datetime import datetime
+from collections import namedtuple
 
 Git = globals.Git
 

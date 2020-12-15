@@ -15,7 +15,7 @@ class Debug(commands.Cog):
 
     @is_me()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
-    async def manually_trigger_event(self, ctx: commands.Context,  event: str):
+    async def manually_trigger_event(self, ctx: commands.Context, event: str):
         event = event.lower().replace('on_', "", 1)
         cor = {
             "guild_join": ctx.guild,

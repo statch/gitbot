@@ -4,7 +4,6 @@ from ext.decorators import guild_available
 from cfg import globals
 from typing import Union
 from datetime import datetime
-from collections import namedtuple
 
 Git = globals.Git
 
@@ -155,7 +154,7 @@ class Checkout(commands.Cog):
             embed.set_footer(text=f"View {how_much} more on GitHub")
         await ctx.send(embed=embed)
 
-    @repo.command(name="-I", aliases=['-info'])
+    @repo.command(name="-info", aliases=['-I', '-i', '-Info'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def repo_info_command(self, ctx: commands.Context, *, repository: str) -> None:
@@ -190,12 +189,7 @@ class Checkout(commands.Cog):
         forked = ""
         if 'fork' in r and r['fork'] is True:
             forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})\n"
-        views: namedtuple = await Git.ghprofile_stats(name=repository.replace('/', '-'))
-        if views:
-            views: str = f"Has {views.all_time} all-time views, {views.day} today"
-        else:
-            views: str = ""
-        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}{views}"
+        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         homepage: tuple = (
             r['homepage'] if 'homepage' in r else None,
@@ -207,20 +201,13 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
-
-        extend = False
         if 'license' in r and r['license'] is not None:
-            extend = True
-            embed.set_footer(text=f'')
-        if extend and len(views):
-            embed.set_footer(text=f'Licensed under the {r["license"]["name"]} | Views powered by ghprofile.me')
-        elif views != "":
-            embed.set_footer(text='Views powered by ghprofile.me')
+            embed.set_footer(text=f'Licensed under the {r["license"]["name"]}')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    @user.command(name='-info', aliases=['-I'])
+    @user.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def profile_command(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
         if u is None:
@@ -260,13 +247,7 @@ class Checkout(commands.Cog):
             contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today\n"
         else:
             contrib: str = ""
-
-        views: namedtuple = await Git.ghprofile_stats(name=user)
-        if views:
-            views: str  = f"Their profile has {views.all_time} all-time views, {views.day} today"
-        else:
-            views: str =  ""
-        info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}{views}"
+        info: str = f"Joined GitHub on {datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (u['websiteUrl'], "Website")
         twitter: tuple = (
@@ -279,13 +260,11 @@ class Checkout(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
-        if views != "":
-            embed.set_footer(text='Views powered by ghprofile.me')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    @org.command(name='-info', aliases=['-I'])
+    @org.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def o_profile_command(self, ctx: commands.Context, *, organization: str) -> None:
         org = await Git.get_org(organization)
         if org is None:

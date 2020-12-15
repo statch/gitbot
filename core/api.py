@@ -5,9 +5,11 @@ import gidgethub.aiohttp as gh
 from dotenv import load_dotenv
 from gidgethub import BadRequest
 from datetime import date, datetime
+from collections import namedtuple
 
 BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
+GhStats = namedtuple('Stats', ['all_time', 'month', 'fortnight', 'week', 'day', 'hour'])
 
 
 class API:
@@ -19,6 +21,16 @@ class API:
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
         self.gh = gh.GitHubAPI(session=self.ses, requester="itsmewulf, Python 3.7",
                                oauth_token=self.token)
+
+    async def ghprofile_stats(self, name: str) -> Union[namedtuple, None]:
+        if '/' in name or '&' in name:
+            return None
+        res = await (await self.ses.get('https://api.ghprofile.me/historic/view?username=%s' % name)).json()
+        period: dict = dict(res['payload']['period'])
+        if not res['success'] or sum([int(v) for v in period.values()]) == 0:
+            return None
+        else:
+            return GhStats(*[int(v) for v in period.values()])
 
     async def get_ratelimit(self) -> dict:
         return await self.gh.getitem("/rate_limit")
@@ -151,4 +163,3 @@ class API:
         data['following'] = data['following']['totalCount']
         data['followers'] = data['followers']['totalCount']
         return dict(data)
-

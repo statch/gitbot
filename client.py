@@ -7,6 +7,8 @@ from ext.decorators import is_me
 
 load_dotenv()
 
+PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
+
 intents = discord.Intents.default()
 intents.bans = False
 intents.voice_states = False
@@ -19,7 +21,7 @@ client = commands.Bot(command_prefix='%s ' % str(os.getenv('PREFIX')), case_inse
 
 dir_paths: list = ['./cogs', './handle', './ext', './core']
 exceptions: list = ["explicit_checks.py", "decorators.py", "manager.py", "api.py"]
-staging_exceptions: list = ['statcord.py', 'topgg.py']
+staging_exceptions: list = ['statcord.py', 'topgg.py'] if not PRODUCTION else []
 botlist_folders: list = []
     
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
@@ -43,7 +45,7 @@ for directory in dir_paths:
             logger.info(f'loading extension: {directory[2:]}.{file[:-3]}')
             client.load_extension(f"{directory[2:]}.{file[:-3]}")
 
-if bool(int(os.getenv('PRODUCTION'))) is True:
+if PRODUCTION:
     # Create a list of tuples consisting of a path and a string to load the extension
     for folder in os.listdir('./core/botlists'):
         if os.path.isdir(f'./core/botlists/{folder}'):

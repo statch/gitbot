@@ -79,7 +79,7 @@ class Store(commands.Cog):
     async def config_org(self, ctx: commands.Context, *, org: str) -> None:
         o = await Git.get_org(org)
         if o is None:
-            await ctx.send(f"{self.e} This user **doesn't exist!**")
+            await ctx.send(f"{self.e} This organization **doesn't exist!**")
             return
         query = await self.db.find_one({"user_id": int(ctx.author.id)})
         if query is not None:
@@ -95,7 +95,7 @@ class Store(commands.Cog):
     async def config_repo(self, ctx, *, repo) -> None:
         r = await Git.get_repo(repo)
         if r is None:
-            await ctx.send(f"{self.e} This user **doesn't exist!**")
+            await ctx.send(f"{self.e} This repository **doesn't exist!**")
             return
         query = await self.db.find_one({"user_id": int(ctx.author.id)})
         if query is not None:
@@ -105,34 +105,37 @@ class Store(commands.Cog):
             await self.db.insert_one({"user_id": int(ctx.author.id), "repo": str(repo)})
             await ctx.send(f"{self.emoji}  Quick access repo set to **{repo}**")
 
-    @commands.command(name='--repo', aliases=["-R", '--repository'])
+    @commands.command(name='--repo', aliases=["-R", '--repository', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def stored_repo_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'repo' in store:
+            ctx.invoked_with_store = True
             await ctx.invoke(self.client.get_command("checkout --repo -info"), repository=str(store["repo"]))
         else:
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access repo configured!** Use `git --config` to do it')
 
-    @commands.command(name='--user', aliases=["-U"])
+    @commands.command(name='--user', aliases=["-U", '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def stored_user_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'user' in store:
+            ctx.invoked_with_store = True
             await ctx.invoke(self.client.get_command("checkout --user -info"), user=str(store["user"]))
         else:
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access user configured!** Use `git --config` to do it')
 
-    @commands.command(name='--org', aliases=["--organization", "-O"])
+    @commands.command(name='--org', aliases=["--organization", "-O", '-org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
     async def stored_org_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'org' in store:
+            ctx.invoked_with_store = True
             await ctx.invoke(self.client.get_command("checkout --org -info"), organization=str(store["org"]))
         else:
             await ctx.send(
@@ -158,48 +161,33 @@ class Store(commands.Cog):
     @delete_field.command(name='user', aliases=['-U', '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    async def delete_user_field(self, ctx: commands.Context):
-        query = await self.db.find_one({"user_id": int(ctx.author.id)})
-        copy: dict = dict(query)
-        if query is not None and 'user' in query:
-            await self.db.update_one(query, {"$unset": {"user": ""}})
-            del copy['user']
+    async def delete_user_command(self, ctx: commands.Context):
+        query = await self.delete_user_field(ctx=ctx)
+        if query:
             await ctx.send(f"{self.emoji}  Saved **user deleted.**")
-            if len(copy) == 2:
-                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         else:
             await ctx.send(f"{self.e}  You don't have a user saved!")
 
     @delete_field.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    async def delete_org_field(self, ctx: commands.Context):
-        query = await self.db.find_one({"user_id": int(ctx.author.id)})
-        copy: dict = dict(query)
-        if query is not None and 'org' in query:
-            await self.db.update_one(query, {"$unset": {"org": ""}})
-            del copy['org']
+    async def delete_org_command(self, ctx: commands.Context):
+        query = await self.delete_org_field(ctx=ctx)
+        if query:
             await ctx.send(f"{self.emoji}  Saved **organization deleted.**")
-            if len(copy) == 2:
-                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         else:
             await ctx.send(f"{self.e}  You don't have an organization saved!")
 
     @delete_field.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
-    async def delete_repo_field(self, ctx: commands.Context):
-        query = await self.db.find_one({"user_id": int(ctx.author.id)})
-        copy: dict = dict(query)
-        if query is not None and 'repo' in query:
-            await self.db.update_one(query, {"$unset": {"repo": ""}})
-            del copy['repo']
+    async def delete_repo_command(self, ctx: commands.Context):
+        query = await self.delete_repo_field(ctx=ctx)
+        if query:
             await ctx.send(f"{self.emoji}  Saved **repo deleted.**")
-            if len(copy) == 2:
-                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         else:
             await ctx.send(f"{self.e}  You don't have a repo saved!")
-            
+
     @delete_field.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @guild_available()
@@ -208,6 +196,39 @@ class Store(commands.Cog):
         if not query:
             return await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
         await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
+
+    async def delete_user_field(self, ctx: commands.Context) -> bool:
+        query = await self.db.find_one({"user_id": int(ctx.author.id)})
+        copy: dict = dict(query)
+        if query is not None and 'user' in query:
+            await self.db.update_one(query, {"$unset": {"user": ""}})
+            del copy['user']
+            if len(copy) == 2:
+                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
+            return True
+        return False
+
+    async def delete_org_field(self, ctx: commands.Context) -> bool:
+        query = await self.db.find_one({"user_id": int(ctx.author.id)})
+        copy: dict = dict(query)
+        if query is not None and 'org' in query:
+            await self.db.update_one(query, {"$unset": {"org": ""}})
+            del copy['org']
+            if len(copy) == 2:
+                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
+            return True
+        return False
+
+    async def delete_repo_field(self, ctx: commands.Context) -> bool:
+        query = await self.db.find_one({"user_id": int(ctx.author.id)})
+        copy: dict = dict(query)
+        if query is not None and 'repo' in query:
+            await self.db.update_one(query, {"$unset": {"repo": ""}})
+            del copy['repo']
+            if len(copy) == 2:
+                await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
+            return True
+        return False
 
 
 def setup(client):

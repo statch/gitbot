@@ -8,7 +8,6 @@ from datetime import datetime
 
 Git = globals.Git
 html_comment_regex = re.compile(r'<!--.*-->', re.MULTILINE | re.DOTALL)
-emoji_regex = re.compile(r':[a-zA-Z_\d]+:', re.IGNORECASE)
 
 
 def kill_markdown(text: str) -> str:
@@ -350,7 +349,6 @@ class Checkout(commands.Cog):
             if len(body) > 512:
                 body: str = re.sub(html_comment_regex, '', body).replace('#', '')[:512]  # Kill comments
                 body: str = kill_markdown(f"{body[:body.rindex(' ')]}...".strip())  # Kill markdown
-                body: str = re.sub(emoji_regex, '', body).strip()  # Kill emojis
         else:
             body = None
         if body:

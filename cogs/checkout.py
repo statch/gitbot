@@ -15,6 +15,7 @@ class Checkout(commands.Cog):
         self.square: str = ":white_small_square:"
         self.f: str = "<:file:762378114135097354>"
         self.fd: str = "<:folder:762378091497914398>"
+        self.e: str = "<:ge:767823523573923890>"
 
     @guild_available()
     @commands.group(name='checkout', aliases=['c'])
@@ -240,7 +241,8 @@ class Checkout(commands.Cog):
             following: str = f"follows only [1 person]({u['html_url']}?tab=following)"
         follow: str = followers + ' and ' + following
 
-        repos: str = "Has no repositories, yet\n" if u['public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
+        repos: str = "Has no repositories, yet\n" if u[
+                                                         'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
         if u['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
         if contrib_count is not None:
@@ -284,7 +286,8 @@ class Checkout(commands.Cog):
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")
-        repos: str = "Has no repositories, yet\n" if org['public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
+        repos: str = "Has no repositories, yet\n" if org[
+                                                         'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
         if org['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({org['html_url']})\n"
         if org['location'] is not None:
@@ -306,6 +309,28 @@ class Checkout(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
+        await ctx.send(embed=embed)
+
+    @checkout.command(name='--issue', aliases=['-issue', '-iss', '-issues', '--issues', '-i'])
+    @commands.cooldown(10, 30, commands.BucketType.user)
+    @guild_available()
+    async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str) -> None:
+        if not issue_number.isnumeric():
+            await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
+            return
+        issue: dict = await Git.get_issue(repo, int(issue_number))
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            title=issue['title'],
+            description=None,
+            url=issue['html_url']
+        )
+        if all(['body' in issue, issue['body'], len(issue['body'])]):
+            embed.add_field(name=':scroll: Body:', value=f"```{str(issue['body']).strip()}```", inline=False)
+        created_at: str = datetime.strptime(issue['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')
+        user: str = f"Created by [{issue['user']['login']}]({issue['user']['html_url']}) on {created_at}\n"
+        info: str = f"{user}"
+        embed.add_field(name=':mag_right: Info:', value=info, inline=False)
         await ctx.send(embed=embed)
 
 

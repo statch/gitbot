@@ -105,6 +105,14 @@ class API:
         except BadRequest:
             return None
 
+    async def get_issue(self, repo: str, issue_number: int) -> Optional[dict]:
+        if '/' not in repo:
+            return None
+        try:
+            return dict(await self.gh.getitem(f'/repos/{repo}/issues/{issue_number}'))
+        except BadRequest:
+            return None
+
     # GraphQL
     async def get_user(self, user: str):
         year_start: str = f'{date.today().year}-01-01T00:00:30Z'

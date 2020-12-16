@@ -44,7 +44,8 @@ class Help(commands.Cog):
                        "`--org -info {organization}` - get info about an organization",
                        "`--org -repos {organization}` - get organization's first 15 repos and a link to more",
                        "\n**Important!** Repo commands that follow, require the exact syntax of `username/repo-name` in place of the `{repo}` argument, ex. `itsmewulf/GitHub-Discord`",
-                       "\n`--repo -info {repo}` - get info about a repository",
+                       "\n`--issue {repo} {issue number}` - get detailed info on an issue",
+                       "`--repo -info {repo}` - get info about a repository",
                        "`--repo -src {repo}` - get the repo's file structure"]
         embed = discord.Embed(
             title=f"{self.e}  Checkout Help",
@@ -132,7 +133,8 @@ class Help(commands.Cog):
                        f"`--org -info` {self.ga} `-O -I`",
                        f"`--org -repos` {self.ga} `-O -R`",
                        f"`--repo -info` {self.ga} `-R -I`",
-                       f"`--repo -src` {self.ga} `-R -S`"]
+                       f"`--repo -src` {self.ga} `-R -S`",
+                       f"`--issue` {self.ga} `-I`"]
         embed = discord.Embed(
             title=f"{self.e}  Checkout Aliases",
             color=0xefefef,

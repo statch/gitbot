@@ -321,7 +321,7 @@ class Checkout(commands.Cog):
         embed.set_thumbnail(url=org['avatar_url'])
         await ctx.send(embed=embed)
 
-    @checkout.command(name='--issue', aliases=['-issue', '-iss', '-issues', '--issues', '-i'])
+    @checkout.command(name='--issue', aliases=['-issue', '-iss', '-issues', '--issues', '-i', 'I', '-I', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @guild_available()
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str) -> None:

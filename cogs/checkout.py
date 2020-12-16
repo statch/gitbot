@@ -1,11 +1,21 @@
 import discord
 import discord.ext.commands as commands
+import re
 from ext.decorators import guild_available
 from cfg import globals
 from typing import Union
 from datetime import datetime
 
 Git = globals.Git
+html_comment_regex = re.compile(r'<!--.*-->', re.MULTILINE | re.DOTALL)
+emoji_regex = re.compile(r':[a-zA-Z_\d]+:', re.IGNORECASE)
+
+
+def kill_markdown(text: str) -> str:
+    md_chars: list = ['*', '>', '`', '~', '\\']
+    for char in md_chars:
+        text = text.replace(char, '')
+    return text
 
 
 class Checkout(commands.Cog):
@@ -15,6 +25,7 @@ class Checkout(commands.Cog):
         self.square: str = ":white_small_square:"
         self.f: str = "<:file:762378114135097354>"
         self.fd: str = "<:folder:762378091497914398>"
+        self.e: str = "<:ge:767823523573923890>"
 
     @guild_available()
     @commands.group(name='checkout', aliases=['c'])
@@ -240,7 +251,8 @@ class Checkout(commands.Cog):
             following: str = f"follows only [1 person]({u['html_url']}?tab=following)"
         follow: str = followers + ' and ' + following
 
-        repos: str = "Has no repositories, yet\n" if u['public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
+        repos: str = "Has no repositories, yet\n" if u[
+                                                         'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
         if u['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
         if contrib_count is not None:
@@ -284,7 +296,8 @@ class Checkout(commands.Cog):
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")
-        repos: str = "Has no repositories, yet\n" if org['public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
+        repos: str = "Has no repositories, yet\n" if org[
+                                                         'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
         if org['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({org['html_url']})\n"
         if org['location'] is not None:
@@ -306,6 +319,76 @@ class Checkout(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
+        await ctx.send(embed=embed)
+
+    @checkout.command(name='--issue', aliases=['-issue', '-iss', '-issues', '--issues', '-i', 'I', '-I', 'i'])
+    @commands.cooldown(10, 30, commands.BucketType.user)
+    @guild_available()
+    async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str) -> None:
+        if not issue_number.isnumeric():
+            await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
+            return
+        issue = await Git.get_issue(repo, int(issue_number))
+        if type(issue) is str:
+            if issue == 'repo':
+                await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                return
+            else:
+                await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
+                return
+        em = f"<:issue_open:788517560164810772>"
+        if issue['state'].lower() == 'closed':
+            em = '<:issue_closed:788517938168594452>'
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            title=f"{em}  {issue['title']} #{issue_number}",
+            description=None,
+            url=issue['url']
+        )
+        if all(['body' in issue, issue['body'], len(issue['body'])]):
+            body: Union[str, None] = str(issue['body']).strip()
+            if len(body) > 512:
+                body: str = re.sub(html_comment_regex, '', body).replace('#', '')[:512]  # Kill comments
+                body: str = kill_markdown(f"{body[:body.rindex(' ')]}...".strip())  # Kill markdown
+                body: str = re.sub(emoji_regex, '', body).strip()  # Kill emojis
+        else:
+            body = None
+        if body:
+            embed.add_field(name=':scroll: Body:', value=f"```{body}```", inline=False)
+
+        created_at: datetime = datetime.strptime(issue['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+
+        user: str = f"Created by [{issue['author']['login']}]({issue['author']['url']}) \
+         on {created_at.strftime('%e, %b %Y')}"
+
+        if issue['closed']:
+            closed_at: datetime = datetime.strptime(issue['closedAt'], '%Y-%m-%dT%H:%M:%SZ')
+            closed: str = f"\nClosed on {closed_at.strftime('%e, %b %Y')}\n"
+        else:
+            closed: str = '\n'
+
+        assignees: str = f"{issue['assigneeCount']} assignees"
+        if issue['assigneeCount'] == 1:
+            assignees: str = 'one assignee'
+        elif issue['assigneeCount'] == 0:
+            assignees: str = 'no assignees'
+
+        comments: str = f"Has {issue['commentCount']} comments"
+        if issue['commentCount'] == 1:
+            comments: str = "Has only one comment"
+        comments_and_assignees: str = f"{comments} and {assignees}"
+
+        participants: str = f"\n{issue['participantCount']} people have participated in this issue" if \
+            issue['participantCount'] != 1 else "\nOne person has participated in this issue"
+
+        info: str = f"{user}{closed}{comments_and_assignees}{participants}"
+
+        embed.add_field(name=':mag_right: Info:', value=info, inline=False)
+
+        if issue['labels']:
+            embed.add_field(name=':label: Labels:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
+
+        embed.set_thumbnail(url=issue['author']['avatarUrl'])
         await ctx.send(embed=embed)
 
 

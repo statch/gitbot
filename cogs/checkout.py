@@ -169,6 +169,11 @@ class Checkout(commands.Cog):
     @guild_available()
     async def repo_info_command(self, ctx: commands.Context, *, repository: str) -> None:
         r: Union[dict, None] = await Git.get_repo(str(repository))
+        if not r and hasattr(ctx, 'invoked_with_store'):
+            await self.client.get_cog('Store').delete_repo_field(ctx=ctx)
+            await ctx.send(
+                f"{self.e}  The repository you had saved changed its name or was deleted. Please **re-add it** using `git --config -repo`")
+            return
         if r is None:
             await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return None
@@ -220,6 +225,11 @@ class Checkout(commands.Cog):
     @user.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def profile_command(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
+        if not u and hasattr(ctx, 'invoked_with_store'):
+            await self.client.get_cog('Store').delete_user_field(ctx=ctx)
+            await ctx.send(
+                f"{self.e}  The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config -user`")
+            return
         if u is None:
             await ctx.send(f"{self.emoji} This user **doesn't exist!**")
             return None
@@ -278,6 +288,11 @@ class Checkout(commands.Cog):
     @org.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def o_profile_command(self, ctx: commands.Context, *, organization: str) -> None:
         org = await Git.get_org(organization)
+        if not org and hasattr(ctx, 'invoked_with_store'):
+            await self.client.get_cog('Store').delete_org_field(ctx=ctx)
+            await ctx.send(
+                f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
+            return
         if org is None:
             await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return None
@@ -335,9 +350,9 @@ class Checkout(commands.Cog):
             else:
                 await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
                 return
-        em = f"<:issue_open:788517560164810772>"
+        em: str = f"<:issue_open:788517560164810772>"
         if issue['state'].lower() == 'closed':
-            em = '<:issue_closed:788517938168594452>'
+            em: str = '<:issue_closed:788517938168594452>'
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f"{em}  {issue['title']} #{issue_number}",

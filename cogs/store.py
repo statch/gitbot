@@ -51,7 +51,7 @@ class Store(commands.Cog):
         data: list = [user, org, repo]
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{self.emoji}  Your GitHub Config",
+            title=f"{self.emoji}  Your {self.client.user.name} Config",
             description="**Quick access:**\n{quick_access}".format(
                 quick_access='\n'.join(data))
         )

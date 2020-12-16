@@ -1,11 +1,21 @@
 import discord
 import discord.ext.commands as commands
+import re
 from ext.decorators import guild_available
 from cfg import globals
 from typing import Union
 from datetime import datetime
 
 Git = globals.Git
+html_comment_regex = re.compile(r'<!--.*-->', re.MULTILINE | re.DOTALL)
+emoji_regex = re.compile(r':[a-zA-Z_\d]+:', re.IGNORECASE)
+
+
+def kill_markdown(text: str) -> str:
+    md_chars: list = ['*', '>', '`', '~', '\\']
+    for char in md_chars:
+        text = text.replace(char, '')
+    return text
 
 
 class Checkout(commands.Cog):
@@ -318,19 +328,67 @@ class Checkout(commands.Cog):
         if not issue_number.isnumeric():
             await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
             return
-        issue: dict = await Git.get_issue(repo, int(issue_number))
+        issue = await Git.get_issue(repo, int(issue_number))
+        if type(issue) is str:
+            if issue == 'repo':
+                await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                return
+            else:
+                await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
+                return
+        em = f"<:issue_open:788517560164810772>"
+        if issue['state'].lower() == 'closed':
+            em = '<:issue_closed:788517938168594452>'
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=issue['title'],
+            title=f"{em}  {issue['title']} #{issue_number}",
             description=None,
-            url=issue['html_url']
+            url=issue['url']
         )
         if all(['body' in issue, issue['body'], len(issue['body'])]):
-            embed.add_field(name=':scroll: Body:', value=f"```{str(issue['body']).strip()}```", inline=False)
-        created_at: str = datetime.strptime(issue['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')
-        user: str = f"Created by [{issue['user']['login']}]({issue['user']['html_url']}) on {created_at}\n"
-        info: str = f"{user}"
+            body: Union[str, None] = str(issue['body']).strip()
+            if len(body) > 512:
+                body: str = re.sub(html_comment_regex, '', body).replace('#', '')[:512]  # Kill comments
+                body: str = kill_markdown(f"{body[:body.rindex(' ')]}...".strip())  # Kill markdown
+                body: str = re.sub(emoji_regex, '', body).strip()  # Kill emojis
+        else:
+            body = None
+        if body:
+            embed.add_field(name=':scroll: Body:', value=f"```{body}```", inline=False)
+
+        created_at: datetime = datetime.strptime(issue['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+
+        user: str = f"Created by [{issue['author']['login']}]({issue['author']['url']}) \
+         on {created_at.strftime('%e, %b %Y')}"
+
+        if issue['closed']:
+            closed_at: datetime = datetime.strptime(issue['closedAt'], '%Y-%m-%dT%H:%M:%SZ')
+            closed: str = f"\nClosed on {closed_at.strftime('%e, %b %Y')}\n"
+        else:
+            closed: str = '\n'
+
+        assignees: str = f"{issue['assigneeCount']} assignees"
+        if issue['assigneeCount'] == 1:
+            assignees: str = 'one assignee'
+        elif issue['assigneeCount'] == 0:
+            assignees: str = 'no assignees'
+
+        comments: str = f"Has {issue['commentCount']} comments"
+        if issue['commentCount'] == 1:
+            comments: str = "Has only one comment"
+        comments_and_assignees: str = f"{comments} and {assignees}"
+
+        participants: str = f"\n{issue['participantCount']} people have participated in this issue" if \
+            issue['participantCount'] != 1 else "\nOne person has participated in this issue"
+
+        info: str = f"{user}{closed}{comments_and_assignees}{participants}"
+
         embed.add_field(name=':mag_right: Info:', value=info, inline=False)
+
+        if issue['labels']:
+            embed.add_field(name=':label: Labels:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
+
+        embed.set_thumbnail(url=issue['author']['avatarUrl'])
         await ctx.send(embed=embed)
 
 

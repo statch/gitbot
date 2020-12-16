@@ -105,15 +105,74 @@ class API:
         except BadRequest:
             return None
 
-    async def get_issue(self, repo: str, issue_number: int) -> Optional[dict]:
-        if '/' not in repo:
-            return None
-        try:
-            return dict(await self.gh.getitem(f'/repos/{repo}/issues/{issue_number}'))
-        except BadRequest:
-            return None
+    async def get_issue(self, repo: str, number: int) -> Union[dict, str]:
+        if '/' not in repo or repo.count('/') > 1:
+            return 'repo'
 
-    # GraphQL
+        split: list = repo.split('/')
+        owner: str = split[0]
+        repository: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: "{repo_name}", owner: "{owner_name}") {{
+            issue(number: {issue_number}) {{
+              author{{
+                login
+                url
+                avatarUrl
+              }}
+              url
+              createdAt
+              closed
+              closedAt
+              body
+              title 
+              state
+              comments {{
+                totalCount
+              }}
+              participants {{
+                totalCount
+              }}
+              assignees {{
+                totalCount
+              }}
+              labels(first: 100) {{
+                edges{{
+                  node{{
+                    name
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+        """.format(repo_name=repository, owner_name=owner, issue_number=number)
+
+        res = await self.ses.post(GRAPHQL,
+                                  json={"query": query},
+                                  headers={"Authorization": f"token {self.token}"})
+
+        data: dict = dict(await res.json())
+
+        if "errors" in data:
+            if not data['data']['repository']:
+                return 'repo'
+            return 'number'
+
+        data: dict = data['data']
+
+        comment_count: int = data['repository']['issue']['comments']['totalCount']
+        assignee_count: int = data['repository']['issue']['assignees']['totalCount']
+        participant_count: int = data['repository']['issue']['participants']['totalCount']
+        del data['repository']['issue']['comments']
+        data['repository']['issue']['commentCount']: int = comment_count
+        data['repository']['issue']['assigneeCount']: int = assignee_count
+        data['repository']['issue']['participantCount']: int = participant_count
+        data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in list(data['repository']['issue']['labels']['edges'])]
+        return data['repository']['issue']
+
     async def get_user(self, user: str):
         year_start: str = f'{date.today().year}-01-01T00:00:30Z'
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')

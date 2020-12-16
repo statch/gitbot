@@ -1,5 +1,5 @@
 import discord.ext.commands as commands
-import os
+from client import PRODUCTION
 
 
 class Errors(commands.Cog):
@@ -14,7 +14,7 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CommandOnCooldown):
             msg = self.e + " " + '**You\'re on cooldown!** Please try again in {:.2f}s'.format(error.retry_after)
             await ctx.send(msg)
-        elif bool(int(os.getenv('PRODUCTION'))):
+        elif not PRODUCTION:
             raise error
 
 

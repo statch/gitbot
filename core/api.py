@@ -126,7 +126,7 @@ class API:
               createdAt
               closed
               closedAt
-              body
+              bodyText
               title 
               state
               comments {{
@@ -167,6 +167,8 @@ class API:
         assignee_count: int = data['repository']['issue']['assignees']['totalCount']
         participant_count: int = data['repository']['issue']['participants']['totalCount']
         del data['repository']['issue']['comments']
+        data['repository']['issue']['body']: str = data['repository']['issue']['bodyText']
+        del data['repository']['issue']['bodyText']
         data['repository']['issue']['commentCount']: int = comment_count
         data['repository']['issue']['assigneeCount']: int = assignee_count
         data['repository']['issue']['participantCount']: int = participant_count

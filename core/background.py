@@ -6,7 +6,7 @@ from itertools import cycle
 
 class Background(commands.Cog):
     def __init__(self, client):
-        self.client = client
+        self.client: commands.Bot = client
         self.next: int = 0
         self.status_changer.start()
 
@@ -25,5 +25,5 @@ class Background(commands.Cog):
         await self.client.wait_until_ready()
 
 
-def setup(client):
+def setup(client: commands.Bot) -> None:
     client.add_cog(Background(client))

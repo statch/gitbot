@@ -31,7 +31,7 @@ class Store(commands.Cog):
                            "\n**You can delete stored data by typing** `git config -delete`"]
             embed = discord.Embed(
                 color=0xefefef,
-                title=f"{self.emoji}  GitHub Config",
+                title=f"{self.emoji}  GitBot Config",
                 description='\n'.join(lines)
             )
             await ctx.send(embed=embed)

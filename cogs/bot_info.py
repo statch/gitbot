@@ -9,7 +9,7 @@ from os.path import isfile, isdir, join
 import platform
 
 pid = os.getpid()
-py: psutil.Process = psutil.Process(pid)
+process: psutil.Process = psutil.Process(pid)
 mgr: Manager = Manager()
 start_time = datetime.datetime.utcnow()
 
@@ -31,8 +31,8 @@ LINES_OF_CODE = sum([dir_line_count('./cogs'), dir_line_count('./ext'), dir_line
 
 
 class BotInfo(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, client: commands.Bot):
+        self.client: commands.Bot = client
         self.emoji: str = '<:github:772040411954937876>'
         self.s: str = "<:gs:767809543815954463>"
         self.s_emoji: str = mgr.emojis["statistics"]
@@ -127,7 +127,7 @@ class BotInfo(commands.Cog):
             description=None
         )
         users: int = sum([x.member_count for x in self.client.guilds])
-        memory: str = "**{:.3f}GB** of RAM".format(py.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
+        memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"
         embed.add_field(name=f"{self.s_emoji}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
                         inline=False)
@@ -139,5 +139,5 @@ class BotInfo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(client):
+def setup(client: commands.Bot) -> None:
     client.add_cog(BotInfo(client))

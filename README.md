@@ -22,7 +22,7 @@ There are some general information commands too, for example:
 - `git --lines {GitHub or GitLab link mentioning lines}` - get the lines mentioned in the link!
 
 ### You can also customize its behavior!
-`git config` will allow you to play around with the settings and make GitHub uniquely yours!
+`git config` will allow you to play around with the settings and make GitBot uniquely yours!
 
 ### Other commands:
 - `git --help` - a classic help message with commands

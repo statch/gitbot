@@ -216,7 +216,7 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
-        if 'license' in r and r['license'] is not None:
+        if 'license' in r and r['license'] is not None and r['license'].lower() != 'other':
             embed.set_footer(text=f'Licensed under the {r["license"]["name"]}')
         await ctx.send(embed=embed)
 

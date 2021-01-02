@@ -257,7 +257,7 @@ class Checkout(commands.Cog):
         following: str = "doesn't follow anyone, yet" if u[
                                                              'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
         if u['following'] == 1:
-            following: str = f"follows only [1 person]({u['html_url']}?tab=following)"
+            following: str = f"follows only [1 person]({u['url']}?tab=following)"
         follow: str = followers + ' and ' + following
 
         repos: str = "Has no repositories, yet\n" if u[

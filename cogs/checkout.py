@@ -196,7 +196,7 @@ class Checkout(commands.Cog):
         if star == 1:
             stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far\n"
         if r['open_issues_count'] == 1:
-            issues: str = f"Has only one [open issue]({r['html_url']}/issues)"
+            issues: str = f"Has only one [open issue]({r['html_url']}/issues)\n"
         forks: str = f"No one has forked this repo, yet\n" if r[
                                                                   'forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
         if r['forks_count'] == 1:

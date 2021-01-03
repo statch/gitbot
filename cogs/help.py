@@ -59,13 +59,10 @@ class Help(commands.Cog):
     @help_command.command(name='utility', aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx) -> None:
-        lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
-                       "\n`git --aliases` - get a list of command shorthands",
-                       "`git --privacy` - the Bot's privacy policy",
-                       "`git --vote` - vote for the Bot!",
-                       "`git --stats` - some stats regarding the Bot",
-                       "`git --uptime` - see the time since the last restart of the Bot",
-                       "`git --ping` - see the Bot's latency"]
+        lines: list = ["These commands let you fetch various data related to Git and GitHub.",
+                       "`git info --license {license}` - get info about a license",
+                       "`git --download {repo}` - get a handy zip with the source code of the repo",
+                       "`git --lines {link}` - get the lines mentioned in a GitHub or GitLab link"]
         embed = discord.Embed(
             title=f"{self.e}  Utility Help",
             color=0xefefef,
@@ -93,9 +90,14 @@ class Help(commands.Cog):
     @help_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx):
-        lines: list = ["These commands let you fetch various data related to Git and GitHub.",
-                       "`git info --license {license}` - get info about a license",
-                      "`git --lines {link}` - get the lines mentioned in a GitHub or GitLab link"]
+        lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
+                       "`git --aliases` - get a list of command shorthands",
+                       "`git --privacy` - the Bot's privacy policy",
+                       "`git --vote` - vote for the Bot!",
+                       "`git --stats` - some stats regarding the Bot",
+                       "`git --uptime` - see the time since the last restart of the Bot",
+                       "`git --ping` - see the Bot's latency"]
+
         embed = discord.Embed(
             title=f"{self.e}  Info Help",
             color=0xefefef,

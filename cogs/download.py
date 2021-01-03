@@ -21,7 +21,11 @@ class Download(commands.Cog):
         src_bytes: Optional[bytes] = await Git.get_repo_zip(repo)
         if not src_bytes:
             return await ctx.send(f"{self.e} This repo **doesn't exist!**")
-        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io.BytesIO(src_bytes))
+        io_obj: io.BytesIO = io.BytesIO(src_bytes)
+        if io_obj.getbuffer().nbytes >= 47185920:  # abort upload if the file is bigger than 45mb
+            return await ctx.send(
+                f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         return await ctx.send(f'{self.emoji} Here\'s the source code of **{repo}!**', file=file)
 
 

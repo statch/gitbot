@@ -1,7 +1,7 @@
-from os import getenv
-from typing import Union, List, Optional
 import aiohttp
 import gidgethub.aiohttp as gh
+from os import getenv
+from typing import Union, List, Optional
 from dotenv import load_dotenv
 from gidgethub import BadRequest
 from datetime import date, datetime
@@ -105,6 +105,18 @@ class API:
         except BadRequest:
             return None
 
+    async def get_repo_zip(self, repo: str) -> Optional[bytes]:
+        if '/' not in repo:
+            return None
+        try:
+            res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
+                                     headers={"Authorization": f"token {self.token}"})
+            if res.status == 200:
+                return await res.content.read()
+            return None
+        except BadRequest:
+            return None
+
     async def get_issue(self, repo: str, number: int) -> Union[dict, str]:
         if '/' not in repo or repo.count('/') > 1:
             return 'repo'
@@ -172,7 +184,8 @@ class API:
         data['repository']['issue']['commentCount']: int = comment_count
         data['repository']['issue']['assigneeCount']: int = assignee_count
         data['repository']['issue']['participantCount']: int = participant_count
-        data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in list(data['repository']['issue']['labels']['edges'])]
+        data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in
+                                                       list(data['repository']['issue']['labels']['edges'])]
         return data['repository']['issue']
 
     async def get_user(self, user: str):

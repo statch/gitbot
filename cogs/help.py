@@ -20,7 +20,7 @@ class Help(commands.Cog):
             lines: list = ["In this section you'll find info and usage of my commands.",
                            "\n**You can access specific parts by typing:**",
                            "`git --help checkout` to fetch information about orgs, repos and users",
-                           "`git --help info` for commands that provide information about Git & GitHub",
+                           "`git --help info` for commands that provide information about the bot itself",
                            "`git --help config` to store your preferred orgs, repos and users",
                            "`git --help utility` for other useful commands",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]

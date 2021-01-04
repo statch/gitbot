@@ -16,6 +16,8 @@ class Errors(commands.Cog):
             await ctx.send(msg)
         elif not PRODUCTION:
             raise error
+        else:
+            print(error)
 
 
 def setup(client):

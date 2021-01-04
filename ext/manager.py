@@ -2,7 +2,7 @@ import json
 from fuzzywuzzy import fuzz
 
 
-json_path = r'./utils/'
+json_path = r'./data/'
 
 
 def _load_json(name: str):

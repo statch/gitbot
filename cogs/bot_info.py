@@ -29,7 +29,6 @@ def dir_line_count(dir):
 
 LINES_OF_CODE = sum([dir_line_count('./cogs'),
                      dir_line_count('./ext'),
-                     dir_line_count('./utils'),
                      dir_line_count('./handle'),
                      dir_line_count('./core')])
 

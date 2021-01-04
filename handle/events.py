@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from utils.explicit_checks import verify_send_perms
+from ext.explicit_checks import verify_send_perms
 from ext.manager import Manager
 
 mgr = Manager()

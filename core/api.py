@@ -1,8 +1,6 @@
 import aiohttp
 import gidgethub.aiohttp as gh
-from os import getenv
 from typing import Union, List, Optional
-from dotenv import load_dotenv
 from gidgethub import BadRequest
 from datetime import date, datetime
 from collections import namedtuple
@@ -15,9 +13,8 @@ GhStats = namedtuple('Stats', ['all_time', 'month', 'fortnight', 'week', 'day', 
 class API:
     """Main Class used to interact with the GitHub API"""
 
-    def __init__(self):
-        load_dotenv()
-        self.token: str = getenv("GITHUB")
+    def __init__(self, token: str):
+        self.token: str = token
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
         self.gh = gh.GitHubAPI(session=self.ses, requester="itsmewulf, Python 3.7",
                                oauth_token=self.token)

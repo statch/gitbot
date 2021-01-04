@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: ❓ General Question
+    url: https://discord.gg/3e5fwpA
+    about: Please visit our official Discord server for general questions about GitBot.

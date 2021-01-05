@@ -1,5 +1,6 @@
 import discord.ext.commands as commands
 import discord
+import ast
 from ext.decorators import is_me
 from cfg import config
 import datetime as dt
@@ -7,9 +8,22 @@ import datetime as dt
 Git = config.Git
 
 
+def insert_returns(body):
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+
+    if isinstance(body[-1], ast.If):
+        insert_returns(body[-1].body)
+        insert_returns(body[-1].orelse)
+
+    if isinstance(body[-1], ast.With):
+        insert_returns(body[-1].body)
+
+
 class Debug(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, client: commands.Bot):
+        self.client: commands.Bot = client
         self.emoji: str = '<:github:772040411954937876>'
         self.e: str = "<:ge:767823523573923890>"
 
@@ -52,6 +66,37 @@ class Debug(commands.Cog):
                         value=f"{search['used']}/{search['limit']}\n\
                         `{dt.datetime.fromtimestamp(search['reset']).strftime('%X')}`")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.is_owner()
+    @is_me()
+    async def eval(self, ctx, *, cmd):
+        if ctx.message.author.id == 548803750634979340:
+            fn_name = "_eval_expr"
+
+            cmd = cmd.strip("` ")
+
+            cmd = "\n".join(f"    {i}" for i in cmd.splitlines())
+
+            body: str = f"async def {fn_name}():\n{cmd}"
+
+            parsed = ast.parse(body)
+            body = parsed.body[0].body
+
+            insert_returns(body)
+
+            env = {
+                'client': self.client,
+                'discord': discord,
+                'commands': commands,
+                'ctx': ctx,
+                'Git': Git,
+                '__import__': __import__
+            }
+            exec(compile(parsed, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
+
+            result = (await eval(f"{fn_name}()", env))  # pylint: disable=eval-used
+            await ctx.send(result)
 
 
 def setup(client):

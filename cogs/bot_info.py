@@ -14,8 +14,8 @@ mgr: Manager = Manager()
 start_time = datetime.datetime.utcnow()
 
 
-def item_line_count(path):  # pylint: disable=redefined-builtin
-    if isdir(path):
+def item_line_count(path):
+    if isdir(path):  # pylint: disable=no-else-return
         return dir_line_count(path)
     elif isfile(path):
         return len(open(path, 'rb').readlines())
@@ -23,7 +23,7 @@ def item_line_count(path):  # pylint: disable=redefined-builtin
         return 0
 
 
-def dir_line_count(dir):
+def dir_line_count(dir):  # pylint: disable=redefined-builtin
     return sum(map(lambda item: item_line_count(join(dir, item)), os.listdir(dir)))
 
 

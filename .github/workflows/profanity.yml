@@ -1,6 +1,6 @@
 name: Profanity check
 
-on: 
+on:
   issues:
     types: [opened, edited]
   issue_comment:

@@ -2,10 +2,11 @@
 
 # GitBot - The no. 1 GitHub Discord Bot 
 
-[![CodeFactor](https://www.codefactor.io/repository/github/statch/gitbot/badge/main)](https://www.codefactor.io/repository/github/statch/gitbot/overview/main) [![issues](https://img.shields.io/github/issues/statch/gitbot)](https://github.com/statch/gitbot/issues) ![code size](https://img.shields.io/github/languages/code-size/statch/gitbot) [![discord](https://img.shields.io/discord/737430006271311913.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/3e5fwpA)
+[![CodeFactor](https://www.codefactor.io/repository/github/statch/gitbot/badge/main)](https://www.codefactor.io/repository/github/statch/gitbot/overview/main) [![issues](https://img.shields.io/github/issues/statch/gitbot)](https://github.com/statch/gitbot/issues) ![code size](https://img.shields.io/github/languages/code-size/statch/gitbot) ![visits](https://api.ghprofile.me/view?username=statch-gitbot&style=flat&label=visits) [![discord](https://img.shields.io/discord/737430006271311913.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/3e5fwpA)
 
-This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.
-Command syntax is themed after `git` CLI.<br/>**The commands listed below are long, but don't worry, there are aliases!**
+This simple GitHub Bot allows you to easily fetch data about users, repos, and organizations.  
+Command syntax is themed after `git` CLI.   
+**The commands listed below are long, but don't worry, there are aliases!**
 
 ### Some of the most notable commands are:
 - `git checkout --user -info {user}` - get information about a GitHub user

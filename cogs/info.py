@@ -37,14 +37,14 @@ class Info(commands.Cog):
             url=lcns["html_url"],
             description=None
         )
-        embed.add_field(name=f"Description", value=f'```{lcns["description"]}```', inline=False)
-        embed.add_field(name="Implementation", value=f'```{lcns["implementation"]}```', inline=False)
-        embed.add_field(name="Permissions", value="".join([f"{self.d1}  {x}\n" for x in lcns["permissions"]]) if len(
+        embed.add_field(name=f"Description:", value=f'```{lcns["description"]}```', inline=False)
+        embed.add_field(name="Implementation:", value=f'```{lcns["implementation"]}```', inline=False)
+        embed.add_field(name="Permissions:", value="".join([f"{self.d1}  {x}\n" for x in lcns["permissions"]]) if len(
             lcns["permissions"]) != 0 else "None")
-        embed.add_field(name="Conditions",
+        embed.add_field(name="Conditions:",
                         value="".join([f"{self.d2}  {x}\n" for x in lcns["conditions"]]) if len(
                             lcns["conditions"]) != 0 else "None")
-        embed.add_field(name="Limitations", value="".join([f"{self.d3}  {x}\n" for x in lcns["limitations"]]) if len(
+        embed.add_field(name="Limitations:", value="".join([f"{self.d3}  {x}\n" for x in lcns["limitations"]]) if len(
             lcns["limitations"]) != 0 else "None")
         await ctx.send(embed=embed)
 

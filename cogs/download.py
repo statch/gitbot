@@ -1,6 +1,6 @@
 import discord
 import io
-from typing import Optional
+from typing import Optional, Union
 from discord.ext import commands
 from ext.decorators import guild_available
 from cfg import globals
@@ -16,17 +16,24 @@ class Download(commands.Cog):
 
     @commands.command(name='--download', aliases=['-download', 'download', '-dl'])
     @guild_available()
+    @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def download_command(self, ctx: commands.Context, repo: str):
-        src_bytes: Optional[bytes] = await Git.get_repo_zip(repo)
-        if not src_bytes:
-            return await ctx.send(f"{self.e} This repo **doesn't exist!**")
+        msg: discord.Message = await ctx.send(f"{self.emoji}  Give me a second while I download the file...")
+        src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
+        if src_bytes is None:
+            return await msg.edit(content=f"{self.e}  This repo **doesn't exist!**")
+        elif src_bytes is False:
+            return await msg.edit(
+                content=f"{self.e}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
-        if io_obj.getbuffer().nbytes >= 47185920:  # abort upload if the file is bigger than 45mb
-            return await ctx.send(
-                f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
         file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
-        return await ctx.send(f'{self.emoji} Here\'s the source code of **{repo}!**', file=file)
+        try:
+            await ctx.send(file=file)
+            await msg.edit(content=f'{self.emoji}  Here\'s the source code of **{repo}!**')
+        except discord.errors.HTTPException:
+            await msg.edit(
+                content=f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
 
 
 def setup(client: commands.Bot) -> None:

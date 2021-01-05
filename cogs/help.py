@@ -46,6 +46,7 @@ class Help(commands.Cog):
                        "\n**Important!** Repo commands that follow, require the exact syntax of `username/repo-name` "
                        "in place of the `{repo}` argument, ex. `itsmewulf/GitHub-Discord`",
                        "\n`--issue {repo} {issue number}` - get detailed info on an issue",
+                       "`--pr {repo} {pr number}` - get detailed info on a pull request",
                        "`--repo -info {repo}` - get info about a repository",
                        "`--repo -src {repo}` - get the repo's file structure"]
         embed = discord.Embed(

@@ -510,13 +510,13 @@ class Checkout(commands.Cog):
         embed.add_field(name=':mag_right: Info:', value=info, inline=False)
 
         embed.add_field(name='Participants:',
-                        value=''.join(participant_strings) if len(participant_strings) else f'No participants',
+                        value=''.join(participant_strings) if participant_strings else f'No participants',
                         inline=True)
         embed.add_field(name='Assignees:',
-                        value=''.join(assignee_strings) if len(assignee_strings) else f'No assignees',
+                        value=''.join(assignee_strings) if assignee_strings else f'No assignees',
                         inline=True)
         embed.add_field(name='Reviewers:',
-                        value=''.join(reviewer_strings) if len(reviewer_strings) else f'No reviewers',
+                        value=''.join(reviewer_strings) if reviewer_strings else f'No reviewers',
                         inline=True)
 
         if pr['labels']:

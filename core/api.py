@@ -28,8 +28,7 @@ class API:
         period: dict = dict(res['payload']['period'])
         if not res['success'] or sum([int(v) for v in period.values()]) == 0:
             return None
-        else:
-            return GhStats(*[int(v) for v in period.values()])
+        return GhStats(*[int(v) for v in period.values()])
 
     async def get_ratelimit(self) -> dict:
         return await self.gh.getitem("/rate_limit")

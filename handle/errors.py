@@ -14,6 +14,9 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CommandOnCooldown):
             msg = self.e + " " + '**You\'re on cooldown!** Please try again in {:.2f}s'.format(error.retry_after)
             await ctx.send(msg)
+        elif isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.send(
+                f"{self.e}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**")
         elif not PRODUCTION:
             raise error
         else:

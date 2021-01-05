@@ -1,4 +1,5 @@
 import aiohttp
+import asyncio
 import gidgethub.aiohttp as gh
 from typing import Union, List, Optional
 from gidgethub import BadRequest
@@ -8,6 +9,7 @@ from collections import namedtuple
 BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
 GhStats = namedtuple('Stats', ['all_time', 'month', 'fortnight', 'week', 'day', 'hour'])
+SIZE_THRESHOLD: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 
 class API:
@@ -102,17 +104,131 @@ class API:
         except BadRequest:
             return None
 
-    async def get_repo_zip(self, repo: str) -> Optional[bytes]:
+    async def get_repo_zip(self, repo: str) -> Optional[Union[bool, bytes]]:
         if '/' not in repo:
             return None
-        try:
-            res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
-                                     headers={"Authorization": f"token {self.token}"})
-            if res.status == 200:
-                return await res.content.read()
-            return None
-        except BadRequest:
-            return None
+
+        res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
+                                 headers={"Authorization": f"token {self.token}"})
+
+        if res.status == 200:
+            try:
+                await res.content.readexactly(SIZE_THRESHOLD)  # Read up to 7.85mb
+            except asyncio.IncompleteReadError as read:
+                return read.partial  # Return the 'partial' data (Which is actually the full data)
+            else:  # The file is too big
+                return False
+        return None
+
+    async def get_pull_request(self, repo: str, number: int) -> Union[dict, str]:
+        if '/' not in repo or repo.count('/') > 1:
+            return 'repo'
+
+        split: list = repo.split('/')
+        owner: str = split[0]
+        repository: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: "{name}", owner: "{owner}") {{
+            pullRequest(number: {number}) {{
+              title
+              url
+              isCrossRepository
+              state
+              createdAt
+              closed
+              closedAt
+              bodyText
+              changedFiles
+              commits(first: 250) {{
+                totalCount
+              }}
+              additions
+              deletions
+              author {{
+                login 
+                url
+                avatarUrl
+              }}
+              comments {{
+                totalCount
+              }}
+              assignees(first: 100) {{
+                totalCount
+                edges {{
+                  node {{
+                    login
+                    url
+                  }}
+                }}
+              }}
+              reviews(first: 100) {{
+                totalCount
+              }}
+              participants(first: 100){{
+                totalCount
+                edges {{
+                  node {{
+                    login
+                    url
+                  }}
+                }}
+              }}
+              reviewRequests(first: 100) {{
+                totalCount
+                edges {{
+                  node {{
+                    requestedReviewer {{
+                      ... on User {{
+                        login
+                        url
+                      }}
+                      ... on Team {{
+                        name
+                        url
+                      }}
+                      ... on Mannequin {{
+                        login
+                        url
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+              labels(first: 100) {{
+                edges {{
+                  node {{
+                    name
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+        """.format(name=repository, owner=owner, number=number)
+
+        res = await self.ses.post(GRAPHQL,
+                                  json={"query": query},
+                                  headers={"Authorization": f"token {self.token}"})
+
+        data: dict = dict(await res.json())
+
+        if "errors" in data:
+            if not data['data']['repository']:
+                return 'repo'
+            return 'number'
+
+        data = data['data']['repository']['pullRequest']
+        data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
+        data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
+        data['reviewers'] = {}
+        data['reviewers']['users'] = [(o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
+                              o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
+                             in data['reviewRequests']['edges']]
+        data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
+        data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in data['participants']['edges']]
+        return data
 
     async def get_issue(self, repo: str, number: int) -> Union[dict, str]:
         if '/' not in repo or repo.count('/') > 1:

@@ -72,10 +72,9 @@ async def _load_extension(ctx, extension, path='cogs'):
     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotFound) as e:
         if isinstance(e, commands.ExtensionAlreadyLoaded):
             await ctx.send(f"<:github:772040411954937876>  This extension is **already loaded!**")
-            return
         elif isinstance(e, commands.ExtensionNotFound):
             await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-            return
+        return
     await ctx.send(f"<:github:772040411954937876>  **{extension}** extension has been **loaded.**")
 
 
@@ -92,10 +91,9 @@ async def _unload_extension(ctx, extension, path='cogs'):
     except (commands.ExtensionNotLoaded, commands.ExtensionNotFound) as e:
         if isinstance(e, commands.ExtensionNotLoaded):
             await ctx.send(f"<:github:772040411954937876>  This extension **isn't loaded!**")
-            return
         elif isinstance(e, commands.ExtensionNotFound):
             await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-            return
+        return
     await ctx.send(f"<:github:772040411954937876>  **{extension}** extension has been **unloaded.**")
 
 
@@ -112,10 +110,9 @@ async def _reload_extension(ctx, extension, path='cogs'):
     except (commands.ExtensionNotLoaded, commands.ExtensionNotFound) as e:
         if isinstance(e, commands.ExtensionNotLoaded):
             await ctx.send(f"<:github:772040411954937876>  This extension **isn't loaded!**")
-            return
         elif isinstance(e, commands.ExtensionNotFound):
             await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-            return
+        return
     await ctx.send(f"<:github:772040411954937876> **{extension}** extension has been **reloaded.**")
 
 

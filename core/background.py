@@ -14,8 +14,6 @@ class Background(commands.Cog):
     async def status_changer(self):
         presences: cycle = cycle([Game(f"in {len(self.client.guilds)} servers"),
                                   Activity(type=ActivityType.watching, name="git --help"),
-                                  Game(
-                                      f"for {sum([x.member_count for x in self.client.guilds])} users!"),
                                   Activity(
                                       type=ActivityType.listening, name="your Git feed")])
         await self.client.change_presence(activity=next(presences))

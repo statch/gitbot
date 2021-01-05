@@ -21,7 +21,7 @@ class Download(commands.Cog):
     async def download_command(self, ctx: commands.Context, repo: str):
         msg: discord.Message = await ctx.send(f"{self.emoji}  Give me a second while I download the file...")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
-        if src_bytes is None:
+        if src_bytes is None:  # pylint: disable=no-else-return
             return await msg.edit(content=f"{self.e}  This repo **doesn't exist!**")
         elif src_bytes is False:
             return await msg.edit(

@@ -1,10 +1,10 @@
 from discord.ext import commands
-from cfg import globals
+from cfg import config
 from ext.decorators import guild_available
 from ext.manager import Manager
 from discord import Embed
 
-Git = globals.Git
+Git = config.Git
 mgr = Manager()
 
 

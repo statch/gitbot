@@ -2,11 +2,11 @@ import discord
 import discord.ext.commands as commands
 import re
 from ext.decorators import guild_available
-from cfg import globals
+from cfg import config
 from typing import Union
 from datetime import datetime
 
-Git = globals.Git
+Git = config.Git
 html_comment_regex = re.compile(r'<!--.*-->', re.MULTILINE | re.DOTALL)
 PR_STATES: dict = {
     "open": "<:pr_open:795793711312404560>",

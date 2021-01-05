@@ -2,10 +2,10 @@ import discord
 from os import getenv
 from discord.ext import commands
 from ext.decorators import guild_available
-from cfg import globals
+from cfg import config
 from motor.motor_asyncio import AsyncIOMotorClient
 
-Git = globals.Git
+Git = config.Git
 
 
 class Store(commands.Cog):

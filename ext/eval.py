@@ -1,10 +1,10 @@
 import ast
 import discord
 from discord.ext import commands
-from cfg import globals
+from cfg import config
 from ext.decorators import is_me
 
-Git = globals.Git
+Git = config.Git
 
 
 def insert_returns(body):

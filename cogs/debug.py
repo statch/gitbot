@@ -1,10 +1,10 @@
 import discord.ext.commands as commands
 import discord
 from ext.decorators import is_me
-from cfg import globals
+from cfg import config
 import datetime as dt
 
-Git = globals.Git
+Git = config.Git
 
 
 class Debug(commands.Cog):

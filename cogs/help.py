@@ -1,9 +1,9 @@
 from discord.ext import commands
 import discord
-from cfg import globals
+from cfg import config
 from ext.decorators import guild_available
 
-Git = globals.Git
+Git = config.Git
 
 
 class Help(commands.Cog):

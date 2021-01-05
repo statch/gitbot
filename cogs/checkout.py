@@ -466,16 +466,31 @@ class Checkout(commands.Cog):
         comments_and_reviews: str = f'{comments} and {reviews}\n'
 
         commit_c: int = pr["commits"]["totalCount"]
+        commits = f'[{commit_c} commits]({pr["url"]}/commits)'
+        if commit_c == 1:
+            commits = f'[one commit]({pr["url"]}/commits)'
 
         files_changed: str = f'[{pr["changedFiles"]} files]({pr["url"]}/files) ' \
-                             f'have been changed over [{commit_c} commits]({pr["url"]}/commits)\n'
+                             f'have been changed in {commits}\n'
         if pr["changedFiles"] == 1:
             files_changed: str = f'[One file]({pr["url"]}/files) was changed ' \
-                                 f'over [{commit_c} commits]({pr["url"]}/commits)\n'
+                                 f'in [{commit_c} commits]({pr["url"]}/commits)\n'
         elif pr['changedFiles'] == 0:
             files_changed: str = f'No files have been changed in this PR\n'
 
-        additions_deletions: str = f'Updated with {pr["additions"]} additions and {pr["deletions"]} deletions.\n'
+        additions: str = f'Updated with {pr["additions"]} additions'
+        if pr["additions"] == 1:
+            additions: str = 'Updated with one addition'
+        elif pr['additions'] == 0:
+            additions: str = 'Updated with no additions'
+
+        deletions: str = f'{pr["deletions"]} deletions'
+        if pr['deletions'] == 1:
+            deletions: str = 'one deletion'
+        elif pr['deletions'] == 0:
+            deletions: str = 'no deletions'
+
+        additions_and_deletions: str = f'{additions} and {deletions}.\n'
 
         assignee_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['assignees']['users']]
         reviewer_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['reviewers']['users']]
@@ -491,7 +506,7 @@ class Checkout(commands.Cog):
                                                                                         :3] + f'- and {len(participant_strings)} more'
 
         cross_repo: str = f'This pull request came from a fork.' if pr['isCrossRepository'] else ''
-        info: str = f'{user}{closed}{comments_and_reviews}{files_changed}{additions_deletions}{cross_repo}'
+        info: str = f'{user}{closed}{comments_and_reviews}{files_changed}{additions_and_deletions}{cross_repo}'
         embed.add_field(name=':mag_right: Info:', value=info, inline=False)
 
         embed.add_field(name='Participants:',

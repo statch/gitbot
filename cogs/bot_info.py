@@ -14,7 +14,7 @@ mgr: Manager = Manager()
 start_time = datetime.datetime.utcnow()
 
 
-def item_line_count(path):
+def item_line_count(path):  # pylint: disable=redefined-builtin
     if isdir(path):
         return dir_line_count(path)
     elif isfile(path):

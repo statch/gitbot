@@ -14,9 +14,10 @@ Command syntax is themed after `git` CLI.
 - `git checkout --org -info {organization}` - get information about a GitHub organization
 - `git checkout --org -repos {organization}` - get a list of a GitHub organization's repos
 
-4 commands that follow require the syntax of `owner/repo-name` in the place of the `{repo}` argument, ex. `statch/GitBot-Discord`
+5 commands that follow require the syntax of `owner/repo-name` in the place of the `{repo}` argument, ex. `statch/GitBot-Discord`
 
 - `git checkout --issue {repo} {issue number}` - get detailed info on a GitHub issue
+- `git checkout --pr {repo} {pull request number}` - get details on a Pull Request
 - `git checkout --repo -info {repo}` - get information about a GitHub repository
 - `git checkout --repo -src {repo}` - get the file structure of a GitHub repository
 - `git --download {repo}` - download the source code right from Discord

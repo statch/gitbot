@@ -183,36 +183,36 @@ class Checkout(commands.Cog):
             await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return None
         embed = discord.Embed(
-            color=0xefefef,
+            color=int(r['primaryLanguage']['color'][1:], 16),
             title=f"{repository}",
             description=None,
-            url=r['html_url']
+            url=r['url']
         )
-        watch: int = r['watchers_count']
-        star: int = r['stargazers_count']
+        watch: int = r['watchers']['totalCount']
+        star: int = r['stargazers']['totalCount']
+        open_issues: int = r['issues']['totalCount']
         if r['description'] is not None and len(r['description']) != 0:
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{r['description']}```")
-        watchers: str = f"Has [{watch} watchers]({r['html_url']}/watchers) in total\n" if watch != 1 else f"Has only [one watcher]({r['html_url']}/watchers)\n"
+        watchers: str = f"Has [{watch} watchers]({r['url']}/watchers) in total\n" if watch != 1 else f"Has only [one watcher]({r['url']}/watchers)\n"
         if watch == 0:
-            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)"
-        issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r[
-                                                                                          'open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
-        stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far\n"
+            watchers: str = f"Doesn't have any [watchers]({r['url']}/watchers)"
+        issues: str = f'Doesn\'t have any [open issues]({r["url"]}/issues)\n' if open_issues == 0 else f"Has [{open_issues} open issues]({r['url']}/issues)\n"
+        stargazers: str = f"No one has [starred]({r['url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['url']}/stargazers) starred so far\n"
         if star == 1:
-            stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far\n"
-        if r['open_issues_count'] == 1:
-            issues: str = f"Has only one [open issue]({r['html_url']}/issues)\n"
+            stargazers: str = f"[One person]({r['url']}/stargazers) starred this so far\n"
+        if open_issues == 1:
+            issues: str = f"Has only one [open issue]({r['url']}/issues)\n"
         forks: str = f"No one has forked this repo, yet\n" if r[
-                                                                  'forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
-        if r['forks_count'] == 1:
-            forks: str = f"It's been forked [only once]({r['html_url']}/network/members)\n"
+                                                                  'forkCount'] == 0 else f"Has been forked [{r['forkCount']} times]({r['url']}/network/members)\n"
+        if r['forkCount'] == 1:
+            forks: str = f"It's been forked [only once]({r['url']}/network/members)\n"
         forked = ""
-        if 'fork' in r and r['fork'] is True:
-            forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})\n"
-        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
+        if 'isFork' in r and r['isFork'] is True:
+            forked = f"This repo is a fork of [{r['parent']['nameWithOwner']}]({r['parent']['url']})\n"
+        info: str = f"Created on {datetime.strptime(r['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         homepage: tuple = (
-            r['homepage'] if 'homepage' in r else None,
+            r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None,
             "Homepage")
         links: list = [homepage]
         link_strings: list = []
@@ -221,8 +221,10 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
-        if 'license' in r and r['license'] is not None and r['license']["name"].lower() != 'other':
-            embed.set_footer(text=f'Licensed under the {r["license"]["name"]}')
+        if r['graphic']:
+            embed.set_image(url=r['graphic'])
+        if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
+            embed.set_footer(text=f'Licensed under the {r["licenseInfo"]["name"]}')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)

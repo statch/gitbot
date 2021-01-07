@@ -120,7 +120,7 @@ class API:
 
         query: str = """
         {{
-          repository(name: {name}, owner: {owner}) {{
+          repository(name: "{name}", owner: "{owner}") {{
             openGraphImageUrl
             url 
             forkCount
@@ -128,6 +128,11 @@ class API:
             usesCustomOpenGraphImage
             createdAt
             description
+            isFork
+            parent {{
+              nameWithOwner
+              url
+            }}
             releases(last: 1) {{
               totalCount
               edges {{
@@ -152,6 +157,7 @@ class API:
             }}
             primaryLanguage{{
               name
+              color
             }}
             homepageUrl
             stargazers {{
@@ -174,7 +180,8 @@ class API:
             return None
 
         data = data['data']['repository']
-        data['release'] = data['releases']['edges'][0]['tagName'] if data['releases']['edges'] else None
+        data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
+        data['release'] = data['releases']['edges'][0]['node']['tagName'] if data['releases']['edges'] else None
 
         return data
 

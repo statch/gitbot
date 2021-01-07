@@ -52,15 +52,6 @@ class API:
         except BadRequest:
             return []
 
-    async def get_repo(self, repo: str) -> Optional[dict]:
-        if '/' not in repo:
-            return None
-        try:
-            repo: dict = await self.gh.getitem(f"/repos/{repo}")
-            return repo if repo['private'] is False else None
-        except BadRequest:
-            return None
-
     async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
         if '/' not in repo:
             return []
@@ -118,6 +109,74 @@ class API:
             else:  # The file is too big
                 return False
         return None
+
+    async def get_repo(self, repo: str) -> Optional[dict]:
+        if '/' not in repo or repo.count('/') > 1:
+            return None
+
+        split: list = repo.split('/')
+        owner: str = split[0]
+        repository: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: {name}, owner: {owner}) {{
+            openGraphImageUrl
+            url 
+            forkCount
+            openGraphImageUrl
+            usesCustomOpenGraphImage
+            createdAt
+            description
+            releases(last: 1) {{
+              totalCount
+              edges {{
+                node {{
+                  tagName
+                }}
+              }}
+            }}
+            issues(states: OPEN) {{
+              totalCount
+            }}
+            fundingLinks {{
+              url
+              platform
+            }}
+            codeOfConduct {{
+              name 
+            }}
+            licenseInfo {{
+              name 
+              nickname 
+            }}
+            primaryLanguage{{
+              name
+            }}
+            homepageUrl
+            stargazers {{
+              totalCount
+            }}
+            watchers {{
+              totalCount
+            }}
+          }}
+        }}
+        """.format(owner=owner, name=repository)
+
+        res = await self.ses.post(GRAPHQL,
+                                  json={"query": query},
+                                  headers={"Authorization": f"token {self.token}"})
+
+        data: dict = dict(await res.json())
+
+        if "errors" in data:
+            return None
+
+        data = data['data']['repository']
+        data['release'] = data['releases']['edges'][0]['tagName'] if data['releases']['edges'] else None
+
+        return data
 
     async def get_pull_request(self, repo: str, number: int) -> Union[dict, str]:
         if '/' not in repo or repo.count('/') > 1:
@@ -222,9 +281,10 @@ class API:
         data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
         data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
         data['reviewers'] = {}
-        data['reviewers']['users'] = [(o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
-                              o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
-                             in data['reviewRequests']['edges']]
+        data['reviewers']['users'] = [
+            (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
+             o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
+            in data['reviewRequests']['edges']]
         data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
         data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in data['participants']['edges']]
         return data

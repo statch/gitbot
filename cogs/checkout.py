@@ -7,19 +7,12 @@ from typing import Union
 from datetime import datetime
 
 Git = config.Git
-html_comment_regex = re.compile(r'<!--.*-->', re.MULTILINE | re.DOTALL)
+md_emoji_re = re.compile(r':.*:', re.IGNORECASE)
 PR_STATES: dict = {
     "open": "<:pr_open:795793711312404560>",
     "closed": "<:pr_closed:788518707969785886>",
     "merged": "<:merge:795801508146839612>"
 }
-
-
-def kill_markdown(text: str) -> str:
-    md_chars: list = ['*', '>', '`', '~', '\\']
-    for char in md_chars:
-        text = text.replace(char, '')
-    return text
 
 
 class Checkout(commands.Cog):
@@ -165,8 +158,8 @@ class Checkout(commands.Cog):
             url=link
         )
         if int(len(files)) > 15:
-            how_much: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
-            embed.set_footer(text=f"View {how_much} more on GitHub")
+            more: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
+            embed.set_footer(text=f"View {more} more on GitHub")
         await ctx.send(embed=embed)
 
     @repo.command(name="-info", aliases=['-I', '-i', '-Info'])
@@ -174,46 +167,65 @@ class Checkout(commands.Cog):
     @guild_available()
     async def repo_info_command(self, ctx: commands.Context, *, repository: str) -> None:
         r: Union[dict, None] = await Git.get_repo(str(repository))
-        if not r and hasattr(ctx, 'invoked_with_store'):
-            await self.client.get_cog('Store').delete_repo_field(ctx=ctx)
-            await ctx.send(
-                f"{self.e}  The repository you had saved changed its name or was deleted. Please **re-add it** using `git --config -repo`")
-            return
-        if r is None:
-            await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
+        if not r:
+            if hasattr(ctx, 'invoked_with_store'):
+                await self.client.get_cog('Store').delete_repo_field(ctx=ctx)
+                await ctx.send(
+                    f"{self.e}  The repository you had saved changed its name or was deleted. Please **re-add it** "
+                    f"using `git --config -repo`")
+            else:
+                await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return None
+
         embed = discord.Embed(
-            color=0xefefef,
+            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] else 0xefefef,
             title=f"{repository}",
             description=None,
-            url=r['html_url']
+            url=r['url']
         )
-        watch: int = r['watchers_count']
-        star: int = r['stargazers_count']
+
+        watch: int = r['watchers']['totalCount']
+        star: int = r['stargazers']['totalCount']
+        open_issues: int = r['issues']['totalCount']
+
         if r['description'] is not None and len(r['description']) != 0:
-            embed.add_field(name=":notepad_spiral: Description:", value=f"```{r['description']}```")
-        watchers: str = f"Has [{watch} watchers]({r['html_url']}/watchers) in total\n" if watch != 1 else f"Has only [one watcher]({r['html_url']}/watchers)\n"
+            embed.add_field(name=":notepad_spiral: Description:",
+                            value=f"```{re.sub(md_emoji_re, '', r['description'])}```")
+
+        watchers: str = f"Has [{watch} watchers]({r['url']}/watchers)" if watch != 1 else f"Has [one watcher]({r['url']}/watchers) "
         if watch == 0:
-            watchers: str = f"Doesn't have any [watchers]({r['html_url']}/watchers)"
-        issues: str = f'Doesn\'t have any [open issues]({r["html_url"]}/issues)\n' if r[
-                                                                                          'open_issues_count'] == 0 else f"Has [{r['open_issues_count']} open issues]({r['html_url']}/issues)\n"
-        stargazers: str = f"No one has [starred]({r['html_url']}/stargazers) to this repo, yet\n" if star == 0 else f"[{star} people]({r['html_url']}/stargazers) starred so far\n"
+            watchers: str = f"Has no watchers"
+        stargazers: str = f"no stargazers\n" if star == 0 else f"[{star} stargazers]({r['url']}/stargazers)\n"
         if star == 1:
-            stargazers: str = f"[One person]({r['html_url']}/stargazers) starred this so far\n"
-        if r['open_issues_count'] == 1:
-            issues: str = f"Has only one [open issue]({r['html_url']}/issues)\n"
+            stargazers: str = f"[one stargazer]({r['url']}/stargazers)\n"
+
+        watchers_stargazers: str = f"{watchers} and {stargazers}"
+
+        issues: str = f'Doesn\'t have any [open issues]({r["url"]}/issues)\n' if open_issues == 0 else f"Has [{open_issues} open issues]({r['url']}/issues)\n"
+        if open_issues == 1:
+            issues: str = f"Has only one [open issue]({r['url']}/issues)\n"
+
         forks: str = f"No one has forked this repo, yet\n" if r[
-                                                                  'forks_count'] == 0 else f"Has been forked [{r['forks_count']} times]({r['html_url']}/network/members)\n"
-        if r['forks_count'] == 1:
-            forks: str = f"It's been forked [only once]({r['html_url']}/network/members)\n"
+                                                                  'forkCount'] == 0 else f"Has been forked [{r['forkCount']} times]({r['url']}/network/members)\n"
+        if r['forkCount'] == 1:
+            forks: str = f"It's been forked [only once]({r['url']}/network/members)\n"
         forked = ""
-        if 'fork' in r and r['fork'] is True:
-            forked = f"This repo is a fork of [{r['parent']['full_name']}]({r['parent']['html_url']})\n"
-        info: str = f"Created on {datetime.strptime(r['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n{issues}{forks}{watchers}{stargazers}{forked}"
+        if 'isFork' in r and r['isFork'] is True:
+            forked = f"This repo is a fork of [{r['parent']['nameWithOwner']}]({r['parent']['url']})\n"
+
+        created_at = f"Created on {datetime.strptime(r['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
+
+        languages = ""
+        if lang := r['primaryLanguage']:
+            if r['languages'] == 1:
+                languages = f'Written mainly using {lang["name"]}'
+            else:
+                languages = f'Written in {r["languages"]} languages, mainly in {lang["name"]}'
+
+        info: str = f"{created_at}{issues}{forks}{watchers_stargazers}{forked}{languages}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
-        homepage: tuple = (
-            r['homepage'] if 'homepage' in r else None,
-            "Homepage")
+
+        homepage: tuple = (r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, "Homepage")
         links: list = [homepage]
         link_strings: list = []
         for lnk in links:
@@ -221,8 +233,19 @@ class Checkout(commands.Cog):
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
-        if 'license' in r and r['license'] is not None and r['license']["name"].lower() != 'other':
-            embed.set_footer(text=f'Licensed under the {r["license"]["name"]}')
+
+        if r['topics'][0] and len(r['topics'][0]) > 1:
+            topic_strings = ' '.join(
+                [f"[`{t['topic']['name']}`]({t['url']})" for t in r['topics'][0]])
+            more = f' `+{r["topics"][1] - 10}`' if r["topics"][1] > 10 else ""
+            embed.add_field(name=f':label: Topics:', value=topic_strings + more)
+
+        if r['graphic']:
+            embed.set_image(url=r['graphic'])
+
+        if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
+            embed.set_footer(text=f'Licensed under the {r["licenseInfo"]["name"]}')
+
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -230,14 +253,16 @@ class Checkout(commands.Cog):
     @user.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def profile_command(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
-        if not u and hasattr(ctx, 'invoked_with_store'):
-            await self.client.get_cog('Store').delete_user_field(ctx=ctx)
-            await ctx.send(
-                f"{self.e}  The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config -user`")
-            return
-        if u is None:
-            await ctx.send(f"{self.emoji} This user **doesn't exist!**")
+        if not u:
+            if hasattr(ctx, 'invoked_with_store'):
+                await self.client.get_cog('Store').delete_user_field(ctx=ctx)
+                await ctx.send(
+                    f"{self.e}  The user you had saved has changed their name or deleted their account. Please "
+                    f"**re-add them** using `git --config -user`")
+            else:
+                await ctx.send(f"{self.emoji} This user **doesn't exist!**")
             return None
+
         form: str = 'Profile' if str(user)[0].isupper() else 'profile'
         embed = discord.Embed(
             color=0xefefef,
@@ -245,6 +270,7 @@ class Checkout(commands.Cog):
             description=None,
             url=u['url']
         )
+
         contrib_count: Union[tuple, None] = u['contributions']
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
@@ -293,14 +319,15 @@ class Checkout(commands.Cog):
     @org.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def o_profile_command(self, ctx: commands.Context, *, organization: str) -> None:
         org = await Git.get_org(organization)
-        if not org and hasattr(ctx, 'invoked_with_store'):
-            await self.client.get_cog('Store').delete_org_field(ctx=ctx)
-            await ctx.send(
-                f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
-            return
-        if org is None:
-            await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
+        if not org:
+            if hasattr(ctx, 'invoked_with_store'):
+                await self.client.get_cog('Store').delete_org_field(ctx=ctx)
+                await ctx.send(
+                    f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
+            else:
+                await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
             return None
+
         form: str = "Profile" if str(organization)[0].isupper() else 'profile'
         embed = discord.Embed(
             color=0xefefef,
@@ -308,6 +335,7 @@ class Checkout(commands.Cog):
             description=None,
             url=org['html_url']
         )
+
         mem: list = await Git.get_org_members(organization)
         members: str = f"Has [{len(mem)} public members](https://github.com/orgs/{organization}/people)\n"
         if len(mem) == 1:

@@ -63,10 +63,10 @@ class API:
     async def get_tree_file(self, repo: str, path: str):
         if '/' not in repo:
             return []
-        if path[0] != '/':
-            path = '/' + str(path)
+        if path[0] == '/':
+            path = path[1:]
         try:
-            return await self.gh.getitem(f"/repos/{repo}/contents{path}")
+            return await self.gh.getitem(f"/repos/{repo}/contents/{path}")
         except BadRequest:
             return []
 
@@ -121,7 +121,6 @@ class API:
         query: str = """
         {{
           repository(name: "{name}", owner: "{owner}") {{
-            openGraphImageUrl
             url 
             forkCount
             openGraphImageUrl
@@ -135,29 +134,36 @@ class API:
             }}
             releases(last: 1) {{
               totalCount
-              edges {{
-                node {{
-                  tagName
+              nodes {{
+                tagName
+              }}
+            }}
+            repositoryTopics(first: 10) {{
+              totalCount
+              nodes {{
+                topic {{
+                  name
                 }}
+                url
               }}
             }}
             issues(states: OPEN) {{
               totalCount
             }}
-            fundingLinks {{
-              url
-              platform
-            }}
             codeOfConduct {{
-              name 
+              name
+              url
             }}
             licenseInfo {{
-              name 
+              name
               nickname 
             }}
             primaryLanguage{{
               name
               color
+            }}
+            languages {{
+              totalCount
             }}
             homepageUrl
             stargazers {{
@@ -180,8 +186,10 @@ class API:
             return None
 
         data = data['data']['repository']
+        data['languages'] = data['languages']['totalCount']
+        data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
         data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
-        data['release'] = data['releases']['edges'][0]['node']['tagName'] if data['releases']['edges'] else None
+        data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
 
         return data
 

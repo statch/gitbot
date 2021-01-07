@@ -190,7 +190,7 @@ class Checkout(commands.Cog):
 
         if r['description'] is not None and len(r['description']) != 0:
             embed.add_field(name=":notepad_spiral: Description:",
-                            value=f"```{re.sub(md_emoji_re, '', r['description'])}```")
+                            value=f"```{re.sub(md_emoji_re, '', r['description']).strip()}```")
 
         watchers: str = f"Has [{watch} watchers]({r['url']}/watchers)" if watch != 1 else f"Has [one watcher]({r['url']}/watchers) "
         if watch == 0:

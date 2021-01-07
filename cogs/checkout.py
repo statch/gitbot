@@ -25,7 +25,7 @@ class Checkout(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
 
     @guild_available()
-    @commands.group(name='checkout', aliases=['c'])
+    @commands.group(name='checkout', aliases=['c', '-C'])
     async def checkout(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             await ctx.send(

@@ -23,8 +23,8 @@ def item_line_count(path):
         return 0
 
 
-def dir_line_count(dir):  # pylint: disable=redefined-builtin
-    return sum(map(lambda item: item_line_count(join(dir, item)), os.listdir(dir)))
+def dir_line_count(directory):
+    return sum(map(lambda item: item_line_count(join(directory, item)), os.listdir(directory)))
 
 
 LINES_OF_CODE = sum([dir_line_count('./cogs'),

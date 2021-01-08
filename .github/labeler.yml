@@ -8,4 +8,4 @@ core:
 cogs:
   - cogs/*
 root:
-  - /
+  - ./*

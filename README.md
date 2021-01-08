@@ -42,4 +42,4 @@ Make sure to checkout our [official website](https://statch.github.io/gitbot "Gi
 
 If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)
 
-**© 2020 wulf, Not affiliated with** [**GitHub Inc.**](https://github.com/)
+**© 2020-2021 wulf, Not affiliated with** [**GitHub Inc.**](https://github.com/)

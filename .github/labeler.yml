@@ -1,3 +1,11 @@
 website:
   - docs/*
   - docs/**
+core:
+  - core/*
+  - core/**
+  - core/***
+cogs:
+  - cogs/*
+root:
+  - /

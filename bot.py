@@ -39,11 +39,24 @@ async def before_invoke(ctx: commands.Context):
 
 bot.before_invoke(before_invoke)
 
-for directory in dir_paths:
-    for file in os.listdir(directory):
-        if file.endswith('.py') and file not in exceptions + staging_exceptions:
-            logger.info(f'loading extension: {directory[2:]}.{file[:-3]}')
-            bot.load_extension(f"{directory[2:]}.{file[:-3]}")
+extensions = [
+    'cogs.base.user',
+    'cogs.base.org',
+    'cogs.base.repo',
+    'cogs.numbered.pr',
+    'cogs.numbered.issue',
+    'cogs.download',
+    'cogs.lines',
+    'cogs.info',
+    'cogs.help',
+    'cogs.config',
+    'cogs.debug',
+    'cogs.bot_info'
+]
+
+for extension in extensions:
+    logger.info(f'Loading {extension}...')
+    bot.load_extension(extension)
 
 if PRODUCTION:  # Load botlist extensions if we are in a production environment
     for folder in os.listdir('./core/botlists'):

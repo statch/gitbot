@@ -19,31 +19,39 @@ class Repo(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.group(name='repo', aliases=['r'])
-    async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
-        if ctx.invoked_subcommand is None:
-            command: commands.Command = self.bot.get_command('repo --info')
-            stored: str = await self.bot.get_cog('Config').getitem(ctx, 'repo')
-            if repo or stored:
-                if repo:
-                    await ctx.invoke(command, repo=repo)
-                else:
-                    ctx.invoked_with_stored = True
-                    await ctx.invoke(command, repo=stored)
+    async def repo_command_group(self, ctx: commands.Context, *, args: str = None) -> None:
+        if not args:
+            stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+            if stored:
+                ctx.invoked_with_stored = True
+                await ctx.invoke(self.bot.get_command('repo --info'), repo=stored)
             else:
                 await ctx.send(
                     f'{self.e}  **You don\'t have a quick access repo configured!** Type `git config` to do it')
+            return
+
+        args = args.split()
+        subcommand = self.bot.get_command(f'repo {args[0]}')
+        if subcommand is None:
+            await ctx.invoke(self.bot.get_command('repo --info'), repo=args[0])
+        elif subcommand and len(args) > 1:
+            await ctx.invoke(subcommand, *args[1:])
+        else:
+            dummy_param = type('obj', (object,), {'name': 'repo'})
+            raise commands.MissingRequiredArgument(dummy_param)
 
     @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
-    async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    async def repo_info_command(self, ctx: commands.Context, repo: Optional[str]) -> None:
         r: Union[dict, None] = await Git.get_repo(str(repo))
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
-                await self.bot.get_cog('Store').delete_repo_field(ctx=ctx)
+                await self.bot.get_cog('Config').delete_field(ctx, 'repo')
                 await ctx.send(
-                    f"{self.e}  The repository you had saved changed its name or was deleted. Please **re-add it** "
+                    f"{self.e}  The repo you had saved changed its name or was deleted. Please **re-add it** "
                     f"using `git --config -repo`")
             else:
-                await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
+                await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
             return None
 
         embed = discord.Embed(
@@ -115,6 +123,43 @@ class Repo(commands.Cog):
         if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
             embed.set_footer(text=f'Licensed under the {r["licenseInfo"]["name"]}')
 
+        await ctx.send(embed=embed)
+
+    @repo_command_group.command(name='--files', aliases=['-f', '-src', '-s', '-fs'])
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    async def repo_files_command(self, ctx: commands.Context, repo: str) -> None:
+        is_tree: bool = False
+        if repo.count('/') > 1:
+            repo = "/".join(repo.split("/", 2)[:2])
+            file = repo[len(repo):]
+            src = await Git.get_tree_file(repo, file)
+            is_tree = True
+        else:
+            src = await Git.get_repo_files(repo)
+        if not src:
+            if is_tree:
+                await ctx.send(f"{self.emoji} This path **doesn't exist!**")
+            else:
+                await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
+            return
+
+        files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
+                                                                          'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
+                       for f in src[:15]]
+        if is_tree:
+            link: str = str(src[0]['_links']['html'])
+            link = link[:link.rindex('/')]
+        else:
+            link: str = f"https://github.com/{repo}"
+        embed = discord.Embed(
+            color=0xefefef,
+            title=f"{repo}" if len(repo) <= 60 else "/".join(repo.split("/", 2)[:2]),
+            description='\n'.join(files),
+            url=link
+        )
+        if len(files) > 15:
+            more: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
+            embed.set_footer(text=f"View {more} more on GitHub")
         await ctx.send(embed=embed)
 
 

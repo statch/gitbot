@@ -1,8 +1,8 @@
 from discord.ext import commands
 import discord
-from cfg import config
+from cfg import bot_config
 
-Git = config.Git
+Git = bot_config.Git
 
 
 class Help(commands.Cog):

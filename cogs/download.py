@@ -2,9 +2,9 @@ import discord
 import io
 from typing import Optional, Union
 from discord.ext import commands
-from cfg import config
+from cfg import bot_config
 
-Git = config.Git
+Git = bot_config.Git
 
 
 class Download(commands.Cog):

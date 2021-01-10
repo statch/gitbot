@@ -1,9 +1,9 @@
 from discord.ext import commands
-from cfg import config
+from cfg import bot_config
 from ext.manager import Manager
 from discord import Embed
 
-Git = config.Git
+Git = bot_config.Git
 mgr = Manager()
 
 

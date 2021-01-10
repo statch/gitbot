@@ -1,11 +1,11 @@
 import discord
 import discord.ext.commands as commands
 import re
-from cfg import config
+from cfg import bot_config
 from typing import Union
 from datetime import datetime
 
-Git = config.Git
+Git = bot_config.Git
 md_emoji_re = re.compile(r':.*:', re.IGNORECASE)
 PR_STATES: dict = {
     "open": "<:pr_open:795793711312404560>",

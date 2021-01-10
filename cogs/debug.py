@@ -2,10 +2,10 @@ import discord.ext.commands as commands
 import discord
 import ast
 from ext.decorators import is_me
-from cfg import config
+from cfg import bot_config
 import datetime as dt
 
-Git = config.Git
+Git = bot_config.Git
 
 
 def insert_returns(body):

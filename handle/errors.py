@@ -1,14 +1,14 @@
-import discord.ext.commands as commands
-from client import PRODUCTION
+from discord.ext import commands
+from bot import PRODUCTION
 
 
 class Errors(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot: commands.Bot):
+        self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
         elif isinstance(error, commands.CommandOnCooldown):
@@ -23,5 +23,5 @@ class Errors(commands.Cog):
             print(error)
 
 
-def setup(client):
-    client.add_cog(Errors(client))
+def setup(bot):
+    bot.add_cog(Errors(bot))

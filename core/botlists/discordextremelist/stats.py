@@ -4,16 +4,16 @@ from os import getenv
 
 
 class DiscordExtremeListStats(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.token: str = getenv("DISCORDEXTREMELIST")
         self.post_del_stats.start()
 
     @tasks.loop(minutes=15)
     async def post_del_stats(self):
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"https://api.discordextremelist.xyz/v2/bot/{self.client.user.id}/stats",
-                                    json={"guildCount": len(self.client.guilds)},
+            async with session.post(f"https://api.discordextremelist.xyz/v2/bot/{self.bot.user.id}/stats",
+                                    json={"guildCount": len(self.bot.guilds)},
                                     headers={"Content-Type": "application/json", "Authorization": self.token}) as res:
                 res_ = await res.json()
             if res.status != 200:
@@ -23,8 +23,8 @@ class DiscordExtremeListStats(commands.Cog):
 
     @post_del_stats.before_loop
     async def wait_until_ready(self):
-        await self.client.wait_until_ready()
+        await self.bot.wait_until_ready()
 
 
-def setup(client):
-    client.add_cog(DiscordExtremeListStats(client))
+def setup(bot):
+    bot.add_cog(DiscordExtremeListStats(bot))

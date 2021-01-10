@@ -2,20 +2,18 @@ import discord
 import io
 from typing import Optional, Union
 from discord.ext import commands
-from ext.decorators import guild_available
 from cfg import config
 
 Git = config.Git
 
 
 class Download(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client: commands.Bot = client
+    def __init__(self, bot: commands.Bot):
+        self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='--download', aliases=['-download', 'download', '-dl'])
-    @guild_available()
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def download_command(self, ctx: commands.Context, repo: str):
@@ -36,5 +34,5 @@ class Download(commands.Cog):
                 content=f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
 
 
-def setup(client: commands.Bot) -> None:
-    client.add_cog(Download(client))
+def setup(bot: commands.Bot) -> None:
+    bot.add_cog(Download(bot))

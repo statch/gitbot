@@ -22,8 +22,8 @@ def insert_returns(body):
 
 
 class Debug(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client: commands.Bot = client
+    def __init__(self, bot: commands.Bot):
+        self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.e: str = "<:ge:767823523573923890>"
 
@@ -39,7 +39,7 @@ class Debug(commands.Cog):
         }
         if cor.get(event, None) is not None:
             e = cor.get(event, None)
-            self.client.dispatch(event, e)
+            self.bot.dispatch(event, e)
             await ctx.send(f"{self.emoji} Dispatched event `{event}`")
         else:
             await ctx.send(f"{self.e}  Failed to dispatch event `{event}`")
@@ -86,7 +86,7 @@ class Debug(commands.Cog):
             insert_returns(body)
 
             env = {
-                'client': self.client,
+                'bot': self.bot,
                 'discord': discord,
                 'commands': commands,
                 'ctx': ctx,
@@ -99,5 +99,5 @@ class Debug(commands.Cog):
             await ctx.send(result)
 
 
-def setup(client):
-    client.add_cog(Debug(client))
+def setup(bot):
+    bot.add_cog(Debug(bot))

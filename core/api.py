@@ -15,6 +15,7 @@ SIZE_THRESHOLD: int = int(7.85 * (1024 ** 2))  # 7.85mb
 class API:
     """Main Class used to interact with the GitHub API"""
 
+
     def __init__(self, token: str):
         self.token: str = token
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()

@@ -1,12 +1,4 @@
 from discord.ext import commands
-from discord import DMChannel
-
-
-def guild_available():
-    def pred(ctx) -> bool:
-        return True if isinstance(ctx.channel, DMChannel) else not ctx.guild.unavailable
-
-    return commands.check(pred)
 
 
 def is_me():

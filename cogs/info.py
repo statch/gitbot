@@ -1,6 +1,5 @@
 from discord.ext import commands
 from cfg import config
-from ext.decorators import guild_available
 from ext.manager import Manager
 from discord import Embed
 
@@ -9,8 +8,8 @@ mgr = Manager()
 
 
 class Info(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.e: str = "<:ge:767823523573923890>"
         self.d1: str = mgr.emojis["circle_green"]
         self.d2: str = mgr.emojis["circle_yellow"]
@@ -18,7 +17,6 @@ class Info(commands.Cog):
 
     @commands.group(name='info')
     @commands.cooldown(10, 20, commands.BucketType.user)
-    @guild_available()
     async def info_command_group(self, ctx):
         if ctx.invoked_subcommand is None:
             return await ctx.send(
@@ -26,7 +24,6 @@ class Info(commands.Cog):
 
     @info_command_group.command(name='--license', aliases=['-L', '-l', 'L', 'l'])
     @commands.cooldown(10, 20, commands.BucketType.user)
-    @guild_available()
     async def get_license(self, ctx, *, lcns: str) -> None:
         lcns: dict = mgr.correlate_license(lcns)
         if lcns is None:
@@ -49,5 +46,5 @@ class Info(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Info(client))
+def setup(bot):
+    bot.add_cog(Info(bot))

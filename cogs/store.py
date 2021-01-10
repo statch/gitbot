@@ -1,7 +1,6 @@
 import discord
-from os import getenv
+import os
 from discord.ext import commands
-from ext.decorators import guild_available
 from cfg import config
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -9,16 +8,15 @@ Git = config.Git
 
 
 class Store(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client: commands.Bot = client
-        self.db: AsyncIOMotorClient = AsyncIOMotorClient(getenv("DB_CONNECTION")).store.users
+    def __init__(self, bot: commands.Bot):
+        self.bot: commands.Bot = bot
+        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv("DB_CONNECTION")).store.users
         self.emoji: str = '<:github:772040411954937876>'
         self.ga: str = "<:ga:768064843176738816>"
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.group(name='--config', aliases=['config', '-cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_command(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             lines: list = ["**In this section you can configure various aspects of your experience**",
@@ -38,7 +36,6 @@ class Store(commands.Cog):
 
     @config_command.command(name='--show', aliases=['-S', '-show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_show(self, ctx: commands.Context) -> None:
         query = await self.db.find_one({"user_id": int(ctx.author.id)})
         if query is None or len(query) == 2:
@@ -51,7 +48,7 @@ class Store(commands.Cog):
         data: list = [user, org, repo]
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{self.emoji}  Your {self.client.user.name} Config",
+            title=f"{self.emoji}  Your {self.bot.user.name} Config",
             description="**Quick access:**\n{quick_access}".format(
                 quick_access='\n'.join(data))
         )
@@ -59,7 +56,6 @@ class Store(commands.Cog):
 
     @config_command.command(name='--user', aliases=['-U'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_user(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
         if u is None:
@@ -75,7 +71,6 @@ class Store(commands.Cog):
 
     @config_command.command(name='--org', aliases=['--organization', '-O'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_org(self, ctx: commands.Context, *, org: str) -> None:
         o = await Git.get_org(org)
         if o is None:
@@ -91,7 +86,6 @@ class Store(commands.Cog):
 
     @config_command.command(name='--repo', aliases=['--repository', '-R'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_repo(self, ctx, *, repo) -> None:
         r = await Git.get_repo(repo)
         if r is None:
@@ -107,43 +101,39 @@ class Store(commands.Cog):
 
     @commands.command(name='--repo', aliases=["-R", '--repository', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def stored_repo_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'repo' in store:
             ctx.invoked_with_store = True
-            await ctx.invoke(self.client.get_command("checkout --repo -info"), repository=str(store["repo"]))
+            await ctx.invoke(self.bot.get_command("checkout --repo -info"), repository=str(store["repo"]))
         else:
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access repo configured!** Use `git --config` to do it')
 
     @commands.command(name='--user', aliases=["-U", '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def stored_user_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'user' in store:
             ctx.invoked_with_store = True
-            await ctx.invoke(self.client.get_command("checkout --user -info"), user=str(store["user"]))
+            await ctx.invoke(self.bot.get_command("checkout --user -info"), user=str(store["user"]))
         else:
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access user configured!** Use `git --config` to do it')
 
     @commands.command(name='--org', aliases=["--organization", "-O", '-org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def stored_org_command(self, ctx: commands.Context) -> None:
         store = await self.db.find_one({'user_id': ctx.author.id})
         if store is not None and 'org' in store:
             ctx.invoked_with_store = True
-            await ctx.invoke(self.client.get_command("checkout --org -info"), organization=str(store["org"]))
+            await ctx.invoke(self.bot.get_command("checkout --org -info"), organization=str(store["org"]))
         else:
             await ctx.send(
                 f'{self.e}  **You don\'t have a quick access organization configured!** Use `git --config` to do it')
 
     @config_command.group(name='-delete', aliases=['-D', '-del', 'delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def delete_field(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             lines: list = ["**You can delete stored quick access data by running the following commands:**",
@@ -160,7 +150,6 @@ class Store(commands.Cog):
 
     @delete_field.command(name='user', aliases=['-U', '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def delete_user_command(self, ctx: commands.Context):
         query = await self.delete_user_field(ctx=ctx)
         if query:
@@ -170,7 +159,6 @@ class Store(commands.Cog):
 
     @delete_field.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def delete_org_command(self, ctx: commands.Context):
         query = await self.delete_org_field(ctx=ctx)
         if query:
@@ -180,7 +168,6 @@ class Store(commands.Cog):
 
     @delete_field.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def delete_repo_command(self, ctx: commands.Context):
         query = await self.delete_repo_field(ctx=ctx)
         if query:
@@ -190,7 +177,6 @@ class Store(commands.Cog):
 
     @delete_field.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def delete_entire_record(self, ctx: commands.Context):
         query = await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         if not query:
@@ -231,5 +217,5 @@ class Store(commands.Cog):
         return False
 
 
-def setup(client):
-    client.add_cog(Store(client))
+def setup(bot):
+    bot.add_cog(Store(bot))

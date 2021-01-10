@@ -1,7 +1,6 @@
 import discord
 import discord.ext.commands as commands
 import re
-from ext.decorators import guild_available
 from cfg import config
 from typing import Union
 from datetime import datetime
@@ -16,22 +15,20 @@ PR_STATES: dict = {
 
 
 class Checkout(commands.Cog):
-    def __init__(self, client):
-        self.client: commands.Bot = client
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.square: str = ":white_small_square:"
         self.f: str = "<:file:762378114135097354>"
         self.fd: str = "<:folder:762378091497914398>"
         self.e: str = "<:ge:767823523573923890>"
 
-    @guild_available()
     @commands.group(name='checkout', aliases=['c', '-C'])
     async def checkout(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             await ctx.send(
                 f"{self.emoji} Looks like you're lost! **Use the command** `git --help` **to get back on track.**")
 
-    @guild_available()
     @checkout.group(name='--user', aliases=['-U', '-u'])
     async def user(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
@@ -45,7 +42,6 @@ class Checkout(commands.Cog):
             )
             await ctx.send(embed=embed)
 
-    @guild_available()
     @checkout.group(name='--organization', aliases=['--org', '-O', '-o'])
     async def org(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
@@ -59,7 +55,6 @@ class Checkout(commands.Cog):
             )
             await ctx.send(embed=embed)
 
-    @guild_available()
     @checkout.group(name="--repo", aliases=['--repository', '-R', '-r'])
     async def repo(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
@@ -74,7 +69,6 @@ class Checkout(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     @user.command(name='-repos', aliases=['-repositories', '-R', '-r'])
     async def _repos(self, ctx: commands.Context, *, user: str) -> None:
         u: Union[dict, None] = await Git.get_user(user)
@@ -100,7 +94,6 @@ class Checkout(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     @org.command(name='-repos', aliases=['-repositories', '-R', 'r'])
     async def _o_repos(self, ctx: commands.Context, *, org: str) -> None:
         o: Union[dict, None] = await Git.get_org(org)
@@ -126,7 +119,6 @@ class Checkout(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     @repo.command(name='-src', aliases=['-S', '-source', '-s', '-Src', '-sRc', '-srC', '-SrC', '-files'])
     async def files_command(self, ctx: commands.Context, *, repository: str) -> None:
         is_tree: bool = False
@@ -164,12 +156,11 @@ class Checkout(commands.Cog):
 
     @repo.command(name="-info", aliases=['-I', '-i', '-Info'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def repo_info_command(self, ctx: commands.Context, *, repository: str) -> None:
         r: Union[dict, None] = await Git.get_repo(str(repository))
         if not r:
             if hasattr(ctx, 'invoked_with_store'):
-                await self.client.get_cog('Store').delete_repo_field(ctx=ctx)
+                await self.bot.get_cog('Store').delete_repo_field(ctx=ctx)
                 await ctx.send(
                     f"{self.e}  The repository you had saved changed its name or was deleted. Please **re-add it** "
                     f"using `git --config -repo`")
@@ -249,13 +240,12 @@ class Checkout(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     @user.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def profile_command(self, ctx: commands.Context, *, user: str) -> None:
         u = await Git.get_user(user)
         if not u:
             if hasattr(ctx, 'invoked_with_store'):
-                await self.client.get_cog('Store').delete_user_field(ctx=ctx)
+                await self.bot.get_cog('Store').delete_user_field(ctx=ctx)
                 await ctx.send(
                     f"{self.e}  The user you had saved has changed their name or deleted their account. Please "
                     f"**re-add them** using `git --config -user`")
@@ -315,13 +305,12 @@ class Checkout(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     @org.command(name='-info', aliases=['-I', '-i', '-Info'])
     async def o_profile_command(self, ctx: commands.Context, *, organization: str) -> None:
         org = await Git.get_org(organization)
         if not org:
             if hasattr(ctx, 'invoked_with_store'):
-                await self.client.get_cog('Store').delete_org_field(ctx=ctx)
+                await self.bot.get_cog('Store').delete_org_field(ctx=ctx)
                 await ctx.send(
                     f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
             else:
@@ -370,7 +359,6 @@ class Checkout(commands.Cog):
 
     @checkout.command(name='--issue', aliases=['-issue', '-iss', '-issues', '--issues', '-i', 'I', '-I', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @guild_available()
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str) -> None:
         if not issue_number.isnumeric():
             await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
@@ -441,7 +429,6 @@ class Checkout(commands.Cog):
 
     @checkout.command(name='--pr', aliases=['--pull', '-pr', 'pr', '--pullrequest', '-pull'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @guild_available()
     async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: str):
         if not pr_number.isnumeric():
             await ctx.send(f"{self.e}  The second argument must be a pull request **number!**")
@@ -553,5 +540,5 @@ class Checkout(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Checkout(client))
+def setup(bot):
+    bot.add_cog(Checkout(bot))

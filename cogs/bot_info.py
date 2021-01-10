@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from ext.decorators import guild_available
 import datetime
 import os
 import psutil
@@ -34,15 +33,14 @@ LINES_OF_CODE = sum([dir_line_count('./cogs'),
 
 
 class BotInfo(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client: commands.Bot = client
+    def __init__(self, bot: commands.Bot):
+        self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.s: str = "<:gs:767809543815954463>"
         self.s_emoji: str = mgr.emojis["statistics"]
 
     @commands.command(name='--uptime', aliases=['--up'], brief="Display's the Bot's uptime")
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def uptime_command(self, ctx) -> None:
         now = datetime.datetime.utcnow()
         delta = now - start_time
@@ -63,18 +61,16 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--ping', brief="Display's the Bot's ping", aliases=["--p"])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def ping_command(self, ctx) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f"{self.s}  **My ping is:**\n**{round(self.client.latency * 1000)}** milliseconds"
+            description=f"{self.s}  **My ping is:**\n**{round(self.bot.latency * 1000)}** milliseconds"
         )
         await ctx.send(embed=embed)
 
     @commands.command(name='--privacy', brief="Display's the Bot's privacy policy", aliases=["--policy"])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def privacy_policy(self, ctx):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
@@ -98,49 +94,46 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--invite', aliases=['invite', '-invite'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def invite_command(self, ctx):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{self.emoji}  Invite me to your server!',
-            description=f"[Invite {self.client.user.name}](https://discord.com/oauth2/authorize?client_id=761269120691470357&scope=bot&permissions=67488832) | [Support Server](https://discord.gg/3e5fwpA)"
+            description=f"[Invite {self.bot.user.name}](https://discord.com/oauth2/authorize?bot_id=761269120691470357&scope=bot&permissions=67488832) | [Support Server](https://discord.gg/3e5fwpA)"
         )
-        embed.set_author(icon_url=self.client.user.avatar_url, name=self.client.user.name)
+        embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
         await ctx.send(embed=embed)
-        
+
     @commands.command(name='--vote', aliases=['vote', '-vote'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def vote_command(self, ctx: commands.Context):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
             description=f"[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**](https://botsfordiscord.com/bot/761269120691470357)"
         )
-        embed.set_author(name=f'Vote for {self.client.user.name}!', icon_url=self.client.user.avatar_url)
+        embed.set_author(name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='--stats', aliases=['-stats', 'stats'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    @guild_available()
     async def stats_command(self, ctx):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
             description=None
         )
-        users: int = sum([x.member_count for x in self.client.guilds])
+        users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"
         embed.add_field(name=f"{self.s_emoji}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
                         inline=False)
         embed.add_field(name="System Usage", value=f"{cpu}\n{memory}")
         embed.add_field(name="People",
-                        value=f"I'm in **{len(self.client.guilds)}** servers,\nand have **{users}** users")
+                        value=f"I'm in **{len(self.bot.guilds)}** servers,\nand have **{users}** users")
         embed.add_field(name="Code",
                         value=f"I am **{LINES_OF_CODE}** lines of code,\nrunning on **{platform.system()} {platform.release()}**")
         await ctx.send(embed=embed)
 
 
-def setup(client: commands.Bot) -> None:
-    client.add_cog(BotInfo(client))
+def setup(bot: commands.Bot) -> None:
+    bot.add_cog(BotInfo(bot))

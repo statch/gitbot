@@ -1,7 +1,6 @@
 import re
 from typing import Union
 from discord.ext import commands
-from ext.decorators import guild_available
 from aiohttp import ClientSession
 
 GITHUB = re.compile(r'github\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/blob/(.+?)/(.+?)#L(\d+)[-~]?L?(\d*)')
@@ -19,9 +18,9 @@ async def compile_gitlab_link(data: tuple) -> str:
 
 
 class Lines(commands.Cog):
-    def __init__(self, client):
-        self.client: commands.Bot = client
-        self.ses: ClientSession = ClientSession(loop=self.client.loop)
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+        self.ses: ClientSession = ClientSession(loop=self.bot.loop)
         self.e: str = "<:ge:767823523573923890>"
 
     async def compile_text(self, url: str, data: tuple) -> Union[str, None]:
@@ -44,7 +43,6 @@ class Lines(commands.Cog):
             return None
         return result
 
-    @guild_available()
     @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def lines_command(self, ctx, link: str) -> None:
@@ -82,5 +80,5 @@ class Lines(commands.Cog):
         return await ctx.send(result)
 
 
-def setup(client):
-    client.add_cog(Lines(client))
+def setup(bot):
+    bot.add_cog(Lines(bot))

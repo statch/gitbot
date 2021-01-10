@@ -4,11 +4,11 @@ import dlabs
 
 
 class DiscordLabsStats(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.token: str = getenv("DISCORDLABS")
-        self.discord_labs = dlabs.Client(bot=self.client, token=self.token, autopost=True, verbose=True)
+        self.discord_labs = dlabs.bot(bot=self.bot, token=self.token, autopost=True, verbose=True)
 
 
-def setup(client):
-    client.add_cog(DiscordLabsStats(client))
+def setup(bot):
+    bot.add_cog(DiscordLabsStats(bot))

@@ -1,18 +1,16 @@
 from discord.ext import commands
 import discord
 from cfg import config
-from ext.decorators import guild_available
 
 Git = config.Git
 
 
 class Help(commands.Cog):
-    def __init__(self, client):
-        self.client: commands.Bot = client
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"
         self.ga: str = "<:ga:768064843176738816>"
 
-    @guild_available()
     @commands.group(name='--help', aliases=['help', '-H'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def help_command(self, ctx: commands.Context) -> None:
@@ -32,7 +30,6 @@ class Help(commands.Cog):
             embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
             await ctx.send(embed=embed)
 
-    @guild_available()
     @help_command.command(name='checkout', aliases=['-checkout', '--checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def checkout_help(self, ctx: commands.Context) -> None:
@@ -57,7 +54,6 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
-    @guild_available()
     @help_command.command(name='utility', aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
@@ -73,7 +69,6 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
-    @guild_available()
     @help_command.command(name='config', aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_help(self, ctx: commands.Context) -> None:
@@ -88,7 +83,6 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
-    @guild_available()
     @help_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx: commands.Context):
@@ -108,7 +102,6 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
-    @guild_available()
     @commands.group(name='--aliases', aliases=['aliases'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def alias_command(self, ctx: commands.Context):
@@ -129,7 +122,6 @@ class Help(commands.Cog):
 
     @alias_command.command(name="checkout", aliases=['-checkout', '--checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def checkout_aliases(self, ctx: commands.Context):
         lines: list = ["**All commands listed below begin with** `git checkout` **or** `git C`",
                        f"`--user -info` {self.ga} `-U -I`",
@@ -149,7 +141,6 @@ class Help(commands.Cog):
 
     @alias_command.command(name="utility", aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def utility_aliases(self, ctx: commands.Context):
         lines: list = [
             "**Shorthands for commands used to fetch data related to Git and GitHub**",
@@ -167,7 +158,6 @@ class Help(commands.Cog):
 
     @alias_command.command(name="config", aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @guild_available()
     async def config_aliases(self, ctx: commands.Context):
         lines: list = [
             "Shorthands for commands used to store your preferred orgs, repos and users",
@@ -185,7 +175,6 @@ class Help(commands.Cog):
         embed.set_footer(text=f"You can find usage of these commands by typing git config")
         await ctx.send(embed=embed)
 
-    @guild_available()
     @alias_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_command_aliases(self, ctx: commands.Context):
@@ -203,5 +192,5 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Help(client))
+def setup(bot):
+    bot.add_cog(Help(bot))

@@ -3,17 +3,17 @@ import discord
 import logging
 from discord.ext import commands
 from dotenv import load_dotenv
-from ext.decorators import is_me
 
 load_dotenv()
 
 PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
+PREFIX: str = str(os.getenv('PREFIX'))
 
 intents = discord.Intents.default()
 intents.bans = False
 intents.voice_states = False
 
-bot = commands.Bot(command_prefix='%s ' % str(os.getenv('PREFIX')), case_insensitive=True,
+bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
                    intents=intents, help_command=None,
                    guild_ready_timeout=1, max_messages=None,
                    description='Seamless GitHub-Discord integration.',
@@ -56,63 +56,6 @@ if PRODUCTION:  # Load botlist extensions if we are in a production environment
             if file.endswith('.py'):
                 logger.info(f'loading extension: {folder[1]}.{file[:-3]}')
                 bot.load_extension(f"{folder[1]}.{file[:-3]}")
-
-
-@bot.command(name='load', aliases=["--load"])
-@is_me()
-async def _load_extension(ctx, extension, path='cogs'):
-    if str(extension).startswith('_'):
-        await ctx.send(f"<:github:772040411954937876>  This file isn't meant to be used as an extension!")
-        return
-    if str(extension).endswith('.py'):
-        extension: str = extension[:-3]
-    try:
-        bot.load_extension(f"{path}.{extension}")
-    except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotFound) as e:
-        if isinstance(e, commands.ExtensionAlreadyLoaded):
-            await ctx.send(f"<:github:772040411954937876>  This extension is **already loaded!**")
-        elif isinstance(e, commands.ExtensionNotFound):
-            await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-        return
-    await ctx.send(f"<:github:772040411954937876>  **{extension}** extension has been **loaded.**")
-
-
-@bot.command(name='unload', aliases=["--unload"])
-@is_me()
-async def _unload_extension(ctx, extension, path='cogs'):
-    if str(extension).startswith('_'):
-        await ctx.send(f"<:github:772040411954937876>  This file isn't meant to be used as an extension!")
-        return
-    if str(extension).endswith('.py'):
-        extension: str = extension[:-3]
-    try:
-        bot.unload_extension(f"{path}.{extension}")
-    except (commands.ExtensionNotLoaded, commands.ExtensionNotFound) as e:
-        if isinstance(e, commands.ExtensionNotLoaded):
-            await ctx.send(f"<:github:772040411954937876>  This extension **isn't loaded!**")
-        elif isinstance(e, commands.ExtensionNotFound):
-            await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-        return
-    await ctx.send(f"<:github:772040411954937876>  **{extension}** extension has been **unloaded.**")
-
-
-@bot.command(name='reload', aliases=["--reload"])
-@is_me()
-async def _reload_extension(ctx, extension, path='cogs'):
-    if str(extension).startswith('_'):
-        await ctx.send(f"<:github:772040411954937876>  This file isn't meant to be used as an extension!")
-        return
-    if str(extension).endswith('.py'):
-        extension: str = extension[:-3]
-    try:
-        bot.reload_extension(f"{path}.{extension}")
-    except (commands.ExtensionNotLoaded, commands.ExtensionNotFound) as e:
-        if isinstance(e, commands.ExtensionNotLoaded):
-            await ctx.send(f"<:github:772040411954937876>  This extension **isn't loaded!**")
-        elif isinstance(e, commands.ExtensionNotFound):
-            await ctx.send(f"<:github:772040411954937876>  I couldn't find that extension!")
-        return
-    await ctx.send(f"<:github:772040411954937876> **{extension}** extension has been **reloaded.**")
 
 
 @bot.check

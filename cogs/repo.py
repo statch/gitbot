@@ -18,27 +18,16 @@ class Repo(commands.Cog):
         self.fd: str = "<:folder:762378091497914398>"
         self.e: str = "<:ge:767823523573923890>"
 
-    @commands.group(name='repo', aliases=['r'])
-    async def repo_command_group(self, ctx: commands.Context, *, args: str = None) -> None:
-        if not args:
+    @commands.group(name='repo', aliases=['r'], invoke_without_command=True)
+    async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+        info_command: commands.Command = self.bot.get_command(f'repo --info')
+        if not repo:
             stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(self.bot.get_command('repo --info'), repo=stored)
-            else:
-                await ctx.send(
-                    f'{self.e}  **You don\'t have a quick access repo configured!** Type `git config` to do it')
-            return
-
-        args = args.split()
-        subcommand = self.bot.get_command(f'repo {args[0]}')
-        if subcommand is None:
-            await ctx.invoke(self.bot.get_command('repo --info'), repo=args[0])
-        elif subcommand and len(args) > 1:
-            await ctx.invoke(subcommand, *args[1:])
+                await ctx.invoke(info_command, repo=stored)
         else:
-            dummy_param = type('obj', (object,), {'name': 'repo'})
-            raise commands.MissingRequiredArgument(dummy_param)
+            await ctx.invoke(info_command, repo=repo)
 
     @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -163,5 +152,5 @@ class Repo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Repo(bot))

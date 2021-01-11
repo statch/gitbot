@@ -1,6 +1,7 @@
 import discord
 import datetime
 import re
+import io
 from discord.ext import commands
 from typing import Union, Optional
 from cfg import bot_config
@@ -153,6 +154,26 @@ class Repo(commands.Cog):
             more: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
             embed.set_footer(text=f"View {more} more on GitHub")
         await ctx.send(embed=embed)
+
+    @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])
+    @commands.max_concurrency(10, commands.BucketType.default, wait=False)
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def download_command(self, ctx: commands.Context, repo: str):
+        msg: discord.Message = await ctx.send(f"{self.emoji}  Give me a second while I download the file...")
+        src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
+        if src_bytes is None:  # pylint: disable=no-else-return
+            return await msg.edit(content=f"{self.e}  This repo **doesn't exist!**")
+        elif src_bytes is False:
+            return await msg.edit(
+                content=f"{self.e}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+        io_obj: io.BytesIO = io.BytesIO(src_bytes)
+        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
+        try:
+            await ctx.send(file=file)
+            await msg.edit(content=f'{self.emoji}  Here\'s the source code of **{repo}!**')
+        except discord.errors.HTTPException:
+            await msg.edit(
+                content=f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
 
 
 def setup(bot: commands.Bot) -> None:

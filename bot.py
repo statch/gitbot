@@ -26,6 +26,7 @@ logger = logging.getLogger('main')
 
 extensions: list = [
     'core.background',
+    'core.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',
     'cogs.github.base.repo',
@@ -33,10 +34,9 @@ extensions: list = [
     'cogs.github.numbered.issue',
     'cogs.github.other.lines',
     'cogs.github.other.info',
-    'cogs.help',
-    'cogs.config',
-    'cogs.debug',
-    'cogs.bot_info',
+    'cogs.ecosystem.help',
+    'cogs.ecosystem.config',
+    'cogs.ecosystem.bot_info',
     'cogs.handle.errors',
     'cogs.handle.events'
 ]

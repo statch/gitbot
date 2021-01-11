@@ -1,7 +1,7 @@
 import discord
 import os
 from discord.ext import commands
-from cfg import bot_config
+from core import bot_config
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 

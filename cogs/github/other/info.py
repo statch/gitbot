@@ -1,5 +1,5 @@
 from discord.ext import commands
-from cfg import bot_config
+from core import bot_config
 from ext.manager import Manager
 from discord import Embed
 

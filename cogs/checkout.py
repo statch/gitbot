@@ -1,7 +1,7 @@
 import discord
 import discord.ext.commands as commands
 import re
-from cfg import bot_config
+from core import bot_config
 from typing import Union
 from datetime import datetime
 

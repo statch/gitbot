@@ -4,7 +4,7 @@ import re
 import io
 from discord.ext import commands
 from typing import Union, Optional
-from cfg import bot_config
+from core import bot_config
 
 Git = bot_config.Git
 md_emoji_re = re.compile(r':.*:', re.IGNORECASE)

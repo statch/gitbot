@@ -1,7 +1,7 @@
 import discord
 import datetime
 from typing import Optional
-from cfg import bot_config
+from core import bot_config
 from discord.ext import commands
 
 Git = bot_config.Git

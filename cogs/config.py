@@ -16,9 +16,9 @@ class Config(commands.Cog):
         self.ga: str = "<:ga:768064843176738816>"
         self.e: str = "<:ge:767823523573923890>"
 
-    @commands.group(name='--config', aliases=['config', '-cfg'])
+    @commands.group(name='config', aliases=['config', '-cfg', 'cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_command(self, ctx: commands.Context) -> None:
+    async def config_command_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             lines: list = ["**In this section you can configure various aspects of your experience**",
                            "\n**Quick access**",
@@ -36,13 +36,13 @@ class Config(commands.Cog):
             )
             await ctx.send(embed=embed)
 
-    @config_command.command(name='--show', aliases=['-S', '-show'])
+    @config_command_group.command(name='--show', aliases=['-S', '-show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show(self, ctx: commands.Context) -> None:
         query = await self.db.find_one({"user_id": int(ctx.author.id)})
         if query is None or len(query) == 2:
             await ctx.send(
-                f'{self.e}  **You don\'t have any quick access data configured!** Use `git --config` to do it')
+                f'{self.e}  **You don\'t have any quick access data configured!** Use `git config` to do it')
             return
         user: str = f"User: `{query['user']}`" if 'user' in query else "User: `Not set`"
         org: str = f"Organization: `{query['org']}`" if 'org' in query else "Organization: `Not set`"
@@ -56,7 +56,7 @@ class Config(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @config_command.command(name='--user', aliases=['-u', '-user'])
+    @config_command_group.command(name='--user', aliases=['-u', '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_user(self, ctx: commands.Context, user: str) -> None:
         u = await self.setitem(ctx, 'user', user)
@@ -65,7 +65,7 @@ class Config(commands.Cog):
         else:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
 
-    @config_command.command(name='--org', aliases=['--organization', '-O', '-org'])
+    @config_command_group.command(name='--org', aliases=['--organization', '-O', '-org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_org(self, ctx: commands.Context, org: str) -> None:
         o = await self.setitem(ctx, 'org', org)
@@ -74,7 +74,7 @@ class Config(commands.Cog):
         else:
             await ctx.send(f'{self.e}  This organization **doesn\'t exist!**')
 
-    @config_command.command(name='--repo', aliases=['--repository', '-R', '-repo'])
+    @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_repo(self, ctx, repo) -> None:
         r = await self.setitem(ctx, 'repo', repo)
@@ -83,29 +83,7 @@ class Config(commands.Cog):
         else:
             await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
 
-    @commands.command(name='--user', aliases=["-U", '-user'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def stored_user_command(self, ctx: commands.Context) -> None:
-        store = await self.db.find_one({'user_id': ctx.author.id})
-        if store is not None and 'user' in store:
-            ctx.invoked_with_store = True
-            await ctx.invoke(self.bot.get_command("checkout --user -info"), user=str(store["user"]))
-        else:
-            await ctx.send(
-                f'{self.e}  **You don\'t have a quick access user configured!** Use `git --config` to do it')
-
-    @commands.command(name='--org', aliases=["--organization", "-O", '-org'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def stored_org_command(self, ctx: commands.Context) -> None:
-        store = await self.db.find_one({'user_id': ctx.author.id})
-        if store is not None and 'org' in store:
-            ctx.invoked_with_store = True
-            await ctx.invoke(self.bot.get_command("checkout --org -info"), organization=str(store["org"]))
-        else:
-            await ctx.send(
-                f'{self.e}  **You don\'t have a quick access organization configured!** Use `git --config` to do it')
-
-    @config_command.group(name='-delete', aliases=['-D', '-del', 'delete'])
+    @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_field_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:

@@ -134,7 +134,7 @@ class Config(commands.Cog):
             return await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
         await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
 
-    async def delete_field(self, ctx: commands.Context, field: str):
+    async def delete_field(self, ctx: commands.Context, field: str) -> bool:
         query = await self.db.find_one({"user_id": ctx.author.id})
         if query is not None and field in query:
             await self.db.update_one(query, {"$unset": {field: ""}})
@@ -150,7 +150,7 @@ class Config(commands.Cog):
             return query[item]
         return None
 
-    async def setitem(self, ctx: commands.Context, item: str, value: str):
+    async def setitem(self, ctx: commands.Context, item: str, value: str) -> bool:
         exists = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
         if exists:
             query = await self.db.find_one({"user_id": ctx.author.id})

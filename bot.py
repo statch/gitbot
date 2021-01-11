@@ -42,9 +42,10 @@ extensions: list = [
     'handle.events'
 ]
 
-botlist_extensions: list = [f'cogs.botlists.{file[:-3]}' for file in os.listdir('cogs/botlists')] if PRODUCTION else []
+if PRODUCTION:
+    extensions.extend([f'cogs.botlists.{file[:-3]}' for file in os.listdir('cogs/botlists')])
 
-for extension in (extensions + botlist_extensions):
+for extension in extensions:
     logger.info(f'Loading {extension}...')
     bot.load_extension(extension)
 

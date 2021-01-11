@@ -32,7 +32,7 @@ class Org(commands.Cog):
     async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
         org = await Git.get_org(organization)
         if not org:
-            if hasattr(ctx, 'invoked_with_store'):
+            if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Store').delete_org_field(ctx=ctx)
                 await ctx.send(
                     f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")

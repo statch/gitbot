@@ -37,8 +37,8 @@ extensions: list = [
     'cogs.config',
     'cogs.debug',
     'cogs.bot_info',
-    'handle.errors',
-    'handle.events'
+    'cogs.handle.errors',
+    'cogs.handle.events'
 ]
 
 if PRODUCTION:

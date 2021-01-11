@@ -118,24 +118,23 @@ class Repo(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @repo_command_group.command(name='--files', aliases=['-f', '-src', '-s', '-fs'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def repo_files_command(self, ctx: commands.Context, repo: str) -> None:
+    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src'])
+    async def files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
         is_tree: bool = False
-        if repo.count('/') > 1:
-            repo = "/".join(repo.split("/", 2)[:2])
-            file = repo[len(repo):]
+        if repo_or_path.count('/') > 1:
+            repo = "/".join(repo_or_path.split("/", 2)[:2])
+            file = repo_or_path[len(repo):]
             src = await Git.get_tree_file(repo, file)
             is_tree = True
         else:
-            src = await Git.get_repo_files(repo)
+            src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
                 await ctx.send(f"{self.emoji} This path **doesn't exist!**")
             else:
-                await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
+                await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return
-
         files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
                                                                           'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
                        for f in src[:15]]
@@ -143,16 +142,15 @@ class Repo(commands.Cog):
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
-            link: str = f"https://github.com/{repo}"
+            link: str = f"https://github.com/{repo_or_path}"
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{repo}" if len(repo) <= 60 else "/".join(repo.split("/", 2)[:2]),
+            title=f"{repo_or_path}" if len(repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
             description='\n'.join(files),
             url=link
         )
-        if len(files) > 15:
-            more: str = str(len(files) - 15) if len(files) - 15 < 15 else "15+"
-            embed.set_footer(text=f"View {more} more on GitHub")
+        if len(src) > 15:
+            embed.set_footer(text=f"View {len(src) - 15} more on GitHub")
         await ctx.send(embed=embed)
 
     @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])

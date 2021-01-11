@@ -16,7 +16,7 @@ class Config(commands.Cog):
         self.ga: str = "<:ga:768064843176738816>"
         self.e: str = "<:ge:767823523573923890>"
 
-    @commands.group(name='config', aliases=['config', '-cfg', 'cfg'])
+    @commands.group(name='config', aliases=['--config', '-cfg', 'cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_command_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:

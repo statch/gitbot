@@ -27,5 +27,5 @@ class DiscordBotListStats(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(DiscordBotListStats(bot))

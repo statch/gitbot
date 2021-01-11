@@ -29,7 +29,7 @@ class Debug(commands.Cog):
 
     @is_me()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
-    async def manually_trigger_event(self, ctx: commands.Context, event: str):
+    async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', "", 1)
         cor = {
             "guild_join": ctx.guild,
@@ -70,7 +70,7 @@ class Debug(commands.Cog):
     @commands.command()
     @commands.is_owner()
     @is_me()
-    async def eval(self, ctx, *, cmd):
+    async def eval(self, ctx: commands.Context, *, cmd) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = "_eval_expr"
 

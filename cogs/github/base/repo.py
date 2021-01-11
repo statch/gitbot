@@ -119,7 +119,7 @@ class Repo(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src'])
+    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs'])
     async def files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
@@ -156,7 +156,7 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
-    async def download_command(self, ctx: commands.Context, repo: str):
+    async def download_command(self, ctx: commands.Context, repo: str) -> None:
         msg: discord.Message = await ctx.send(f"{self.emoji}  Give me a second while I download the file...")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return

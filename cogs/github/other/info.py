@@ -9,7 +9,7 @@ mgr = Manager()
 
 class Info(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"
         self.d1: str = mgr.emojis["circle_green"]
         self.d2: str = mgr.emojis["circle_yellow"]

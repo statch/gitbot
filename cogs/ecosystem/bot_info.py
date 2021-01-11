@@ -13,7 +13,7 @@ mgr: Manager = Manager()
 start_time = datetime.datetime.utcnow()
 
 
-def item_line_count(path):
+def item_line_count(path) -> int:
     if isdir(path):  # pylint: disable=no-else-return
         return dir_line_count(path)
     elif isfile(path):
@@ -22,13 +22,13 @@ def item_line_count(path):
         return 0
 
 
-def dir_line_count(directory):
+def dir_line_count(directory) -> int:
     return sum(map(lambda item: item_line_count(join(directory, item)), os.listdir(directory)))
 
 
-LINES_OF_CODE = sum([dir_line_count('./cogs'),
-                     dir_line_count('./ext'),
-                     dir_line_count('./core')])
+LINES_OF_CODE: int = sum([dir_line_count('./cogs'),
+                          dir_line_count('./ext'),
+                          dir_line_count('./core')])
 
 
 class BotInfo(commands.Cog):
@@ -40,7 +40,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--uptime', aliases=['--up'], brief="Display's the Bot's uptime")
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def uptime_command(self, ctx) -> None:
+    async def uptime_command(self, ctx: commands.Context) -> None:
         now = datetime.datetime.utcnow()
         delta = now - start_time
         hours, remainder = divmod(int(delta.total_seconds()), 3600)
@@ -60,7 +60,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--ping', brief="Display's the Bot's ping", aliases=["--p"])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def ping_command(self, ctx) -> None:
+    async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
@@ -70,7 +70,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--privacy', brief="Display's the Bot's privacy policy", aliases=["--policy"])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def privacy_policy(self, ctx):
+    async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f"{self.emoji}  Privacy Policy",
@@ -93,7 +93,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--invite', aliases=['invite', '-invite'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def invite_command(self, ctx):
+    async def invite_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{self.emoji}  Invite me to your server!',
@@ -104,7 +104,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--vote', aliases=['vote', '-vote'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def vote_command(self, ctx: commands.Context):
+    async def vote_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
@@ -115,7 +115,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='--stats', aliases=['-stats', 'stats'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def stats_command(self, ctx):
+    async def stats_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,

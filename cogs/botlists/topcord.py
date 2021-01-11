@@ -5,7 +5,7 @@ from discord.ext import commands, tasks
 
 class TopCordStats(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.token: str = getenv("TOPCORD")
         self.post_topcord_stats.start()
 
@@ -26,5 +26,5 @@ class TopCordStats(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(TopCordStats(bot))

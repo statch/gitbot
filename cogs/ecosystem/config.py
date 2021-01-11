@@ -101,7 +101,7 @@ class Config(commands.Cog):
 
     @delete_field_group.command(name='user', aliases=['-U', '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def delete_user_command(self, ctx: commands.Context):
+    async def delete_user_command(self, ctx: commands.Context) -> None:
         deleted = await self.delete_field_group(ctx, 'user')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **user deleted.**")
@@ -110,7 +110,7 @@ class Config(commands.Cog):
 
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def delete_org_command(self, ctx: commands.Context):
+    async def delete_org_command(self, ctx: commands.Context) -> None:
         deleted = await self.delete_field_group(ctx, 'org')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **organization deleted.**")
@@ -119,7 +119,7 @@ class Config(commands.Cog):
 
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def delete_repo_command(self, ctx: commands.Context):
+    async def delete_repo_command(self, ctx: commands.Context) -> None:
         deleted = await self.delete_field_group(ctx, 'repo')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **repo deleted.**")
@@ -128,10 +128,11 @@ class Config(commands.Cog):
 
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def delete_entire_record(self, ctx: commands.Context):
+    async def delete_entire_record(self, ctx: commands.Context) -> None:
         query = await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         if not query:
-            return await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
+            await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
+            return
         await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
 
     async def delete_field(self, ctx: commands.Context, field: str) -> bool:
@@ -162,5 +163,5 @@ class Config(commands.Cog):
         return False
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Config(bot))

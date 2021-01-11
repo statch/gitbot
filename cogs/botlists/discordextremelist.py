@@ -5,7 +5,7 @@ from os import getenv
 
 class DiscordExtremeListStats(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.token: str = getenv("DISCORDEXTREMELIST")
         self.post_del_stats.start()
 
@@ -26,5 +26,5 @@ class DiscordExtremeListStats(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(DiscordExtremeListStats(bot))

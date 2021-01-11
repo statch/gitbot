@@ -8,7 +8,7 @@ class Errors(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error):
+    async def on_command_error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
         elif isinstance(error, commands.CommandOnCooldown):

@@ -5,7 +5,7 @@ from os import getenv
 
 class DiscordBotsStats(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.token: str = getenv("DISCORDBOTS")
         self.post_dbots_stats.start()
 
@@ -26,5 +26,5 @@ class DiscordBotsStats(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(DiscordBotsStats(bot))

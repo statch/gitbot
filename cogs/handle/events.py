@@ -39,7 +39,7 @@ class Events(commands.Cog):
         return embed
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild: discord.Guild):
+    async def on_guild_join(self, guild: discord.Guild) -> None:
         receiver = None
         async for channel in guild_text_channels(guild):
             if await verify_send_perms(channel):
@@ -65,7 +65,7 @@ class Events(commands.Cog):
             await receiver.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
+    async def on_guild_remove(self, guild) -> None:
         embed_l: discord.Embed = await self.build_guild_embed(guild, False)
         channel = self.bot.get_channel(775042132054376448)
         print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")

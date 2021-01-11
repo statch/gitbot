@@ -25,6 +25,7 @@ logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger = logging.getLogger('main')
 
 extensions: list = [
+    'core.background',
     'cogs.base.user',
     'cogs.base.org',
     'cogs.base.repo',

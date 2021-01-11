@@ -26,6 +26,9 @@ class Repo(commands.Cog):
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, repo=stored)
+            else:
+                await ctx.send(
+                    f'{self.e}  You don\'t have a quick access repo configured! **Type** `git config` **to do it.**')
         else:
             await ctx.invoke(info_command, repo=repo)
 

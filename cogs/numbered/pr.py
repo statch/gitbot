@@ -1,5 +1,6 @@
 import discord
 import datetime
+from typing import Optional
 from cfg import bot_config
 from discord.ext import commands
 
@@ -19,11 +20,28 @@ class PullRequest(commands.Cog):
 
     @commands.command(name='pr', aliases=['pull', '-pr', '--pr', '--pullrequest', '-pull'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: str):
-        if not pr_number.isnumeric():
+    async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: Optional[str] = None):
+        if not pr_number and not repo.isnumeric():
+            await ctx.send(
+                f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
+            return
+        elif not pr_number and repo.isnumeric():
+            num = repo
+            stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+            if stored:
+                repo = stored
+                pr_number = num
+            else:
+                await ctx.send(
+                    f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                return
+
+        try:
+            pr: dict = await Git.get_pull_request(repo, int(pr_number))
+        except ValueError:
             await ctx.send(f"{self.e}  The second argument must be a pull request **number!**")
             return
-        pr: dict = await Git.get_pull_request(repo, int(pr_number))
+
         if isinstance(pr, str):
             if pr == 'repo':
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")

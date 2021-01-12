@@ -25,38 +25,38 @@ class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
+        self.e: str = '<:ge:767823523573923890>'
 
     @is_me()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
     async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
-        event = event.lower().replace('on_', "", 1)
+        event = event.lower().replace('on_', '', 1)
         cor = {
-            "guild_join": ctx.guild,
-            "guild_remove": ctx.guild,
-            "member_join": ctx.author,
-            "member_remove": ctx.author
+            'guild_join': ctx.guild,
+            'guild_remove': ctx.guild,
+            'member_join': ctx.author,
+            'member_remove': ctx.author
         }
         if cor.get(event, None) is not None:
             e = cor.get(event, None)
             self.bot.dispatch(event, e)
-            await ctx.send(f"{self.emoji} Dispatched event `{event}`")
+            await ctx.send(f'{self.emoji} Dispatched event `{event}`')
         else:
-            await ctx.send(f"{self.e}  Failed to dispatch event `{event}`")
+            await ctx.send(f'{self.e}  Failed to dispatch event `{event}`')
 
     @is_me()
-    @commands.command(aliases=["--rate", "--ratelimit"])
-    async def rate(self, ctx) -> None:
+    @commands.command(aliases=['--rate', '--ratelimit'])
+    async def rate(self, ctx: commands.Context) -> None:
         rate = await Git.get_ratelimit()
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{self.e}  Rate-limiting",
+            title=f'{self.e}  Rate-limiting',
             description=None
         )
         graphql = rate['resources']['graphql']
         rest = rate['rate']
         search = rate['resources']['search']
-        embed.add_field(name="REST",
+        embed.add_field(name='REST',
                         value=f"{rest['used']}/{rate['rate']['limit']}\n\
                         `{dt.datetime.fromtimestamp(rest['reset']).strftime('%X')}`")
         embed.add_field(name='GraphQL',
@@ -70,15 +70,15 @@ class Debug(commands.Cog):
     @commands.command()
     @commands.is_owner()
     @is_me()
-    async def eval(self, ctx: commands.Context, *, cmd) -> None:
+    async def eval(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
-            fn_name = "_eval_expr"
+            fn_name = '_eval_expr'
 
-            cmd = cmd.strip("` ")
+            cmd = cmd.strip('` ')
 
-            cmd = "\n".join(f"    {i}" for i in cmd.splitlines())
+            cmd = "\n".join(f'    {i}' for i in cmd.splitlines())
 
-            body: str = f"async def {fn_name}():\n{cmd}"
+            body: str = f'async def {fn_name}():\n{cmd}'
 
             parsed = ast.parse(body)
             body = parsed.body[0].body
@@ -93,9 +93,9 @@ class Debug(commands.Cog):
                 'Git': Git,
                 '__import__': __import__
             }
-            exec(compile(parsed, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
+            exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used
 
-            result = (await eval(f"{fn_name}()", env))  # pylint: disable=eval-used
+            result = (await eval(f'{fn_name}()', env))  # pylint: disable=eval-used
             await ctx.send(result)
 
 

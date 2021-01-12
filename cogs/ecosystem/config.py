@@ -11,10 +11,10 @@ Git = bot_config.Git
 class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv("DB_CONNECTION")).store.users
+        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store.users
         self.emoji: str = '<:github:772040411954937876>'
-        self.ga: str = "<:ga:768064843176738816>"
-        self.e: str = "<:ge:767823523573923890>"
+        self.ga: str = '<:ga:768064843176738816>'
+        self.e: str = '<:ge:767823523573923890>'
 
     @commands.group(name='config', aliases=['--config', '-cfg', 'cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -25,18 +25,17 @@ class Config(commands.Cog):
                            "These commands allow you to save a user, repo or org to get with a short command.",
                            "`git config --user {username}` " + self.ga + " Access a saved user with `git --user`",
                            "`git config --org {org}` " + self.ga + " Access a saved organization with `git --org`",
-                           "\n**Important!** The command that follows requires the exact syntax of "
-                           "`username/repo-name` in place of the `{repo}` argument, ex. `itsmewulf/GitHub-Discord`",
-                           "\n`git config --repo {repo}` " + self.ga + " Access a saved repo with `git --repo`",
-                           "\n**You can delete stored data by typing** `git config -delete`"]
+                           "`git config --repo {repo}` " + self.ga + " Access a saved repo with `git --repo`",
+                           "\n**You can delete stored data by typing** `git config --delete`"]
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{self.emoji}  GitBot Config",
                 description='\n'.join(lines)
             )
+            embed.set_footer(text='To see what you have saved, use git config --show')
             await ctx.send(embed=embed)
 
-    @config_command_group.command(name='--show', aliases=['-S', '-show'])
+    @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show(self, ctx: commands.Context) -> None:
         query = await self.db.find_one({"user_id": int(ctx.author.id)})
@@ -83,15 +82,15 @@ class Config(commands.Cog):
         else:
             await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
 
-    @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete'])
+    @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete', '--delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_field_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             lines: list = ["**You can delete stored quick access data by running the following commands:**",
-                           f"`git config -delete user`" + f' {self.ga} ' + 'delete the quick access user',
-                           f"`git config -delete org`" + f' {self.ga} ' + 'delete the quick access organization',
-                           f"`git config -delete repo`" + f' {self.ga} ' + 'delete the quick access repo',
-                           f"`git config -delete all`" + f' {self.ga} ' + 'delete all of your quick access data']
+                           f"`git config --delete user`" + f' {self.ga} ' + 'delete the quick access user',
+                           f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization',
+                           f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo',
+                           f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data']
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{self.emoji}  Delete Quick Access Data",

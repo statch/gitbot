@@ -101,7 +101,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='user', aliases=['-U', '-user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: commands.Context) -> None:
-        deleted = await self.delete_field_group(ctx, 'user')
+        deleted: bool = await self.delete_field(ctx, 'user')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **user deleted.**")
         else:
@@ -110,7 +110,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: commands.Context) -> None:
-        deleted = await self.delete_field_group(ctx, 'org')
+        deleted: bool = await self.delete_field(ctx, 'org')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **organization deleted.**")
         else:
@@ -119,7 +119,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: commands.Context) -> None:
-        deleted = await self.delete_field_group(ctx, 'repo')
+        deleted: bool = await self.delete_field(ctx, 'repo')
         if deleted:
             await ctx.send(f"{self.emoji}  Saved **repo deleted.**")
         else:
@@ -128,14 +128,14 @@ class Config(commands.Cog):
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_entire_record(self, ctx: commands.Context) -> None:
-        query = await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
+        query: dict = await self.db.find_one_and_delete({"user_id": int(ctx.author.id)})
         if not query:
             await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
             return
         await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
 
     async def delete_field(self, ctx: commands.Context, field: str) -> bool:
-        query = await self.db.find_one({"user_id": ctx.author.id})
+        query: dict = await self.db.find_one({"user_id": ctx.author.id})
         if query is not None and field in query:
             await self.db.update_one(query, {"$unset": {field: ""}})
             del query[field]
@@ -145,13 +145,13 @@ class Config(commands.Cog):
         return False
 
     async def getitem(self, ctx: commands.Context, item: str) -> Optional[str]:
-        query = await self.db.find_one({'user_id': ctx.author.id})
+        query: dict = await self.db.find_one({'user_id': ctx.author.id})
         if query and item in query:
             return query[item]
         return None
 
     async def setitem(self, ctx: commands.Context, item: str, value: str) -> bool:
-        exists = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
+        exists: bool = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
         if exists:
             query = await self.db.find_one({"user_id": ctx.author.id})
             if query is not None:

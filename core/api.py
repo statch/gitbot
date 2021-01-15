@@ -129,6 +129,9 @@ class API:
             createdAt
             description
             isFork
+            owner {{
+              avatarUrl
+            }}
             parent {{
               nameWithOwner
               url

@@ -184,6 +184,8 @@ class Checkout(commands.Cog):
             url=r['url']
         )
 
+        embed.set_thumbnail(url=r['owner']['avatarUrl'])
+
         watch: int = r['watchers']['totalCount']
         star: int = r['stargazers']['totalCount']
         open_issues: int = r['issues']['totalCount']

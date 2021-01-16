@@ -36,7 +36,7 @@ class Manager:
                 return i
         return None
 
-    async def get_link_reference(self, link: str) -> Optional[Tuple[dict, str]]:
+    async def get_link_reference(self, link: str) -> Optional[Union[Tuple[dict, str], str]]:
         for pattern in self.patterns:
             match: list = re.findall(pattern[0], link)
             if match:
@@ -50,5 +50,5 @@ class Manager:
                         return obj, 'org' if obj is not None else 'org'
                     else:
                         return obj, 'user'
-                return (repo := await action(match)), 'repo' if repo is not None else None
+                return (repo := await action(match)), 'repo' if repo is not None else 'repo'
             return None

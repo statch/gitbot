@@ -36,7 +36,10 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def repo_info_command(self, ctx: commands.Context, repo: Optional[str]) -> None:
-        r: Union[dict, None] = await Git.get_repo(str(repo))
+        if hasattr(ctx, 'data'):
+            r: dict = getattr(ctx, 'data')
+        else:
+            r: Union[dict, None] = await Git.get_repo(str(repo))
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Config').delete_field(ctx, 'repo')

@@ -16,32 +16,36 @@ class Issue(commands.Cog):
     @commands.command(name='issue', aliases=['-issue', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str = None) -> None:
-        if not issue_number and not repo.isnumeric():
-            await ctx.send(
-                f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
-            return
-        elif not issue_number and repo.isnumeric():
-            num = repo
-            stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
-            if stored:
-                repo = stored
-                issue_number = num
-            else:
+        if hasattr(ctx, 'data'):
+            issue: dict = getattr(ctx, 'data')
+        else:
+            if not issue_number and not repo.isnumeric():
                 await ctx.send(
-                    f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                    f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
+                return
+            elif not issue_number and repo.isnumeric():
+                num = repo
+                stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+                if stored:
+                    repo = stored
+                    issue_number = num
+                else:
+                    await ctx.send(
+                        f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                    return
+
+            try:
+                issue = await Git.get_issue(repo, int(issue_number))
+            except ValueError:
+                await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
+                return
+            if isinstance(issue, str):
+                if issue == 'repo':
+                    await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                else:
+                    await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
                 return
 
-        try:
-            issue = await Git.get_issue(repo, int(issue_number))
-        except ValueError:
-            await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
-            return
-        if isinstance(issue, str):
-            if issue == 'repo':
-                await ctx.send(f"{self.e}  This repository **doesn't exist!**")
-            else:
-                await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
-            return
         em: str = f"<:issue_open:788517560164810772>"
         if issue['state'].lower() == 'closed':
             em: str = '<:issue_closed:788517938168594452>'

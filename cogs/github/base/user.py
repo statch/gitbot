@@ -30,7 +30,10 @@ class User(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='--info', aliases=['-i', '-info'])
     async def user_info_command(self, ctx: commands.Context, user: str) -> None:
-        u = await Git.get_user(user)
+        if hasattr(ctx, 'data'):
+            u: dict = getattr(ctx, 'data')
+        else:
+            u = await Git.get_user(user)
         if not u:
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Store').delete_user_field(ctx=ctx)

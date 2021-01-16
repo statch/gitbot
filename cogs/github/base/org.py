@@ -30,7 +30,10 @@ class Org(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='--info', aliases=['-i', '-info'])
     async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
-        org = await Git.get_org(organization)
+        if hasattr(ctx, 'data'):
+            org: dict = getattr(ctx, 'data')
+        else:
+            org = await Git.get_org(organization)
         if not org:
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Store').delete_org_field(ctx=ctx)

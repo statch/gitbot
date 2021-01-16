@@ -1,7 +1,7 @@
 from discord.ext import commands
 from core import bot_config
 from ext.manager import Manager
-from typing import Optional
+from typing import Optional, Union
 
 Git = bot_config.Git
 mgr = Manager()
@@ -18,7 +18,21 @@ class Info(commands.Cog):
     @commands.command(name='info')
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def info_command_group(self, ctx: commands.Context, link: str):
-        ref: Optional[tuple] = await mgr.get_link_reference(link)
+        ref: Optional[Union[tuple, str]] = await mgr.get_link_reference(link)
+        if isinstance(ref, tuple) and isinstance(ref[0], str):
+            if ref[0] == 'repo':
+                await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+            elif ref[1] == 'issue':
+                await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
+            else:
+                await ctx.send(f"{self.e}  A pull request with this number **doesn't exist!**")
+            return
+        setattr(ctx, 'data', ref.object)
+        cmd: commands.Command = self.bot.get_command(ref.type)
+        if isinstance(args := ref.args, (tuple, list)):
+            await ctx.invoke(cmd, *args)
+            return
+        await ctx.invoke(cmd, args)
 
 
 def setup(bot: commands.Bot) -> None:

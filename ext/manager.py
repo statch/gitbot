@@ -8,7 +8,7 @@ from collections import namedtuple
 
 json_path = r'./data/'
 Git = bot_config.Git
-GitCommandData = namedtuple('GitObject', 'object type args')
+GitCommandData = namedtuple('GitObject', 'data type args')
 
 
 def json_dict(name: str) -> dict:
@@ -51,7 +51,7 @@ class Manager:
                         return obj, pattern[1]
                     return GitCommandData(obj, pattern[1], match)
                 if not action:
-                    if obj := await Git.get_user((m := match)) is None:
+                    if (obj := await Git.get_user((m := match))) is None:
                         obj: Optional[dict] = await Git.get_org(m)
                         return GitCommandData(obj, 'org', m) if obj is not None else 'no-user-or-org'
                     else:

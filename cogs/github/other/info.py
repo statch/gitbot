@@ -27,7 +27,7 @@ class Info(commands.Cog):
             else:
                 await ctx.send(f"{self.e}  A pull request with this number **doesn't exist!**")
             return
-        setattr(ctx, 'data', ref.object)
+        setattr(ctx, 'data', ref.data)
         cmd: commands.Command = self.bot.get_command(ref.type)
         if isinstance(args := ref.args, (tuple, list)):
             await ctx.invoke(cmd, *args)

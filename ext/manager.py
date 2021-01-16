@@ -8,7 +8,7 @@ from collections import namedtuple
 
 json_path = r'./data/'
 Git = bot_config.Git
-GitCommandData = namedtuple('GitObject', 'data type args')
+GitCommandData = namedtuple('GitCommandData', 'data type args')
 
 
 def json_dict(name: str) -> dict:

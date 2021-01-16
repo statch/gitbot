@@ -122,7 +122,7 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs'])
-    async def files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
+    async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
             repo = "/".join(repo_or_path.split("/", 2)[:2])

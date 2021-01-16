@@ -1,10 +1,8 @@
 import re
+import ext.regex as regex
 from typing import Union
 from discord.ext import commands
 from aiohttp import ClientSession
-
-GITHUB = re.compile(r'github\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/blob/(.+?)/(.+?)#L(\d+)[-~]?L?(\d*)')
-GITLAB = re.compile(r'gitlab\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/-/blob/(.+?)/(.+?)#L(\d+)-?(\d*)')
 
 
 async def compile_github_link(data: tuple) -> str:
@@ -23,13 +21,16 @@ class Lines(commands.Cog):
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
         self.e: str = "<:ge:767823523573923890>"
 
-    async def compile_text(self, url: str, data: tuple) -> Union[str, None]:
+    async def compile_text(self, url: str, data: tuple) -> Union[str, bool, None]:
         content = await (await self.ses.get(url)).text(encoding='utf-8')
+        lines_ = content.splitlines(keepends=True)
+
+        if data[4] == '' and lines_[int(data[3]) - 1] == '\n':  # if the request is a single, empty line
+            return False
 
         extension = url[url.rindex('.') + 1:]
         extension = 'js' if extension == 'ts' else extension
 
-        lines_ = content.splitlines(keepends=True)
         lines = []
         for line in lines_[int(data[3]) - 1:int(data[4]) if data[4] != '' else int(data[3])]:
             if line == '\r\n' or line.endswith('\n'):
@@ -39,15 +40,15 @@ class Lines(commands.Cog):
 
         text = ''.join(lines)
         result = f"```{extension}\n{text}\n```"
-        if result == f"```{extension}\n\n```":
+        if result == f"```{extension}\n\n```" or len(content) == 0:
             return None
         return result
 
     @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def lines_command(self, ctx, link: str) -> None:
-        github_match = re.findall(GITHUB, link)
-        gitlab_match = re.findall(GITLAB, link)
+    async def lines_command(self, ctx: commands.Context, link: str) -> None:
+        github_match = re.findall(regex.GITHUB_LINES, link)
+        gitlab_match = re.findall(regex.GITLAB_LINES, link)
         if github_match:
             github_match = github_match[0]
 
@@ -77,6 +78,8 @@ class Lines(commands.Cog):
                 return await ctx.send(f"{self.e}  That project is private or otherwise inaccessible.")
         else:
             return await ctx.send(f"{self.e}  The link isn't a GitHub or GitLab URL!")
+        if isinstance(result, bool):
+            return await ctx.send
         return await ctx.send(result)
 
 

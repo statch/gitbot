@@ -34,6 +34,7 @@ extensions: list = [
     'cogs.github.numbered.issue',
     'cogs.github.other.lines',
     'cogs.github.other.info',
+    'cogs.github.other.license',
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',

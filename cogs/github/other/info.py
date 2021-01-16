@@ -19,6 +19,9 @@ class Info(commands.Cog):
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def info_command_group(self, ctx: commands.Context, link: str) -> None:
         ref: Optional[Union[tuple, str, 'GitCommandData']] = await mgr.get_link_reference(link)
+        if ref is None:
+            await ctx.send(f'{self.e}  I couldn\'t fetch any info regarding the link you provided!')
+            return
         if isinstance(ref, tuple) and isinstance(ref[0], str):
             if ref[0] == 'repo':
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")

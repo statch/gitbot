@@ -17,8 +17,8 @@ class Info(commands.Cog):
 
     @commands.command(name='info')
     @commands.cooldown(10, 20, commands.BucketType.user)
-    async def info_command_group(self, ctx: commands.Context, link: str):
-        ref: Optional[Union[tuple, str]] = await mgr.get_link_reference(link)
+    async def info_command_group(self, ctx: commands.Context, link: str) -> None:
+        ref: Optional[Union[tuple, str, 'GitCommandData']] = await mgr.get_link_reference(link)
         if isinstance(ref, tuple) and isinstance(ref[0], str):
             if ref[0] == 'repo':
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")
@@ -26,6 +26,12 @@ class Info(commands.Cog):
                 await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
             else:
                 await ctx.send(f"{self.e}  A pull request with this number **doesn't exist!**")
+            return
+        elif isinstance(ref, str):
+            if ref == 'no-user-of-org':
+                await ctx.send(f'{self.e}  This user or organization **doesn\'t exist!**')
+            else:
+                await ctx.send(f'{self.e}  This repository **doesn\'t exist!**')
             return
         setattr(ctx, 'data', ref.data)
         cmd: commands.Command = self.bot.get_command(ref.type)

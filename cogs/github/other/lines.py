@@ -1,3 +1,5 @@
+# TODO Clean this shit up
+
 import re
 import ext.regex as regex
 from typing import Union

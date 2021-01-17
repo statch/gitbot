@@ -57,5 +57,5 @@ class Manager:
                     else:
                         return GitCommandData(obj, 'user', m)
                 repo = await action(match)
-                return GitCommandData(repo, 'repo', match) if repo is not None else 'repo'
+                return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
         return None

@@ -1,7 +1,7 @@
 from os import getenv
 from dotenv import load_dotenv
-from core.api import API
+from core.github.api import GitHubAPI
 
 load_dotenv()
 
-Git = API(getenv('GITHUB'))
+Git = GitHubAPI(getenv('GITHUB'))

@@ -97,7 +97,7 @@ class BotInfo(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{self.emoji}  Invite me to your server!',
-            description=f"[Invite {self.bot.user.name}](https://discord.com/oauth2/authorize?bot_id=761269120691470357&scope=bot&permissions=67488832) | [Support Server](https://discord.gg/3e5fwpA)"
+            description=f"[Invite {self.bot.user.name}](https://discord.com/oauth2/authorize?client_id=761269120691470357&scope=bot&permissions=67488832) | [Support Server](https://discord.gg/3e5fwpA)"
         )
         embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
         await ctx.send(embed=embed)

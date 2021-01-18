@@ -54,8 +54,7 @@ class Manager:
                     if (obj := await Git.get_user((m := match))) is None:
                         obj: Optional[dict] = await Git.get_org(m)
                         return GitCommandData(obj, 'org', m) if obj is not None else 'no-user-or-org'
-                    else:
-                        return GitCommandData(obj, 'user', m)
+                    return GitCommandData(obj, 'user', m)
                 repo = await action(match)
                 return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
         return None

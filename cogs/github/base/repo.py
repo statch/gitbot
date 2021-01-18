@@ -35,7 +35,7 @@ class Repo(commands.Cog):
 
     @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def repo_info_command(self, ctx: commands.Context, repo: Optional[str]) -> None:
+    async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')
         else:

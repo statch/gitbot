@@ -12,15 +12,23 @@ mgr = Manager()
 class Gist(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+        self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    async def gist_command(self, ctx: commands.Context, user: str, num: int) -> None:
+    async def gist_command(self, ctx: commands.Context, user: str) -> None:
+        data: dict = await Git.get_user_gists(user)
+        if data is None:
+            await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
+            return
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=None,
-            description=None
+            title=f'{user}\'s gists',
+            description=None,
+            url=data['url']
         )
+
+        await ctx.send(embed=embed)
 
         try:
             msg: discord.Message = await self.bot.wait_for('message',
@@ -28,14 +36,12 @@ class Gist(commands.Cog):
                                                                             and m.author.id == ctx.author.id),
                                                            timeout=30)
         except TimeoutError:
-            pass
+            return
 
-        data = await Git.get_user_gists(user)
-
-        await ctx.send(embed=await self.build_gist_embed(data, num))
+        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content)))
 
     async def build_gist_embed(self, data: dict, index: int) -> discord.Embed:
-        gist: dict = data['gists']['nodes'][index]
+        gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(
             color=await self.get_color_from_files(gist['files']),
             title=gist['description'],
@@ -63,11 +69,12 @@ class Gist(commands.Cog):
     async def get_color_from_files(self, files: list) -> int:
         extensions = [f['extension'] for f in files]
         most_common = await mgr.get_most_common(extensions)
-        if most_common == '.md':
+        if most_common in ['.md', '']:
             return 0xefefef
         for file in files:
-            if file['extension'] == most_common:
+            if file['extension'] == most_common and file['language'] is not None:
                 return int(file['language']['color'][1:], 16)
+        return 0xefefef
 
 
 def setup(bot: commands.Bot) -> None:

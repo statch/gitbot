@@ -37,8 +37,6 @@ class Gist(commands.Cog):
         gist_strings = [
             f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in enumerate(data['gists']['nodes'])]
 
-        print([x for x in gist_strings])
-
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{user}\'s gists',

@@ -14,6 +14,7 @@ class Gist(commands.Cog):
         self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.e: str = "<:ge:767823523573923890>"
+        self.square: str = ":white_small_square:"
 
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
@@ -22,10 +23,26 @@ class Gist(commands.Cog):
         if data is None:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
             return
+
+        if len(data['gists']['nodes']) == 0:
+            await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
+            return
+
+        def gist_url(gist) -> str:
+            if not gist['description']:
+                return gist['url']
+            desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
+            return f'[{desc}]({gist["url"]})'
+
+        gist_strings = [
+            f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in enumerate(data['gists']['nodes'])]
+
+        print([x for x in gist_strings])
+
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{user}\'s gists',
-            description=None,
+            description='\n'.join(gist_strings),
             url=data['url']
         )
 

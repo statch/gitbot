@@ -12,6 +12,7 @@ mgr = Manager()
 class Gist(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+        self.emoji: str = '<:github:772040411954937876>'
         self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
@@ -28,15 +29,28 @@ class Gist(commands.Cog):
             url=data['url']
         )
 
-        await ctx.send(embed=embed)
+        base_msg = await ctx.send(embed=embed)
 
-        try:
-            msg: discord.Message = await self.bot.wait_for('message',
-                                                           check=lambda m: (m.channel.id == ctx.channel.id
-                                                                            and m.author.id == ctx.author.id),
-                                                           timeout=30)
-        except TimeoutError:
-            return
+        while True:
+            try:
+                msg: discord.Message = await self.bot.wait_for('message',
+                                                               check=lambda m: (m.channel.id == ctx.channel.id
+                                                                                and m.author.id == ctx.author.id),
+                                                               timeout=30)
+                if not msg.content.isnumeric():
+                    max_gist_index: str = "10" if data["gists"]["totalCount"] >= 10 else data["gists"]["totalCount"]
+                    await ctx.send(
+                        f'{self.emoji}  Please pick a number **between 1 and {max_gist_index}**')
+                    continue
+                break
+            except TimeoutError:
+                timeout_embed = discord.Embed(
+                    color=0xffd500,
+                    title=f'Timed Out'
+                )
+                timeout_embed.set_footer(text='To pick an option, simply send a number next time!')
+                await base_msg.edit(embed=timeout_embed)
+                return
 
         await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content)))
 

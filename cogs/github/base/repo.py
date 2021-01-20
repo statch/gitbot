@@ -5,9 +5,10 @@ import io
 from discord.ext import commands
 from typing import Union, Optional
 from core import bot_config
+from ext.regex import MD_EMOJI_RE
 
 Git = bot_config.Git
-md_emoji_re = re.compile(r':.*:', re.IGNORECASE)
+
 
 
 class Repo(commands.Cog):
@@ -65,7 +66,7 @@ class Repo(commands.Cog):
 
         if r['description'] is not None and len(r['description']) != 0:
             embed.add_field(name=":notepad_spiral: Description:",
-                            value=f"```{re.sub(md_emoji_re, '', r['description']).strip()}```")
+                            value=f"```{re.sub(MD_EMOJI_RE, '', r['description']).strip()}```")
 
         watchers: str = f"Has [{watch} watchers]({r['url']}/watchers)" if watch != 1 else f"Has [one watcher]({r['url']}/watchers) "
         if watch == 0:

@@ -20,7 +20,7 @@ class Gist(commands.Cog):
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str) -> None:
         data: dict = await Git.get_user_gists(user)
-        if data is None:
+        if not data:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
             return
 
@@ -28,14 +28,14 @@ class Gist(commands.Cog):
             await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
             return
 
-        def gist_url(gist) -> str:
+        def gist_url(gist: dict) -> str:
             if not gist['description']:
                 return gist['url']
             desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
             return f'[{desc}]({gist["url"]})'
 
-        gist_strings = [
-            f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in enumerate(data['gists']['nodes'])]
+        gist_strings = [f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
+                        enumerate(data['gists']['nodes'])]
 
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
@@ -43,6 +43,8 @@ class Gist(commands.Cog):
             description='\n'.join(gist_strings),
             url=data['url']
         )
+
+        embed.set_footer(text=f'To inspect a specific gist, simply send its number in this channel.')
 
         base_msg = await ctx.send(embed=embed)
 

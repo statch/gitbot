@@ -4,6 +4,7 @@ from asyncio import TimeoutError
 from discord.ext import commands
 from core import bot_config
 from ext.manager import Manager
+from typing import Optional
 
 Git = bot_config.Git
 mgr = Manager()
@@ -23,9 +24,12 @@ class Gist(commands.Cog):
         if not data:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
             return
-
-        if len(data['gists']['nodes']) == 0:
-            await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
+        if len(gists := data['gists']['nodes']) < 2:
+            if gists == 0:
+                await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
+            else:
+                await ctx.send(embed=await self.build_gist_embed(data, 1,
+                                                                 footer='You didn\'t see the gist list because this user has only one gist.'))
             return
 
         def gist_url(gist: dict) -> str:
@@ -53,11 +57,17 @@ class Gist(commands.Cog):
                 msg: discord.Message = await self.bot.wait_for('message',
                                                                check=lambda m: (m.channel.id == ctx.channel.id
                                                                                 and m.author.id == ctx.author.id),
+
                                                                timeout=30)
                 if not msg.content.isnumeric():
-                    max_gist_index: str = "10" if data["gists"]["totalCount"] >= 10 else data["gists"]["totalCount"]
                     await ctx.send(
-                        f'{self.emoji}  Please pick a number **between 1 and {max_gist_index}**')
+                        f'{self.emoji}  Please pick a number **between 1 and {len(gist_strings)}**', delete_after=7)
+                    continue
+                elif (num := int(msg.content)) > 10:
+                    await ctx.send(f'Please pass in a number **smaller than 10!**', delete_after=7)
+                    continue
+                elif num > len(gist_strings):
+                    await ctx.send(f'This user doesn\'t have that many gists!', delete_after=7)
                     continue
                 break
             except TimeoutError:
@@ -71,7 +81,7 @@ class Gist(commands.Cog):
 
         await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content)))
 
-    async def build_gist_embed(self, data: dict, index: int) -> discord.Embed:
+    async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(
             color=await self.get_color_from_files(gist['files']),
@@ -94,6 +104,9 @@ class Gist(commands.Cog):
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
+
+        if footer:
+            embed.set_footer(text=footer)
 
         return embed
 

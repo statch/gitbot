@@ -82,11 +82,46 @@ class GitHubAPI:
         except BadRequest:
             return []
 
-    async def get_user_gists(self, user: str) -> Union[List[dict], list]:
-        try:
-            return list(await self.gh.getitem(f"/users/{user}/gists"))
-        except BadRequest:
-            return []
+    async def get_user_gists(self, user: str):  # TODO build GraphQL query
+        query: str = """
+        {{ 
+          user(login: "{user}") {{
+            url
+            login
+            gists(last: 10) {{
+              totalCount
+              nodes {{
+                id
+                stargazerCount
+                name 
+                description
+                updatedAt
+                createdAt
+                url 
+                comments {{
+                    totalCount
+                }}
+                files {{
+                  name
+                  text 
+                }}
+              }}
+            }}
+          }}
+        }}
+        """.format(user=user)
+
+        res = await self.ses.post(GRAPHQL,
+                                  json={"query": query},
+                                  headers={"Authorization": f"token {self.token}"})
+
+        data: dict = await res.json()
+
+        if 'errors' in data:
+            return None
+        data = data['data']['user']
+
+        return data
 
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
@@ -95,9 +130,6 @@ class GitHubAPI:
             return None
 
     async def get_repo_zip(self, repo: str) -> Optional[Union[bool, bytes]]:
-        if '/' not in repo:
-            return None
-
         res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
                                  headers={"Authorization": f"token {self.token}"})
 
@@ -111,9 +143,6 @@ class GitHubAPI:
         return None
 
     async def get_repo(self, repo: str) -> Optional[dict]:
-        if '/' not in repo or repo.count('/') > 1:
-            return None
-
         split: list = repo.split('/')
         owner: str = split[0]
         repository: str = split[1]
@@ -197,9 +226,6 @@ class GitHubAPI:
         return data
 
     async def get_pull_request(self, repo: str, number: int) -> Union[dict, str]:
-        if '/' not in repo or repo.count('/') > 1:
-            return 'repo'
-
         split: list = repo.split('/')
         owner: str = split[0]
         repository: str = split[1]

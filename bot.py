@@ -9,15 +9,16 @@ load_dotenv()
 PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
 PREFIX: str = str(os.getenv('PREFIX'))
 
-intents = discord.Intents.default()
-intents.bans = False
-intents.voice_states = False
+intents: discord.Intents = discord.Intents(
+    messages=True,
+    guilds=True
+)
 
-bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
-                   intents=intents, help_command=None,
-                   guild_ready_timeout=1, max_messages=None,
-                   description='Seamless GitHub-Discord integration.',
-                   fetch_offline_members=False)
+bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
+                                 intents=intents, help_command=None,
+                                 guild_ready_timeout=1, max_messages=None,
+                                 description='Seamless GitHub-Discord integration.',
+                                 fetch_offline_members=False)
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
 logging.getLogger('asyncio').setLevel(logging.WARNING)
@@ -32,6 +33,7 @@ extensions: list = [
     'cogs.github.base.repo',
     'cogs.github.numbered.pr',
     'cogs.github.numbered.issue',
+    'cogs.github.complex.gist',
     'cogs.github.other.lines',
     'cogs.github.other.info',
     'cogs.github.other.license',
@@ -59,7 +61,8 @@ async def global_check(ctx: commands.Context) -> bool:
 
 
 async def before_invoke(ctx: commands.Context) -> None:
-    await ctx.channel.trigger_typing()
+    if str(ctx.command) not in ['gist']:
+        await ctx.channel.trigger_typing()
 
 
 bot.before_invoke(before_invoke)

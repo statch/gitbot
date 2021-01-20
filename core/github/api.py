@@ -103,7 +103,10 @@ class GitHubAPI:
                 }}
                 files {{
                   name
-                  text 
+                  extension
+                  language {{
+                    color
+                  }}
                 }}
               }}
             }}

@@ -3,8 +3,10 @@ import datetime
 from asyncio import TimeoutError
 from discord.ext import commands
 from core import bot_config
+from ext.manager import Manager
 
 Git = bot_config.Git
+mgr = Manager()
 
 
 class Gist(commands.Cog):
@@ -35,7 +37,7 @@ class Gist(commands.Cog):
     async def build_gist_embed(self, data: dict, index: int) -> discord.Embed:
         gist: dict = data['gists']['nodes'][index]
         embed = discord.Embed(
-            color=0xefefef,
+            color=await self.get_color_from_files(gist['files']),
             title=gist['description'],
             description=None,
             url=gist['url']
@@ -57,6 +59,15 @@ class Gist(commands.Cog):
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
         return embed
+
+    async def get_color_from_files(self, files: list) -> int:
+        extensions = [f['extension'] for f in files]
+        most_common = await mgr.get_most_common(extensions)
+        if most_common == '.md':
+            return 0xefefef
+        for file in files:
+            if file['extension'] == most_common:
+                return int(file['language']['color'][1:], 16)
 
 
 def setup(bot: commands.Bot) -> None:

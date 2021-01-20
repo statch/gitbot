@@ -2,7 +2,7 @@ import json
 import re
 import ext.regex as r
 from core import bot_config
-from typing import Optional, Union, Callable
+from typing import Optional, Union, Callable, Any
 from fuzzywuzzy import fuzz
 from collections import namedtuple
 
@@ -58,3 +58,6 @@ class Manager:
                 repo = await action(match)
                 return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
         return None
+
+    async def get_most_common(self, items: list) -> Any:
+        return max(set(items), key=items.count)

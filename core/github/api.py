@@ -82,7 +82,7 @@ class GitHubAPI:
         except BadRequest:
             return []
 
-    async def get_user_gists(self, user: str):  # TODO build GraphQL query
+    async def get_user_gists(self, user: str):
         query: str = """
         {{ 
           user(login: "{user}") {{

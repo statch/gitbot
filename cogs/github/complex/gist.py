@@ -17,6 +17,7 @@ class Gist(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
         self.square: str = ":white_small_square:"
 
+    # TODO figure out if this needs more handlers
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str) -> None:
@@ -81,6 +82,7 @@ class Gist(commands.Cog):
 
         await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content)))
 
+    # TODO Finish this (more details)
     async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(

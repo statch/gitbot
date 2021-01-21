@@ -10,7 +10,6 @@ from ext.regex import MD_EMOJI_RE
 Git = bot_config.Git
 
 
-
 class Repo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot

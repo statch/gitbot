@@ -7,19 +7,18 @@ from ext.manager import Manager
 from os.path import isfile, isdir, join
 import platform
 
-pid = os.getpid()
+pid: int = os.getpid()
 process: psutil.Process = psutil.Process(pid)
 mgr: Manager = Manager()
-start_time = datetime.datetime.utcnow()
+start_time: datetime.datetime = datetime.datetime.utcnow()
 
 
 def item_line_count(path) -> int:
-    if isdir(path):  # pylint: disable=no-else-return
+    if isdir(path):
         return dir_line_count(path)
     elif isfile(path):
         return len(open(path, 'rb').readlines())
-    else:
-        return 0
+    return 0
 
 
 def dir_line_count(directory) -> int:
@@ -38,19 +37,19 @@ class BotInfo(commands.Cog):
         self.s: str = "<:gs:767809543815954463>"
         self.s_emoji: str = mgr.emojis["statistics"]
 
-    @commands.command(name='--uptime', aliases=['--up'], brief="Display's the Bot's uptime")
+    @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def uptime_command(self, ctx: commands.Context) -> None:
-        now = datetime.datetime.utcnow()
-        delta = now - start_time
+        now: datetime.datetime = datetime.datetime.utcnow()
+        delta: datetime.timedelta = now - start_time
         hours, remainder = divmod(int(delta.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         if days:
-            time_format = "**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds."
+            time_format: str = "**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds."
         else:
-            time_format = "**{h}** hours, **{m}** minutes, and **{s}** seconds."
-        uptime_stamp = time_format.format(d=days, h=hours, m=minutes, s=seconds)
+            time_format: str = "**{h}** hours, **{m}** minutes, and **{s}** seconds."
+        uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
@@ -58,7 +57,7 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name='--ping', brief="Display's the Bot's ping", aliases=["--p"])
+    @commands.command(name='ping', aliases=['--ping', '-ping'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -68,7 +67,7 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name='--privacy', brief="Display's the Bot's privacy policy", aliases=["--policy"])
+    @commands.command(name='privacy', aliases=["policy", '--privacy', '-privacy', '-policy', '--policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -91,7 +90,7 @@ class BotInfo(commands.Cog):
                               "and yes, all of this is subject to change in the future.")
         await ctx.send(embed=embed)
 
-    @commands.command(name='--invite', aliases=['invite', '-invite'])
+    @commands.command(name='invite', aliases=['--invite', '-invite'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def invite_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -102,7 +101,7 @@ class BotInfo(commands.Cog):
         embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
         await ctx.send(embed=embed)
 
-    @commands.command(name='--vote', aliases=['vote', '-vote'])
+    @commands.command(name='vote', aliases=['--vote', '-vote'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def vote_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -113,7 +112,7 @@ class BotInfo(commands.Cog):
         embed.set_author(name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command(name='--stats', aliases=['-stats', 'stats'])
+    @commands.command(name='stats', aliases=['--stats', '-stats'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def stats_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(

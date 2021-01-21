@@ -111,7 +111,7 @@ class Gist(commands.Cog):
         return embed
 
     async def get_color_from_files(self, files: list) -> int:
-        extensions = [f['extension'] for f in files]
+        extensions: list = [f['extension'] for f in files]
         most_common = await mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
             return 0xefefef

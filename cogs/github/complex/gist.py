@@ -25,7 +25,7 @@ class Gist(commands.Cog):
         if not data:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
             return
-        if len(gists := data['gists']['nodes']) < 2:
+        if (gists := len(data['gists']['nodes'])) < 2:
             if gists == 0:
                 await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
             else:

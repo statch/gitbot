@@ -4,4 +4,4 @@ from core.github.api import GitHubAPI
 
 load_dotenv()
 
-Git = GitHubAPI(getenv('GITHUB'))
+Git = GitHubAPI(getenv('GITHUB'), 'itsmewulf')

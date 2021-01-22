@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
+from sys import version_info
 from typing import Union, List, Optional
 from gidgethub import BadRequest
 from datetime import date, datetime
@@ -13,12 +14,23 @@ SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 
 class GitHubAPI:
-    """Main Class used to interact with the GitHub API"""
+    """
+    The main class used to interact with the GitHub API.
 
-    def __init__(self, token: str):
+    Parameters
+    ----------
+    token: str
+        The GitHub access token to send requests with.
+    requester: str
+        A :class:`str` denoting the author of the requests (ex. 'BigNoob420')
+    """
+
+    def __init__(self, token: str, requester: str):
+        requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
         self.token: str = token
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh = gh.GitHubAPI(session=self.ses, requester="itsmewulf, Python 3.7",
+        self.gh = gh.GitHubAPI(session=self.ses,
+                               requester=requester,
                                oauth_token=self.token)
 
     async def ghprofile_stats(self, name: str) -> Union[namedtuple, None]:

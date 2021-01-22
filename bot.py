@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
+NO_TYPING_COMMANDS: list = os.getenv('NO_TYPING_COMMANDS').split()
 PREFIX: str = str(os.getenv('PREFIX'))
 
 intents: discord.Intents = discord.Intents(
@@ -23,7 +24,7 @@ bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=T
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 logging.getLogger('discord.gateway').setLevel(logging.WARNING)
-logger = logging.getLogger('main')
+logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
     'core.background',
@@ -60,12 +61,10 @@ async def global_check(ctx: commands.Context) -> bool:
     return True
 
 
+@bot.before_invoke
 async def before_invoke(ctx: commands.Context) -> None:
-    if str(ctx.command) not in ['gist']:
+    if str(ctx.command) not in NO_TYPING_COMMANDS:
         await ctx.channel.trigger_typing()
-
-
-bot.before_invoke(before_invoke)
 
 
 @bot.event

@@ -18,13 +18,15 @@ class Events(commands.Cog):
     async def build_guild_embed(self, guild: discord.Guild, state: bool = True) -> discord.Embed:
         if state:
             title: str = f'{mgr.emojis["checkmark"]}  Joined a new guild!'
+            color: int = 0x33ba7c
         else:
             title: str = f'{mgr.emojis["failure"]}  Removed from a guild.'
+            color: int = 0xda4353
 
         embed = discord.Embed(
             title=title,
             description=None,
-            color=0xefefef,
+            color=color,
         )
         owner = await self.bot.fetch_user(guild.owner_id)
         embed.add_field(name='Name', value=str(guild))

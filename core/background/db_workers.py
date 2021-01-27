@@ -6,8 +6,6 @@ from discord.ext import tasks, commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.bot_config import Git
 
-RELEASE_URL = 'https://api.github.com/repos/{owner}/{repo}/releases/latest'
-
 
 class DatabaseWorkers(commands.Cog):
     def __init__(self, bot: commands.Bot):

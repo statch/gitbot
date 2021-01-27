@@ -2,6 +2,7 @@ import asyncio
 import os
 import discord
 import datetime
+from bot import logger
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
@@ -83,7 +84,7 @@ class ReleaseFeed(commands.Cog):
 
     @release_feed_worker.before_loop
     async def release_feed_worker_before_loop(self) -> None:
-        print('Release worker sleeping until the bot is ready...')
+        logger.info('Release worker sleeping until the bot is ready...')
         await self.bot.wait_until_ready()
 
     @commands.Cog.listener()

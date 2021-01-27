@@ -17,7 +17,6 @@ class Gist(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
         self.square: str = ":white_small_square:"
 
-    # TODO figure out if this needs more handlers
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str) -> None:

@@ -42,8 +42,9 @@ class DatabaseWorkers(commands.Cog):
         if new_release['usesCustomOpenGraphImage']:
             embed.set_image(url=new_release['openGraphImageUrl'])
 
-        body: str = BeautifulSoup(new_release['release']['descriptionHTML'], features='html.parser').getText()[:387].replace('\n\n', '\n')
-        body: str = f"```{body[:body.rindex(' ')]}...```".strip()
+        if body := new_release['release']['descriptionHTML']:
+            body: str = BeautifulSoup(body, features='html.parser').getText()[:387].replace('\n\n', '\n')
+            body: str = f"```{body[:body.rindex(' ')]}...```".strip()
 
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
 
@@ -64,7 +65,7 @@ class DatabaseWorkers(commands.Cog):
             await self.db.find_one_and_delete(doc)
         else:
             await self.db.update_one(doc, {'$pull': {'feed': item}})
-        success = await self.doc_send(doc, embed)
+        success: bool = await self.doc_send(doc, embed)
         if not success:
             print('fuck')
 

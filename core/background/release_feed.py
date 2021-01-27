@@ -38,7 +38,7 @@ class ReleaseFeed(commands.Cog):
         stage = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
         if new_release['release']['isDraft']:
             stage += ' draft'
-        embed = discord.Embed(
+        embed: discord.Embed = discord.Embed(
             color=new_release['color'],
             title=f'New {item["repo"]} {stage}! `{new_release["release"]["tagName"]}`',
             url=new_release['release']['url']
@@ -62,16 +62,14 @@ class ReleaseFeed(commands.Cog):
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
 
-        success: bool = await self.doc_send(doc, embed)
-        if not success:
-            await self.db.find_one_and_delete({'_id': doc['_id']})
+        await self.doc_send(doc, embed)
 
     async def update_with_data(self, guild_id: int, to_update: List[Tuple[str]]) -> None:
         await self.db.find_one_and_update({'_id': guild_id}, {
             '$set': {'feed': [dict(repo=repo, release=release) for repo, release in to_update]}})
 
-    async def handle_missing_item(self, doc: dict, item: dict) -> None:  # TODO Details here
-        embed = discord.Embed(
+    async def handle_missing_item(self, doc: dict, item: dict) -> None:
+        embed: discord.Embed = discord.Embed(
             color=0xda4353,
             title=f'One of your release feed repos was deleted/renamed!',
             description=f'A repository previously saved as `{item["repo"]}` was **deleted or renamed** by the owner. '
@@ -81,9 +79,7 @@ class ReleaseFeed(commands.Cog):
             await self.db.find_one_and_delete(doc)
         else:
             await self.db.update_one(doc, {'$pull': {'feed': item}})
-        success: bool = await self.doc_send(doc, embed)
-        if not success:
-            print('fuck')
+        await self.doc_send(doc, embed)
 
     @release_feed_worker.before_loop
     async def release_feed_worker_before_loop(self) -> None:
@@ -96,8 +92,8 @@ class ReleaseFeed(commands.Cog):
 
     async def doc_send(self, doc: dict, embed: discord.Embed) -> bool:
         try:
-            webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + doc['hook'],
-                                               adapter=discord.AsyncWebhookAdapter(Git.ses))
+            webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + doc['hook'],
+                                                                adapter=discord.AsyncWebhookAdapter(Git.ses))
             await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
             await self.db.find_one_and_delete({'_id': doc['_id']})

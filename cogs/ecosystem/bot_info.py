@@ -46,14 +46,14 @@ class BotInfo(commands.Cog):
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         if days:
-            time_format: str = "**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds."
+            time_format: str = '**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds.'
         else:
-            time_format: str = "**{h}** hours, **{m}** minutes, and **{s}** seconds."
+            time_format: str = '**{h}** hours, **{m}** minutes, and **{s}** seconds.'
         uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f"{self.s}  **I have been online for:**\n{uptime_stamp}"
+            description=f'{self.s}  **I have been online for:**\n{uptime_stamp}'
         )
         await ctx.send(embed=embed)
 
@@ -62,7 +62,6 @@ class BotInfo(commands.Cog):
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=None,
             description=f"{self.s}  **My ping is:**\n**{round(self.bot.latency * 1000)}** milliseconds"
         )
         await ctx.send(embed=embed)
@@ -72,8 +71,7 @@ class BotInfo(commands.Cog):
     async def privacy_policy(self, ctx: commands.Context) -> None:  # TODO new TOS
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=f"{self.emoji}  Privacy Policy",
-            description=None
+            title=f'{self.emoji}  Privacy Policy'
         )
         embed.add_field(name="What is stored?", inline=False,
                         value="The only data stored are your User ID and quick access users, repos and orgs.")
@@ -95,19 +93,20 @@ class BotInfo(commands.Cog):
     async def invite_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.emoji}  Invite me to your server!',
-            description=f"[Invite {self.bot.user.name}](https://discord.com/oauth2/authorize?client_id=761269120691470357&scope=bot&permissions=67488832) | [Support Server](https://discord.gg/3e5fwpA)"
+            description=f"[**Invite {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id"
+                        f"=761269120691470357&scope=bot&permissions=67488832) | [**Support Server**]("
+                        f"https://discord.gg/3e5fwpA) "
         )
-        embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
+        embed.set_author(icon_url=self.bot.user.avatar_url, name='Invite me to your server!')
         await ctx.send(embed=embed)
 
     @commands.command(name='vote', aliases=['--vote', '-vote'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def vote_command(self, ctx: commands.Context) -> None:  # TODO ???
+    async def vote_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=None,
-            description=f"[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**](https://botsfordiscord.com/bot/761269120691470357)"
+            description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
+                        "https://botsfordiscord.com/bot/761269120691470357) "
         )
         embed.set_author(name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
@@ -115,11 +114,7 @@ class BotInfo(commands.Cog):
     @commands.command(name='stats', aliases=['--stats', '-stats'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def stats_command(self, ctx: commands.Context) -> None:
-        embed: discord.Embed = discord.Embed(
-            color=0xefefef,
-            title=None,
-            description=None
-        )
+        embed: discord.Embed = discord.Embed(color=0xefefef)
         users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"

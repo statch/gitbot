@@ -1,6 +1,7 @@
 import asyncio
 import os
 import discord
+from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -40,6 +41,11 @@ class DatabaseWorkers(commands.Cog):
         )
         if new_release['usesCustomOpenGraphImage']:
             embed.set_image(url=new_release['openGraphImageUrl'])
+
+        body: str = BeautifulSoup(new_release['release']['descriptionHTML'], features='html.parser').getText()[:387].replace('\n\n', '\n')
+        body: str = f"```{body[:body.rindex(' ')]}...```".strip()
+
+        embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
 
         success: bool = await self.doc_send(doc, embed)
         if not success:

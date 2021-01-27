@@ -205,6 +205,7 @@ class GitHubAPI:
                 releaseAssets {{
                   totalCount
                 }}
+                descriptionHTML
                 publishedAt
                 tagName
                 url

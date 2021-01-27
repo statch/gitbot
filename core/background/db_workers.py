@@ -26,13 +26,13 @@ class DatabaseWorkers(commands.Cog):
                 if res:
                     if (t := res['release']['tagName']) != item['release']:
                         await self.handle_feed_item(doc, item, res)
-                        changed = True
+                        changed: bool = True
                     update.append((item['repo'], t))
                 else:
                     await self.handle_missing_item(doc, item)
                 await asyncio.sleep(2)
             if changed:
-                await self.update_with_data(doc['guild_id'], update)
+                await self.update_with_data(doc['_id'], update)
 
     async def handle_feed_item(self, doc: dict, item: dict, new_release: dict) -> None:  # TODO Finish this
         embed = discord.Embed(
@@ -45,10 +45,10 @@ class DatabaseWorkers(commands.Cog):
 
         success: bool = await self.doc_send(doc, embed)
         if not success:
-            print('fuck')
+            await self.db.find_one_and_delete({'_id': doc['_id']})
 
     async def update_with_data(self, guild_id: int, to_update: List[Tuple[str]]) -> None:
-        await self.db.find_one_and_update({'guild_id': guild_id}, {
+        await self.db.find_one_and_update({'_id': guild_id}, {
             '$set': {'feed': [dict(repo=repo, release=release) for repo, release in to_update]}})
 
     async def handle_missing_item(self, doc: dict, item: dict) -> None:  # TODO Details here
@@ -71,14 +71,15 @@ class DatabaseWorkers(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        await self.db.find_one_and_delete({'guild_id': guild.id})
+        await self.db.find_one_and_delete({'_id': guild.id})
 
     async def doc_send(self, doc: dict, embed: discord.Embed) -> bool:
-        channel: discord.TextChannel = await self.bot.fetch_channel(doc['channel_id'])
-        if channel:
+        try:
+            channel: discord.TextChannel = await self.bot.fetch_channel(doc['channel_id'])
             await channel.send(embed=embed)
-            return True
-        return False
+        except discord.errors.NotFound:
+            return False
+        return True
 
 
 def setup(bot: commands.Bot) -> None:

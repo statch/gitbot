@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional, Tuple
+from typing import Union, List, Optional, Tuple, Dict, AnyStr
 from gidgethub import BadRequest
 from datetime import date, datetime
 from itertools import cycle
@@ -38,7 +38,33 @@ class GitHubAPI:
     def token(self) -> str:
         return next(self.tokens)
 
-    async def ghprofile_stats(self, name: str) -> Union[namedtuple, None]:
+    async def post_gql(self,
+                       query: str,
+                       key: Optional[str] = None,
+                       complex_: bool = False,
+                       just_query: bool = False) -> Union[Dict, AnyStr, None]:
+        res: dict = await (await self.ses.post(GRAPHQL,
+                                               json={'query': query},
+                                               headers={'Authorization': f'token {self.token}'})).json()
+        if just_query:
+            return res
+
+        if 'errors' in res:
+            if complex_:
+                if not res['data']['repository']:
+                    return 'repo'
+                return 'number'
+            return None
+        res: dict = res['data']
+        if not key:
+            return res
+        if len(split := key.split()) > 1:
+            for key in split:
+                res = res[key]
+            return res
+        return res[key]
+
+    async def ghprofile_stats(self, name: str) -> Union[GhStats, None]:
         if '/' in name or '&' in name:
             return None
         res = await (await self.ses.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
@@ -131,17 +157,7 @@ class GitHubAPI:
         }}
         """.format(user=user)
 
-        res = await self.ses.post(GRAPHQL,
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
-
-        data: dict = await res.json()
-
-        if 'errors' in data:
-            return None
-        data = data['data']['user']
-
-        return data
+        return await self.post_gql(query, 'user')
 
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
@@ -199,23 +215,13 @@ class GitHubAPI:
         }}
         """.format(owner=owner, name=name)
 
-        res = await self.ses.post(GRAPHQL,  # TODO deal with duplicated code?
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
-
-        data: dict = dict(await res.json())
-
-        if "errors" in data:
-            return None
-
-        data = data['data']['repository']
-
-        data['release'] = data['releases']['nodes'][0]
-        data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
-        del data['primaryLanguage']
-        del data['releases']
-
-        return data
+        data = await self.post_gql(query, 'repository')
+        if data:
+            data['release'] = data['releases']['nodes'][0]
+            data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
+            del data['primaryLanguage']
+            del data['releases']
+            return data
 
     async def get_repo(self, repo: str) -> Optional[dict]:
         split: list = repo.split('/')
@@ -283,21 +289,12 @@ class GitHubAPI:
         }}
         """.format(owner=owner, name=repository)
 
-        res = await self.ses.post(GRAPHQL,
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
-
-        data: dict = dict(await res.json())
-
-        if "errors" in data:
-            return None
-
-        data = data['data']['repository']
-        data['languages'] = data['languages']['totalCount']
-        data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
-        data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
-        data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
-
+        data: dict = await self.post_gql(query, 'repository')
+        if data:
+            data['languages'] = data['languages']['totalCount']
+            data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
+            data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
+            data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
         return data
 
     async def get_pull_request(self, repo: str, number: int) -> Union[dict, str]:
@@ -385,27 +382,18 @@ class GitHubAPI:
         }}
         """.format(name=repository, owner=owner, number=number)
 
-        res = await self.ses.post(GRAPHQL,
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
-
-        data: dict = dict(await res.json())
-
-        if "errors" in data:
-            if not data['data']['repository']:
-                return 'repo'
-            return 'number'
-
-        data = data['data']['repository']['pullRequest']
-        data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
-        data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
-        data['reviewers'] = {}
-        data['reviewers']['users'] = [
-            (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
-             o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
-            in data['reviewRequests']['edges']]
-        data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
-        data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in data['participants']['edges']]
+        data = await self.post_gql(query, 'repository pullRequest', complex_=True)
+        if data:
+            data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
+            data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
+            data['reviewers'] = {}
+            data['reviewers']['users'] = [
+                (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
+                 o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
+                in data['reviewRequests']['edges']]
+            data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
+            data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in
+                                             data['participants']['edges']]
         return data
 
     async def get_issue(self, repo: str, number: int) -> Union[dict, str]:
@@ -453,31 +441,21 @@ class GitHubAPI:
         }}
         """.format(repo_name=repository, owner_name=owner, issue_number=number)
 
-        res = await self.ses.post(GRAPHQL,
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
-
-        data: dict = dict(await res.json())
-
-        if "errors" in data:
-            if not data['data']['repository']:
-                return 'repo'
-            return 'number'
-
-        data: dict = data['data']
-
-        comment_count: int = data['repository']['issue']['comments']['totalCount']
-        assignee_count: int = data['repository']['issue']['assignees']['totalCount']
-        participant_count: int = data['repository']['issue']['participants']['totalCount']
-        del data['repository']['issue']['comments']
-        data['repository']['issue']['body']: str = data['repository']['issue']['bodyText']
-        del data['repository']['issue']['bodyText']
-        data['repository']['issue']['commentCount']: int = comment_count
-        data['repository']['issue']['assigneeCount']: int = assignee_count
-        data['repository']['issue']['participantCount']: int = participant_count
-        data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in
-                                                       list(data['repository']['issue']['labels']['edges'])]
-        return data['repository']['issue']
+        data: dict = await self.post_gql(query, complex_=True)
+        if isinstance(data, dict):
+            comment_count: int = data['repository']['issue']['comments']['totalCount']
+            assignee_count: int = data['repository']['issue']['assignees']['totalCount']
+            participant_count: int = data['repository']['issue']['participants']['totalCount']
+            del data['repository']['issue']['comments']
+            data['repository']['issue']['body']: str = data['repository']['issue']['bodyText']
+            del data['repository']['issue']['bodyText']
+            data['repository']['issue']['commentCount']: int = comment_count
+            data['repository']['issue']['assigneeCount']: int = assignee_count
+            data['repository']['issue']['participantCount']: int = participant_count
+            data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in
+                                                           list(data['repository']['issue']['labels']['edges'])]
+            return data['repository']['issue']
+        return data
 
     async def get_user(self, user: str):
         year_start: str = f'{date.today().year}-01-01T00:00:30Z'
@@ -518,11 +496,9 @@ class GitHubAPI:
           }}
         }}
         """.format(user=user, from_=year_start, to=to)
-        res = await self.ses.post(GRAPHQL,
-                                  json={"query": query},
-                                  headers={"Authorization": f"token {self.token}"})
 
-        data = await res.json()
+        data = await self.post_gql(query, just_query=True)
+
         if not data['data']['user']:
             return None
 

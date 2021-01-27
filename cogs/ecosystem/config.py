@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 Git = bot_config.Git
 
 
-class Config(commands.Cog):
+class Config(commands.Cog):  # TODO add release feed config
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store.users

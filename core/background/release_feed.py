@@ -55,7 +55,8 @@ class ReleaseFeed(commands.Cog):
                       f'{datetime.datetime.strptime(new_release["release"]["createdAt"], "%Y-%m-%dT%H:%M:%SZ").strftime("%e, %b %Y")}\n'
 
         asset_c: int = new_release["release"]["releaseAssets"]["totalCount"]
-        assets: str = f'Has {asset_c} assets attached\n'.replace('0', 'no') if asset_c != 1 else 'Has one asset attached'
+        assets: str = f'Has {asset_c} assets attached\n'.replace('0',
+                                                                 'no') if asset_c != 1 else 'Has one asset attached'
         info = f'{author}{assets}'
 
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
@@ -72,7 +73,9 @@ class ReleaseFeed(commands.Cog):
     async def handle_missing_item(self, doc: dict, item: dict) -> None:  # TODO Details here
         embed = discord.Embed(
             color=0xda4353,
-            title=f'One of your saved repos was deleted/renamed!'
+            title=f'One of your release feed repos was deleted/renamed!',
+            description=f'A repository previously saved as `{item["repo"]}` was **deleted or renamed** by the owner. '
+                        f'Please re-add it under the new name.'
         )
         if len(doc['feed']) == 1:
             await self.db.find_one_and_delete(doc)
@@ -93,9 +96,11 @@ class ReleaseFeed(commands.Cog):
 
     async def doc_send(self, doc: dict, embed: discord.Embed) -> bool:
         try:
-            channel: discord.TextChannel = await self.bot.fetch_channel(doc['channel_id'])
-            await channel.send(embed=embed)
-        except discord.errors.NotFound:
+            webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + doc['hook'],
+                                               adapter=discord.AsyncWebhookAdapter(Git.ses))
+            await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+        except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
+            await self.db.find_one_and_delete({'_id': doc['_id']})
             return False
         return True
 

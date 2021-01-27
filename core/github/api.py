@@ -224,13 +224,13 @@ class GitHubAPI:
         }}
         """.format(owner=owner, name=name)
 
-        data = await self.post_gql(query, 'repository')
+        data: dict = await self.post_gql(query, 'repository')
         if data:
             data['release'] = data['releases']['nodes'][0]
             data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
             del data['primaryLanguage']
             del data['releases']
-            return data
+        return data
 
     async def get_repo(self, repo: str) -> Optional[dict]:
         split: list = repo.split('/')

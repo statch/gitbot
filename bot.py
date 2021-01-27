@@ -29,7 +29,7 @@ logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
-    'core.background.db_workers',
+    'core.background.release_feed',
     'core.background.misc',
     'core.debug',
     'cogs.github.base.user',

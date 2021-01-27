@@ -9,7 +9,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from core.bot_config import Git
 
 
-class DatabaseWorkers(commands.Cog):
+class ReleaseFeed(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION'))
@@ -17,7 +17,7 @@ class DatabaseWorkers(commands.Cog):
         self.release_feed_worker.start()
 
     @tasks.loop(minutes=45)
-    async def release_feed_worker(self) -> None:  # TODO Chunk this shit
+    async def release_feed_worker(self) -> None:
         async for doc in self.db.find({}):
             changed: bool = False
             update: list = []
@@ -101,4 +101,4 @@ class DatabaseWorkers(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(DatabaseWorkers(bot))
+    bot.add_cog(ReleaseFeed(bot))

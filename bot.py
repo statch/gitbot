@@ -1,3 +1,5 @@
+# TODO load/unload/reload etc.
+
 import os
 import discord
 import logging
@@ -27,7 +29,8 @@ logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
-    'core.background',
+    'core.background.db_workers',
+    'core.background.misc',
     'core.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',

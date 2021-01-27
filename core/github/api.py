@@ -2,9 +2,10 @@ import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Tuple
 from gidgethub import BadRequest
 from datetime import date, datetime
+from itertools import cycle
 from collections import namedtuple
 
 BASE_URL: str = 'https://api.github.com'
@@ -19,19 +20,23 @@ class GitHubAPI:
 
     Parameters
     ----------
-    token: str
-        The GitHub access token to send requests with.
+    tokens: list
+        The GitHub access tokens to send requests with.
     requester: str
         A :class:`str` denoting the author of the requests (ex. 'BigNoob420')
     """
 
-    def __init__(self, token: str, requester: str):
+    def __init__(self, tokens: Tuple[Optional[str]], requester: str):
         requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
-        self.token: str = token
+        self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
         self.gh = gh.GitHubAPI(session=self.ses,
                                requester=requester,
                                oauth_token=self.token)
+
+    @property
+    def token(self) -> str:
+        return next(self.tokens)
 
     async def ghprofile_stats(self, name: str) -> Union[namedtuple, None]:
         if '/' in name or '&' in name:
@@ -156,6 +161,61 @@ class GitHubAPI:
             else:
                 return False
         return None
+
+    async def get_latest_release(self, repo: str) -> Optional[dict]:
+        split: list = repo.split('/')
+        owner: str = split[0]
+        name: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: "{name}", owner: "{owner}") {{
+            url
+            usesCustomOpenGraphImage
+            openGraphImageUrl
+            primaryLanguage {{
+              color 
+            }}
+            releases(last: 1) {{
+              nodes {{
+                isDraft
+                releaseAssets {{
+                  totalCount
+                }}
+                publishedAt
+                tagName
+                url
+                isPrerelease
+                isLatest
+                publishedAt
+                name
+                author {{
+                  login
+                  url 
+                }}
+              }}
+            }}
+          }}
+        }}
+        """.format(owner=owner, name=name)
+
+        res = await self.ses.post(GRAPHQL,  # TODO deal with duplicated code?
+                                  json={"query": query},
+                                  headers={"Authorization": f"token {self.token}"})
+
+        data: dict = dict(await res.json())
+
+        if "errors" in data:
+            return None
+
+        data = data['data']['repository']
+
+        data['release'] = data['releases']['nodes'][0]
+        data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
+        del data['primaryLanguage']
+        del data['releases']
+
+        return data
 
     async def get_repo(self, repo: str) -> Optional[dict]:
         split: list = repo.split('/')

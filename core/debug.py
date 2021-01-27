@@ -46,7 +46,7 @@ class Debug(commands.Cog):
 
     @is_me()
     @commands.command(aliases=['--rate', '--ratelimit'])
-    async def rate(self, ctx: commands.Context) -> None:
+    async def rate(self, ctx: commands.Context) -> None:  # TODO adapt this for the new token system
         rate = await Git.get_ratelimit()
         embed = discord.Embed(
             color=0xefefef,

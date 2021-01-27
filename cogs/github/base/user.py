@@ -29,7 +29,7 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='--info', aliases=['-i', '-info'])
-    async def user_info_command(self, ctx: commands.Context, user: str) -> None:
+    async def user_info_command(self, ctx: commands.Context, user: str) -> None:  # TODO Rework this a little
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:

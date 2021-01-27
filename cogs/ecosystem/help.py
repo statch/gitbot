@@ -5,7 +5,7 @@ from core import bot_config
 Git = bot_config.Git
 
 
-class Help(commands.Cog):
+class Help(commands.Cog):  # TODO Just rewrite this from scratch
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"

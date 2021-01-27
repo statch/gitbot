@@ -69,7 +69,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='privacy', aliases=["policy", '--privacy', '-privacy', '-policy', '--policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def privacy_policy(self, ctx: commands.Context) -> None:
+    async def privacy_policy(self, ctx: commands.Context) -> None:  # TODO new TOS
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f"{self.emoji}  Privacy Policy",
@@ -103,7 +103,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='vote', aliases=['--vote', '-vote'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def vote_command(self, ctx: commands.Context) -> None:
+    async def vote_command(self, ctx: commands.Context) -> None:  # TODO ???
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,

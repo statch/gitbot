@@ -209,6 +209,7 @@ class GitHubAPI:
                 publishedAt
                 tagName
                 url
+                createdAt
                 isPrerelease
                 isLatest
                 publishedAt

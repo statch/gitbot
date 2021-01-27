@@ -1,6 +1,7 @@
 import asyncio
 import os
 import discord
+import datetime
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
@@ -33,10 +34,13 @@ class DatabaseWorkers(commands.Cog):
             if changed:
                 await self.update_with_data(doc['_id'], update)
 
-    async def handle_feed_item(self, doc: dict, item: dict, new_release: dict) -> None:  # TODO Finish this
+    async def handle_feed_item(self, doc: dict, item: dict, new_release: dict) -> None:
+        stage = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
+        if new_release['release']['isDraft']:
+            stage += ' draft'
         embed = discord.Embed(
             color=new_release['color'],
-            title=f'New {item["repo"]} release!',
+            title=f'New {item["repo"]} {stage}! `{new_release["release"]["tagName"]}`',
             url=new_release['release']['url']
         )
         if new_release['usesCustomOpenGraphImage']:
@@ -46,7 +50,16 @@ class DatabaseWorkers(commands.Cog):
             body: str = BeautifulSoup(body, features='html.parser').getText()[:387].replace('\n\n', '\n')
             body: str = f"```{body[:body.rindex(' ')]}...```".strip()
 
+        author: dict = new_release["release"]["author"]
+        author: str = f'Created by [{author["login"]}]({author["url"]}) on ' \
+                      f'{datetime.datetime.strptime(new_release["release"]["createdAt"], "%Y-%m-%dT%H:%M:%SZ").strftime("%e, %b %Y")}\n'
+
+        asset_c: int = new_release["release"]["releaseAssets"]["totalCount"]
+        assets: str = f'Has {asset_c} assets attached\n'.replace('0', 'no') if asset_c != 1 else 'Has one asset attached'
+        info = f'{author}{assets}'
+
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
+        embed.add_field(name=':mag_right: Info:', value=info)
 
         success: bool = await self.doc_send(doc, embed)
         if not success:

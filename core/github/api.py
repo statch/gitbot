@@ -2,12 +2,13 @@ import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional, Tuple, Dict, AnyStr
+from typing import Union, List, Optional, Dict, AnyStr
 from gidgethub import BadRequest
 from datetime import date, datetime
 from itertools import cycle
 from collections import namedtuple
 
+YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
 GhStats = namedtuple('Stats', 'all_time month fortnight week day hour')
@@ -26,8 +27,9 @@ class GitHubAPI:
         A :class:`str` denoting the author of the requests (ex. 'BigNoob420')
     """
 
-    def __init__(self, tokens: Tuple[Optional[str]], requester: str):
+    def __init__(self, tokens: tuple, requester: str):
         requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        self.__tokens = tokens
         self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
         self.gh = gh.GitHubAPI(session=self.ses,
@@ -73,8 +75,13 @@ class GitHubAPI:
             return None
         return GhStats(*[int(v) for v in period.values()])
 
-    async def get_ratelimit(self) -> dict:
-        return await self.gh.getitem("/rate_limit")
+    async def get_ratelimit(self) -> tuple:
+        results: list = []
+        for token in self.__tokens:
+            data = await (await self.ses.get(f'https://api.github.com/rate_limit',
+                                              headers={'Authorization': f'token {token}'})).json()
+            results.append(data)
+        return tuple(results), len(self.__tokens)
 
     async def get_user_repos(self, user: str) -> Optional[list]:
         try:
@@ -458,7 +465,6 @@ class GitHubAPI:
         return data
 
     async def get_user(self, user: str):
-        year_start: str = f'{date.today().year}-01-01T00:00:30Z'
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')
         query: str = """
         {{ 
@@ -495,7 +501,7 @@ class GitHubAPI:
             }}
           }}
         }}
-        """.format(user=user, from_=year_start, to=to)
+        """.format(user=user, from_=YEAR_START, to=to)
 
         data = await self.post_gql(query, just_query=True)
 
@@ -511,4 +517,4 @@ class GitHubAPI:
         data['public_repos'] = data['repositories']['totalCount']
         data['following'] = data['following']['totalCount']
         data['followers'] = data['followers']['totalCount']
-        return dict(data)
+        return data

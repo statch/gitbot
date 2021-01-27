@@ -43,7 +43,7 @@ class DatabaseWorkers(commands.Cog):
         if new_release['usesCustomOpenGraphImage']:
             embed.set_image(url=new_release['openGraphImageUrl'])
 
-        success = await self.doc_send(doc, embed)
+        success: bool = await self.doc_send(doc, embed)
         if not success:
             print('fuck')
 

@@ -46,25 +46,29 @@ class Debug(commands.Cog):
 
     @is_me()
     @commands.command(aliases=['--rate', '--ratelimit'])
-    async def rate(self, ctx: commands.Context) -> None:  # TODO adapt this for the new token system
-        rate = await Git.get_ratelimit()
+    async def rate(self, ctx: commands.Context) -> None:
+        data = await Git.get_ratelimit()
+        rate = data[0]
         embed = discord.Embed(
             color=0xefefef,
             title=f'{self.e}  Rate-limiting',
             description=None
         )
-        graphql = rate['resources']['graphql']
-        rest = rate['rate']
-        search = rate['resources']['search']
+        graphql = [g['resources']['graphql'] for g in rate]
+        used_gql = sum(g['used'] for g in graphql)
+        rest = [r['rate'] for r in rate]
+        used_rest = sum(r['used'] for r in rest)
+        search = [s['resources']['search'] for s in rate]
+        used_search = sum(s['used'] for s in search)
         embed.add_field(name='REST',
-                        value=f"{rest['used']}/{rate['rate']['limit']}\n\
-                        `{dt.datetime.fromtimestamp(rest['reset']).strftime('%X')}`")
+                        value=f"{used_rest}/{data[1] * 5000}\n\
+                        `{dt.datetime.fromtimestamp(rest[0]['reset']).strftime('%X')}`")
         embed.add_field(name='GraphQL',
-                        value=f"{graphql['used']}/{graphql['limit']}\n\
-                        `{dt.datetime.fromtimestamp(graphql['reset']).strftime('%X')}`")
+                        value=f"{used_gql}/{data[1] * 5000}\n\
+                        `{dt.datetime.fromtimestamp(graphql[0]['reset']).strftime('%X')}`")
         embed.add_field(name='Search',
-                        value=f"{search['used']}/{search['limit']}\n\
-                        `{dt.datetime.fromtimestamp(search['reset']).strftime('%X')}`")
+                        value=f"{used_search}/{data[1] * 30}\n\
+                        `{dt.datetime.fromtimestamp(search[0]['reset']).strftime('%X')}`")
         await ctx.send(embed=embed)
 
     @commands.command()

@@ -68,7 +68,7 @@ class BotInfo(commands.Cog):
 
     @commands.command(name='privacy', aliases=["policy", '--privacy', '-privacy', '-policy', '--policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def privacy_policy(self, ctx: commands.Context) -> None:  # TODO new TOS
+    async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{self.emoji}  Privacy Policy'

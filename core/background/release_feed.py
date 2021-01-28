@@ -36,7 +36,7 @@ class ReleaseFeed(commands.Cog):
                 await self.update_with_data(doc['_id'], update)
 
     async def handle_feed_item(self, doc: dict, item: dict, new_release: dict) -> None:
-        stage = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
+        stage: str = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
         if new_release['release']['isDraft']:
             stage += ' draft'
         embed: discord.Embed = discord.Embed(
@@ -58,7 +58,7 @@ class ReleaseFeed(commands.Cog):
         asset_c: int = new_release["release"]["releaseAssets"]["totalCount"]
         assets: str = f'Has {asset_c} assets attached\n'.replace('0',
                                                                  'no') if asset_c != 1 else 'Has one asset attached'
-        info = f'{author}{assets}'
+        info: str = f'{author}{assets}'
 
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)

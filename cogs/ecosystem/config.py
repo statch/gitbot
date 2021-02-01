@@ -1,11 +1,9 @@
 import discord
 import os
 from discord.ext import commands
-from core import bot_config
+from core.bot_config import Git
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
-
-Git = bot_config.Git
 
 
 class Config(commands.Cog):  # TODO add release feed config

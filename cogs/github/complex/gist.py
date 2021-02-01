@@ -2,11 +2,10 @@ import discord
 import datetime
 from asyncio import TimeoutError
 from discord.ext import commands
-from core import bot_config
+from core.bot_config import Git
 from ext.manager import Manager
 from typing import Optional
 
-Git = bot_config.Git
 mgr = Manager()
 
 

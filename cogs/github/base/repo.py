@@ -4,10 +4,8 @@ import re
 import io
 from discord.ext import commands
 from typing import Union, Optional
-from core import bot_config
+from core.bot_config import Git
 from ext.regex import MD_EMOJI_RE
-
-Git = bot_config.Git
 
 
 class Repo(commands.Cog):

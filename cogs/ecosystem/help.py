@@ -1,8 +1,5 @@
 from discord.ext import commands
 import discord
-from core import bot_config
-
-Git = bot_config.Git
 
 
 class Help(commands.Cog):  # TODO Just rewrite this from scratch

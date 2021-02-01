@@ -2,9 +2,7 @@ import discord
 import datetime
 from discord.ext import commands
 from typing import Union, Optional
-from core import bot_config
-
-Git = bot_config.Git
+from core.bot_config import Git
 
 
 class User(commands.Cog):

@@ -1,10 +1,8 @@
 import discord
 import datetime
 from typing import Optional, Union
-from core import bot_config
+from core.bot_config import Git
 from discord.ext import commands
-
-Git = bot_config.Git
 
 
 class Org(commands.Cog):

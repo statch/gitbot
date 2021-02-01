@@ -1,10 +1,9 @@
 import discord
 import datetime
 from typing import Optional
-from core import bot_config
+from core.bot_config import Git
 from discord.ext import commands
 
-Git = bot_config.Git
 PR_STATES: dict = {
     "open": "<:pr_open:795793711312404560>",
     "closed": "<:pr_closed:788518707969785886>",

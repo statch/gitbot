@@ -31,28 +31,28 @@ class Lines(commands.Cog):
                 return 0
 
         res = await self.ses.get(url)
-        content = await res.text(encoding='utf-8')
+        content: str = await res.text(encoding='utf-8')
 
         if res.status == 404 or '<title>Checking your Browser - GitLab</title>' in content:
             return 3
 
-        lines_ = content.splitlines(keepends=True)
+        lines_: list = content.splitlines(keepends=True)
 
         if not data[4] and lines_[int(data[3]) - 1] == '\n':  # if the request is a single, empty line
             return 1
 
-        extension = url[url.rindex('.') + 1:]
-        extension = 'js' if extension == 'ts' else extension
+        extension: str = url[url.rindex('.') + 1:]
+        extension: str = 'js' if extension == 'ts' else extension
 
-        lines = []
+        lines: list = []
         for line in lines_[int(data[3]) - 1:int(data[4]) if data[4] != '' else int(data[3])]:
             if line == '\r\n' or line.endswith('\n'):
                 lines.append(line)
                 continue
             lines.append(f"{line}\n")
 
-        text = ''.join(lines)
-        result = f"```{extension}\n{text}\n```"
+        text: str = ''.join(lines)
+        result: str = f"```{extension}\n{text}\n```"
 
         return result
 

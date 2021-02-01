@@ -29,7 +29,6 @@ logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
-    'core.background.release_feed',
     'core.background.misc',
     'core.debug',
     'cogs.github.base.user',
@@ -41,6 +40,7 @@ extensions: list = [
     'cogs.github.other.lines',
     'cogs.github.other.info',
     'cogs.github.other.license',
+    'cogs.github.complex.workers.release_feed',
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',
@@ -49,7 +49,8 @@ extensions: list = [
 ]
 
 if PRODUCTION:
-    extensions.extend([f'cogs.botlists.{file[:-3]}' for file in os.listdir('cogs/botlists')])
+    extensions.extend([f'cogs.botlists.major.{file[:-3]}' for file in os.listdir('cogs/botlists/major')])
+    extensions.extend([f'cogs.botlists.minor.{file[:-3]}' for file in os.listdir('cogs/botlists/minor')])
 
 for extension in extensions:
     logger.info(f'Loading {extension}...')

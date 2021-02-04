@@ -81,6 +81,7 @@ class Config(commands.Cog):  # TODO add release feed config
 
                                                                    timeout=30)
                     if (m := msg.content.lower()) == 'cancel':
+                        await base_msg.delete()
                         await ctx.send(f'{self.emoji}  Release Feed channel setup **cancelled.**')
                         return
                     elif m == 'create':

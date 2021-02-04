@@ -226,7 +226,7 @@ class GitHubAPI:
 
         data: dict = await self.post_gql(query, 'repository')
         if data:
-            data['release'] = data['releases']['nodes'][0]
+            data['release'] = data['releases']['nodes'][0] if data['releases']['nodes'] else None
             data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
             del data['primaryLanguage']
             del data['releases']
@@ -299,6 +299,7 @@ class GitHubAPI:
         """.format(owner=owner, name=repository)
 
         data: dict = await self.post_gql(query, 'repository')
+        print(data)
         if data:
             data['languages'] = data['languages']['totalCount']
             data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])

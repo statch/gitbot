@@ -17,6 +17,10 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(
                 f"{self.e}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**")
+        elif isinstance(error, commands.BotMissingPermissions):
+            await ctx.send(
+                f"{self.e}  **I am missing permissions required to do this!**"
+                f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
         elif not PRODUCTION:
             raise error
         else:

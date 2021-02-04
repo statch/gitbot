@@ -25,10 +25,11 @@ class ReleaseFeed(commands.Cog):
             for item in doc['feed']:
                 res: Optional[dict] = await Git.get_latest_release(item['repo'])
                 if res:
-                    if (t := res['release']['tagName']) != item['release']:
-                        await self.handle_feed_item(doc, item, res)
-                        changed: bool = True
-                    update.append((item['repo'], t))
+                    if res['release']:
+                        if (t := res['release']['tagName']) != item['release']:
+                            await self.handle_feed_item(doc, item, res)
+                            changed: bool = True
+                        update.append((item['repo'], t))
                 else:
                     await self.handle_missing_item(doc, item)
                 await asyncio.sleep(2)

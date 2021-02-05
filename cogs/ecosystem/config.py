@@ -133,10 +133,21 @@ class Config(commands.Cog):  # TODO add release feed config
         if not r:
             await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
         if g:
-            await self.guild_db.update_one({'_id': ctx.guild.id},
-                                           {'$push': {'feed': {'repo': repo, 'release': r['release'][
-                                               'tagName'] if r['release'] else None}}})
-            await ctx.send(f'{self.emoji} **{repo}\'s** releases will now be logged.')
+            if len(g['feed']) < 3:
+                await self.guild_db.update_one({'_id': ctx.guild.id},
+                                               {'$push': {'feed': {'repo': repo, 'release': r['release'][
+                                                   'tagName'] if r['release'] else None}}})
+                await ctx.send(f'{self.emoji} **{repo}\'s** releases will now be logged.')
+            else:
+                embed_limit_reached: discord.Embed = discord.Embed(
+                    color=0xda4353,
+                    title='Release Feed repo limit reached!',
+                    description=f'This guild has reached the **limit of 3 release feed repos.**'
+                                f' You can remove a previously added repo by typing `git config -delete feed`'
+                )
+                embed_limit_reached.set_footer(text=f'You need the Manage Channels to do that.',
+                                               icon_url=self.bot.user.avatar_url)
+                await ctx.send(embed=embed_limit_reached)
 
     @config_command_group.command(name='--user', aliases=['-u', '-user', 'user'])
     @commands.cooldown(15, 30, commands.BucketType.user)

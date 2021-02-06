@@ -133,6 +133,10 @@ class Config(commands.Cog):  # TODO add release feed config
         if not r:
             await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
         if g:
+            for r in g['feed']:
+                if r['repo'].lower() == repo.lower():
+                    await ctx.send(f'{self.e}  That repo\'s releases are **already being logged!**')
+                    return
             if len(g['feed']) < 3:
                 await self.guild_db.update_one({'_id': ctx.guild.id},
                                                {'$push': {'feed': {'repo': repo, 'release': r['release'][

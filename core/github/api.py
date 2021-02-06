@@ -299,7 +299,6 @@ class GitHubAPI:
         """.format(owner=owner, name=repository)
 
         data: dict = await self.post_gql(query, 'repository')
-        print(data)
         if data:
             data['languages'] = data['languages']['totalCount']
             data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])

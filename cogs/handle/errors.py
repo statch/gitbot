@@ -21,6 +21,10 @@ class Errors(commands.Cog):
             await ctx.send(
                 f"{self.e}  **I am missing permissions required to do this!**"
                 f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send(
+                f"{self.e}  **You're missing permissions required to do this!**"
+                f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
         elif not PRODUCTION:
             raise error
         else:

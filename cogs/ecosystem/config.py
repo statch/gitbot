@@ -180,17 +180,55 @@ class Config(commands.Cog):  # TODO add release feed config
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_field_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            lines: list = ["**You can delete stored quick access data by running the following commands:**",
-                           f"`git config --delete user`" + f' {self.ga} ' + 'delete the quick access user',
-                           f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization',
-                           f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo',
-                           f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data']
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{self.emoji}  Delete Quick Access Data",
-                description='\n'.join(lines)
+                description=f"**You can delete stored quick access data by running the following commands:**\n"
+                            f"`git config --delete user`" + f' {self.ga} ' + 'delete the quick access user\n'
+                            f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization\n'
+                            f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo\n'
+                            f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data\n'
             )
             await ctx.send(embed=embed)
+
+    @delete_field_group.group(name='feed', aliases=['-feed', '--feed'])
+    @commands.cooldown(15, 30, commands.BucketType.guild)
+    async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
+        if repo.lower() == 'all':
+            await ctx.invoke(self.bot.get_command('config delete feed all'))
+            return
+        if not repo:
+            embed: discord.Embed = discord.Embed(
+                color=0xefefef,
+                title='Delete Release Feed data',
+                description=f'**You can delete stored release feed data by running the following commands:**\n'
+                            f'`git config -delete feed {{repo}}` {self.ga} unsubscribe from a specific repo\n'
+                            f'`git config -delete feed all` {self.ga} unsubscribe from all repos'
+            )
+            await ctx.send(embed=embed)
+        else:
+            guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+            if guild:
+                for r in guild['feed']:
+                    if r['repo'].lower() == repo.lower():
+                        guild['feed'].remove(r)
+                        await self.guild_db.update_one(guild, {'$set': {'feed': guild['feed']}})
+                        await ctx.send(f'{self.emoji}  {repo}\'s releases will **no longer be logged.**')
+                    else:
+                        await ctx.send(f'{self.e}  That repo\'s releases are **not currently logged!**')
+            else:
+                await ctx.send(f'{self.e}  You don\'t have a release feed channel configured!')
+
+    @delete_feed_group.command(name='all', aliases=['-all', '--all'])
+    @commands.cooldown(15, 30, commands.BucketType.guild)
+    async def delete_all_feeds_command(self, ctx: commands.Context):
+        guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+        if guild is None:
+            await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
+        else:
+            if guild['feed']:
+                await self.guild_db.update_one(guild, {'$set': {'feed': []}})
+            await ctx.send(f'{self.emoji}  All release feeds were **closed successfully.**')
 
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
     @commands.cooldown(15, 30, commands.BucketType.user)

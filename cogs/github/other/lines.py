@@ -1,5 +1,5 @@
 import re
-import ext.regex as regex
+from ext import regex
 from typing import Union
 from discord.ext import commands
 from aiohttp import ClientSession

@@ -10,7 +10,6 @@ from itertools import cycle
 class MiscellaneousBackgroundTasks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.next: int = 0
         self.status_changer.start()
         if PRODUCTION:
             self.statcord: statcord.Client = statcord.Client(self.bot, os.getenv('STATCORD'))

@@ -1,7 +1,0 @@
-from os import getenv
-from dotenv import load_dotenv
-from core.github.api import GitHubAPI
-
-load_dotenv()
-
-Git = GitHubAPI((getenv('GITHUB_MAIN'), getenv('GITHUB_SECONDARY')), 'itsmewulf')

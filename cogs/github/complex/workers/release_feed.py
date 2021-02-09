@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from core.bot_config import Git
+from core.globs import Git
 
 
 class ReleaseFeed(commands.Cog):

@@ -1,13 +1,12 @@
 import json
 import re
 from ext import regex as r
-from core import bot_config
+from core.globs import Git
 from typing import Optional, Union, Callable, Any
 from fuzzywuzzy import fuzz
 from collections import namedtuple
 
 json_path: str = r'./data/'
-Git: bot_config.GitHubAPI = bot_config.Git
 GitCommandData = namedtuple('GitCommandData', 'data type args')
 
 

@@ -1,7 +1,7 @@
 import discord
 import os
 from discord.ext import commands
-from core.bot_config import Git
+from core.globs import Git
 from typing import Optional
 from asyncio import TimeoutError
 from motor.motor_asyncio import AsyncIOMotorClient

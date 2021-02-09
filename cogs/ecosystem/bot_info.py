@@ -1,15 +1,15 @@
 import discord
-from discord.ext import commands
+import platform
 import datetime
 import os
 import psutil
-from ext.manager import Manager
+from discord.ext import commands
+from core.globs import Mgr
 from os.path import isfile, isdir, join
-import platform
+
 
 pid: int = os.getpid()
 process: psutil.Process = psutil.Process(pid)
-mgr: Manager = Manager()
 start_time: datetime.datetime = datetime.datetime.utcnow()
 
 
@@ -35,7 +35,7 @@ class BotInfo(commands.Cog):
         self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.s: str = "<:gs:767809543815954463>"
-        self.s_emoji: str = mgr.emojis["statistics"]
+        self.s_emoji: str = Mgr.emojis["statistics"]
 
     @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
     @commands.cooldown(15, 30, commands.BucketType.member)

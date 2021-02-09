@@ -1,9 +1,7 @@
 import discord
 from discord.ext import commands
 from ext.explicit_checks import verify_send_perms
-from ext.manager import Manager
-
-mgr = Manager()
+from core.globs import Mgr
 
 
 async def guild_text_channels(guild: discord.Guild):
@@ -17,10 +15,10 @@ class Events(commands.Cog):
 
     async def build_guild_embed(self, guild: discord.Guild, state: bool = True) -> discord.Embed:
         if state:
-            title: str = f'{mgr.emojis["checkmark"]}  Joined a new guild!'
+            title: str = f'{Mgr.emojis["checkmark"]}  Joined a new guild!'
             color: int = 0x33ba7c
         else:
-            title: str = f'{mgr.emojis["failure"]}  Removed from a guild.'
+            title: str = f'{Mgr.emojis["failure"]}  Removed from a guild.'
             color: int = 0xda4353
 
         embed = discord.Embed(

@@ -4,7 +4,7 @@ import re
 import io
 from discord.ext import commands
 from typing import Union, Optional
-from core.bot_config import Git
+from core.globs import Git
 from ext.regex import MD_EMOJI_RE
 
 

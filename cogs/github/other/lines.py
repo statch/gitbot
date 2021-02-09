@@ -59,8 +59,8 @@ class Lines(commands.Cog):
     @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def lines_command(self, ctx: commands.Context, link: str) -> None:
-        github_match: list = re.findall(regex.GITHUB_LINES, link)
-        gitlab_match: list = re.findall(regex.GITLAB_LINES, link)
+        github_match: list = re.findall(regex.GITHUB_LINES_RE, link)
+        gitlab_match: list = re.findall(regex.GITLAB_LINES_RE, link)
         if github_match:
             result: str = await self.handle_match(github_match[0])
             platform_term: str = 'repository'

@@ -1,5 +1,5 @@
-from discord.ext import commands
 import discord
+from discord.ext import commands
 
 
 class Help(commands.Cog):  # TODO Just rewrite this from scratch

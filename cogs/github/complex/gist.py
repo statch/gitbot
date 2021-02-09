@@ -2,7 +2,7 @@ import discord
 import datetime
 from asyncio import TimeoutError
 from discord.ext import commands
-from core.bot_config import Git
+from core.globs import Git
 from ext.manager import Manager
 from typing import Optional
 

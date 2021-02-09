@@ -1,11 +1,9 @@
 import discord.ext.commands as commands
 import discord
+import datetime as dt
 import ast
 from ext.decorators import is_me
-from core import bot_config
-import datetime as dt
-
-Git = bot_config.Git
+from core.globs import Git
 
 
 def insert_returns(body):

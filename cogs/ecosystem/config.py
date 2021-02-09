@@ -58,7 +58,7 @@ class Config(commands.Cog):  # TODO add release feed config
 
     @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release'])
     @commands.has_guild_permissions(manage_channels=True)
-    @commands.bot_has_permissions(manage_webhooks=True, manage_channels=True)
+    @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(10, 30, commands.BucketType.guild)
     async def config_release_feed(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
         g: dict = await self.guild_db.find_one({'_id': ctx.guild.id})
@@ -78,7 +78,6 @@ class Config(commands.Cog):  # TODO add release feed config
                     msg: discord.Message = await self.bot.wait_for('message',
                                                                    check=lambda m: (m.channel.id == ctx.channel.id
                                                                                     and m.author.id == ctx.author.id),
-
                                                                    timeout=30)
                     if (m := msg.content.lower()) == 'cancel':
                         await base_msg.delete()
@@ -195,19 +194,18 @@ class Config(commands.Cog):  # TODO add release feed config
             )
             await ctx.send(embed=embed)
 
-    @delete_field_group.group(name='feed', aliases=['-feed', '--feed'])
+    @delete_field_group.group(name='feed', aliases=['-feed', '--feed'], invoke_without_command=True)
+    @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(15, 30, commands.BucketType.guild)
     async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
-        if repo.lower() == 'all':
-            await ctx.invoke(self.bot.get_command('config delete feed all'))
-            return
         if not repo:
             embed: discord.Embed = discord.Embed(
                 color=0xefefef,
                 title='Delete Release Feed data',
                 description=f'**You can delete stored release feed data by running the following commands:**\n'
                             f'`git config -delete feed {{repo}}` {self.ga} unsubscribe from a specific repo\n'
-                            f'`git config -delete feed all` {self.ga} unsubscribe from all repos'
+                            f'`git config -delete feed all` {self.ga} unsubscribe from all repos\n'
+                            f'`git config -delete feed total` {self.ga} unsubscribe from all releases and delete the feed webhook'
             )
             await ctx.send(embed=embed)
         else:
@@ -225,7 +223,8 @@ class Config(commands.Cog):  # TODO add release feed config
 
     @delete_feed_group.command(name='all', aliases=['-all', '--all'])
     @commands.cooldown(15, 30, commands.BucketType.guild)
-    async def delete_all_feeds_command(self, ctx: commands.Context):
+    @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
+    async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
         if guild is None:
             await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
@@ -233,6 +232,25 @@ class Config(commands.Cog):  # TODO add release feed config
             if guild['feed']:
                 await self.guild_db.update_one(guild, {'$set': {'feed': []}})
             await ctx.send(f'{self.emoji}  All release feeds were **closed successfully.**')
+
+    @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
+    @commands.cooldown(10, 30, commands.BucketType.guild)
+    @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
+    @commands.bot_has_guild_permissions()
+    async def delete_feed_with_channel_command(self, ctx: commands.Context) -> None:
+        guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+        if guild is None:
+            await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
+        else:
+            webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
+                                                                adapter=discord.AsyncWebhookAdapter(Git.ses))
+            await self.guild_db.delete_one(guild)
+            try:
+                await webhook.delete()
+            except (discord.NotFound, discord.HTTPException):
+                pass
+            finally:
+                await ctx.send(f'{self.e}  The release feed channel has been **closed successfully.**')
 
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
     @commands.cooldown(15, 30, commands.BucketType.user)

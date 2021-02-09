@@ -77,10 +77,7 @@ class ReleaseFeed(commands.Cog):
             description=f'A repository previously saved as `{item["repo"]}` was **deleted or renamed** by the owner. '
                         f'Please re-add it under the new name.'
         )
-        if len(doc['feed']) == 1:
-            await self.db.find_one_and_delete(doc)
-        else:
-            await self.db.update_one(doc, {'$pull': {'feed': item}})
+        await self.db.update_one(doc, {'$pull': {'feed': item}})
         await self.doc_send(doc, embed)
 
     @release_feed_worker.before_loop

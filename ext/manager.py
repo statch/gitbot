@@ -1,7 +1,7 @@
 import json
 import re
+import importlib
 from ext import regex as r
-from core.globs import Git
 from typing import Optional, Union, Callable, Any
 from fuzzywuzzy import fuzz
 from collections import namedtuple
@@ -16,17 +16,20 @@ def json_dict(name: str) -> dict:
 
 
 class Manager:
-    def __init__(self):
+    Git = importlib.import_module('core.globs')
+
+    def __init__(self, github_instance):
+        self.git = github_instance
         self.licenses: dict = json_dict("licenses")
         self.emojis: dict = json_dict("emoji")
         self.patterns: tuple = ((r.ISSUE_RE, 'issue'),
                                 (r.PR_RE, 'pr'),
                                 (r.REPO_RE, 'repo'),
                                 (r.USER_ORG_RE, 'user_org'))
-        self.type_to_func: dict = {'repo': Git.get_repo,
+        self.type_to_func: dict = {'repo': self.git.get_repo,
                                    'user_org': None,
-                                   'issue': Git.get_issue,
-                                   'pr': Git.get_pull_request}
+                                   'issue': self.git.get_issue,
+                                   'pr': self.git.get_pull_request}
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -50,8 +53,8 @@ class Manager:
                         return obj, pattern[1]
                     return GitCommandData(obj, pattern[1], match)
                 if not action:
-                    if (obj := await Git.get_user((m := match))) is None:
-                        obj: Optional[dict] = await Git.get_org(m)
+                    if (obj := await self.git.get_user((m := match))) is None:
+                        obj: Optional[dict] = await self.git.get_org(m)
                         return GitCommandData(obj, 'org', m) if obj is not None else 'no-user-or-org'
                     return GitCommandData(obj, 'user', m)
                 repo = await action(match)

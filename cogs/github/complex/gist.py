@@ -2,11 +2,8 @@ import discord
 import datetime
 from asyncio import TimeoutError
 from discord.ext import commands
-from core.globs import Git
-from ext.manager import Manager
+from core.globs import Git, Mgr
 from typing import Optional
-
-mgr = Manager()
 
 
 class Gist(commands.Cog):
@@ -112,7 +109,7 @@ class Gist(commands.Cog):
 
     async def get_color_from_files(self, files: list) -> int:
         extensions: list = [f['extension'] for f in files]
-        most_common = await mgr.get_most_common(extensions)
+        most_common = await Mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
             return 0xefefef
         for file in files:

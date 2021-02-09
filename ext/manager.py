@@ -1,6 +1,5 @@
 import json
 import re
-import importlib
 from ext import regex as r
 from typing import Optional, Union, Callable, Any
 from fuzzywuzzy import fuzz
@@ -16,8 +15,6 @@ def json_dict(name: str) -> dict:
 
 
 class Manager:
-    Git = importlib.import_module('core.globs')
-
     def __init__(self, github_instance):
         self.git = github_instance
         self.licenses: dict = json_dict("licenses")

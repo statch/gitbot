@@ -24,9 +24,10 @@ class Config(commands.Cog):  # TODO add release feed config
             lines: list = ["**In this section you can configure various aspects of your experience**",
                            "\n**Quick access**",
                            "These commands allow you to save a user, repo or org to get with a short command.",
-                           "`git config --user {username}` " + self.ga + " Access a saved user with `git --user`",
-                           "`git config --org {org}` " + self.ga + " Access a saved organization with `git --org`",
-                           "`git config --repo {repo}` " + self.ga + " Access a saved repo with `git --repo`",
+                           "`git config --user {username}` " + self.ga + " Access a saved user with `git user`",
+                           "`git config --org {org}` " + self.ga + " Access a saved organization with `git org`",
+                           "`git config --repo {repo}` " + self.ga + " Access a saved repo with `git repo`",
+                           "`git config --feed {repo}` " + self.ga + " Subscribe to new releases of a repository",
                            "\n**You can delete stored data by typing** `git config --delete`"]
             embed = discord.Embed(
                 color=0xefefef,
@@ -191,6 +192,7 @@ class Config(commands.Cog):  # TODO add release feed config
                             f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization\n'
                             f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo\n'
                             f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data\n'
+                            f"`git config --delete feed` {self.ga} view options regarding deleting release feed data"
             )
             await ctx.send(embed=embed)
 

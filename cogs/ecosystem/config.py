@@ -58,6 +58,7 @@ class Config(commands.Cog):  # TODO add release feed config
         await ctx.send(embed=embed)
 
     @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release'])
+    @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(10, 30, commands.BucketType.guild)
@@ -197,6 +198,7 @@ class Config(commands.Cog):  # TODO add release feed config
             await ctx.send(embed=embed)
 
     @delete_field_group.group(name='feed', aliases=['-feed', '--feed'], invoke_without_command=True)
+    @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(15, 30, commands.BucketType.guild)
     async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
@@ -224,6 +226,7 @@ class Config(commands.Cog):  # TODO add release feed config
                 await ctx.send(f'{self.e}  You don\'t have a release feed channel configured!')
 
     @delete_feed_group.command(name='all', aliases=['-all', '--all'])
+    @commands.guild_only()
     @commands.cooldown(15, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
@@ -236,6 +239,7 @@ class Config(commands.Cog):  # TODO add release feed config
             await ctx.send(f'{self.emoji}  All release feeds were **closed successfully.**')
 
     @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
+    @commands.guild_only()
     @commands.cooldown(10, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_guild_permissions()

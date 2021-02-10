@@ -25,6 +25,8 @@ class Errors(commands.Cog):
             await ctx.send(
                 f"{self.e}  **You're missing permissions required to do this!**"
                 f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+        elif isinstance(error, commands.NoPrivateMessage):
+            await ctx.send(f'{self.e}  This command can only be used **inside a server!**')
         elif not PRODUCTION:
             raise error
         else:

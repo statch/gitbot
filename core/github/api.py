@@ -79,7 +79,7 @@ class GitHubAPI:
         results: list = []
         for token in self.__tokens:
             data = await (await self.ses.get(f'https://api.github.com/rate_limit',
-                                              headers={'Authorization': f'token {token}'})).json()
+                                             headers={'Authorization': f'token {token}'})).json()
             results.append(data)
         return tuple(results), len(self.__tokens)
 
@@ -152,6 +152,7 @@ class GitHubAPI:
                     totalCount
                 }}
                 files {{
+                  text
                   name
                   extension
                   language {{

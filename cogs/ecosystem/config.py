@@ -248,10 +248,10 @@ class Config(commands.Cog):  # TODO add release feed config
         if guild is None:
             await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
         else:
-            webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
-                                                                adapter=discord.AsyncWebhookAdapter(Git.ses))
             await self.guild_db.delete_one(guild)
             try:
+                webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
+                    adapter=discord.AsyncWebhookAdapter(Git.ses))
                 await webhook.delete()
             except (discord.NotFound, discord.HTTPException):
                 pass

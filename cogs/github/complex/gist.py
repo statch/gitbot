@@ -5,6 +5,10 @@ from discord.ext import commands
 from core.globs import Git, Mgr
 from typing import Optional
 
+DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
+                           'cpp', 'html', 'php', 'json', 'xml', 'yml',
+                           'nim', 'md', 'go', 'kt')
+
 
 class Gist(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -44,7 +48,7 @@ class Gist(commands.Cog):
             url=data['url']
         )
 
-        embed.set_footer(text=f'To inspect a specific gist, simply send its number in this channel.')
+        embed.set_footer(text=f'Ten latest gists from {user}.\nTo inspect a specific gist, simply send its number in this channel.')
 
         base_msg = await ctx.send(embed=embed)
 
@@ -74,8 +78,7 @@ class Gist(commands.Cog):
                 timeout_embed.set_footer(text='To pick an option, simply send a number next time!')
                 await base_msg.edit(embed=timeout_embed)
                 return
-
-        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content)))
+        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content), 'The content is a preview of the first file of the gist'))
 
     # TODO Finish this (more details)
     async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
@@ -86,6 +89,7 @@ class Gist(commands.Cog):
             description=None,
             url=gist['url']
         )
+        first_file: dict = gist['files'][0]
 
         created_at: str = f"Created by [{data['login']}]({data['url']}) on {datetime.datetime.strptime(gist['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
         updated_at: str = f"Last updated at {datetime.datetime.strptime(gist['updatedAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
@@ -100,6 +104,7 @@ class Gist(commands.Cog):
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
+        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
         if footer:
@@ -113,9 +118,15 @@ class Gist(commands.Cog):
         if most_common in ['.md', '']:
             return 0xefefef
         for file in files:
-            if file['extension'] == most_common and file['language'] is not None:
+            if all([file['extension'] == most_common, file['language'], file['language']['color']]):
                 return int(file['language']['color'][1:], 16)
         return 0xefefef
+
+    def extension(self, ext: str) -> str:
+        ext = ext[1:]
+        if ext == 'ts':
+            return 'js'
+        return ext if ext in DISCORD_MD_LANGS else ''
 
 
 def setup(bot: commands.Bot) -> None:

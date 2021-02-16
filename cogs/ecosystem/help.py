@@ -14,10 +14,10 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
         if ctx.invoked_subcommand is None:
             lines: list = ["In this section you'll find info and usage of my commands.",
                            "\n**You can access specific parts by typing:**",
-                           "`git --help checkout` to fetch information about orgs, repos and users",
-                           "`git --help info` for commands that provide information about the bot itself",
-                           "`git --help config` to store your preferred orgs, repos and users",
-                           "`git --help utility` for other useful commands",
+                           "`git help github` to fetch information from GitHub",
+                           "`git help info` for commands that provide information about the bot itself",
+                           "`git help config` to store your preferred orgs, repos, user and feeds",
+                           "`git help utility` for other useful commands",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
             embed = discord.Embed(
                 title=f"{self.e}  Help",
@@ -27,24 +27,22 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
             embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
             await ctx.send(embed=embed)
 
-    @help_command.command(name='checkout', aliases=['-checkout', '--checkout'])
+    @help_command.command(name='github', aliases=['-github', '--github'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def checkout_help(self, ctx: commands.Context) -> None:
-        lines: list = ["The checkout command allows you to fetch information directly from GitHub.",
-                       "\n**All commands listed below assume being prefixed with** `git checkout`",
-                       "Words in curly braces symbolize arguments that the command requires",
-                       "`--user -info {username}` - get information about a user",
-                       "`--user -repos {username}` - get user's first 15 repos and a link to more",
-                       "`--org -info {organization}` - get info about an organization",
-                       "`--org -repos {organization}` - get organization's first 15 repos and a link to more",
+    async def github_help(self, ctx: commands.Context) -> None:
+        lines: list = ["**Words in curly braces symbolize arguments that the command requires**",
+                       "`git user -info {username}` - get information about a user",
+                       "`git user -repos {username}` - view a user's repos",
+                       "`git org -info {organization}` - get info about an organization",
+                       "`git org -repos {organization}` - view an organization's repos",
                        "\n**Important!** Repo commands that follow, require the exact syntax of `username/repo-name` "
                        "in place of the `{repo}` argument, ex. `itsmewulf/GitHub-Discord`",
-                       "\n`--issue {repo} {issue number}` - get detailed info on an issue",
-                       "`--pr {repo} {pr number}` - get detailed info on a pull request",
-                       "`--repo -info {repo}` - get info about a repository",
-                       "`--repo -src {repo}` - get the repo's file structure"]
+                       "\n`git issue {repo} {issue number}` - get detailed info on an issue",
+                       "`git pr {repo} {pr number}` - get detailed info on a pull request",
+                       "`git repo -info {repo}` - get info about a repository",
+                       "`git repo -src {repo}` - get the repo's file structure"]
         embed = discord.Embed(
-            title=f"{self.e}  Checkout Help",
+            title=f"{self.e}  GitHub Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -55,9 +53,9 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
         lines: list = ["These commands let you fetch various data related to Git and GitHub.",
-                       "`git info --license {license}` - get info about a license",
-                       "`git --download {repo}` - get a handy zip with the source code of the repo",
-                       "`git --lines {link}` - get the lines mentioned in a GitHub or GitLab link"]
+                       "`git license {license}` - get info about a license",
+                       "`git lines {link}` - get the lines mentioned in a GitHub or GitLab link",
+                       "`git info {link}` - automatically inspect a link and get info on it"]
         embed = discord.Embed(
             title=f"{self.e}  Utility Help",
             color=0xefefef,

@@ -7,7 +7,7 @@ from asyncio import TimeoutError
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
-class Config(commands.Cog):  # TODO add release feed config
+class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
@@ -57,7 +57,7 @@ class Config(commands.Cog):  # TODO add release feed config
         )
         await ctx.send(embed=embed)
 
-    @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release'])
+    @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
     @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)

@@ -80,7 +80,6 @@ class Gist(commands.Cog):
                 return
         await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content), 'The content is a preview of the first file of the gist'))
 
-    # TODO Finish this (more details)
     async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(

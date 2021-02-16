@@ -3,7 +3,7 @@ from discord.ext import commands
 
 
 class Help(commands.Cog):  # TODO Just rewrite this from scratch
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"
         self.ga: str = "<:ga:768064843176738816>"
@@ -82,7 +82,7 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @help_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def info_help(self, ctx: commands.Context):
+    async def info_help(self, ctx: commands.Context) -> None:
         lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
                        "`git --aliases` - get a list of command shorthands",
                        "`git --privacy` - the Bot's privacy policy",
@@ -101,7 +101,7 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @commands.group(name='--aliases', aliases=['aliases'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def alias_command(self, ctx: commands.Context):
+    async def alias_command(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             lines: list = ["In this section you'll find shorthands of my commands",
                            "\n**You can access specific parts by typing:**",
@@ -119,7 +119,7 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @alias_command.command(name="checkout", aliases=['-checkout', '--checkout'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def checkout_aliases(self, ctx: commands.Context):
+    async def checkout_aliases(self, ctx: commands.Context) -> None:
         lines: list = ["**All commands listed below begin with** `git checkout` **or** `git C`",
                        f"`--user -info` {self.ga} `-U -I`",
                        f"`--user -repos` {self.ga} `-U -R`",
@@ -138,12 +138,12 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @alias_command.command(name="utility", aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def utility_aliases(self, ctx: commands.Context):
+    async def utility_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             "**Shorthands for commands used to fetch data related to Git and GitHub**",
-            f"`git info --license` {self.ga} `git info -L`",
-            f"`git --download` {self.ga} `git -dl`",
-            f"`git --lines` {self.ga} `git -L`"
+            f"`git license` {self.ga} `git info -L`",
+            f"`git repo --download` {self.ga} `git repo -dl`",
+            f"`git lines` {self.ga} `git -l`"
         ]
         embed = discord.Embed(
             title=f"{self.e}  Utility Aliases",
@@ -155,14 +155,15 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @alias_command.command(name="config", aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_aliases(self, ctx: commands.Context):
+    async def config_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
-            "Shorthands for commands used to store your preferred orgs, repos and users",
-            f"`git config` {self.ga} `git -cfg`",
-            f"`git config -show` {self.ga} `git -cfg -S`",
-            f"`git config --user` {self.ga} `git -cfg -U`",
-            f"`git config --org` {self.ga} `git -cfg -O`",
-            f"`git config --repo` {self.ga} `git -cfg -R`",
+            "Shorthands for commands used to store your preferred orgs, repos, users and feeds",
+            f"`git config` {self.ga} `git cfg`",
+            f"`git config -show` {self.ga} `git cfg -S`",
+            f"`git config --user` {self.ga} `git cfg -U`",
+            f"`git config --org` {self.ga} `git cfg -O`",
+            f"`git config --repo` {self.ga} `git cfg -R`",
+            f"`git config --feed` {self.ga} `git cfg -F`"
         ]
         embed = discord.Embed(
             title=f"{self.e}  Config Aliases",
@@ -174,20 +175,20 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
 
     @alias_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def info_command_aliases(self, ctx: commands.Context):
+    async def info_command_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             "Shorthands for commands not tied to GitHub itself",
-            f"`git --uptime` {self.ga} `git --up`",
-            f"`git --ping` {self.ga} `git --p`"
+            f"`git uptime` {self.ga} `git up`",
+            f"`git ping` {self.ga} `git p`"
         ]
         embed = discord.Embed(
             title=f"{self.e}  Info Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help info")
+        embed.set_footer(text=f"You can find usage of these commands by typing git help info")
         await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Help(bot))

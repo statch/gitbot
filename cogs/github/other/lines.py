@@ -21,7 +21,7 @@ class Lines(commands.Cog):
         self.errors: dict = {
             0: f'{self.e}  I cannot show **more than 25 lines**, sorry!',
             1: f'{self.e}  There **isn\'t any content** on these lines!',
-            2: self.e + '  That {0} is **private or otherwise innacessible.**',
+            2: self.e + '  That {0} is **private or otherwise inaccessible.**',
             3: self.e + '  That {0} **doesn\'t exist!**'
         }
 
@@ -56,7 +56,7 @@ class Lines(commands.Cog):
 
         return result
 
-    @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line'])
+    @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line', '-l'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def lines_command(self, ctx: commands.Context, link: str) -> None:
         github_match: list = re.findall(regex.GITHUB_LINES_RE, link)

@@ -41,7 +41,7 @@ class Config(commands.Cog):
     @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show(self, ctx: commands.Context) -> None:
-        query: dict = await self.user_db.find_one({"user_id": int(ctx.author.id)})
+        query: dict = await self.user_db.find_one({"_id": int(ctx.author.id)})
         if not isinstance(ctx.channel, discord.DMChannel):
             release: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
         else:
@@ -297,24 +297,24 @@ class Config(commands.Cog):
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_entire_record(self, ctx: commands.Context) -> None:
-        query: dict = await self.user_db.find_one_and_delete({"user_id": int(ctx.author.id)})
+        query: dict = await self.user_db.find_one_and_delete({"_id": int(ctx.author.id)})
         if not query:
             await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
             return
         await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
 
     async def delete_field(self, ctx: commands.Context, field: str) -> bool:
-        query: dict = await self.user_db.find_one({"user_id": ctx.author.id})
+        query: dict = await self.user_db.find_one({"_id": ctx.author.id})
         if query is not None and field in query:
             await self.user_db.update_one(query, {"$unset": {field: ""}})
             del query[field]
             if len(query) == 2:
-                await self.user_db.find_one_and_delete({"user_id": ctx.author.id})
+                await self.user_db.find_one_and_delete({"_id": ctx.author.id})
             return True
         return False
 
     async def getitem(self, ctx: commands.Context, item: str) -> Optional[str]:
-        query: dict = await self.user_db.find_one({'user_id': ctx.author.id})
+        query: dict = await self.user_db.find_one({'_id': ctx.author.id})
         if query and item in query:
             return query[item]
         return None
@@ -322,11 +322,11 @@ class Config(commands.Cog):
     async def setitem(self, ctx: commands.Context, item: str, value: str) -> bool:
         exists: bool = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
         if exists:
-            query = await self.user_db.find_one({"user_id": ctx.author.id})
+            query = await self.user_db.find_one({"_id": ctx.author.id})
             if query is not None:
                 await self.user_db.update_one(query, {"$set": {item: value}})
             else:
-                await self.user_db.insert_one({"user_id": ctx.author.id, item: value})
+                await self.user_db.insert_one({"_id": ctx.author.id, item: value})
             return True
         return False
 

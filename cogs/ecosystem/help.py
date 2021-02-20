@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 
-class Help(commands.Cog):  # TODO Just rewrite this from scratch
+class Help(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.e: str = "<:ge:767823523573923890>"
@@ -82,12 +82,12 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx: commands.Context) -> None:
         lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
-                       "`git --aliases` - get a list of command shorthands",
-                       "`git --privacy` - the Bot's privacy policy",
-                       "`git --vote` - vote for the Bot!",
-                       "`git --stats` - some stats regarding the Bot",
-                       "`git --uptime` - see the time since the last restart of the Bot",
-                       "`git --ping` - see the Bot's latency"]
+                       "`git aliases` - get a list of command shorthands",
+                       "`git privacy` - the Bot's privacy policy",
+                       "`git vote` - vote for the Bot!",
+                       "`git stats` - some stats regarding the Bot",
+                       "`git uptime` - see the time since the last restart of the Bot",
+                       "`git ping` - see the Bot's latency"]
 
         embed = discord.Embed(
             title=f"{self.e}  Info Help",
@@ -103,10 +103,10 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
         if ctx.invoked_subcommand is None:
             lines: list = ["In this section you'll find shorthands of my commands",
                            "\n**You can access specific parts by typing:**",
-                           "`git --aliases checkout` - for checkout command aliases",
-                           "`git --aliases info` - for other aliases",
-                           "`git --aliases config` - for configuration command aliases",
-                           "`git --aliases utility` - for utility command aliases"]
+                           "`git aliases github` - for GitHub command aliases",
+                           "`git aliases info` - for other aliases",
+                           "`git aliases config` - for configuration command aliases",
+                           "`git aliases utility` - for utility command aliases"]
             embed = discord.Embed(
                 title=f"{self.e}  Aliases",
                 color=0xefefef,
@@ -115,23 +115,23 @@ class Help(commands.Cog):  # TODO Just rewrite this from scratch
             embed.set_footer(text=f"You can find usage of these commands by typing git --help")
             await ctx.send(embed=embed)
 
-    @alias_command.command(name="checkout", aliases=['-checkout', '--checkout'])
+    @alias_command.command(name="github", aliases=['-github', '--github'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def checkout_aliases(self, ctx: commands.Context) -> None:
-        lines: list = ["**All commands listed below begin with** `git checkout` **or** `git C`",
-                       f"`--user -info` {self.ga} `-U -I`",
-                       f"`--user -repos` {self.ga} `-U -R`",
-                       f"`--org -info` {self.ga} `-O -I`",
-                       f"`--org -repos` {self.ga} `-O -R`",
-                       f"`--repo -info` {self.ga} `-R -I`",
-                       f"`--repo -src` {self.ga} `-R -S`",
-                       f"`--issue` {self.ga} `-I`"]
+    async def github_aliases(self, ctx: commands.Context) -> None:
+        lines: list = ["Some commands default to their `info` variant if it's omitted:",
+                       f"`git user -info` {self.ga} `git user`",
+                       f"`git repo -info` {self.ga} `git repo`",
+                       f"`git org -info` {self.ga} `git org`",
+                       f"There are generic aliases as well:",
+                       f"`git user -repos` {self.ga} `git user -r`",
+                       f"`git org -repos` {self.ga} `git org -r`",
+                       f"`git issue` {self.ga} `git i`"]
         embed = discord.Embed(
-            title=f"{self.e}  Checkout Aliases",
+            title=f"{self.e}  GitHub Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help checkout")
+        embed.set_footer(text=f"You can find usage of these commands by typing git --help github")
         await ctx.send(embed=embed)
 
     @alias_command.command(name="utility", aliases=['-utility', '--utility'])

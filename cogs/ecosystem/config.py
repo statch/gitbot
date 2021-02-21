@@ -53,7 +53,9 @@ class Config(commands.Cog):
         user: str = f"User: `{query['user']}`" if 'user' in query else "User: `Not set`"
         org: str = f"Organization: `{query['org']}`" if 'org' in query else "Organization: `Not set`"
         repo: str = f"Repo: `{query['repo']}`" if 'repo' in query else "Repo: `Not set`"
-        feed: str = 'Release Feed:\n' + '\n'.join([f'{self.square} `{r["repo"]}`' for r in release['feed']]) if release and release['feed'] else 'Release Feed: `Not configured`'
+        feed: str = 'Release Feed:\n' + '\n'.join(
+            [f'{self.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
+            'feed'] else 'Release Feed: `Not configured`'
         data: list = [user, org, repo, feed]
         embed = discord.Embed(
             color=0xefefef,
@@ -62,7 +64,8 @@ class Config(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
+    @config_command_group.command(name='feed',
+        aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
     @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
@@ -92,7 +95,7 @@ class Config(commands.Cog):
                         return
                     elif m == 'create':
                         channel: Optional[discord.TextChannel] = await ctx.guild.create_text_channel('release-feeds',
-                                                                                                     topic=f'Release feeds of the configured repos will show up here!')
+                                                                                                     topic=f'Release feeds of configured repos will show up here!')
                     else:
                         try:
                             channel: Optional[discord.TextChannel] = await commands.TextChannelConverter().convert(ctx,
@@ -103,10 +106,15 @@ class Config(commands.Cog):
                             continue
                     hook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name,
                                                                          reason=f'Release Feed channel setup by {ctx.author}')
-                    r: dict = await Git.get_latest_release(repo)
-                    feed = [{'repo': repo.lower(), 'release': r['release']['tagName']}] if r and r['release'] else []
+                    feed: list = []
+                    r: Optional[dict] = None
+                    if repo:
+                        r: dict = await Git.get_latest_release(repo)
+                        feed = [{'repo': repo.lower(), 'release': r['release']['tagName']}] if r and r[
+                            'release'] else []
                     if hook:
-                        await self.guild_db.insert_one({'_id': ctx.guild.id, 'hook': hook.url[33:], 'feed': feed})
+                        await self.guild_db.insert_one(
+                            {'_id': ctx.guild.id, 'hook': hook.url[33:], 'feed': feed if feed else []})
                         success_embed: discord.Embed = discord.Embed(
                             color=0x33ba7c,
                             title=f'Release Feed channel configured!',
@@ -217,7 +225,8 @@ class Config(commands.Cog):
                     description=f'**You can delete stored release feed data by running the following commands:**\n'
                                 f'`git config -delete feed {{repo}}` {self.ga} unsubscribe from a specific repo\n'
                                 f'`git config -delete feed all` {self.ga} unsubscribe from all repos\n'
-                                f'`git config -delete feed total` {self.ga} unsubscribe from all releases and delete the '
+                                f'`git config -delete feed total` {self.ga} unsubscribe from all releases and delete '
+                                f'the '
                                 f'feed webhook'
                 )
                 await ctx.send(embed=embed)

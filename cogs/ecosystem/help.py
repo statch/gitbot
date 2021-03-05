@@ -33,6 +33,7 @@ class Help(commands.Cog):
         lines: list = ["**Words in curly braces symbolize arguments that the command requires**",
                        "`git user -info {username}` - get information about a user",
                        "`git user -repos {username}` - view a user's repos",
+                       "`git gist {username}` - view a user's gists",
                        "`git org -info {organization}` - get info about an organization",
                        "`git org -repos {organization}` - view an organization's repos",
                        "\n**Important!** Repo commands that follow, require the exact syntax of `username/repo-name` "

@@ -3,7 +3,7 @@ import datetime
 from asyncio import TimeoutError
 from discord.ext import commands
 from core.globs import Git, Mgr
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
                            'cpp', 'html', 'php', 'json', 'xml', 'yml',
@@ -19,7 +19,7 @@ class Gist(commands.Cog):
 
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    async def gist_command(self, ctx: commands.Context, user: str) -> None:
+    async def gist_command(self, ctx: commands.Context, user: str, ind: Optional[Union[int, str]] = None) -> None:
         data: dict = await Git.get_user_gists(user)
         if not data:
             await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
@@ -38,8 +38,8 @@ class Gist(commands.Cog):
             desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
             return f'[{desc}]({gist["url"]})'
 
-        gist_strings = [f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
-                        enumerate(data['gists']['nodes'])]
+        gist_strings: list = [f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
+                              enumerate(data['gists']['nodes'])]
 
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
@@ -50,7 +50,25 @@ class Gist(commands.Cog):
 
         embed.set_footer(text=f'Ten latest gists from {user}.\nTo inspect a specific gist, simply send its number in this channel.')
 
-        base_msg = await ctx.send(embed=embed)
+        base_msg: discord.Message = await ctx.send(embed=embed)
+
+        def validate_index(index: Union[int, str]) -> Tuple[bool, Optional[str]]:
+            if not str(index).isnumeric():
+                return False, f'{self.emoji}  Please pick a number **between 1 and {len(gist_strings)}**'
+            elif int(index) > 10:
+                return False, f'{self.emoji} Please pass in a number **smaller than 10!**'
+            elif int(index) > len(gist_strings):
+                return False, f'{self.emoji} This user doesn\'t have that many gists!'
+            else:
+                return True, None
+
+        if ind:
+            if (i := validate_index(ind))[0]:
+                await base_msg.delete()
+                await ctx.send(embed=await self.build_gist_embed(data, int(ind), 'The content is a preview of the first file of the gist'))
+                return
+            else:
+                await ctx.send(i[1], delete_after=7)
 
         while True:
             try:
@@ -59,15 +77,9 @@ class Gist(commands.Cog):
                                                                                 and m.author.id == ctx.author.id),
 
                                                                timeout=30)
-                if not msg.content.isnumeric():
-                    await ctx.send(
-                        f'{self.emoji}  Please pick a number **between 1 and {len(gist_strings)}**', delete_after=7)
-                    continue
-                elif (num := int(msg.content)) > 10:
-                    await ctx.send(f'Please pass in a number **smaller than 10!**', delete_after=7)
-                    continue
-                elif num > len(gist_strings):
-                    await ctx.send(f'This user doesn\'t have that many gists!', delete_after=7)
+                success, err_msg = validate_index(msg.content)
+                if not success:
+                    await ctx.send(err_msg, delete_after=7)
                     continue
                 break
             except TimeoutError:
@@ -113,7 +125,7 @@ class Gist(commands.Cog):
 
     async def get_color_from_files(self, files: list) -> int:
         extensions: list = [f['extension'] for f in files]
-        most_common = await Mgr.get_most_common(extensions)
+        most_common: Optional[str] = await Mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
             return 0xefefef
         for file in files:
@@ -122,7 +134,7 @@ class Gist(commands.Cog):
         return 0xefefef
 
     def extension(self, ext: str) -> str:
-        ext = ext[1:]
+        ext: str = ext[1:]
         if ext == 'ts':
             return 'js'
         return ext if ext in DISCORD_MD_LANGS else ''

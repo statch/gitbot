@@ -1,10 +1,9 @@
-# TODO load/unload/reload etc.
-
 import os
 import discord
 import logging
 from discord.ext import commands
 from dotenv import load_dotenv
+from ext.decorators import is_me
 
 load_dotenv()
 
@@ -55,6 +54,43 @@ if PRODUCTION:
 for extension in extensions:
     logger.info(f'Loading {extension}...')
     bot.load_extension(extension)
+
+
+async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
+    if (cog := cog.lower()) == 'all':
+        done: int = 0
+        try:
+            for ext in extensions:
+                getattr(bot, f'{op}_extension')(ext)
+                done += 1
+        except commands.ExtensionError as e:
+            await ctx.send(f'**Exception during batch-{op}ing.**\n```{e}```')
+        else:
+            await ctx.send(f'All extensions **successfully {op}ed.** ({done})')
+    try:
+        getattr(bot, f'{op}_extension')(cog)
+    except commands.ExtensionError as e:
+        await ctx.send(f'**Exception while {op}ing** `{cog}`**.**\n```{e}```')
+    else:
+        await ctx.send(f'**Successfully {op}ed** `{cog}`.')
+
+
+@bot.command(name='reload')
+@is_me()
+async def reload_command(ctx: commands.Context, cog: str) -> None:
+    await do_cog_op(ctx, cog, 'reload')
+
+
+@bot.command(name='load')
+@is_me()
+async def load_command(ctx: commands.Context, cog: str) -> None:
+    await do_cog_op(ctx, cog, 'load')
+
+
+@bot.command(name='unload')
+@is_me()
+async def unload_command(ctx: commands.Context, cog: str) -> None:
+    await do_cog_op(ctx, cog, 'unload')
 
 
 @bot.check

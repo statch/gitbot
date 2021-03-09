@@ -64,14 +64,14 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
                 getattr(bot, f'{op}_extension')(ext)
                 done += 1
         except commands.ExtensionError as e:
-            await ctx.send(f'**Exception during batch-{op}ing.**\n```{e}```')
+            await ctx.send(f'**Exception during batch-{op}ing:**\n```{e}```')
         else:
             await ctx.send(f'All extensions **successfully {op}ed.** ({done})')
     else:
         try:
             getattr(bot, f'{op}_extension')(cog)
         except commands.ExtensionError as e:
-            await ctx.send(f'**Exception while {op}ing** `{cog}`**.**\n```{e}```')
+            await ctx.send(f'**Exception while {op}ing** `{cog}`**:**\n```{e}```')
         else:
             await ctx.send(f'**Successfully {op}ed** `{cog}`.')
 

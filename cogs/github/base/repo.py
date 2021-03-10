@@ -2,6 +2,7 @@ import discord
 import datetime
 import re
 import io
+from asyncio import TimeoutError
 from discord.ext import commands
 from typing import Union, Optional
 from core.globs import Git
@@ -178,14 +179,74 @@ class Repo(commands.Cog):
 
     @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
     @commands.cooldown(5, 40, commands.BucketType.user)
-    async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+    async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+        if (lstate := state.lower()) not in ('open', 'closed'):
+            await ctx.send(f'{self.e} `{state}` is not a **valid issue state!** (Try `open` or `closed`)')
+            return
+        stored: bool = False
         if not repo:
             repo = await self.bot.get_cog('Config').getitem(ctx, 'repo')
             if not repo:
                 await ctx.send(f'{self.e} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
                                f'repo into the command)')
                 return
-        issues: list = await Git.get_last_issues_by_state(repo)
+            stored: bool = True
+        issues: list = await Git.get_last_issues_by_state(repo, state=f'[{state.upper()}]')
+        if not issues:
+            if issues is None:
+                if stored:
+                    await self.bot.get_cog('Config').delete_field(ctx, 'repo')
+                await ctx.send(f'{self.e}  This repo doesn\'t exist!')
+            else:
+                await ctx.send(f'{self.e} This repo doesn\'t have any open issues!')
+            return
+
+        issue_strings: list = [self.make_issue_string(repo, i) for i in issues]
+
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            title=f'Latest {lstate} issues in `{repo}`',
+            url=f'https://github.com/{repo}/issues',
+            description='\n'.join(issue_strings)
+        )
+
+        embed.set_footer(text='You can quickly inspect a specific issue from the list by typing its number!\nYou can '
+                              'type cancel to quit.')
+
+        def validate_number(number: str) -> Optional[dict]:
+            if number.startswith('#'):
+                number: str = number[1:]
+            try:
+                number: int = int(number)
+            except TypeError:
+                return None
+            matched = [i for i in issues if i['number'] == number]
+            if matched:
+                return matched[0]
+            return None
+
+        await ctx.send(embed=embed)
+
+        while True:
+            try:
+                msg: discord.Message = await self.bot.wait_for('message', check=lambda m: m.channel.id == ctx.channel.id and
+                                                                   m.author.id == ctx.author.id, timeout=30)
+                if msg.content.lower() == 'cancel':
+                    return
+                if not (issue := validate_number(num := msg.content)):
+                    await ctx.send(f'{self.e} `{num}` is not a valid number **from the list!**')
+                    continue
+                else:
+                    ctx.data = await Git.get_issue('', 0, issue, True)
+                    await ctx.invoke(self.bot.get_command(f'issue'), repo)
+                    return
+            except TimeoutError:
+                return
+
+    def make_issue_string(self, repo: str, issue: dict) -> str:
+        url = f'https://github.com/{repo}/issues/{issue["number"]}/'
+        return f'[`#{issue["number"]}`]({url}) **|** [' \
+               f'{issue["title"] if len(issue["title"]) < 70 else issue["title"][:67] + "..."}]({url})'
 
 
 def setup(bot: commands.Bot) -> None:

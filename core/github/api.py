@@ -26,6 +26,7 @@ ISSUE_QUERY: str = """
       closedAt
       bodyText
       title 
+      number
       state
       comments {
         totalCount
@@ -107,7 +108,7 @@ class GitHubAPI:
         results: list = []
         for token in self.__tokens:
             data = await (await self.ses.get(f'https://api.github.com/rate_limit',
-                headers={'Authorization': f'token {token}'})).json()
+                                             headers={'Authorization': f'token {token}'})).json()
             results.append(data)
         return tuple(results), len(self.__tokens)
 
@@ -433,7 +434,10 @@ class GitHubAPI:
                                              data['participants']['edges']]
         return data
 
-    async def get_issue(self, repo: str, number: int, data: Optional[dict] = None) -> Union[dict, str]:
+    async def get_issue(self, repo: str,
+                        number: int,
+                        data: Optional[dict] = None,
+                        had_keys_removed: bool = False) -> Union[dict, str]:
         if not data:
             if '/' not in repo or repo.count('/') > 1:
                 return 'repo'
@@ -451,7 +455,9 @@ class GitHubAPI:
             """.format(repo_name=repository, owner_name=owner, issue_number=number, q=ISSUE_QUERY)
 
             data: dict = await self.post_gql(query, complex_=True)
-        if isinstance((data := data['repository']['issue']), dict):
+        if not had_keys_removed:
+            data: dict = data['repository']['issue']
+        if isinstance(data, dict):
             comment_count: int = data['comments']['totalCount']
             assignee_count: int = data['assignees']['totalCount']
             participant_count: int = data['participants']['totalCount']
@@ -484,7 +490,7 @@ class GitHubAPI:
 
         data: dict = await self.post_gql(query)
         if 'repository' in data and 'issues' in data['repository']:
-            return data['repository']['issues']
+            return data['repository']['issues']['nodes']
 
     async def get_user(self, user: str):
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')

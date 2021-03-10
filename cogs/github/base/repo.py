@@ -176,6 +176,17 @@ class Repo(commands.Cog):
             await msg.edit(
                 content=f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
 
+    @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
+    @commands.cooldown(5, 40, commands.BucketType.user)
+    async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+        if not repo:
+            repo = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+            if not repo:
+                await ctx.send(f'{self.e} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
+                               f'repo into the command)')
+                return
+        issues: list = await Git.get_last_issues_by_state(repo)
+
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Repo(bot))

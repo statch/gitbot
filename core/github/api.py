@@ -464,8 +464,27 @@ class GitHubAPI:
             data['labels']: list = [lb['name'] for lb in list(data['labels']['nodes'])]
         return data
 
-    async def get_issues_by_state(self, repo: str, limit: int = 10, state: str = '[OPEN]') -> List[dict]:
-        pass
+    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = '[OPEN]') -> Optional[List[dict]]:
+        if '/' not in repo or repo.count('/') > 1:
+            return None
+
+        split: list = repo.split('/')
+        owner: str = split[0]
+        repository: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: "{name}", owner: "{owner}") {{
+            issues(states: {state}, last: {last}) {{
+              nodes {q}
+            }}
+          }}
+        }}
+        """.format(name=repository, owner=owner, state=state, last=last, q=ISSUE_QUERY)
+
+        data: dict = await self.post_gql(query)
+        if 'repository' in data and 'issues' in data['repository']:
+            return data['repository']['issues']
 
     async def get_user(self, user: str):
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')

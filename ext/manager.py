@@ -37,7 +37,7 @@ class Manager:
                 return i
         return None
 
-    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
+    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:  # TODO Add support for line link references
         for pattern in self.patterns:
             match: list = re.findall(pattern[0], link)
             if match:

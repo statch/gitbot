@@ -13,6 +13,36 @@ BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
 GhStats = namedtuple('Stats', 'all_time month fortnight week day hour')
 SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
+ISSUE_QUERY: str = """
+    {
+      author{
+        login
+        url
+        avatarUrl
+      }
+      url
+      createdAt
+      closed
+      closedAt
+      bodyText
+      title 
+      state
+      comments {
+        totalCount
+      }
+      participants {
+        totalCount
+      }
+      assignees {
+        totalCount
+      }
+      labels(first: 100) {
+        nodes {
+          name
+        }
+      }
+    }
+"""
 
 
 class GitHubAPI:
@@ -32,9 +62,7 @@ class GitHubAPI:
         self.__tokens = tokens
         self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh = gh.GitHubAPI(session=self.ses,
-                               requester=requester,
-                               oauth_token=self.token)
+        self.gh = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.token)
 
     @property
     def token(self) -> str:
@@ -79,7 +107,7 @@ class GitHubAPI:
         results: list = []
         for token in self.__tokens:
             data = await (await self.ses.get(f'https://api.github.com/rate_limit',
-                                             headers={'Authorization': f'token {token}'})).json()
+                headers={'Authorization': f'token {token}'})).json()
             results.append(data)
         return tuple(results), len(self.__tokens)
 
@@ -176,7 +204,6 @@ class GitHubAPI:
     async def get_repo_zip(self, repo: str) -> Optional[Union[bool, bytes]]:
         res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
                                  headers={"Authorization": f"token {self.token}"})
-
         if res.status == 200:
             try:
                 await res.content.readexactly(SIZE_THRESHOLD_BYTES)
@@ -406,66 +433,39 @@ class GitHubAPI:
                                              data['participants']['edges']]
         return data
 
-    async def get_issue(self, repo: str, number: int) -> Union[dict, str]:
-        if '/' not in repo or repo.count('/') > 1:
-            return 'repo'
+    async def get_issue(self, repo: str, number: int, data: Optional[dict] = None) -> Union[dict, str]:
+        if not data:
+            if '/' not in repo or repo.count('/') > 1:
+                return 'repo'
 
-        split: list = repo.split('/')
-        owner: str = split[0]
-        repository: str = split[1]
+            split: list = repo.split('/')
+            owner: str = split[0]
+            repository: str = split[1]
 
-        query: str = """
-        {{
-          repository(name: "{repo_name}", owner: "{owner_name}") {{
-            issue(number: {issue_number}) {{
-              author{{
-                login
-                url
-                avatarUrl
-              }}
-              url
-              createdAt
-              closed
-              closedAt
-              bodyText
-              title 
-              state
-              comments {{
-                totalCount
-              }}
-              participants {{
-                totalCount
-              }}
-              assignees {{
-                totalCount
-              }}
-              labels(first: 100) {{
-                edges{{
-                  node{{
-                    name
-                  }}
-                }}
+            query: str = """
+            {{
+              repository(name: "{repo_name}", owner: "{owner_name}") {{
+                issue(number: {issue_number}) {q}
               }}
             }}
-          }}
-        }}
-        """.format(repo_name=repository, owner_name=owner, issue_number=number)
+            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=ISSUE_QUERY)
 
-        data: dict = await self.post_gql(query, complex_=True)
-        if isinstance(data, dict):
-            comment_count: int = data['repository']['issue']['comments']['totalCount']
-            assignee_count: int = data['repository']['issue']['assignees']['totalCount']
-            participant_count: int = data['repository']['issue']['participants']['totalCount']
-            del data['repository']['issue']['comments']
-            data['repository']['issue']['body']: str = data['repository']['issue']['bodyText']
-            del data['repository']['issue']['bodyText']
-            data['repository']['issue']['commentCount']: int = comment_count
-            data['repository']['issue']['assigneeCount']: int = assignee_count
-            data['repository']['issue']['participantCount']: int = participant_count
-            data['repository']['issue']['labels']: list = [lb['node']['name'] for lb in
-                                                           list(data['repository']['issue']['labels']['edges'])]
-            return data['repository']['issue']
+            data: dict = await self.post_gql(query, complex_=True)
+        if isinstance((data := data['repository']['issue']), dict):
+            comment_count: int = data['comments']['totalCount']
+            assignee_count: int = data['assignees']['totalCount']
+            participant_count: int = data['participants']['totalCount']
+            del data['comments']
+            data['body']: str = data['bodyText']
+            del data['bodyText']
+            data['commentCount']: int = comment_count
+            data['assigneeCount']: int = assignee_count
+            data['participantCount']: int = participant_count
+            data['labels']: list = [lb['name'] for lb in list(data['labels']['nodes'])]
         return data
+
+    async def get_issues_by_state(self, repo: str, limit: int = 10, state: str = '[OPEN]') -> List[dict]:
+        pass
 
     async def get_user(self, user: str):
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')

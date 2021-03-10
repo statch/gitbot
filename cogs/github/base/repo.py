@@ -183,6 +183,9 @@ class Repo(commands.Cog):
         if (lstate := state.lower()) not in ('open', 'closed'):
             await ctx.send(f'{self.e} `{state}` is not a **valid issue state!** (Try `open` or `closed`)')
             return
+        if (s := repo.lower()) in ('open', 'closed'):
+            state: str = s
+            repo = None
         stored: bool = False
         if not repo:
             repo = await self.bot.get_cog('Config').getitem(ctx, 'repo')
@@ -234,7 +237,7 @@ class Repo(commands.Cog):
                 if msg.content.lower() == 'cancel':
                     return
                 if not (issue := validate_number(num := msg.content)):
-                    await ctx.send(f'{self.e} `{num}` is not a valid number **from the list!**')
+                    await ctx.send(f'{self.e} `{num}` is not a valid number **from the list!**', delete_after=7)
                     continue
                 else:
                     ctx.data = await Git.get_issue('', 0, issue, True)

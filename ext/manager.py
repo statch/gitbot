@@ -29,7 +29,7 @@ class Manager:
                                    'user_org': None,
                                    'issue': self.git.get_issue,
                                    'pr': self.git.get_pull_request,
-                                   'lines': 0}
+                                   'lines': 'lines'}
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -45,8 +45,8 @@ class Manager:
             match: list = re.findall(pattern[0], link)
             if match:
                 match: Union[str, tuple] = match[0]
-                action: Optional[Union[Callable, int]] = self.type_to_func[pattern[1]]
-                if isinstance(action, int):
+                action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
+                if isinstance(action, str):
                     return GitCommandData(link, 'lines', link)
                 if isinstance(match, tuple) and action:
                     match: tuple = tuple([i if not i.isnumeric() else int(i) for i in match])

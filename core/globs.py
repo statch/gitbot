@@ -1,6 +1,6 @@
 from os import getenv
 from dotenv import load_dotenv
-from core.github.api import GitHubAPI
+from core.github.net.api import GitHubAPI
 from ext.manager import Manager
 
 load_dotenv()

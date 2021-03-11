@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
+from .data.repeated_queries import IssueQuery, PullRequestQuery
 from sys import version_info
 from typing import Union, List, Optional, Dict, AnyStr
 from gidgethub import BadRequest
@@ -13,37 +14,6 @@ BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
 GhStats = namedtuple('Stats', 'all_time month fortnight week day hour')
 SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
-ISSUE_QUERY: str = """
-    {
-      author{
-        login
-        url
-        avatarUrl
-      }
-      url
-      createdAt
-      closed
-      closedAt
-      bodyText
-      title 
-      number
-      state
-      comments {
-        totalCount
-      }
-      participants {
-        totalCount
-      }
-      assignees {
-        totalCount
-      }
-      labels(first: 100) {
-        nodes {
-          name
-        }
-      }
-    }
-"""
 
 
 class GitHubAPI:
@@ -343,82 +313,10 @@ class GitHubAPI:
         query: str = """
         {{
           repository(name: "{name}", owner: "{owner}") {{
-            pullRequest(number: {number}) {{
-              title
-              url
-              isCrossRepository
-              state
-              createdAt
-              closed
-              closedAt
-              bodyText
-              changedFiles
-              commits(first: 250) {{
-                totalCount
-              }}
-              additions
-              deletions
-              author {{
-                login 
-                url
-                avatarUrl
-              }}
-              comments {{
-                totalCount
-              }}
-              assignees(first: 100) {{
-                totalCount
-                edges {{
-                  node {{
-                    login
-                    url
-                  }}
-                }}
-              }}
-              reviews(first: 100) {{
-                totalCount
-              }}
-              participants(first: 100){{
-                totalCount
-                edges {{
-                  node {{
-                    login
-                    url
-                  }}
-                }}
-              }}
-              reviewRequests(first: 100) {{
-                totalCount
-                edges {{
-                  node {{
-                    requestedReviewer {{
-                      ... on User {{
-                        login
-                        url
-                      }}
-                      ... on Team {{
-                        name
-                        url
-                      }}
-                      ... on Mannequin {{
-                        login
-                        url
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-              labels(first: 100) {{
-                edges {{
-                  node {{
-                    name
-                  }}
-                }}
-              }}
-            }}
+            pullRequest(number: {number}) {q}
           }}
         }}
-        """.format(name=repository, owner=owner, number=number)
+        """.format(name=repository, owner=owner, number=number, q=PullRequestQuery)
 
         data = await self.post_gql(query, 'repository pullRequest', complex_=True)
         if data:
@@ -433,6 +331,9 @@ class GitHubAPI:
             data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in
                                              data['participants']['edges']]
         return data
+
+    async def get_last_pull_requests_by_state(self) -> Optional[List[dict]]:
+        pass
 
     async def get_issue(self, repo: str,
                         number: int,
@@ -452,7 +353,7 @@ class GitHubAPI:
                 issue(number: {issue_number}) {q}
               }}
             }}
-            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=ISSUE_QUERY)
+            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=IssueQuery)
 
             data: dict = await self.post_gql(query, complex_=True)
         if not had_keys_removed:
@@ -486,7 +387,7 @@ class GitHubAPI:
             }}
           }}
         }}
-        """.format(name=repository, owner=owner, state=state, last=last, q=ISSUE_QUERY)
+        """.format(name=repository, owner=owner, state=state, last=last, q=IssueQuery)
 
         data: dict = await self.post_gql(query)
         if 'repository' in data and 'issues' in data['repository']:

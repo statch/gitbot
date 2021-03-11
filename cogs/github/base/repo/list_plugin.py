@@ -64,8 +64,8 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
     while True:
         try:
             msg: discord.Message = await ctx.bot.wait_for('message',
-                check=lambda m: m.channel.id == ctx.channel.id and
-                                m.author.id == ctx.author.id, timeout=30)
+                                                          check=lambda m: m.channel.id == ctx.channel.id and
+                                                          m.author.id == ctx.author.id, timeout=30)
             if msg.content.lower() == 'cancel':
                 return
             if not (issue := validate_number(num := msg.content)):
@@ -77,6 +77,10 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
                 return
         except TimeoutError:
             return
+
+
+async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:  # TODO Implement pull_request_list
+    pass
 
 
 def make_issue_string(repo: str, issue: dict) -> str:

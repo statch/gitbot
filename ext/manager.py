@@ -19,14 +19,17 @@ class Manager:
         self.git = github_instance
         self.licenses: dict = json_dict("licenses")
         self.emojis: dict = json_dict("emoji")
-        self.patterns: tuple = ((r.ISSUE_RE, 'issue'),
+        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
+                                (r.GITLAB_LINES_RE, 'lines'),
+                                (r.ISSUE_RE, 'issue'),
                                 (r.PR_RE, 'pr'),
                                 (r.REPO_RE, 'repo'),
                                 (r.USER_ORG_RE, 'user_org'))
         self.type_to_func: dict = {'repo': self.git.get_repo,
                                    'user_org': None,
                                    'issue': self.git.get_issue,
-                                   'pr': self.git.get_pull_request}
+                                   'pr': self.git.get_pull_request,
+                                   'lines': 0}
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -37,12 +40,14 @@ class Manager:
                 return i
         return None
 
-    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:  # TODO Add support for line link references
+    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
         for pattern in self.patterns:
             match: list = re.findall(pattern[0], link)
             if match:
                 match: Union[str, tuple] = match[0]
-                action: Optional[Callable] = self.type_to_func[pattern[1]]
+                action: Optional[Union[Callable, int]] = self.type_to_func[pattern[1]]
+                if isinstance(action, int):
+                    return GitCommandData(link, 'lines', link)
                 if isinstance(match, tuple) and action:
                     match: tuple = tuple([i if not i.isnumeric() else int(i) for i in match])
                     obj: Union[dict, str] = await action(match[0], int(match[1]))

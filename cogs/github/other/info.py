@@ -1,6 +1,7 @@
 from discord.ext import commands
 from core.globs import Mgr
 from typing import Optional, Union
+from ext.manager import GitCommandData
 
 
 class Info(commands.Cog):
@@ -13,11 +14,11 @@ class Info(commands.Cog):
 
     @commands.command(name='info')
     @commands.cooldown(10, 20, commands.BucketType.user)
-    async def info_command_group(self, ctx: commands.Context, link: str) -> None:
-        ref: Optional[Union[tuple, str, 'GitCommandData']] = await mgr.get_link_reference(link)
+    async def info_command(self, ctx: commands.Context, link: str) -> None:
+        ref: Optional[Union[tuple, str, GitCommandData]] = await Mgr.get_link_reference(link)
         if ref is None:
             await ctx.send(f'{self.e}  I couldn\'t fetch any info regarding the link you provided!')
-        elif isinstance(ref, tuple) and isinstance(ref[0], str):
+        elif not isinstance(ref, GitCommandData) and isinstance(ref[0], str):
             if ref[0] == 'repo':
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")
             elif ref[1] == 'issue':

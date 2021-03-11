@@ -32,7 +32,7 @@ extensions: list = [
     'core.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',
-    'cogs.github.base.repo',
+    'cogs.github.base.repo.repo',
     'cogs.github.numbered.pr',
     'cogs.github.numbered.issue',
     'cogs.github.complex.gist',

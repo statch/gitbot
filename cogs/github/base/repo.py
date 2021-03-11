@@ -232,8 +232,9 @@ class Repo(commands.Cog):
 
         while True:
             try:
-                msg: discord.Message = await self.bot.wait_for('message', check=lambda m: m.channel.id == ctx.channel.id and
-                                                                   m.author.id == ctx.author.id, timeout=30)
+                msg: discord.Message = await self.bot.wait_for('message',
+                                                               check=lambda m: m.channel.id == ctx.channel.id and
+                                                               m.author.id == ctx.author.id, timeout=30)
                 if msg.content.lower() == 'cancel':
                     return
                 if not (issue := validate_number(num := msg.content)):
@@ -241,7 +242,7 @@ class Repo(commands.Cog):
                     continue
                 else:
                     ctx.data = await Git.get_issue('', 0, issue, True)
-                    await ctx.invoke(self.bot.get_command(f'issue'), repo)
+                    await ctx.invoke(self.bot.get_command('issue'), repo)
                     return
             except TimeoutError:
                 return
@@ -254,3 +255,4 @@ class Repo(commands.Cog):
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Repo(bot))
+fstrin

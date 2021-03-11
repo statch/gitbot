@@ -49,7 +49,7 @@ class Manager:
                 if isinstance(action, str):
                     return GitCommandData(link, 'lines', link)
                 if isinstance(match, tuple) and action:
-                    match: tuple = tuple([i if not i.isnumeric() else int(i) for i in match])
+                    match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
                     obj: Union[dict, str] = await action(match[0], int(match[1]))
                     if isinstance(obj, str):
                         return obj, pattern[1]

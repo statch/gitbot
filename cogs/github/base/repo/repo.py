@@ -2,7 +2,7 @@ import discord
 import datetime
 import re
 import io
-from .list_plugin import issue_list
+from .list_plugin import issue_list, pull_request_list
 from discord.ext import commands
 from typing import Union, Optional
 from core.globs import Git
@@ -181,6 +181,11 @@ class Repo(commands.Cog):
     @commands.cooldown(5, 40, commands.BucketType.user)
     async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
+
+    @repo_command_group.command(name='pulls', aliases=['-pulls', '--pulls', 'prs', '-prs', '--prs'])
+    @commands.cooldown(5, 40, commands.BucketType.user)
+    async def pull_request_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+        await pull_request_list(ctx, repo, state)
 
 
 def setup(bot: commands.Bot) -> None:

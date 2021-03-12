@@ -1,7 +1,7 @@
 import json
 import re
 from ext import regex as r
-from typing import Optional, Union, Callable, Any
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
 from collections import namedtuple
 
@@ -65,3 +65,20 @@ class Manager:
 
     async def get_most_common(self, items: list) -> Any:
         return max(set(items), key=items.count)
+
+    async def validate_number(self, number: str, items: List[dict]) -> Optional[dict]:
+        if number.startswith('#'):
+            number: str = number[1:]
+        try:
+            number: int = int(number)
+        except TypeError:
+            return None
+        matched = [i for i in items if i['number'] == number]
+        if matched:
+            return matched[0]
+        return None
+
+    async def reverse(self, __sequence: Optional[Reversible]) -> Optional[Iterable]:
+        if __sequence:
+            return type(__sequence)((reversed(__sequence)))
+        return None

@@ -1,6 +1,6 @@
 IssueQuery: str = """
 {
-  author{
+  author {
     login
     url
     avatarUrl
@@ -40,6 +40,7 @@ PullRequestQuery: str = """
   closed
   closedAt
   bodyText
+  number
   changedFiles
   commits(first: 250) {
     totalCount
@@ -66,7 +67,7 @@ PullRequestQuery: str = """
   reviews(first: 100) {
     totalCount
   }
-  participants(first: 100){
+  participants(first: 100) {
     totalCount
     edges {
       node {

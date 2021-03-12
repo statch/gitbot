@@ -305,21 +305,28 @@ class GitHubAPI:
             data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
         return data
 
-    async def get_pull_request(self, repo: str, number: int) -> Union[dict, str]:
-        split: list = repo.split('/')
-        owner: str = split[0]
-        repository: str = split[1]
+    async def get_pull_request(self,
+                               repo: str,
+                               number: int,
+                               data: Optional[dict] = None,
+                               had_keys_removed: bool = False) -> Union[dict, str]:
+        if not data:
+            split: list = repo.split('/')
+            owner: str = split[0]
+            repository: str = split[1]
 
-        query: str = """
-        {{
-          repository(name: "{name}", owner: "{owner}") {{
-            pullRequest(number: {number}) {q}
-          }}
-        }}
-        """.format(name=repository, owner=owner, number=number, q=PullRequestQuery)
+            query: str = """
+            {{
+              repository(name: "{name}", owner: "{owner}") {{
+                pullRequest(number: {number}) {q}
+              }}
+            }}
+            """.format(name=repository, owner=owner, number=number, q=PullRequestQuery)
 
-        data = await self.post_gql(query, 'repository pullRequest', complex_=True)
-        if data:
+            data = await self.post_gql(query, 'repository pullRequest', complex_=True)
+        if isinstance(data, dict):
+            if not had_keys_removed:
+                data: dict = data['repository']['pullRequest']
             data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
             data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
             data['reviewers'] = {}
@@ -332,12 +339,33 @@ class GitHubAPI:
                                              data['participants']['edges']]
         return data
 
-    async def get_last_pull_requests_by_state(self, repo: str,
+    async def get_last_pull_requests_by_state(self,
+                                              repo: str,
                                               last: int = 10,
                                               state: str = '[OPEN]') -> Optional[List[dict]]:
-        pass
+        if '/' not in repo or repo.count('/') > 1:
+            return None
 
-    async def get_issue(self, repo: str,
+        split: list = repo.split('/')
+        owner: str = split[0]
+        repository: str = split[1]
+
+        query: str = """
+        {{
+          repository(name: "{name}", owner: "{owner}") {{
+            pullRequests(states: {state}, last: {last}) {{
+              nodes {q}
+            }}
+          }}
+        }}
+        """.format(name=repository, owner=owner, state=state, last=last, q=PullRequestQuery)
+
+        data: dict = await self.post_gql(query)
+        if 'repository' in data and 'pullRequests' in data['repository']:
+            return data['repository']['pullRequests']['nodes']
+
+    async def get_issue(self,
+                        repo: str,
                         number: int,
                         data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
                         had_keys_removed: bool = False) -> Union[dict, str]:

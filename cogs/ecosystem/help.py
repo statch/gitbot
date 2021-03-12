@@ -43,7 +43,9 @@ class Help(commands.Cog):
                        "`git repo -info {repo}` - get info about a repository",
                        "`git repo -files {repo}` - get the repo's file structure",
                        "`git repo -issues {repo} (state)` - get 10 latest issues from a repo (state defaults to "
-                       "OPEN). If no repo is passed, the stored one is used."]
+                       "OPEN). If no repo is passed, the stored one is used",
+                       "`git repo -pulls {repo} (state)` - identical to the above, except for pull requests"]
+
         embed = discord.Embed(
             title=f"{self.e}  GitHub Help",
             color=0xefefef,

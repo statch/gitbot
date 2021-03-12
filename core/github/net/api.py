@@ -332,12 +332,14 @@ class GitHubAPI:
                                              data['participants']['edges']]
         return data
 
-    async def get_last_pull_requests_by_state(self) -> Optional[List[dict]]:
+    async def get_last_pull_requests_by_state(self, repo: str,
+                                              last: int = 10,
+                                              state: str = '[OPEN]') -> Optional[List[dict]]:
         pass
 
     async def get_issue(self, repo: str,
                         number: int,
-                        data: Optional[dict] = None,
+                        data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
                         had_keys_removed: bool = False) -> Union[dict, str]:
         if not data:
             if '/' not in repo or repo.count('/') > 1:
@@ -356,9 +358,9 @@ class GitHubAPI:
             """.format(repo_name=repository, owner_name=owner, issue_number=number, q=IssueQuery)
 
             data: dict = await self.post_gql(query, complex_=True)
-        if not had_keys_removed:
-            data: dict = data['repository']['issue']
         if isinstance(data, dict):
+            if not had_keys_removed:
+                data: dict = data['repository']['issue']
             comment_count: int = data['comments']['totalCount']
             assignee_count: int = data['assignees']['totalCount']
             participant_count: int = data['participants']['totalCount']

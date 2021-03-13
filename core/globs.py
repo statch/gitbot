@@ -1,5 +1,7 @@
 from os import getenv
+
 from dotenv import load_dotenv
+
 from core.net.github.api import GitHubAPI
 from ext.manager import Manager
 

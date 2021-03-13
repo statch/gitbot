@@ -1,12 +1,14 @@
-import aiohttp
 import asyncio
-import gidgethub.aiohttp as gh
-from sys import version_info
-from typing import Union, List, Optional, Dict, AnyStr
-from gidgethub import BadRequest
+from collections import namedtuple
 from datetime import date, datetime
 from itertools import cycle
-from collections import namedtuple
+from sys import version_info
+from typing import AnyStr, Dict, List, Optional, Union
+
+import aiohttp
+import gidgethub.aiohttp as gh
+from gidgethub import BadRequest
+
 from ext.datatypes.dir_proxy import DirProxy
 
 YEAR_START: str = f"{date.today().year}-01-01T00:00:30Z"

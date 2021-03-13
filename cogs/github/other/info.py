@@ -1,6 +1,8 @@
-from discord.ext import commands
-from core.globs import Mgr
 from typing import Optional, Union
+
+from discord.ext import commands
+
+from core.globs import Mgr
 from ext.manager import GitCommandData
 
 

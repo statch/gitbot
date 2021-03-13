@@ -1,8 +1,10 @@
-import discord
 import datetime
 from typing import Optional
-from core.globs import Git
+
+import discord
 from discord.ext import commands
+
+from core.globs import Git
 
 PR_STATES: dict = {
     "open": "<:pr_open:795793711312404560>",

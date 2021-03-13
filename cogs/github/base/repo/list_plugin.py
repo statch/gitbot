@@ -1,8 +1,10 @@
+from asyncio import TimeoutError
+from typing import List, Optional
+
 import discord
 from discord.ext import commands
-from typing import Optional, List
+
 from core.globs import Git, Mgr
-from asyncio import TimeoutError
 
 err: str = "<:ge:767823523573923890>"
 

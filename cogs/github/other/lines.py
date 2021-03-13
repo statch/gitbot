@@ -1,8 +1,10 @@
 import re
-from ext import regex
 from typing import Union
-from discord.ext import commands
+
 from aiohttp import ClientSession
+from discord.ext import commands
+
+from ext import regex
 
 
 async def compile_github_link(data: tuple) -> str:

@@ -1,5 +1,6 @@
-import aiohttp
 from os import getenv
+
+import aiohttp
 from discord.ext import commands, tasks
 
 

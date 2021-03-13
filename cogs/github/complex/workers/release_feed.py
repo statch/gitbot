@@ -1,12 +1,14 @@
 import asyncio
-import os
-import discord
 import datetime
-from bot import logger
+import os
+from typing import List, Optional, Tuple
+
+import discord
 from bs4 import BeautifulSoup
-from typing import List, Tuple, Optional
-from discord.ext import tasks, commands
+from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
+
+from bot import logger
 from core.globs import Git
 
 

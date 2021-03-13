@@ -1,6 +1,7 @@
-from discord.ext import commands
 from os import getenv
+
 import dlabs
+from discord.ext import commands
 
 
 class DiscordLabsStats(commands.Cog):

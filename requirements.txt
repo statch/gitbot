@@ -3,7 +3,7 @@ aiohttp==3.7.4.post0
 gidgethub==5.0.0
 python-dotenv==0.15.0
 fuzzywuzzy~=0.18.0
-python-Levenshtein==0.12.1
+python-Levenshtein==0.12.2
 motor==2.3.1
 dnspython==2.1.0
 psutil==5.8.0

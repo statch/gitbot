@@ -10,7 +10,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
+        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(
+            os.getenv('DB_CONNECTION')).store
         self.user_db: AsyncIOMotorClient = self.db_client.users
         self.guild_db: AsyncIOMotorClient = self.db_client.guilds
         self.square: str = ":white_small_square:"
@@ -25,17 +26,22 @@ class Config(commands.Cog):
             lines: list = ["**In this section you can configure various aspects of your experience**",
                            "\n**Quick access**",
                            "These commands allow you to save a user, repo or org to get with a short command.",
-                           "`git config --user {username}` " + self.ga + " Access a saved user with `git user`",
-                           "`git config --org {org}` " + self.ga + " Access a saved organization with `git org`",
-                           "`git config --repo {repo}` " + self.ga + " Access a saved repo with `git repo`",
-                           "`git config --feed {repo}` " + self.ga + " Subscribe to new releases of a repository",
+                           "`git config --user {username}` " + self.ga +
+                           " Access a saved user with `git user`",
+                           "`git config --org {org}` " + self.ga +
+                           " Access a saved organization with `git org`",
+                           "`git config --repo {repo}` " + self.ga +
+                           " Access a saved repo with `git repo`",
+                           "`git config --feed {repo}` " + self.ga +
+                           " Subscribe to new releases of a repository",
                            "\n**You can delete stored data by typing** `git config --delete`"]
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{self.emoji}  GitBot Config",
                 description='\n'.join(lines)
             )
-            embed.set_footer(text='To see what you have saved, use git config --show')
+            embed.set_footer(
+                text='To see what you have saved, use git config --show')
             await ctx.send(embed=embed)
 
     @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
@@ -65,7 +71,7 @@ class Config(commands.Cog):
         await ctx.send(embed=embed)
 
     @config_command_group.command(name='feed',
-        aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
+                                  aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
     @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
@@ -99,7 +105,7 @@ class Config(commands.Cog):
                     else:
                         try:
                             channel: Optional[discord.TextChannel] = await commands.TextChannelConverter().convert(ctx,
-                                msg.content)
+                                                                                                                   msg.content)
                         except commands.BadArgument:
                             await ctx.send(
                                 f'{self.e}  **That is not a valid channel!** Try again, or type `cancel` to quit.')
@@ -124,7 +130,8 @@ class Config(commands.Cog):
                                         f' an embed will show up with some info and changes.'
                         )
                         if r:
-                            success_embed.set_footer(text=f'{repo} has already been added :)')
+                            success_embed.set_footer(
+                                text=f'{repo} has already been added :)')
                         try:
                             await msg.delete()
                         except discord.errors.Forbidden:
@@ -140,7 +147,8 @@ class Config(commands.Cog):
                         color=0xffd500,
                         title=f'Timed Out'
                     )
-                    timeout_embed.set_footer(text='Simply send a channel name/mention next time!')
+                    timeout_embed.set_footer(
+                        text='Simply send a channel name/mention next time!')
                     await base_msg.edit(embed=timeout_embed)
                     return
         if g and not repo:
@@ -156,7 +164,7 @@ class Config(commands.Cog):
                     return
             if len(g['feed']) < 3:
                 await self.guild_db.update_one({'_id': ctx.guild.id},
-                    {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
+                                               {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
                 await ctx.send(f'{self.emoji} **{repo}\'s** releases will now be logged.')
             else:
                 embed_limit_reached: discord.Embed = discord.Embed(
@@ -166,7 +174,7 @@ class Config(commands.Cog):
                                 f' You can remove a previously added repo by typing `git config -delete feed`'
                 )
                 embed_limit_reached.set_footer(text=f'You need the Manage Channels to do that.',
-                    icon_url=self.bot.user.avatar_url)
+                                               icon_url=self.bot.user.avatar_url)
                 await ctx.send(embed=embed_limit_reached)
 
     @config_command_group.command(name='--user', aliases=['-u', '-user', 'user'])
@@ -204,11 +212,15 @@ class Config(commands.Cog):
                 color=0xefefef,
                 title=f"{self.emoji}  Delete Quick Access Data",
                 description=f"**You can delete stored quick access data by running the following commands:**\n"
-                            f"`git config --delete user`" + f' {self.ga} ' + 'delete the quick access user\n'
-                                                                             f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization\n'
-                                                                                                                             f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo\n'
-                                                                                                                                                                              f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data\n'
-                                                                                                                                                                                                                              f"`git config --delete feed` {self.ga} view options regarding deleting release feed data"
+                            f"`git config --delete user`" +
+                f' {self.ga} ' + 'delete the quick access user\n'
+                f"`git config --delete org`" +
+                f' {self.ga} ' + 'delete the quick access organization\n'
+                f"`git config --delete repo`" +
+                f' {self.ga} ' + 'delete the quick access repo\n'
+                f"`git config --delete all`" +
+                f' {self.ga} ' + 'delete all of your quick access data\n'
+                f"`git config --delete feed` {self.ga} view options regarding deleting release feed data"
             )
             await ctx.send(embed=embed)
 
@@ -269,7 +281,7 @@ class Config(commands.Cog):
             await self.guild_db.delete_one(guild)
             try:
                 webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
-                    adapter=discord.AsyncWebhookAdapter(Git.ses))
+                                                                    adapter=discord.AsyncWebhookAdapter(Git.ses))
                 await webhook.delete()
             except (discord.NotFound, discord.HTTPException):
                 pass

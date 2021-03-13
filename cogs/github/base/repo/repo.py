@@ -50,7 +50,8 @@ class Repo(commands.Cog):
             return None
 
         embed = discord.Embed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] else 0xefefef,
+            color=int(r['primaryLanguage']['color'][1:],
+                      16) if r['primaryLanguage'] else 0xefefef,
             title=f"{repo}",
             description=None,
             url=r['url']
@@ -80,7 +81,7 @@ class Repo(commands.Cog):
             issues: str = f"Has only one [open issue]({r['url']}/issues)\n"
 
         forks: str = f"No one has forked this repo, yet\n" if r[
-                                                                  'forkCount'] == 0 else f"Has been forked [{r['forkCount']} times]({r['url']}/network/members)\n"
+            'forkCount'] == 0 else f"Has been forked [{r['forkCount']} times]({r['url']}/network/members)\n"
         if r['forkCount'] == 1:
             forks: str = f"It's been forked [only once]({r['url']}/network/members)\n"
         forked = ""
@@ -99,26 +100,30 @@ class Repo(commands.Cog):
         info: str = f"{created_at}{issues}{forks}{watchers_stargazers}{forked}{languages}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
-        homepage: tuple = (r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, "Homepage")
+        homepage: tuple = (
+            r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, "Homepage")
         links: list = [homepage]
         link_strings: list = []
         for lnk in links:
             if lnk[0] is not None and len(lnk[0]) != 0:
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
-            embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
+            embed.add_field(name=f":link: Links:",
+                            value='\n'.join(link_strings), inline=False)
 
         if r['topics'][0] and len(r['topics'][0]) > 1:
             topic_strings = ' '.join(
                 [f"[`{t['topic']['name']}`]({t['url']})" for t in r['topics'][0]])
             more = f' `+{r["topics"][1] - 10}`' if r["topics"][1] > 10 else ""
-            embed.add_field(name=f':label: Topics:', value=topic_strings + more)
+            embed.add_field(name=f':label: Topics:',
+                            value=topic_strings + more)
 
         if r['graphic']:
             embed.set_image(url=r['graphic'])
 
         if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
-            embed.set_footer(text=f'Licensed under the {r["licenseInfo"]["name"]}')
+            embed.set_footer(
+                text=f'Licensed under the {r["licenseInfo"]["name"]}')
 
         await ctx.send(embed=embed)
 
@@ -140,7 +145,7 @@ class Repo(commands.Cog):
                 await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
             return
         files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
-                                                                          'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
+            'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
                        for f in src[:15]]
         if is_tree:
             link: str = str(src[0]['_links']['html'])
@@ -149,7 +154,8 @@ class Repo(commands.Cog):
             link: str = f"https://github.com/{repo_or_path}"
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{repo_or_path}" if len(repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
+            title=f"{repo_or_path}" if len(
+                repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
             description='\n'.join(files),
             url=link
         )
@@ -169,7 +175,8 @@ class Repo(commands.Cog):
             return await msg.edit(
                 content=f"{self.e}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
-        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
+        file: discord.File = discord.File(
+            filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
             await ctx.send(file=file)
             await msg.edit(content=f'{self.emoji}  Here\'s the source code of **{repo}!**')

@@ -13,7 +13,8 @@ from core.globs import Git
 class ReleaseFeed(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION'))
+        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(
+            os.getenv('DB_CONNECTION'))
         self.db: AsyncIOMotorClient = self.db_client.store.guilds
         self.release_feed_worker.start()
 
@@ -49,7 +50,8 @@ class ReleaseFeed(commands.Cog):
             embed.set_image(url=new_release['openGraphImageUrl'])
 
         if body := new_release['release']['descriptionHTML']:
-            body: str = BeautifulSoup(body, features='html.parser').getText()[:387].replace('\n\n', '\n')
+            body: str = BeautifulSoup(body, features='html.parser').getText()[
+                :387].replace('\n\n', '\n')
             body: str = f"```{body[:body.rindex(' ')]}...```".strip()
 
         author: dict = new_release["release"]["author"]
@@ -61,7 +63,8 @@ class ReleaseFeed(commands.Cog):
                                                                  'no') if asset_c != 1 else 'Has one asset attached'
         info: str = f'{author}{assets}'
 
-        embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
+        embed.add_field(name=':notepad_spiral: Body:',
+                        value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
 
         await self.doc_send(doc, embed)

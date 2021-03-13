@@ -35,7 +35,8 @@ class Gist(commands.Cog):
         def gist_url(gist: dict) -> str:
             if not gist['description']:
                 return gist['url']
-            desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
+            desc = gist["description"] if len(
+                gist["description"]) < 70 else gist["description"][:67] + '...'
             return f'[{desc}]({gist["url"]})'
 
         gist_strings: list = [f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
@@ -48,7 +49,8 @@ class Gist(commands.Cog):
             url=data['url']
         )
 
-        embed.set_footer(text=f'Ten latest gists from {user}.\nTo inspect a specific gist, simply send its number in this channel.')
+        embed.set_footer(
+            text=f'Ten latest gists from {user}.\nTo inspect a specific gist, simply send its number in this channel.')
 
         base_msg: discord.Message = await ctx.send(embed=embed)
 
@@ -87,7 +89,8 @@ class Gist(commands.Cog):
                     color=0xffd500,
                     title=f'Timed Out'
                 )
-                timeout_embed.set_footer(text='To pick an option, simply send a number next time!')
+                timeout_embed.set_footer(
+                    text='To pick an option, simply send a number next time!')
                 await base_msg.edit(embed=timeout_embed)
                 return
         await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content), 'The content is a preview of the first file of the gist'))
@@ -105,7 +108,7 @@ class Gist(commands.Cog):
         created_at: str = f"Created by [{data['login']}]({data['url']}) on {datetime.datetime.strptime(gist['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
         updated_at: str = f"Last updated at {datetime.datetime.strptime(gist['updatedAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
         stargazers = f"Has [{gist['stargazerCount']} stargazers]({gist['url']}/stargazers)" if gist[
-                                                                                                   'stargazerCount'] != 1 else f"Has [one stargazer]({gist['url']}/stargazers)"
+            'stargazerCount'] != 1 else f"Has [one stargazer]({gist['url']}/stargazers)"
         if gist['stargazerCount'] == 0:
             stargazers = "Has no stargazers"
         comment_count = gist['comments']['totalCount']
@@ -115,7 +118,8 @@ class Gist(commands.Cog):
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
-        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
+        embed.add_field(name=':notepad_spiral: Contents:',
+                        value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
         if footer:

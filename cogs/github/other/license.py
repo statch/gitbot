@@ -24,8 +24,10 @@ class License(commands.Cog):
             url=lcns["html_url"],
             description=None
         )
-        embed.add_field(name=f"Description:", value=f'```{lcns["description"]}```', inline=False)
-        embed.add_field(name="Implementation:", value=f'```{lcns["implementation"]}```', inline=False)
+        embed.add_field(name=f"Description:",
+                        value=f'```{lcns["description"]}```', inline=False)
+        embed.add_field(name="Implementation:",
+                        value=f'```{lcns["implementation"]}```', inline=False)
         embed.add_field(name="Permissions:", value="".join([f"{self.d1}  {x}\n" for x in lcns["permissions"]]) if len(
             lcns["permissions"]) != 0 else "None")
         embed.add_field(name="Conditions:",

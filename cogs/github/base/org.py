@@ -27,7 +27,8 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='--info', aliases=['-i', '-info'])
-    async def org_info_command(self, ctx: commands.Context, organization: str) -> None:  # TODO Add more info and make it nicer
+    # TODO Add more info and make it nicer
+    async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
         else:
@@ -55,9 +56,10 @@ class Org(commands.Cog):
             members: str = f"Has only [one public member](https://github.com/orgs/{organization}/people)\n"
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
-            embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")
+            embed.add_field(name=":notepad_spiral: Description:",
+                            value=f"```{org['description']}```")
         repos: str = "Has no repositories, yet\n" if org[
-                                                         'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
+            'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
         if org['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({org['html_url']})\n"
         if org['location'] is not None:
@@ -79,7 +81,8 @@ class Org(commands.Cog):
             if lnk[0] is not None and len(lnk[0]) != 0:
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
-            embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
+            embed.add_field(name=f":link: Links:",
+                            value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
         await ctx.send(embed=embed)
 

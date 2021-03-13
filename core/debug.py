@@ -95,7 +95,8 @@ class Debug(commands.Cog):
                 'Git': Git,
                 '__import__': __import__
             }
-            exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used
+            exec(compile(parsed, filename='<ast>', mode='exec'),
+                 env)  # pylint: disable=exec-used
 
             result = (await eval(f'{fn_name}()', env))  # pylint: disable=eval-used
             await ctx.send(result)

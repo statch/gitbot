@@ -11,7 +11,8 @@ GitCommandData = namedtuple('GitCommandData', 'data type args')
 
 
 def json_dict(name: str) -> dict:
-    to_load = json_path + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+    to_load = json_path + str(name).lower() + \
+        '.json' if name[-5:] != '.json' else ''
     return json.load(open(to_load))
 
 
@@ -46,11 +47,13 @@ class Manager:
             match: list = re.findall(pattern[0], link)
             if match:
                 match: Union[str, tuple] = match[0]
-                action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
+                action: Optional[Union[Callable, str]
+                                 ] = self.type_to_func[pattern[1]]
                 if isinstance(action, str):
                     return GitCommandData(link, 'lines', link)
                 if isinstance(match, tuple) and action:
-                    match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
+                    match: tuple = tuple(
+                        i if not i.isnumeric() else int(i) for i in match)
                     obj: Union[dict, str] = await action(match[0], int(match[1]))
                     if isinstance(obj, str):
                         return obj, pattern[1]

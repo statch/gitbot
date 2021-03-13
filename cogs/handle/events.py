@@ -31,8 +31,10 @@ class Events(commands.Cog):
         embed.add_field(name='Members', value=str(guild.member_count))
         embed.add_field(name='ID', value=f"`{str(guild.id)}`")
         embed.add_field(name='Owner', value=str(owner))
-        embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
-        embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
+        embed.add_field(name='Created at', value=str(
+            guild.created_at.strftime('%e, %b %Y')))
+        embed.add_field(name='Channels', value=str(
+            len(guild.channels) - len(guild.categories)))
         embed.set_footer(text=f"Now in {len(self.bot.guilds)} guilds")
         embed.set_thumbnail(url=guild.icon_url)
 
@@ -51,14 +53,17 @@ class Events(commands.Cog):
             description=f":tada: **Hi! I'm {self.bot.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git --help` to get started.\n\nIf you have any problems, [join the support server!](https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
         )
         embed.set_thumbnail(url=self.bot.user.avatar_url)
-        embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
+        embed.set_author(icon_url=self.bot.user.avatar_url,
+                         name=self.bot.user.name)
         embed.set_footer(text=f"© 2020 wulf, statch")
 
         embed_l: discord.Embed = await self.build_guild_embed(guild)
 
-        print(f"Joined guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")
+        print(
+            f"Joined guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")
 
-        channel = await self.bot.fetch_channel(775042132054376448)  # Logging the join
+        # Logging the join
+        channel = await self.bot.fetch_channel(775042132054376448)
         await channel.send(embed=embed_l)
 
         if receiver is not None:  # Sending the join message
@@ -68,7 +73,8 @@ class Events(commands.Cog):
     async def on_guild_remove(self, guild) -> None:
         embed_l: discord.Embed = await self.build_guild_embed(guild, False)
         channel = self.bot.get_channel(775042132054376448)
-        print(f"Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")
+        print(
+            f"Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")
         await channel.send(embed=embed_l)
 
     @commands.Cog.listener()
@@ -81,7 +87,8 @@ class Events(commands.Cog):
                 description=f":tada: **Hi! I'm {self.bot.user.name}.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
             )
             embed.set_thumbnail(url=self.bot.user.avatar_url)
-            embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
+            embed.set_author(icon_url=self.bot.user.avatar_url,
+                             name=self.bot.user.name)
             await message.channel.send(embed=embed)
 
 

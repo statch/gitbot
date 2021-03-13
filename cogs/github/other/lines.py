@@ -38,7 +38,8 @@ class Lines(commands.Cog):
 
         lines_: list = content.splitlines(keepends=True)
 
-        if not data[4] and lines_[int(data[3]) - 1] == '\n':  # if the request is a single, empty line
+        # if the request is a single, empty line
+        if not data[4] and lines_[int(data[3]) - 1] == '\n':
             return 1
 
         extension: str = url[url.rindex('.') + 1:]

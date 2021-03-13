@@ -8,7 +8,8 @@ class DiscordLabsStats(commands.Cog):
         self.bot: commands.Bot = bot
         self.token: str = getenv("DISCORDLABS")
         self.discord_labs = dlabs.Client(
-            bot=self.bot, token=self.token, autopost=True, verbose=True)
+            bot=self.bot, token=self.token, autopost=True, verbose=True
+        )
 
 
 def setup(bot: commands.Bot) -> None:

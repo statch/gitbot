@@ -19,10 +19,10 @@ class Lines(commands.Cog):
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
         self.e: str = "<:ge:767823523573923890>"
         self.errors: dict = {
-            0: f'{self.e}  I cannot show **more than 25 lines**, sorry!',
-            1: f'{self.e}  There **isn\'t any content** on these lines!',
-            2: self.e + '  That {0} is **private or otherwise inaccessible.**',
-            3: self.e + '  That {0} **doesn\'t exist!**'
+            0: f"{self.e}  I cannot show **more than 25 lines**, sorry!",
+            1: f"{self.e}  There **isn't any content** on these lines!",
+            2: self.e + "  That {0} is **private or otherwise inaccessible.**",
+            3: self.e + "  That {0} **doesn't exist!**",
         }
 
     async def compile_text(self, url: str, data: tuple) -> Union[str, int]:
@@ -31,45 +31,54 @@ class Lines(commands.Cog):
                 return 0
 
         res = await self.ses.get(url)
-        content: str = await res.text(encoding='utf-8')
+        content: str = await res.text(encoding="utf-8")
 
-        if res.status == 404 or '<title>Checking your Browser - GitLab</title>' in content:
+        if (
+            res.status == 404
+            or "<title>Checking your Browser - GitLab</title>" in content
+        ):
             return 3
 
         lines_: list = content.splitlines(keepends=True)
 
         # if the request is a single, empty line
-        if not data[4] and lines_[int(data[3]) - 1] == '\n':
+        if not data[4] and lines_[int(data[3]) - 1] == "\n":
             return 1
 
-        extension: str = url[url.rindex('.') + 1:]
-        extension: str = 'js' if extension == 'ts' else extension
+        extension: str = url[url.rindex(".") + 1 :]
+        extension: str = "js" if extension == "ts" else extension
 
         lines: list = []
-        for line in lines_[int(data[3]) - 1:int(data[4]) if data[4] != '' else int(data[3])]:
-            if line == '\r\n' or line.endswith('\n'):
+        for line in lines_[
+            int(data[3]) - 1 : int(data[4]) if data[4] != "" else int(data[3])
+        ]:
+            if line == "\r\n" or line.endswith("\n"):
                 lines.append(line)
                 continue
             lines.append(f"{line}\n")
 
-        text: str = ''.join(lines)
+        text: str = "".join(lines)
         result: str = f"```{extension}\n{text}\n```"
 
         return result
 
-    @commands.command(name='--lines', aliases=['-lines', 'lines', 'line', '-line', '--line', '-l'])
+    @commands.command(
+        name="--lines", aliases=["-lines", "lines", "line", "-line", "--line", "-l"]
+    )
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def lines_command(self, ctx: commands.Context, link: str) -> None:
         github_match: list = re.findall(regex.GITHUB_LINES_RE, link)
         gitlab_match: list = re.findall(regex.GITLAB_LINES_RE, link)
         if github_match:
             result: str = await self.handle_match(github_match[0])
-            platform_term: str = 'repository'
+            platform_term: str = "repository"
         elif gitlab_match:
-            result: str = await self.handle_match(gitlab_match[0], 'gitlab')
-            platform_term: str = 'project'
+            result: str = await self.handle_match(gitlab_match[0], "gitlab")
+            platform_term: str = "project"
         else:
-            await ctx.send(f"{self.e}  The link has to be a GitHub or GitLab URL **mentioning lines!**")
+            await ctx.send(
+                f"{self.e}  The link has to be a GitHub or GitLab URL **mentioning lines!**"
+            )
             return
 
         if isinstance(result, str):
@@ -77,8 +86,8 @@ class Lines(commands.Cog):
         elif isinstance(result, int):
             await ctx.send(self.errors[result].format(platform_term))
 
-    async def handle_match(self, match: tuple, type_: str = 'github') -> str:
-        if type_ == 'github':
+    async def handle_match(self, match: tuple, type_: str = "github") -> str:
+        if type_ == "github":
             url: str = await compile_github_link(match)
         else:
             url: str = await compile_gitlab_link(match)

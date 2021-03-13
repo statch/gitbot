@@ -1,9 +1,14 @@
 import asyncio
 from collections import namedtuple
-from datetime import date, datetime
+from datetime import date
+from datetime import datetime
 from itertools import cycle
 from sys import version_info
-from typing import AnyStr, Dict, List, Optional, Union
+from typing import AnyStr
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import aiohttp
 import gidgethub.aiohttp as gh

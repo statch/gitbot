@@ -1,7 +1,9 @@
 import datetime
 import os
 import platform
-from os.path import isdir, isfile, join
+from os.path import isdir
+from os.path import isfile
+from os.path import join
 
 import discord
 import psutil

@@ -1,7 +1,8 @@
 from os import getenv
 
 import aiohttp
-from discord.ext import commands, tasks
+from discord.ext import commands
+from discord.ext import tasks
 
 
 class TopCordStats(commands.Cog):

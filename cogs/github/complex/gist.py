@@ -1,11 +1,14 @@
 import datetime
 from asyncio import TimeoutError
-from typing import Optional, Tuple, Union
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import discord
 from discord.ext import commands
 
-from core.globs import Git, Mgr
+from core.globs import Git
+from core.globs import Mgr
 
 DISCORD_MD_LANGS: tuple = (
     "java",

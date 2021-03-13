@@ -1,0 +1,29 @@
+{
+  url
+  usesCustomOpenGraphImage
+  openGraphImageUrl
+  primaryLanguage {
+    color
+  }
+  releases(last: 1) {
+    nodes {
+      isDraft
+      releaseAssets {
+        totalCount
+      }
+      descriptionHTML
+      publishedAt
+      tagName
+      url
+      createdAt
+      isPrerelease
+      isLatest
+      publishedAt
+      name
+      author {
+        login
+        url
+      }
+    }
+  }
+}

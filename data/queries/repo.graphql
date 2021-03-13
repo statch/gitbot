@@ -1,0 +1,56 @@
+{
+  url
+  forkCount
+  openGraphImageUrl
+  usesCustomOpenGraphImage
+  createdAt
+  description
+  isFork
+  owner {
+    avatarUrl
+  }
+  parent {
+    nameWithOwner
+    url
+  }
+  releases(last: 1) {
+    totalCount
+    nodes {
+      tagName
+    }
+  }
+  repositoryTopics(first: 10) {
+    totalCount
+    nodes {
+      topic {
+        name
+      }
+      url
+    }
+  }
+  issues(states: OPEN) {
+    totalCount
+  }
+  codeOfConduct {
+    name
+    url
+  }
+  licenseInfo {
+    name
+    nickname
+  }
+  primaryLanguage{
+    name
+    color
+  }
+  languages {
+    totalCount
+  }
+  homepageUrl
+  stargazers {
+    totalCount
+  }
+  watchers {
+    totalCount
+  }
+}

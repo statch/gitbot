@@ -1,0 +1,27 @@
+{
+  url
+  login
+  gists(last: 10) {
+    totalCount
+    nodes {
+      id
+      stargazerCount
+      name
+      description
+      updatedAt
+      createdAt
+      url
+      comments {
+        totalCount
+      }
+      files {
+        text
+        name
+        extension
+        language {
+          color
+        }
+      }
+    }
+  }
+}

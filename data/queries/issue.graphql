@@ -1,0 +1,29 @@
+{
+  author {
+    login
+    url
+    avatarUrl
+  }
+  url
+  createdAt
+  closed
+  closedAt
+  bodyText
+  title 
+  number
+  state
+  comments {
+    totalCount
+  }
+  participants {
+    totalCount
+  }
+  assignees {
+    totalCount
+  }
+  labels(first: 100) {
+    nodes {
+      name
+    }
+  }
+}

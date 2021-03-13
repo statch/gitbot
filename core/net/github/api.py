@@ -197,8 +197,7 @@ class GitHubAPI:
     async def get_pull_request(self,
                                repo: str,
                                number: int,
-                               data: Optional[dict] = None,
-                               had_keys_removed: bool = False) -> Union[dict, str]:
+                               data: Optional[dict] = None) -> Union[dict, str]:
         if not data:
             split: list = repo.split('/')
             owner: str = split[0]
@@ -214,8 +213,6 @@ class GitHubAPI:
 
             data = await self.post_gql(query, 'repository pullRequest', complex_=True)
         if isinstance(data, dict):
-            if not had_keys_removed:
-                data: dict = data['repository']['pullRequest']
             data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
             data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
             data['reviewers'] = {}

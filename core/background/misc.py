@@ -4,7 +4,8 @@ from random import randint
 
 import discord
 import statcord
-from discord.ext import commands, tasks
+from discord.ext import commands
+from discord.ext import tasks
 
 from bot import PRODUCTION
 

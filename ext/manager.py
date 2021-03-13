@@ -1,14 +1,19 @@
 import json
 import re
 from collections import namedtuple
-from typing import (Any, Callable, Iterable, List, Optional, Reversible, Tuple,
-                    Union)
+from typing import Any
+from typing import Callable
+from typing import Iterable
+from typing import List
+from typing import Optional
+from typing import Reversible
+from typing import Tuple
+from typing import Union
 
 from fuzzywuzzy import fuzz
 
-from ext import regex as r
-
 from .datatypes.dir_proxy import DirProxy
+from ext import regex as r
 
 json_path: str = r"./data/"
 GitCommandData = namedtuple("GitCommandData", "data type args")

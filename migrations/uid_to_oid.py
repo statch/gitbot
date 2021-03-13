@@ -2,11 +2,12 @@
 A one-use script to replace documents using both the _id and user_id fields
 with ones overwriting the _id field.
 """
-
 from os import getenv
 
 from dotenv import load_dotenv
-from pymongo import DeleteOne, InsertOne, MongoClient
+from pymongo import DeleteOne
+from pymongo import InsertOne
+from pymongo import MongoClient
 
 load_dotenv()
 

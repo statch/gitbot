@@ -1,5 +1,6 @@
 import os
-from typing import Any, Union
+from typing import Any
+from typing import Union
 
 
 class DirProxy:

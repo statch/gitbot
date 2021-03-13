@@ -1,12 +1,13 @@
-import discord
-import platform
 import datetime
 import os
+import platform
+from os.path import isdir, isfile, join
+
+import discord
 import psutil
 from discord.ext import commands
-from core.globs import Mgr
-from os.path import isfile, isdir, join
 
+from core.globs import Mgr
 
 pid: int = os.getpid()
 process: psutil.Process = psutil.Process(pid)

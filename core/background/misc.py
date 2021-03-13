@@ -1,10 +1,12 @@
-import discord
 import os
-import statcord
-from bot import PRODUCTION
-from discord.ext import commands, tasks
-from random import randint
 from itertools import cycle
+from random import randint
+
+import discord
+import statcord
+from discord.ext import commands, tasks
+
+from bot import PRODUCTION
 
 
 class MiscellaneousBackgroundTasks(commands.Cog):

@@ -1,8 +1,10 @@
-import os
-import discord
 import logging
+import os
+
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+
 from ext.decorators import is_me
 
 load_dotenv()

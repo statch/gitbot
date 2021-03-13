@@ -1,10 +1,12 @@
-import discord
 import os
-from discord.ext import commands
-from core.globs import Git
-from typing import Optional
 from asyncio import TimeoutError
+from typing import Optional
+
+import discord
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
+
+from core.globs import Git
 
 
 class Config(commands.Cog):

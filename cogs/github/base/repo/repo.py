@@ -1,12 +1,15 @@
-import discord
 import datetime
-import re
 import io
-from .list_plugin import issue_list, pull_request_list
+import re
+from typing import Optional, Union
+
+import discord
 from discord.ext import commands
-from typing import Union, Optional
+
 from core.globs import Git
 from ext.regex import MD_EMOJI_RE
+
+from .list_plugin import issue_list, pull_request_list
 
 
 class Repo(commands.Cog):

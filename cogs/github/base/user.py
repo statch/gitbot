@@ -1,7 +1,9 @@
-import discord
 import datetime
+from typing import Optional, Union
+
+import discord
 from discord.ext import commands
-from typing import Union, Optional
+
 from core.globs import Git
 
 

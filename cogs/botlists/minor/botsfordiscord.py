@@ -1,6 +1,7 @@
+from os import getenv
+
 import aiohttp
 from discord.ext import commands, tasks
-from os import getenv
 
 
 class BotsForDiscordStats(commands.Cog):

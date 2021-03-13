@@ -1,6 +1,7 @@
-from discord.ext import commands
-from core.globs import Mgr
 from discord import Embed
+from discord.ext import commands
+
+from core.globs import Mgr
 
 
 class License(commands.Cog):

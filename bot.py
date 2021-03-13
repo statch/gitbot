@@ -26,7 +26,8 @@ bot: commands.Bot = commands.Bot(
     fetch_offline_members=False,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s: %(message)s")
+logging.basicConfig(level=logging.INFO,
+                    format="%(levelname)s:%(name)s: %(message)s")
 logging.getLogger("asyncio").setLevel(logging.WARNING)
 logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger("main")
@@ -52,18 +53,14 @@ extensions: list = [
 ]
 
 if PRODUCTION:
-    extensions.extend(
-        [
-            f"cogs.botlists.major.{file[:-3]}"
-            for file in os.listdir("cogs/botlists/major")
-        ]
-    )
-    extensions.extend(
-        [
-            f"cogs.botlists.minor.{file[:-3]}"
-            for file in os.listdir("cogs/botlists/minor")
-        ]
-    )
+    extensions.extend([
+        f"cogs.botlists.major.{file[:-3]}"
+        for file in os.listdir("cogs/botlists/major")
+    ])
+    extensions.extend([
+        f"cogs.botlists.minor.{file[:-3]}"
+        for file in os.listdir("cogs/botlists/minor")
+    ])
 
 for extension in extensions:
     logger.info(f"Loading {extension}...")
@@ -85,7 +82,8 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
         try:
             getattr(bot, f"{op}_extension")(cog)
         except commands.ExtensionError as e:
-            await ctx.send(f"**Exception while {op}ing** `{cog}`**:**\n```{e}```")
+            await ctx.send(
+                f"**Exception while {op}ing** `{cog}`**:**\n```{e}```")
         else:
             await ctx.send(f"**Successfully {op}ed** `{cog}`.")
 
@@ -110,7 +108,8 @@ async def unload_command(ctx: commands.Context, cog: str) -> None:
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
-    if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
+    if not isinstance(ctx.channel,
+                      discord.DMChannel) and ctx.guild.unavailable:
         return False
 
     return True

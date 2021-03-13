@@ -20,7 +20,8 @@ GitCommandData = namedtuple("GitCommandData", "data type args")
 
 
 def json_dict(name: str) -> dict:
-    to_load = json_path + str(name).lower() + ".json" if name[-5:] != ".json" else ""
+    to_load = json_path + str(
+        name).lower() + ".json" if name[-5:] != ".json" else ""
     return json.load(open(to_load))
 
 
@@ -55,44 +56,39 @@ class Manager:
         return None
 
     async def get_link_reference(
-        self, link: str
-    ) -> Optional[Union[GitCommandData, str, tuple]]:
+            self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
         for pattern in self.patterns:
             match: list = re.findall(pattern[0], link)
             if match:
                 match: Union[str, tuple] = match[0]
-                action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
+                action: Optional[Union[Callable,
+                                       str]] = self.type_to_func[pattern[1]]
                 if isinstance(action, str):
                     return GitCommandData(link, "lines", link)
                 if isinstance(match, tuple) and action:
-                    match: tuple = tuple(
-                        i if not i.isnumeric() else int(i) for i in match
-                    )
-                    obj: Union[dict, str] = await action(match[0], int(match[1]))
+                    match: tuple = tuple(i if not i.isnumeric() else int(i)
+                                         for i in match)
+                    obj: Union[dict,
+                               str] = await action(match[0], int(match[1]))
                     if isinstance(obj, str):
                         return obj, pattern[1]
                     return GitCommandData(obj, pattern[1], match)
                 if not action:
                     if (obj := await self.git.get_user((m := match))) is None:
                         obj: Optional[dict] = await self.git.get_org(m)
-                        return (
-                            GitCommandData(obj, "org", m)
-                            if obj is not None
-                            else "no-user-or-org"
-                        )
+                        return (GitCommandData(obj, "org", m)
+                                if obj is not None else "no-user-or-org")
                     return GitCommandData(obj, "user", m)
                 repo = await action(match)
-                return (
-                    GitCommandData(repo, pattern[1], match)
-                    if repo is not None
-                    else "repo"
-                )
+                return (GitCommandData(repo, pattern[1], match)
+                        if repo is not None else "repo")
         return None
 
     async def get_most_common(self, items: list) -> Any:
         return max(set(items), key=items.count)
 
-    async def validate_number(self, number: str, items: List[dict]) -> Optional[dict]:
+    async def validate_number(self, number: str,
+                              items: List[dict]) -> Optional[dict]:
         if number.startswith("#"):
             number: str = number[1:]
         try:
@@ -104,10 +100,12 @@ class Manager:
             return matched[0]
         return None
 
-    async def reverse(self, __sequence: Optional[Reversible]) -> Optional[Iterable]:
+    async def reverse(self,
+                      __sequence: Optional[Reversible]) -> Optional[Iterable]:
         if __sequence:
             return type(__sequence)((reversed(__sequence)))
         return None
 
-    async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
+    async def readdir(self, path: str, ext: Union[str, list,
+                                                  tuple]) -> DirProxy:
         return DirProxy(path=path, ext=ext)

@@ -14,19 +14,21 @@ class License(commands.Cog):
 
     @commands.command(name="--license", aliases=["license", "-license"])
     @commands.cooldown(10, 20, commands.BucketType.user)
-    async def license_command(self, ctx: commands.Context, *, lcns: str) -> None:
+    async def license_command(self, ctx: commands.Context, *,
+                              lcns: str) -> None:
         lcns: dict = Mgr.correlate_license(lcns)
         if lcns is None:
             await ctx.send(
                 f"{self.e}  I couldn't find a license matching the name you provided!"
             )
             return
-        embed = Embed(
-            color=0xEFEFEF, title=lcns["name"], url=lcns["html_url"], description=None
-        )
-        embed.add_field(
-            name=f"Description:", value=f'```{lcns["description"]}```', inline=False
-        )
+        embed = Embed(color=0xEFEFEF,
+                      title=lcns["name"],
+                      url=lcns["html_url"],
+                      description=None)
+        embed.add_field(name=f"Description:",
+                        value=f'```{lcns["description"]}```',
+                        inline=False)
         embed.add_field(
             name="Implementation:",
             value=f'```{lcns["implementation"]}```',
@@ -35,20 +37,17 @@ class License(commands.Cog):
         embed.add_field(
             name="Permissions:",
             value="".join([f"{self.d1}  {x}\n" for x in lcns["permissions"]])
-            if len(lcns["permissions"]) != 0
-            else "None",
+            if len(lcns["permissions"]) != 0 else "None",
         )
         embed.add_field(
             name="Conditions:",
             value="".join([f"{self.d2}  {x}\n" for x in lcns["conditions"]])
-            if len(lcns["conditions"]) != 0
-            else "None",
+            if len(lcns["conditions"]) != 0 else "None",
         )
         embed.add_field(
             name="Limitations:",
             value="".join([f"{self.d3}  {x}\n" for x in lcns["limitations"]])
-            if len(lcns["limitations"]) != 0
-            else "None",
+            if len(lcns["limitations"]) != 0 else "None",
         )
         await ctx.send(embed=embed)
 

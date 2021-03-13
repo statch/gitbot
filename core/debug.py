@@ -28,8 +28,10 @@ class Debug(commands.Cog):
         self.e: str = "<:ge:767823523573923890>"
 
     @is_me()
-    @commands.command(name="dispatch", aliases=["--event", "--dispatch", "event"])
-    async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
+    @commands.command(name="dispatch",
+                      aliases=["--event", "--dispatch", "event"])
+    async def manually_trigger_event(self, ctx: commands.Context,
+                                     event: str) -> None:
         event = event.lower().replace("on_", "", 1)
         cor = {
             "guild_join": ctx.guild,
@@ -49,9 +51,9 @@ class Debug(commands.Cog):
     async def rate(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
-        embed = discord.Embed(
-            color=0xEFEFEF, title=f"{self.e}  Rate-limiting", description=None
-        )
+        embed = discord.Embed(color=0xEFEFEF,
+                              title=f"{self.e}  Rate-limiting",
+                              description=None)
         graphql = [g["resources"]["graphql"] for g in rate]
         used_gql = sum(g["used"] for g in graphql)
         rest = [r["rate"] for r in rate]
@@ -101,9 +103,7 @@ class Debug(commands.Cog):
                 "Git": Git,
                 "__import__": __import__,
             }
-            exec(
-                compile(parsed, filename="<ast>", mode="exec"), env
-            )  # pylint: disable=exec-used
+            exec(compile(parsed, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
 
             result = await eval(f"{fn_name}()", env)  # pylint: disable=eval-used
             await ctx.send(result)

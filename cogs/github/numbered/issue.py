@@ -15,9 +15,10 @@ class Issue(commands.Cog):
 
     @commands.command(name="issue", aliases=["-issue", "i"])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    async def issue_command(
-        self, ctx: commands.Context, repo: str, issue_number: str = None
-    ) -> None:
+    async def issue_command(self,
+                            ctx: commands.Context,
+                            repo: str,
+                            issue_number: str = None) -> None:
         if hasattr(ctx, "data"):
             issue: dict = getattr(ctx, "data")
         else:
@@ -47,7 +48,8 @@ class Issue(commands.Cog):
                 return
             if isinstance(issue, str):
                 if issue == "repo":
-                    await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                    await ctx.send(
+                        f"{self.e}  This repository **doesn't exist!**")
                 else:
                     await ctx.send(
                         f"{self.e}  An issue with this number **doesn't exist!**"
@@ -71,21 +73,19 @@ class Issue(commands.Cog):
         else:
             body = None
         if body:
-            embed.add_field(
-                name=":notepad_spiral: Body:", value=f"```{body}```", inline=False
-            )
+            embed.add_field(name=":notepad_spiral: Body:",
+                            value=f"```{body}```",
+                            inline=False)
 
         created_at: datetime = datetime.datetime.strptime(
-            issue["createdAt"], "%Y-%m-%dT%H:%M:%SZ"
-        )
+            issue["createdAt"], "%Y-%m-%dT%H:%M:%SZ")
 
         user: str = f"Created by [{issue['author']['login']}]({issue['author']['url']}) \
          on {created_at.strftime('%e, %b %Y')}"
 
         if issue["closed"]:
             closed_at: datetime = datetime.datetime.strptime(
-                issue["closedAt"], "%Y-%m-%dT%H:%M:%SZ"
-            )
+                issue["closedAt"], "%Y-%m-%dT%H:%M:%SZ")
             closed: str = f"\nClosed on {closed_at.strftime('%e, %b %Y')}\n"
         else:
             closed: str = "\n"
@@ -106,9 +106,8 @@ class Issue(commands.Cog):
 
         participants: str = (
             f"\n{issue['participantCount']} people have participated in this issue"
-            if issue["participantCount"] != 1
-            else "\nOne person has participated in this issue"
-        )
+            if issue["participantCount"] != 1 else
+            "\nOne person has participated in this issue")
 
         info: str = f"{user}{closed}{comments_and_assignees}{participants}"
 

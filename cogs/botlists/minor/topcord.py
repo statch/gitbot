@@ -15,12 +15,15 @@ class TopCordStats(commands.Cog):
     async def post_topcord_stats(self):
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"https://topcord.xyz/api/bot/stats/{self.bot.user.id}",
-                json={"guilds": len(self.bot.guilds), "shards": 0},
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": self.token,
-                },
+                    f"https://topcord.xyz/api/bot/stats/{self.bot.user.id}",
+                    json={
+                        "guilds": len(self.bot.guilds),
+                        "shards": 0
+                    },
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": self.token,
+                    },
             ) as res:
                 res_ = await res.json()
             if res.status != 200:

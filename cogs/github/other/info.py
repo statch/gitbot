@@ -18,9 +18,8 @@ class Info(commands.Cog):
     @commands.command(name="info")
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def info_command(self, ctx: commands.Context, link: str) -> None:
-        ref: Optional[Union[tuple, str, GitCommandData]] = await Mgr.get_link_reference(
-            link
-        )
+        ref: Optional[Union[
+            tuple, str, GitCommandData]] = await Mgr.get_link_reference(link)
         if ref is None:
             await ctx.send(
                 f"{self.e}  I couldn't fetch any info regarding the link you provided!"
@@ -30,8 +29,7 @@ class Info(commands.Cog):
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")
             elif ref[1] == "issue":
                 await ctx.send(
-                    f"{self.e}  An issue with this number **doesn't exist!**"
-                )
+                    f"{self.e}  An issue with this number **doesn't exist!**")
             else:
                 await ctx.send(
                     f"{self.e}  A pull request with this number **doesn't exist!**"
@@ -39,8 +37,7 @@ class Info(commands.Cog):
         elif isinstance(ref, str):
             if ref == "no-user-of-org":
                 await ctx.send(
-                    f"{self.e}  This user or organization **doesn't exist!**"
-                )
+                    f"{self.e}  This user or organization **doesn't exist!**")
             else:
                 await ctx.send(f"{self.e}  This repository **doesn't exist!**")
         else:

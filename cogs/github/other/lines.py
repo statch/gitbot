@@ -35,10 +35,8 @@ class Lines(commands.Cog):
         res = await self.ses.get(url)
         content: str = await res.text(encoding="utf-8")
 
-        if (
-            res.status == 404
-            or "<title>Checking your Browser - GitLab</title>" in content
-        ):
+        if (res.status == 404
+                or "<title>Checking your Browser - GitLab</title>" in content):
             return 3
 
         lines_: list = content.splitlines(keepends=True)
@@ -47,13 +45,12 @@ class Lines(commands.Cog):
         if not data[4] and lines_[int(data[3]) - 1] == "\n":
             return 1
 
-        extension: str = url[url.rindex(".") + 1 :]
+        extension: str = url[url.rindex(".") + 1:]
         extension: str = "js" if extension == "ts" else extension
 
         lines: list = []
-        for line in lines_[
-            int(data[3]) - 1 : int(data[4]) if data[4] != "" else int(data[3])
-        ]:
+        for line in lines_[int(data[3]) -
+                           1:int(data[4]) if data[4] != "" else int(data[3])]:
             if line == "\r\n" or line.endswith("\n"):
                 lines.append(line)
                 continue
@@ -65,8 +62,8 @@ class Lines(commands.Cog):
         return result
 
     @commands.command(
-        name="--lines", aliases=["-lines", "lines", "line", "-line", "--line", "-l"]
-    )
+        name="--lines",
+        aliases=["-lines", "lines", "line", "-line", "--line", "-l"])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def lines_command(self, ctx: commands.Context, link: str) -> None:
         github_match: list = re.findall(regex.GITHUB_LINES_RE, link)

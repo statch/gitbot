@@ -171,7 +171,7 @@ class GitHubAPI:
 
     async def get_user_gists(self, user: str):
         query: str = """
-        {{ 
+        {{
           user(login: "{user}") {q}}}
         """.format(
             user=user, q=self._queries.user_gists
@@ -409,7 +409,7 @@ class GitHubAPI:
     async def get_user(self, user: str):
         to: str = datetime.utcnow().strftime("%Y-%m-%dT%XZ")
         query: str = """  # This isn't in self._queries because I didn't want to mess around formatting it with dates
-        {{ 
+        {{
           user(login: "{user}") {{
             createdAt
             company

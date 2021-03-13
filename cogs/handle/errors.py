@@ -16,12 +16,9 @@ class Errors(commands.Cog):
             )
         elif isinstance(error, commands.CommandOnCooldown):
             msg = (
-                self.e
-                + " "
-                + "**You're on cooldown!** Please try again in {:.2f}s".format(
-                    error.retry_after
-                )
-            )
+                self.e + " " +
+                "**You're on cooldown!** Please try again in {:.2f}s".format(
+                    error.retry_after))
             await ctx.send(msg)
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(

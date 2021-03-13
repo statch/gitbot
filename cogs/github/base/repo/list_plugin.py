@@ -11,9 +11,9 @@ from core.globs import Mgr
 err: str = "<:ge:767823523573923890>"
 
 
-async def issue_list(
-    ctx: commands.Context, repo: Optional[str] = None, state: str = "open"
-) -> None:
+async def issue_list(ctx: commands.Context,
+                     repo: Optional[str] = None,
+                     state: str = "open") -> None:
     if (lstate := state.lower()) not in ("open", "closed"):
         await ctx.send(
             f"{err} `{state}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -24,22 +24,23 @@ async def issue_list(
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog("Config").getitem(ctx, "repo")
+        repo: Optional[str] = await ctx.bot.get_cog("Config").getitem(
+            ctx, "repo")
         if not repo:
             await ctx.send(
                 f"{err} **You don't have a quick access repo configured!** (You didn't pass a "
-                f"repo into the command)"
-            )
+                f"repo into the command)")
             return
         stored: bool = True
-    issues: List[dict] = await Mgr.reverse(
-        await Git.get_last_issues_by_state(repo, state=f"[{state.upper()}]")
-    )
+    issues: List[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(
+        repo, state=f"[{state.upper()}]"))
     if not issues:
         await handle_none(ctx, "issue", stored, lstate)
         return
 
-    issue_strings: List[str] = [await make_string(repo, i, "issues") for i in issues]
+    issue_strings: List[str] = [
+        await make_string(repo, i, "issues") for i in issues
+    ]
 
     embed: discord.Embed = discord.Embed(
         color=0xEFEFEF,
@@ -49,9 +50,9 @@ async def issue_list(
     )
 
     embed.set_footer(
-        text="You can quickly inspect a specific issue from the list by typing its number!\nYou can "
-        "type cancel to quit."
-    )
+        text=
+        "You can quickly inspect a specific issue from the list by typing its number!\nYou can "
+        "type cancel to quit.")
 
     await ctx.send(embed=embed)
 
@@ -59,13 +60,14 @@ async def issue_list(
         try:
             msg: discord.Message = await ctx.bot.wait_for(
                 "message",
-                check=lambda m: m.channel.id == ctx.channel.id
-                and m.author.id == ctx.author.id,
+                check=lambda m: m.channel.id == ctx.channel.id and m.author.id
+                == ctx.author.id,
                 timeout=30,
             )
             if msg.content.lower() == "cancel":
                 return
-            if not (issue := await Mgr.validate_number(num := msg.content, issues)):
+            if not (issue := await Mgr.validate_number(num := msg.content,
+                                                       issues)):
                 await ctx.send(
                     f"{err} `{num}` is not a valid number **from the list!**",
                     delete_after=7,
@@ -79,9 +81,9 @@ async def issue_list(
             return
 
 
-async def pull_request_list(
-    ctx: commands.Context, repo: Optional[str] = None, state: str = "open"
-) -> None:
+async def pull_request_list(ctx: commands.Context,
+                            repo: Optional[str] = None,
+                            state: str = "open") -> None:
     if (lstate := state.lower()) not in ("open", "closed", "merged"):
         await ctx.send(
             f"{err} `{state}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)"
@@ -92,22 +94,24 @@ async def pull_request_list(
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog("Config").getitem(ctx, "repo")
+        repo: Optional[str] = await ctx.bot.get_cog("Config").getitem(
+            ctx, "repo")
         if not repo:
             await ctx.send(
                 f"{err} **You don't have a quick access repo configured!** (You didn't pass a "
-                f"repo into the command)"
-            )
+                f"repo into the command)")
             return
         stored: bool = True
     prs: List[dict] = await Mgr.reverse(
-        await Git.get_last_pull_requests_by_state(repo, state=f"[{state.upper()}]")
-    )
+        await Git.get_last_pull_requests_by_state(repo,
+                                                  state=f"[{state.upper()}]"))
     if not prs:
         await handle_none(ctx, "pull request", stored, lstate)
         return
 
-    pr_strings: List[str] = [await make_string(repo, pr, "pulls") for pr in prs]
+    pr_strings: List[str] = [
+        await make_string(repo, pr, "pulls") for pr in prs
+    ]
 
     embed: discord.Embed = discord.Embed(
         color=0xEFEFEF,
@@ -117,9 +121,9 @@ async def pull_request_list(
     )
 
     embed.set_footer(
-        text="You can quickly inspect a specific PR from the list by typing its number!\nYou can "
-        "type cancel to quit."
-    )
+        text=
+        "You can quickly inspect a specific PR from the list by typing its number!\nYou can "
+        "type cancel to quit.")
 
     await ctx.send(embed=embed)
 
@@ -127,8 +131,8 @@ async def pull_request_list(
         try:
             msg: discord.Message = await ctx.bot.wait_for(
                 "message",
-                check=lambda m: m.channel.id == ctx.channel.id
-                and m.author.id == ctx.author.id,
+                check=lambda m: m.channel.id == ctx.channel.id and m.author.id
+                == ctx.author.id,
                 timeout=30,
             )
             if msg.content.lower() == "cancel":
@@ -147,9 +151,8 @@ async def pull_request_list(
             return
 
 
-async def handle_none(
-    ctx: commands.Context, item: str, stored: bool, state: str
-) -> None:
+async def handle_none(ctx: commands.Context, item: str, stored: bool,
+                      state: str) -> None:
     if item is None:
         if stored:
             await ctx.bot.get_cog("Config").delete_field(ctx, "repo")
@@ -160,11 +163,11 @@ async def handle_none(
             await ctx.send(f"{err}  This repo doesn't exist!")
     else:
         if not stored:
-            await ctx.send(f"{err} This repo doesn't have any **{state} {item}s!**")
+            await ctx.send(
+                f"{err} This repo doesn't have any **{state} {item}s!**")
         else:
             await ctx.send(
-                f"{err} Your saved repo doesn't have any **{state} {item}s!**"
-            )
+                f"{err} Your saved repo doesn't have any **{state} {item}s!**")
     return
 
 

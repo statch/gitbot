@@ -21,11 +21,12 @@ class Help(commands.Cog):
                 "`git help utility` for other useful commands",
                 "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)",
             ]
-            embed = discord.Embed(
-                title=f"{self.e}  Help", color=0xEFEFEF, description="\n".join(lines)
-            )
+            embed = discord.Embed(title=f"{self.e}  Help",
+                                  color=0xEFEFEF,
+                                  description="\n".join(lines))
             embed.set_footer(
-                text=f"You can find a list of aliases by using the git --aliases command"
+                text=
+                f"You can find a list of aliases by using the git --aliases command"
             )
             await ctx.send(embed=embed)
 
@@ -50,11 +51,12 @@ class Help(commands.Cog):
             "`git repo -pulls {repo} (state)` - identical to the above, except for pull requests",
         ]
 
-        embed = discord.Embed(
-            title=f"{self.e}  GitHub Help", color=0xEFEFEF, description="\n".join(lines)
-        )
+        embed = discord.Embed(title=f"{self.e}  GitHub Help",
+                              color=0xEFEFEF,
+                              description="\n".join(lines))
         embed.set_footer(
-            text=f"You can find a list of aliases by using the git --aliases command"
+            text=
+            f"You can find a list of aliases by using the git --aliases command"
         )
         await ctx.send(embed=embed)
 
@@ -73,7 +75,8 @@ class Help(commands.Cog):
             description="\n".join(lines),
         )
         embed.set_footer(
-            text=f"You can find a list of aliases by using the git --aliases command"
+            text=
+            f"You can find a list of aliases by using the git --aliases command"
         )
         await ctx.send(embed=embed)
 
@@ -85,11 +88,12 @@ class Help(commands.Cog):
             "`git config` - get detailed info on your options",
             "`git config -show` - shows your current settings",
         ]
-        embed = discord.Embed(
-            title=f"{self.e}  Config Help", color=0xEFEFEF, description="\n".join(lines)
-        )
+        embed = discord.Embed(title=f"{self.e}  Config Help",
+                              color=0xEFEFEF,
+                              description="\n".join(lines))
         embed.set_footer(
-            text=f"You can find a list of aliases by using the git --aliases command"
+            text=
+            f"You can find a list of aliases by using the git --aliases command"
         )
         await ctx.send(embed=embed)
 
@@ -106,11 +110,12 @@ class Help(commands.Cog):
             "`git ping` - see the Bot's latency",
         ]
 
-        embed = discord.Embed(
-            title=f"{self.e}  Info Help", color=0xEFEFEF, description="\n".join(lines)
-        )
+        embed = discord.Embed(title=f"{self.e}  Info Help",
+                              color=0xEFEFEF,
+                              description="\n".join(lines))
         embed.set_footer(
-            text=f"You can find a list of aliases by using the git --aliases command"
+            text=
+            f"You can find a list of aliases by using the git --aliases command"
         )
         await ctx.send(embed=embed)
 
@@ -126,12 +131,12 @@ class Help(commands.Cog):
                 "`git aliases config` - for configuration command aliases",
                 "`git aliases utility` - for utility command aliases",
             ]
-            embed = discord.Embed(
-                title=f"{self.e}  Aliases", color=0xEFEFEF, description="\n".join(lines)
-            )
+            embed = discord.Embed(title=f"{self.e}  Aliases",
+                                  color=0xEFEFEF,
+                                  description="\n".join(lines))
             embed.set_footer(
-                text=f"You can find usage of these commands by typing git --help"
-            )
+                text=
+                f"You can find usage of these commands by typing git --help")
             await ctx.send(embed=embed)
 
     @alias_command.command(name="github", aliases=["-github", "--github"])
@@ -153,7 +158,8 @@ class Help(commands.Cog):
             description="\n".join(lines),
         )
         embed.set_footer(
-            text=f"You can find usage of these commands by typing git --help github"
+            text=
+            f"You can find usage of these commands by typing git --help github"
         )
         await ctx.send(embed=embed)
 
@@ -172,7 +178,8 @@ class Help(commands.Cog):
             description="\n".join(lines),
         )
         embed.set_footer(
-            text=f"You can find usage of these commands by typing git --help utility"
+            text=
+            f"You can find usage of these commands by typing git --help utility"
         )
         await ctx.send(embed=embed)
 
@@ -194,8 +201,7 @@ class Help(commands.Cog):
             description="\n".join(lines),
         )
         embed.set_footer(
-            text=f"You can find usage of these commands by typing git config"
-        )
+            text=f"You can find usage of these commands by typing git config")
         await ctx.send(embed=embed)
 
     @alias_command.command(name="info", aliases=["-info", "--info"])

@@ -9,15 +9,15 @@ from os import getenv
 
 load_dotenv()
 
-db: MongoClient = MongoClient(getenv('DB_CONNECTION'))['store']['users']
+db: MongoClient = MongoClient(getenv("DB_CONNECTION"))["store"]["users"]
 
 ops: list = []
 
 for u in db.find():
-    if 'user_id' in u:
-        uid: int = u['user_id']
-        del u['_id'], u['user_id']
-        ops.append(DeleteOne({'user_id': uid}))
+    if "user_id" in u:
+        uid: int = u["user_id"]
+        del u["_id"], u["user_id"]
+        ops.append(DeleteOne({"user_id": uid}))
         ops.append(InsertOne(dict(_id=uid, **u)))
 
 print("Writing " + str(len(ops) >> 1))

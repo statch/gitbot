@@ -10,25 +10,36 @@ class Errors(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
+            await ctx.send(
+                f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**"
+            )
         elif isinstance(error, commands.CommandOnCooldown):
-            msg = self.e + " " + \
-                '**You\'re on cooldown!** Please try again in {:.2f}s'.format(
-                    error.retry_after)
+            msg = (
+                self.e
+                + " "
+                + "**You're on cooldown!** Please try again in {:.2f}s".format(
+                    error.retry_after
+                )
+            )
             await ctx.send(msg)
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(
-                f"{self.e}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**")
+                f"{self.e}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**"
+            )
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send(
                 f"{self.e}  **I am missing permissions required to do this!**"
-                f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+                f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}"
+            )
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send(
                 f"{self.e}  **You're missing permissions required to do this!**"
-                f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+                f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}"
+            )
         elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send(f'{self.e}  This command can only be used **inside a server!**')
+            await ctx.send(
+                f"{self.e}  This command can only be used **inside a server!**"
+            )
         elif not PRODUCTION:
             raise error
         else:

@@ -12,9 +12,14 @@ class DiscordExtremeListStats(commands.Cog):
     @tasks.loop(minutes=15)
     async def post_del_stats(self):
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"https://api.discordextremelist.xyz/v2/bot/{self.bot.user.id}/stats",
-                                    json={"guildCount": len(self.bot.guilds)},
-                                    headers={"Content-Type": "application/json", "Authorization": self.token}) as res:
+            async with session.post(
+                f"https://api.discordextremelist.xyz/v2/bot/{self.bot.user.id}/stats",
+                json={"guildCount": len(self.bot.guilds)},
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": self.token,
+                },
+            ) as res:
                 res_ = await res.json()
             if res.status != 200:
                 print(f"\ndiscordextremelist API error:\n\n{res_}\n")

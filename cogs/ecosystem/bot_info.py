@@ -49,7 +49,8 @@ class BotInfo(commands.Cog):
             time_format: str = '**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds.'
         else:
             time_format: str = '**{h}** hours, **{m}** minutes, and **{s}** seconds.'
-        uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
+        uptime_stamp: str = time_format.format(
+            d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
@@ -97,7 +98,8 @@ class BotInfo(commands.Cog):
                         f"=761269120691470357&scope=bot&permissions=67488832) | [**Support Server**]("
                         f"https://discord.gg/3e5fwpA) "
         )
-        embed.set_author(icon_url=self.bot.user.avatar_url, name='Invite me to your server!')
+        embed.set_author(icon_url=self.bot.user.avatar_url,
+                         name='Invite me to your server!')
         await ctx.send(embed=embed)
 
     @commands.command(name='vote', aliases=['--vote', '-vote'])
@@ -108,7 +110,8 @@ class BotInfo(commands.Cog):
             description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
                         "https://botsfordiscord.com/bot/761269120691470357) "
         )
-        embed.set_author(name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
+        embed.set_author(
+            name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='stats', aliases=['--stats', '-stats'])
@@ -116,7 +119,9 @@ class BotInfo(commands.Cog):
     async def stats_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(color=0xefefef)
         users: int = sum([x.member_count for x in self.bot.guilds])
-        memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
+        # memory use in GB... I think
+        memory: str = "**{:.3f}GB** of RAM".format(
+            process.memory_info()[0] / 2. ** 30)
         cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"
         embed.add_field(name=f"{self.s_emoji}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
                         inline=False)

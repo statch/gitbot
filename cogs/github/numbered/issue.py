@@ -61,15 +61,18 @@ class Issue(commands.Cog):
         else:
             body = None
         if body:
-            embed.add_field(name=':notepad_spiral: Body:', value=f"```{body}```", inline=False)
+            embed.add_field(name=':notepad_spiral: Body:',
+                            value=f"```{body}```", inline=False)
 
-        created_at: datetime = datetime.datetime.strptime(issue['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+        created_at: datetime = datetime.datetime.strptime(
+            issue['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
 
         user: str = f"Created by [{issue['author']['login']}]({issue['author']['url']}) \
          on {created_at.strftime('%e, %b %Y')}"
 
         if issue['closed']:
-            closed_at: datetime = datetime.datetime.strptime(issue['closedAt'], '%Y-%m-%dT%H:%M:%SZ')
+            closed_at: datetime = datetime.datetime.strptime(
+                issue['closedAt'], '%Y-%m-%dT%H:%M:%SZ')
             closed: str = f"\nClosed on {closed_at.strftime('%e, %b %Y')}\n"
         else:
             closed: str = '\n'
@@ -96,7 +99,8 @@ class Issue(commands.Cog):
         embed.add_field(name=':mag_right: Info:', value=info, inline=False)
 
         if issue['labels']:
-            embed.add_field(name=':label: Labels:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
+            embed.add_field(name=':label: Labels:', value=' '.join(
+                [f"`{lb}`" for lb in issue['labels']]))
 
         embed.set_thumbnail(url=issue['author']['avatarUrl'])
         await ctx.send(embed=embed)

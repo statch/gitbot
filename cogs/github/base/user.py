@@ -27,7 +27,8 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='--info', aliases=['-i', '-info'])
-    async def user_info_command(self, ctx: commands.Context, user: str) -> None:  # TODO Rework this a little
+    # TODO Rework this a little
+    async def user_info_command(self, ctx: commands.Context, user: str) -> None:
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:
@@ -53,25 +54,26 @@ class User(commands.Cog):
         contrib_count: Union[tuple, None] = u['contributions']
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
-            embed.add_field(name=":notepad_spiral: Bio:", value=f"```{u['bio']}```")
+            embed.add_field(name=":notepad_spiral: Bio:",
+                            value=f"```{u['bio']}```")
         occupation: str = f'Works at {u["company"]}\n' if "company" in u and u[
             "company"] is not None else 'Isn\'t part of a company\n'
         orgs: str = f"Belongs to {orgs_c} organizations\n" if orgs_c != 0 else "Doesn't belong to any organizations\n"
         if orgs_c == 1:
             orgs: str = "Belongs to 1 organization\n"
         followers: str = "Isn\'t followed by anyone" if u[
-                                                            'followers'] == 0 else f"Has [{u['followers']} followers]({u['url']}?tab=followers)"
+            'followers'] == 0 else f"Has [{u['followers']} followers]({u['url']}?tab=followers)"
 
         if u['followers'] == 1:
             followers: str = f"Has only [1 follower]({u['url']}?tab=followers)"
         following: str = "doesn't follow anyone, yet" if u[
-                                                             'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
+            'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
         if u['following'] == 1:
             following: str = f"follows only [1 person]({u['url']}?tab=following)"
         follow: str = followers + ' and ' + following
 
         repos: str = "Has no repositories, yet\n" if u[
-                                                         'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
+            'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
         if u['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
         if contrib_count is not None:
@@ -91,7 +93,8 @@ class User(commands.Cog):
             if lnk[0] is not None and len(lnk[0]) != 0:
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
-            embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
+            embed.add_field(name=f":link: Links:",
+                            value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
         await ctx.send(embed=embed)
 

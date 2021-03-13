@@ -12,7 +12,9 @@ class Errors(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
         elif isinstance(error, commands.CommandOnCooldown):
-            msg = self.e + " " + '**You\'re on cooldown!** Please try again in {:.2f}s'.format(error.retry_after)
+            msg = self.e + " " + \
+                '**You\'re on cooldown!** Please try again in {:.2f}s'.format(
+                    error.retry_after)
             await ctx.send(msg)
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(

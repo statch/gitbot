@@ -24,7 +24,8 @@ class Help(commands.Cog):
                 color=0xefefef,
                 description="\n".join(lines)
             )
-            embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+            embed.set_footer(
+                text=f"You can find a list of aliases by using the git --aliases command")
             await ctx.send(embed=embed)
 
     @help_command.command(name='github', aliases=['-github', '--github'])
@@ -51,7 +52,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(
+            text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
     @help_command.command(name='utility', aliases=['-utility', '--utility'])
@@ -66,7 +68,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(
+            text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
     @help_command.command(name='config', aliases=['-config', '--config'])
@@ -80,7 +83,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(
+            text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
     @help_command.command(name="info", aliases=["-info", "--info"])
@@ -99,7 +103,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(
+            text=f"You can find a list of aliases by using the git --aliases command")
         await ctx.send(embed=embed)
 
     @commands.group(name='--aliases', aliases=['aliases'])
@@ -117,7 +122,8 @@ class Help(commands.Cog):
                 color=0xefefef,
                 description="\n".join(lines)
             )
-            embed.set_footer(text=f"You can find usage of these commands by typing git --help")
+            embed.set_footer(
+                text=f"You can find usage of these commands by typing git --help")
             await ctx.send(embed=embed)
 
     @alias_command.command(name="github", aliases=['-github', '--github'])
@@ -136,7 +142,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help github")
+        embed.set_footer(
+            text=f"You can find usage of these commands by typing git --help github")
         await ctx.send(embed=embed)
 
     @alias_command.command(name="utility", aliases=['-utility', '--utility'])
@@ -153,7 +160,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help utility")
+        embed.set_footer(
+            text=f"You can find usage of these commands by typing git --help utility")
         await ctx.send(embed=embed)
 
     @alias_command.command(name="config", aliases=['-config', '--config'])
@@ -173,7 +181,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git config")
+        embed.set_footer(
+            text=f"You can find usage of these commands by typing git config")
         await ctx.send(embed=embed)
 
     @alias_command.command(name="info", aliases=["-info", "--info"])
@@ -189,7 +198,8 @@ class Help(commands.Cog):
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git help info")
+        embed.set_footer(
+            text=f"You can find usage of these commands by typing git help info")
         await ctx.send(embed=embed)
 
 

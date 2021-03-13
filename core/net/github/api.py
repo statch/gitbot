@@ -29,12 +29,15 @@ class GitHubAPI:
     """
 
     def __init__(self, tokens: tuple, requester: str):
-        requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        requester: str = requester + \
+            '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
         self.__tokens: tuple = tokens
-        self._queries: DirProxy = DirProxy('./data/queries/', ('.gql', '.graphql'))
+        self._queries: DirProxy = DirProxy(
+            './data/queries/', ('.gql', '.graphql'))
         self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.token)
+        self.gh: gh.GitHubAPI = gh.GitHubAPI(
+            session=self.ses, requester=requester, oauth_token=self.token)
 
     @property
     def token(self) -> str:
@@ -171,7 +174,8 @@ class GitHubAPI:
         data: dict = await self.post_gql(query, 'repository')
         if data:
             data['release'] = data['releases']['nodes'][0] if data['releases']['nodes'] else None
-            data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
+            data['color'] = int(data['primaryLanguage']['color']
+                                [1:], 16) if data['primaryLanguage'] else 0xefefef
             del data['primaryLanguage']
             del data['releases']
         return data
@@ -189,7 +193,8 @@ class GitHubAPI:
         data: dict = await self.post_gql(query, 'repository')
         if data:
             data['languages'] = data['languages']['totalCount']
-            data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
+            data['topics'] = (data['repositoryTopics']['nodes'],
+                              data['repositoryTopics']['totalCount'])
             data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
             data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
         return data
@@ -216,8 +221,10 @@ class GitHubAPI:
         if isinstance(data, dict):
             if not had_keys_removed:
                 data: dict = data['repository']['pullRequest']
-            data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
-            data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
+            data['labels']: list = [l['node']['name']
+                                    for l in data['labels']['edges']]
+            data['assignees']['users'] = [
+                (u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
             data['reviewers'] = {}
             data['reviewers']['users'] = [
                 (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
@@ -256,7 +263,8 @@ class GitHubAPI:
     async def get_issue(self,
                         repo: str,
                         number: int,
-                        data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
+                        # If data isn't None, this method simply acts as a parser
+                        data: Optional[dict] = None,
                         had_keys_removed: bool = False) -> Union[dict, str]:
         if not data:
             if '/' not in repo or repo.count('/') > 1:
@@ -287,7 +295,8 @@ class GitHubAPI:
             data['commentCount']: int = comment_count
             data['assigneeCount']: int = assignee_count
             data['participantCount']: int = participant_count
-            data['labels']: list = [lb['name'] for lb in list(data['labels']['nodes'])]
+            data['labels']: list = [lb['name']
+                                    for lb in list(data['labels']['nodes'])]
         return data
 
     async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = '[OPEN]') -> Optional[List[dict]]:

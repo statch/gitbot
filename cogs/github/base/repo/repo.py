@@ -123,7 +123,7 @@ class Repo(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs'])
+    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs', 'fs'])
     async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
         is_tree: bool = False
         if repo_or_path.count('/') > 1:

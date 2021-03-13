@@ -1,7 +1,8 @@
 import json
 import re
+from .datatypes.dir_proxy import DirProxy
 from ext import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Tuple
 from fuzzywuzzy import fuzz
 from collections import namedtuple
 
@@ -82,3 +83,6 @@ class Manager:
         if __sequence:
             return type(__sequence)((reversed(__sequence)))
         return None
+
+    async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
+        return DirProxy(path=path, ext=ext)

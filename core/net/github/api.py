@@ -1,13 +1,13 @@
 import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
-from .data.repeated_queries import IssueQuery, PullRequestQuery
 from sys import version_info
 from typing import Union, List, Optional, Dict, AnyStr
 from gidgethub import BadRequest
 from datetime import date, datetime
 from itertools import cycle
 from collections import namedtuple
+from ext.datatypes.dir_proxy import DirProxy
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
@@ -30,10 +30,11 @@ class GitHubAPI:
 
     def __init__(self, tokens: tuple, requester: str):
         requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
-        self.__tokens = tokens
+        self.__tokens: tuple = tokens
+        self._queries: DirProxy = DirProxy('./data/queries/', ('.gql', '.graphql'))
         self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.token)
+        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.token)
 
     @property
     def token(self) -> str:
@@ -134,35 +135,8 @@ class GitHubAPI:
     async def get_user_gists(self, user: str):
         query: str = """
         {{ 
-          user(login: "{user}") {{
-            url
-            login
-            gists(last: 10) {{
-              totalCount
-              nodes {{
-                id
-                stargazerCount
-                name 
-                description
-                updatedAt
-                createdAt
-                url 
-                comments {{
-                    totalCount
-                }}
-                files {{
-                  text
-                  name
-                  extension
-                  language {{
-                    color
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-        """.format(user=user)
+          user(login: "{user}") {q}}}
+        """.format(user=user, q=self._queries.user_gists)
 
         return await self.post_gql(query, 'user')
 
@@ -191,37 +165,8 @@ class GitHubAPI:
 
         query: str = """
         {{
-          repository(name: "{name}", owner: "{owner}") {{
-            url
-            usesCustomOpenGraphImage
-            openGraphImageUrl
-            primaryLanguage {{
-              color 
-            }}
-            releases(last: 1) {{
-              nodes {{
-                isDraft
-                releaseAssets {{
-                  totalCount
-                }}
-                descriptionHTML
-                publishedAt
-                tagName
-                url
-                createdAt
-                isPrerelease
-                isLatest
-                publishedAt
-                name
-                author {{
-                  login
-                  url 
-                }}
-              }}
-            }}
-          }}
-        }}
-        """.format(owner=owner, name=name)
+          repository(name: "{name}", owner: "{owner}") {q}}}
+        """.format(owner=owner, name=name, q=self._queries.release)
 
         data: dict = await self.post_gql(query, 'repository')
         if data:
@@ -238,64 +183,8 @@ class GitHubAPI:
 
         query: str = """
         {{
-          repository(name: "{name}", owner: "{owner}") {{
-            url 
-            forkCount
-            openGraphImageUrl
-            usesCustomOpenGraphImage
-            createdAt
-            description
-            isFork
-            owner {{
-              avatarUrl
-            }}
-            parent {{
-              nameWithOwner
-              url
-            }}
-            releases(last: 1) {{
-              totalCount
-              nodes {{
-                tagName
-              }}
-            }}
-            repositoryTopics(first: 10) {{
-              totalCount
-              nodes {{
-                topic {{
-                  name
-                }}
-                url
-              }}
-            }}
-            issues(states: OPEN) {{
-              totalCount
-            }}
-            codeOfConduct {{
-              name
-              url
-            }}
-            licenseInfo {{
-              name
-              nickname 
-            }}
-            primaryLanguage{{
-              name
-              color
-            }}
-            languages {{
-              totalCount
-            }}
-            homepageUrl
-            stargazers {{
-              totalCount
-            }}
-            watchers {{
-              totalCount
-            }}
-          }}
-        }}
-        """.format(owner=owner, name=repository)
+          repository(name: "{name}", owner: "{owner}") {q}}}
+        """.format(owner=owner, name=repository, q=self._queries.repo)
 
         data: dict = await self.post_gql(query, 'repository')
         if data:
@@ -321,7 +210,7 @@ class GitHubAPI:
                 pullRequest(number: {number}) {q}
               }}
             }}
-            """.format(name=repository, owner=owner, number=number, q=PullRequestQuery)
+            """.format(name=repository, owner=owner, number=number, q=self._queries.pull_request)
 
             data = await self.post_gql(query, 'repository pullRequest', complex_=True)
         if isinstance(data, dict):
@@ -358,7 +247,7 @@ class GitHubAPI:
             }}
           }}
         }}
-        """.format(name=repository, owner=owner, state=state, last=last, q=PullRequestQuery)
+        """.format(name=repository, owner=owner, state=state, last=last, q=self._queries.pull_request)
 
         data: dict = await self.post_gql(query)
         if 'repository' in data and 'pullRequests' in data['repository']:
@@ -383,7 +272,7 @@ class GitHubAPI:
                 issue(number: {issue_number}) {q}
               }}
             }}
-            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=IssueQuery)
+            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=self._queries.issue)
 
             data: dict = await self.post_gql(query, complex_=True)
         if isinstance(data, dict):
@@ -417,7 +306,7 @@ class GitHubAPI:
             }}
           }}
         }}
-        """.format(name=repository, owner=owner, state=state, last=last, q=IssueQuery)
+        """.format(name=repository, owner=owner, state=state, last=last, q=self._queries.issue)
 
         data: dict = await self.post_gql(query)
         if 'repository' in data and 'issues' in data['repository']:
@@ -425,7 +314,7 @@ class GitHubAPI:
 
     async def get_user(self, user: str):
         to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')
-        query: str = """
+        query: str = """  # This isn't in self._queries because I didn't want to mess around formatting it with dates
         {{ 
           user(login: "{user}") {{
             createdAt

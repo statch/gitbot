@@ -61,8 +61,8 @@ class GitHubAPI:
         if not key:
             return res
         if len(split := key.split()) > 1:
-            for key in split:
-                res = res[key]
+            for k in split:
+                res = res[k]
             return res
         return res[key]
 

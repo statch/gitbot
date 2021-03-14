@@ -12,7 +12,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
         await ctx.send(f'{err} `{state}` is not a **valid issue state!** (Try `open` or `closed`)')
         return
     if repo and (s := repo.lower()) in ('open', 'closed'):
-        state: str = s
+        state, lstate = s, s
         repo = None
     stored: bool = False
     if not repo:
@@ -64,7 +64,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
         await ctx.send(f'{err} `{state}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)')
         return
     if repo and (s := repo.lower()) in ('open', 'closed', 'merged'):
-        state: str = s
+        state, lstate = s, s
         repo = None
     stored: bool = False
     if not repo:

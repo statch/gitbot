@@ -59,16 +59,14 @@ class Gist(commands.Cog):
                 return False, f'{self.emoji} Please pass in a number **smaller than 10!**'
             elif int(index) > len(gist_strings):
                 return False, f'{self.emoji} This user doesn\'t have that many gists!'
-            else:
-                return True, None
+            return True, None
 
         if ind:
             if (i := validate_index(ind))[0]:
                 await base_msg.delete()
                 await ctx.send(embed=await self.build_gist_embed(data, int(ind), 'The content is a preview of the first file of the gist'))
                 return
-            else:
-                await ctx.send(i[1], delete_after=7)
+            await ctx.send(i[1], delete_after=7)
 
         while True:
             try:

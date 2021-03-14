@@ -27,7 +27,7 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='--info', aliases=['-i', '-info'])
-    async def org_info_command(self, ctx: commands.Context, organization: str) -> None:  # TODO Add more info and make it nicer
+    async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
         else:

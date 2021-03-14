@@ -64,8 +64,7 @@ class Config(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @config_command_group.command(name='feed',
-        aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
+    @config_command_group.command(name='feed', aliases=['-feed', '--feed', 'release', '-release', '--release', '-f', '-F'])
     @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
@@ -131,10 +130,9 @@ class Config(commands.Cog):
                             pass
                         await base_msg.edit(embed=success_embed)
                         return
-                    else:
-                        await base_msg.delete()
-                        await ctx.send(f'{self.e}  **Something went wrong,** please report this in the support server.')
-                        return
+                    await base_msg.delete()
+                    await ctx.send(f'{self.e}  **Something went wrong,** please report this in the support server.')
+                    return
                 except TimeoutError:
                     timeout_embed = discord.Embed(
                         color=0xffd500,

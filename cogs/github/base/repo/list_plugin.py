@@ -1,9 +1,8 @@
 import discord
+import asyncio
 from discord.ext import commands
 from typing import Optional, List
 from core.globs import Git, Mgr
-from asyncio import TimeoutError
-
 err: str = "<:ge:767823523573923890>"
 
 
@@ -55,7 +54,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
                 ctx.data = await Git.get_issue('', 0, issue, True)
                 await ctx.invoke(ctx.bot.get_command('issue'), repo)
                 return
-        except TimeoutError:
+        except asyncio.TimeoutError:
             return
 
 
@@ -104,10 +103,10 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
                 await ctx.send(f'{err} `{num}` is not a valid number **from the list!**', delete_after=7)
                 continue
             else:
-                ctx.data = await Git.get_pull_request('', 0, pr, True)
+                ctx.data = await Git.get_pull_request('', 0, pr)
                 await ctx.invoke(ctx.bot.get_command('pr'), repo)
                 return
-        except TimeoutError:
+        except asyncio.TimeoutError:
             return
 
 

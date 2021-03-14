@@ -1,9 +1,9 @@
 import discord
+import asyncio
 import os
 from discord.ext import commands
 from core.globs import Git
 from typing import Optional
-from asyncio import TimeoutError
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
@@ -133,7 +133,7 @@ class Config(commands.Cog):
                     await base_msg.delete()
                     await ctx.send(f'{self.e}  **Something went wrong,** please report this in the support server.')
                     return
-                except TimeoutError:
+                except asyncio.TimeoutError:
                     timeout_embed = discord.Embed(
                         color=0xffd500,
                         title=f'Timed Out'

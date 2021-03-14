@@ -1,6 +1,6 @@
 import discord
 import datetime
-from asyncio import TimeoutError
+import asyncio
 from discord.ext import commands
 from core.globs import Git, Mgr
 from typing import Optional, Tuple, Union
@@ -82,7 +82,7 @@ class Gist(commands.Cog):
                     await ctx.send(err_msg, delete_after=7)
                     continue
                 break
-            except TimeoutError:
+            except asyncio.TimeoutError:
                 timeout_embed = discord.Embed(
                     color=0xffd500,
                     title=f'Timed Out'

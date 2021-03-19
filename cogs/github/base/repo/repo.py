@@ -2,7 +2,7 @@ import discord
 import datetime
 import re
 import io
-from .list_plugin import issue_list, pull_request_list
+from .list_plugin import *
 from discord.ext import commands
 from typing import Union, Optional
 from core.globs import Git

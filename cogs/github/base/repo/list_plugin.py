@@ -3,6 +3,13 @@ import asyncio
 from discord.ext import commands
 from typing import Optional, List
 from core.globs import Git, Mgr
+
+__all__: tuple = (
+    'issue_list',
+    'pull_request_list'
+)
+
+
 err: str = "<:ge:767823523573923890>"
 
 

@@ -7,7 +7,7 @@ from gidgethub import BadRequest
 from datetime import date, datetime
 from itertools import cycle
 from collections import namedtuple
-from ext.datatypes.dir_proxy import DirProxy
+from ext.datatypes import DirProxy
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'

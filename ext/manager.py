@@ -1,8 +1,8 @@
 import json
 import re
-from .datatypes.dir_proxy import DirProxy
+from ext.datatypes import DirProxy, JSONProxy
 from ext import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Tuple
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
 from collections import namedtuple
 
@@ -10,16 +10,12 @@ json_path: str = r'./data/'
 GitCommandData = namedtuple('GitCommandData', 'data type args')
 
 
-def json_dict(name: str) -> dict:
-    to_load = json_path + str(name).lower() + '.json' if name[-5:] != '.json' else ''
-    return json.load(open(to_load))
-
-
 class Manager:
     def __init__(self, github_instance):
         self.git = github_instance
-        self.licenses: dict = json_dict("licenses")
-        self.emojis: dict = json_dict("emoji")
+        self.e: JSONProxy = self.load_json('emoji')
+        self.licenses: JSONProxy = self.load_json('licenses')
+        self.emojis: JSONProxy = self.load_json('emoji')
         self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
                                 (r.GITLAB_LINES_RE, 'lines'),
                                 (r.ISSUE_RE, 'issue'),
@@ -40,6 +36,12 @@ class Manager:
             if any([match > 80, match1 > 80, match2 > 80]):
                 return i
         return None
+
+    def load_json(self, name: str) -> JSONProxy:
+        to_load = json_path + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+        with open(to_load, 'r') as fp:
+            data: Union[dict, list] = json.load(fp)
+        return JSONProxy(data)
 
     async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
         for pattern in self.patterns:

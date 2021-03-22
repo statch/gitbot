@@ -2,6 +2,15 @@ from typing import Any, Union
 
 
 class JSONProxy(dict):
+    """A wrapper around :class:`dict` (And :class:`list` for ease of use) allowing dotted access.
+    Mainly meant for use on dicts loaded from JSON files, but works on any type of :class:`dict`.
+
+    Parameters
+    ----------
+    data: :class:`Union[:class:`dict`, :class:`list`]`
+        The object to wrap with JSONProxy.
+    """
+
     def __init__(self, data: Union[dict, list]):
         self.__items: Union[list, dict] = data
         if isinstance(data, dict):

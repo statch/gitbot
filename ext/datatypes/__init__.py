@@ -1,2 +1,2 @@
-from .dir_proxy import DirProxy
-from .json_proxy import JSONProxy
+from .proxies.dir_proxy import DirProxy
+from .proxies.json_proxy import JSONProxy

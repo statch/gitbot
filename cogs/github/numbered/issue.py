@@ -1,15 +1,13 @@
 import discord
 import datetime
 from typing import Optional
-from core.globs import Git
+from core.globs import Git, Mgr
 from discord.ext import commands
 
 
 class Issue(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='issue', aliases=['-issue', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
@@ -19,7 +17,7 @@ class Issue(commands.Cog):
         else:
             if not issue_number and not repo.isnumeric():
                 await ctx.send(
-                    f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
+                    f'{Mgr.e.err}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
                 return
             num = repo
             stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
@@ -28,19 +26,19 @@ class Issue(commands.Cog):
                 issue_number = num
             else:
                 await ctx.send(
-                    f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                    f'{Mgr.e.err}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
                 return
 
             try:
                 issue = await Git.get_issue(repo, int(issue_number))
             except ValueError:
-                await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
+                await ctx.send(f"{Mgr.e.err}  The second argument must be an issue **number!**")
                 return
             if isinstance(issue, str):
                 if issue == 'repo':
-                    await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                    await ctx.send(f"{Mgr.e.err}  This repository **doesn't exist!**")
                 else:
-                    await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
+                    await ctx.send(f"{Mgr.e.err}  An issue with this number **doesn't exist!**")
                 return
 
         em: str = f"<:issue_open:788517560164810772>"

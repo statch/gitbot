@@ -1,21 +1,19 @@
 import discord
 import datetime
 from typing import Optional
-from core.globs import Git
+from core.globs import Git, Mgr
 from discord.ext import commands
 
 PR_STATES: dict = {
-    "open": "<:pr_open:795793711312404560>",
-    "closed": "<:pr_closed:788518707969785886>",
-    "merged": "<:merge:795801508146839612>"
+    "open": Mgr.e.pr_open,
+    "closed": Mgr.e.pr_closed,
+    "merged": Mgr.e.pr_merged
 }
 
 
 class PullRequest(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='pr', aliases=['pull', '-pr', '--pr', '--pullrequest', '-pull'])
     @commands.cooldown(10, 30, commands.BucketType.user)
@@ -25,7 +23,7 @@ class PullRequest(commands.Cog):
         else:
             if not pr_number and not repo.isnumeric():
                 await ctx.send(
-                    f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
+                    f'{Mgr.e.err}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
                 return
             elif not pr_number and repo.isnumeric():
                 num = repo
@@ -35,20 +33,20 @@ class PullRequest(commands.Cog):
                     pr_number = num
                 else:
                     await ctx.send(
-                        f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                        f'{Mgr.e.err}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
                     return
 
             try:
                 pr: dict = await Git.get_pull_request(repo, int(pr_number))
             except ValueError:
-                await ctx.send(f"{self.e}  The second argument must be a pull request **number!**")
+                await ctx.send(f"{Mgr.e.err}  The second argument must be a pull request **number!**")
                 return
 
             if isinstance(pr, str):
                 if pr == 'repo':
-                    await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                    await ctx.send(f"{Mgr.e.err}  This repository **doesn't exist!**")
                 else:
-                    await ctx.send(f"{self.e}  A pull request with this number **doesn't exist!**")
+                    await ctx.send(f"{Mgr.e.err}  A pull request with this number **doesn't exist!**")
                 return
 
         title: str = pr['title'] if len(pr['title']) <= 90 else f"{pr['title'][:87]}..."

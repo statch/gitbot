@@ -6,5 +6,8 @@
   "circle_yellow": "<:circle_yellow:772842186290888735>",
   "statistics": "<:statistics:774385842298290216>",
   "checkmark": "<:checkmark:770244084727283732>",
-  "failure": "<:failure:770244076896256010>"
+  "failure": "<:failure:770244076896256010>",
+  "pr_open": "<:pr_open:795793711312404560>",
+  "pr_closed": "<:pr_closed:788518707969785886>",
+  "pr_merged": "<:merge:795801508146839612>"
 }

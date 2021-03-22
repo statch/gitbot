@@ -3,7 +3,7 @@ import discord
 import datetime as dt
 import ast
 from ext.decorators import is_me
-from core.globs import Git
+from core.globs import Git, Mgr
 
 
 def insert_returns(body):
@@ -22,8 +22,6 @@ def insert_returns(body):
 class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = '<:ge:767823523573923890>'
 
     @is_me()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
@@ -38,9 +36,9 @@ class Debug(commands.Cog):
         if cor.get(event, None) is not None:
             e = cor.get(event, None)
             self.bot.dispatch(event, e)
-            await ctx.send(f'{self.emoji} Dispatched event `{event}`')
+            await ctx.send(f'{Mgr.e.github} Dispatched event `{event}`')
         else:
-            await ctx.send(f'{self.e}  Failed to dispatch event `{event}`')
+            await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
 
     @is_me()
     @commands.command(aliases=['--rate', '--ratelimit'])
@@ -49,7 +47,7 @@ class Debug(commands.Cog):
         rate = data[0]
         embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.e}  Rate-limiting',
+            title=f'{Mgr.e.err}  Rate-limiting',
             description=None
         )
         graphql = [g['resources']['graphql'] for g in rate]
@@ -101,5 +99,5 @@ class Debug(commands.Cog):
             await ctx.send(result)
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Debug(bot))

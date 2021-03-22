@@ -1,12 +1,11 @@
 import discord
+from core.globs import Mgr
 from discord.ext import commands
 
 
 class Help(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.e: str = "<:ge:767823523573923890>"
-        self.ga: str = "<:ga:768064843176738816>"
 
     @commands.group(name='--help', aliases=['help', '-H'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -20,7 +19,7 @@ class Help(commands.Cog):
                            "`git help utility` for other useful commands",
                            "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
             embed = discord.Embed(
-                title=f"{self.e}  Help",
+                title=f"{Mgr.e.err}  Help",
                 color=0xefefef,
                 description="\n".join(lines)
             )
@@ -47,7 +46,7 @@ class Help(commands.Cog):
                        "`git repo -pulls {repo} (state)` - identical to the above, except for pull requests"]
 
         embed = discord.Embed(
-            title=f"{self.e}  GitHub Help",
+            title=f"{Mgr.e.err}  GitHub Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -62,7 +61,7 @@ class Help(commands.Cog):
                        "`git lines {link}` - get the lines mentioned in a GitHub or GitLab link",
                        "`git info {link}` - automatically inspect a link and get info on it"]
         embed = discord.Embed(
-            title=f"{self.e}  Utility Help",
+            title=f"{Mgr.e.err}  Utility Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -76,7 +75,7 @@ class Help(commands.Cog):
                        "`git config` - get detailed info on your options",
                        "`git config -show` - shows your current settings"]
         embed = discord.Embed(
-            title=f"{self.e}  Config Help",
+            title=f"{Mgr.e.err}  Config Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -95,7 +94,7 @@ class Help(commands.Cog):
                        "`git ping` - see the Bot's latency"]
 
         embed = discord.Embed(
-            title=f"{self.e}  Info Help",
+            title=f"{Mgr.e.err}  Info Help",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -113,7 +112,7 @@ class Help(commands.Cog):
                            "`git aliases config` - for configuration command aliases",
                            "`git aliases utility` - for utility command aliases"]
             embed = discord.Embed(
-                title=f"{self.e}  Aliases",
+                title=f"{Mgr.e.err}  Aliases",
                 color=0xefefef,
                 description="\n".join(lines)
             )
@@ -124,15 +123,15 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def github_aliases(self, ctx: commands.Context) -> None:
         lines: list = ["Some commands default to their `info` variant if it's omitted:",
-                       f"`git user -info` {self.ga} `git user`",
-                       f"`git repo -info` {self.ga} `git repo`",
-                       f"`git org -info` {self.ga} `git org`",
+                       f"`git user -info` {Mgr.e.arrow} `git user`",
+                       f"`git repo -info` {Mgr.e.arrow} `git repo`",
+                       f"`git org -info` {Mgr.e.arrow} `git org`",
                        f"There are generic aliases as well:",
-                       f"`git user -repos` {self.ga} `git user -r`",
-                       f"`git org -repos` {self.ga} `git org -r`",
-                       f"`git issue` {self.ga} `git i`"]
+                       f"`git user -repos` {Mgr.e.arrow} `git user -r`",
+                       f"`git org -repos` {Mgr.e.arrow} `git org -r`",
+                       f"`git issue` {Mgr.e.arrow} `git i`"]
         embed = discord.Embed(
-            title=f"{self.e}  GitHub Aliases",
+            title=f"{Mgr.e.err}  GitHub Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -144,12 +143,12 @@ class Help(commands.Cog):
     async def utility_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             "**Shorthands for commands used to fetch data related to Git and GitHub**",
-            f"`git license` {self.ga} `git info -L`",
-            f"`git repo --download` {self.ga} `git repo -dl`",
-            f"`git lines` {self.ga} `git -l`"
+            f"`git license` {Mgr.e.arrow} `git info -L`",
+            f"`git repo --download` {Mgr.e.arrow} `git repo -dl`",
+            f"`git lines` {Mgr.e.arrow} `git -l`"
         ]
         embed = discord.Embed(
-            title=f"{self.e}  Utility Aliases",
+            title=f"{Mgr.e.err}  Utility Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -161,15 +160,15 @@ class Help(commands.Cog):
     async def config_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             "Shorthands for commands used to store your preferred orgs, repos, users and feeds",
-            f"`git config` {self.ga} `git cfg`",
-            f"`git config -show` {self.ga} `git cfg -S`",
-            f"`git config --user` {self.ga} `git cfg -U`",
-            f"`git config --org` {self.ga} `git cfg -O`",
-            f"`git config --repo` {self.ga} `git cfg -R`",
-            f"`git config --feed` {self.ga} `git cfg -F`"
+            f"`git config` {Mgr.e.arrow} `git cfg`",
+            f"`git config -show` {Mgr.e.arrow} `git cfg -S`",
+            f"`git config --user` {Mgr.e.arrow} `git cfg -U`",
+            f"`git config --org` {Mgr.e.arrow} `git cfg -O`",
+            f"`git config --repo` {Mgr.e.arrow} `git cfg -R`",
+            f"`git config --feed` {Mgr.e.arrow} `git cfg -F`"
         ]
         embed = discord.Embed(
-            title=f"{self.e}  Config Aliases",
+            title=f"{Mgr.e.err}  Config Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )
@@ -181,11 +180,11 @@ class Help(commands.Cog):
     async def info_command_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             "Shorthands for commands not tied to GitHub itself",
-            f"`git uptime` {self.ga} `git up`",
-            f"`git ping` {self.ga} `git p`"
+            f"`git uptime` {Mgr.e.arrow} `git up`",
+            f"`git ping` {Mgr.e.arrow} `git p`"
         ]
         embed = discord.Embed(
-            title=f"{self.e}  Info Aliases",
+            title=f"{Mgr.e.err}  Info Aliases",
             color=0xefefef,
             description="\n".join(lines)
         )

@@ -33,9 +33,6 @@ LINES_OF_CODE: int = sum([dir_line_count('./cogs'),
 class BotInfo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.s: str = "<:gs:767809543815954463>"
-        self.s_emoji: str = Mgr.e["statistics"]
 
     @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
@@ -53,7 +50,7 @@ class BotInfo(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f'{self.s}  **I have been online for:**\n{uptime_stamp}'
+            description=f'{Mgr.e.timer}  **I have been online for:**\n{uptime_stamp}'
         )
         await ctx.send(embed=embed)
 
@@ -62,7 +59,7 @@ class BotInfo(commands.Cog):
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            description=f"{self.s}  **My ping is:**\n**{round(self.bot.latency * 1000)}** milliseconds"
+            description=f"{Mgr.e.timer}  **My ping is:**\n**{round(self.bot.latency * 1000)}** milliseconds"
         )
         await ctx.send(embed=embed)
 
@@ -71,7 +68,7 @@ class BotInfo(commands.Cog):
     async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.emoji}  Privacy Policy'
+            title=f'{Mgr.e.github}  Privacy Policy'
         )
         embed.add_field(name="What is stored?", inline=False,
                         value="The only data stored are your User ID and quick access users, repos and orgs.")
@@ -118,7 +115,7 @@ class BotInfo(commands.Cog):
         users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"
-        embed.add_field(name=f"{self.s_emoji}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
+        embed.add_field(name=f"{Mgr.e.stats}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
                         inline=False)
         embed.add_field(name="System Usage", value=f"{cpu}\n{memory}")
         embed.add_field(name="People",

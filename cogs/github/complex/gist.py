@@ -13,20 +13,17 @@ DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
 class Gist(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
-        self.square: str = ":white_small_square:"
 
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str, ind: Optional[Union[int, str]] = None) -> None:
         data: dict = await Git.get_user_gists(user)
         if not data:
-            await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
+            await ctx.send(f'{Mgr.e.err}  This user **doesn\'t exist!**')
             return
         if (gists := len(data['gists']['nodes'])) < 2:
             if gists == 0:
-                await ctx.send(f'{self.e}  This user doesn\'t have any **public gists!**')
+                await ctx.send(f'{Mgr.e.err}  This user doesn\'t have any **public gists!**')
             else:
                 await ctx.send(embed=await self.build_gist_embed(data, 1,
                                                                  footer='You didn\'t see the gist list because this user has only one gist.'))
@@ -38,7 +35,7 @@ class Gist(commands.Cog):
             desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
             return f'[{desc}]({gist["url"]})'
 
-        gist_strings: list = [f'{self.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
+        gist_strings: list = [f'{Mgr.e.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
                               enumerate(data['gists']['nodes'])]
 
         embed: discord.Embed = discord.Embed(
@@ -54,11 +51,11 @@ class Gist(commands.Cog):
 
         def validate_index(index: Union[int, str]) -> Tuple[bool, Optional[str]]:
             if not str(index).isnumeric():
-                return False, f'{self.emoji}  Please pick a number **between 1 and {len(gist_strings)}**'
+                return False, f'{Mgr.e.github}  Please pick a number **between 1 and {len(gist_strings)}**'
             elif int(index) > 10:
-                return False, f'{self.emoji} Please pass in a number **smaller than 10!**'
+                return False, f'{Mgr.e.github} Please pass in a number **smaller than 10!**'
             elif int(index) > len(gist_strings):
-                return False, f'{self.emoji} This user doesn\'t have that many gists!'
+                return False, f'{Mgr.e.github} This user doesn\'t have that many gists!'
             return True, None
 
         if ind:
@@ -113,7 +110,7 @@ class Gist(commands.Cog):
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
-        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
+        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{Mgr.e.errxtension(first_file['extension'])}\n{first_file['text'][:449]}```")
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
         if footer:

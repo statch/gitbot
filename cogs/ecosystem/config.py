@@ -2,7 +2,7 @@ import discord
 import asyncio
 import os
 from discord.ext import commands
-from core.globs import Git
+from core.globs import Git, Mgr
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -13,10 +13,6 @@ class Config(commands.Cog):
         self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
         self.user_db: AsyncIOMotorClient = self.db_client.users
         self.guild_db: AsyncIOMotorClient = self.db_client.guilds
-        self.square: str = ":white_small_square:"
-        self.emoji: str = '<:github:772040411954937876>'
-        self.ga: str = '<:ga:768064843176738816>'
-        self.e: str = '<:ge:767823523573923890>'
 
     @commands.group(name='config', aliases=['--config', '-cfg', 'cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -25,14 +21,14 @@ class Config(commands.Cog):
             lines: list = ["**In this section you can configure various aspects of your experience**",
                            "\n**Quick access**",
                            "These commands allow you to save a user, repo or org to get with a short command.",
-                           "`git config --user {username}` " + self.ga + " Access a saved user with `git user`",
-                           "`git config --org {org}` " + self.ga + " Access a saved organization with `git org`",
-                           "`git config --repo {repo}` " + self.ga + " Access a saved repo with `git repo`",
-                           "`git config --feed {repo}` " + self.ga + " Subscribe to new releases of a repository",
+                           "`git config --user {username}` " + Mgr.e.arrow + " Access a saved user with `git user`",
+                           "`git config --org {org}` " + Mgr.e.arrow + " Access a saved organization with `git org`",
+                           "`git config --repo {repo}` " + Mgr.e.arrow + " Access a saved repo with `git repo`",
+                           "`git config --feed {repo}` " + Mgr.e.arrow + " Subscribe to new releases of a repository",
                            "\n**You can delete stored data by typing** `git config --delete`"]
             embed = discord.Embed(
                 color=0xefefef,
-                title=f"{self.emoji}  GitBot Config",
+                title=f"{Mgr.e.github}  GitBot Config",
                 description='\n'.join(lines)
             )
             embed.set_footer(text='To see what you have saved, use git config --show')
@@ -48,18 +44,18 @@ class Config(commands.Cog):
             release = None
         if query is None and release is None or release and len(release) == 1 and query is None:
             await ctx.send(
-                f'{self.e}  **You don\'t have any quick access data configured!** Use `git config` to do it')
+                f'{Mgr.e.err}  **You don\'t have any quick access data configured!** Use `git config` to do it')
             return
         user: str = f"User: `{query['user']}`" if 'user' in query else "User: `Not set`"
         org: str = f"Organization: `{query['org']}`" if 'org' in query else "Organization: `Not set`"
         repo: str = f"Repo: `{query['repo']}`" if 'repo' in query else "Repo: `Not set`"
         feed: str = 'Release Feed:\n' + '\n'.join(
-            [f'{self.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
+            [f'{Mgr.e.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
             'feed'] else 'Release Feed: `Not configured`'
         data: list = [user, org, repo, feed]
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{self.emoji}  Your {self.bot.user.name} Config",
+            title=f"{Mgr.e.github}  Your {self.bot.user.name} Config",
             description="**Quick access:**\n" + '\n'.join(data)
         )
         await ctx.send(embed=embed)
@@ -90,7 +86,7 @@ class Config(commands.Cog):
                                                                    timeout=30)
                     if (m := msg.content.lower()) == 'cancel':
                         await base_msg.delete()
-                        await ctx.send(f'{self.emoji}  Release Feed channel setup **cancelled.**')
+                        await ctx.send(f'{Mgr.e.github}  Release Feed channel setup **cancelled.**')
                         return
                     elif m == 'create':
                         channel: Optional[discord.TextChannel] = await ctx.guild.create_text_channel('release-feeds',
@@ -101,7 +97,7 @@ class Config(commands.Cog):
                                 msg.content)
                         except commands.BadArgument:
                             await ctx.send(
-                                f'{self.e}  **That is not a valid channel!** Try again, or type `cancel` to quit.')
+                                f'{Mgr.e.err}  **That is not a valid channel!** Try again, or type `cancel` to quit.')
                             continue
                     hook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name,
                                                                          reason=f'Release Feed channel setup by {ctx.author}')
@@ -131,7 +127,7 @@ class Config(commands.Cog):
                         await base_msg.edit(embed=success_embed)
                         return
                     await base_msg.delete()
-                    await ctx.send(f'{self.e}  **Something went wrong,** please report this in the support server.')
+                    await ctx.send(f'{Mgr.e.err}  **Something went wrong,** please report this in the support server.')
                     return
                 except asyncio.TimeoutError:
                     timeout_embed = discord.Embed(
@@ -142,20 +138,20 @@ class Config(commands.Cog):
                     await base_msg.edit(embed=timeout_embed)
                     return
         if g and not repo:
-            await ctx.send(f'{self.e} Please pass in a repository which you wish to follow!')
+            await ctx.send(f'{Mgr.e.err} Please pass in a repository which you wish to follow!')
             return
         r: dict = await Git.get_latest_release(repo)
         if not r:
-            await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
+            await ctx.send(f'{Mgr.e.err}  This repo **doesn\'t exist!**')
         if g:
             for r_ in g['feed']:
                 if r_['repo'].lower() == repo.lower():
-                    await ctx.send(f'{self.e}  That repo\'s releases are **already being logged!**')
+                    await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **already being logged!**')
                     return
             if len(g['feed']) < 3:
                 await self.guild_db.update_one({'_id': ctx.guild.id},
                     {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
-                await ctx.send(f'{self.emoji} **{repo}\'s** releases will now be logged.')
+                await ctx.send(f'{Mgr.e.github} **{repo}\'s** releases will now be logged.')
             else:
                 embed_limit_reached: discord.Embed = discord.Embed(
                     color=0xda4353,
@@ -172,27 +168,27 @@ class Config(commands.Cog):
     async def config_user(self, ctx: commands.Context, user: str) -> None:
         u = await self.setitem(ctx, 'user', user)
         if u:
-            await ctx.send(f"{self.emoji}  Quick access user set to **{user}**")
+            await ctx.send(f"{Mgr.e.github}  Quick access user set to **{user}**")
         else:
-            await ctx.send(f'{self.e}  This user **doesn\'t exist!**')
+            await ctx.send(f'{Mgr.e.err}  This user **doesn\'t exist!**')
 
     @config_command_group.command(name='--org', aliases=['--organization', '-O', '-org', 'org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_org(self, ctx: commands.Context, org: str) -> None:
         o = await self.setitem(ctx, 'org', org)
         if o:
-            await ctx.send(f"{self.emoji}  Quick access organization set to **{org}**")
+            await ctx.send(f"{Mgr.e.github}  Quick access organization set to **{org}**")
         else:
-            await ctx.send(f'{self.e}  This organization **doesn\'t exist!**')
+            await ctx.send(f'{Mgr.e.err}  This organization **doesn\'t exist!**')
 
     @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo', 'repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_repo(self, ctx, repo) -> None:
         r = await self.setitem(ctx, 'repo', repo)
         if r:
-            await ctx.send(f"{self.emoji}  Quick access repo set to **{repo}**")
+            await ctx.send(f"{Mgr.e.github}  Quick access repo set to **{repo}**")
         else:
-            await ctx.send(f'{self.e}  This repo **doesn\'t exist!**')
+            await ctx.send(f'{Mgr.e.err}  This repo **doesn\'t exist!**')
 
     @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete', '--delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -200,13 +196,13 @@ class Config(commands.Cog):
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
                 color=0xefefef,
-                title=f"{self.emoji}  Delete Quick Access Data",
+                title=f"{Mgr.e.github}  Delete Quick Access Data",
                 description=f"**You can delete stored quick access data by running the following commands:**\n"
-                            f"`git config --delete user`" + f' {self.ga} ' + 'delete the quick access user\n'
-                                                                             f"`git config --delete org`" + f' {self.ga} ' + 'delete the quick access organization\n'
-                                                                                                                             f"`git config --delete repo`" + f' {self.ga} ' + 'delete the quick access repo\n'
-                                                                                                                                                                              f"`git config --delete all`" + f' {self.ga} ' + 'delete all of your quick access data\n'
-                                                                                                                                                                                                                              f"`git config --delete feed` {self.ga} view options regarding deleting release feed data"
+                            f"`git config --delete user`" + f' {Mgr.e.arrow} ' + 'delete the quick access user\n'
+                                                                             f"`git config --delete org`" + f' {Mgr.e.arrow} ' + 'delete the quick access organization\n'
+                                                                                                                             f"`git config --delete repo`" + f' {Mgr.e.arrow} ' + 'delete the quick access repo\n'
+                                                                                                                                                                              f"`git config --delete all`" + f' {Mgr.e.arrow} ' + 'delete all of your quick access data\n'
+                                                                                                                                                                                                                              f"`git config --delete feed` {Mgr.e.arrow} view options regarding deleting release feed data"
             )
             await ctx.send(embed=embed)
 
@@ -221,9 +217,9 @@ class Config(commands.Cog):
                     color=0xefefef,
                     title='Delete Release Feed data',
                     description=f'**You can delete stored release feed data by running the following commands:**\n'
-                                f'`git config -delete feed {{repo}}` {self.ga} unsubscribe from a specific repo\n'
-                                f'`git config -delete feed all` {self.ga} unsubscribe from all repos\n'
-                                f'`git config -delete feed total` {self.ga} unsubscribe from all releases and delete '
+                                f'`git config -delete feed {{repo}}` {Mgr.e.arrow} unsubscribe from a specific repo\n'
+                                f'`git config -delete feed all` {Mgr.e.arrow} unsubscribe from all repos\n'
+                                f'`git config -delete feed total` {Mgr.e.arrow} unsubscribe from all releases and delete '
                                 f'the '
                                 f'feed webhook'
                 )
@@ -235,11 +231,11 @@ class Config(commands.Cog):
                         if r['repo'].lower() == repo.lower():
                             guild['feed'].remove(r)
                             await self.guild_db.update_one({'_id': ctx.guild.id}, {'$set': {'feed': guild['feed']}})
-                            await ctx.send(f'{self.emoji}  `{repo}`\'s releases will **no longer be logged.**')
+                            await ctx.send(f'{Mgr.e.github}  `{repo}`\'s releases will **no longer be logged.**')
                             return
-                    await ctx.send(f'{self.e}  That repo\'s releases are **not currently logged!**')
+                    await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **not currently logged!**')
                 else:
-                    await ctx.send(f'{self.e}  You don\'t have a release feed channel configured!')
+                    await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed channel configured!')
 
     @delete_feed_group.command(name='all', aliases=['-all', '--all'])
     @commands.guild_only()
@@ -248,11 +244,11 @@ class Config(commands.Cog):
     async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
         if guild is None:
-            await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
+            await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
         else:
             if guild['feed']:
                 await self.guild_db.update_one(guild, {'$set': {'feed': []}})
-            await ctx.send(f'{self.emoji}  All release feeds were **closed successfully.**')
+            await ctx.send(f'{Mgr.e.github}  All release feeds were **closed successfully.**')
 
     @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
     @commands.guild_only()
@@ -262,7 +258,7 @@ class Config(commands.Cog):
     async def delete_feed_with_channel_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
         if guild is None:
-            await ctx.send(f'{self.e}  You don\'t have a release feed configured, so **nothing was deleted.**')
+            await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
         else:
             await self.guild_db.delete_one(guild)
             try:
@@ -272,43 +268,43 @@ class Config(commands.Cog):
             except (discord.NotFound, discord.HTTPException):
                 pass
             finally:
-                await ctx.send(f'{self.e}  The release feed channel has been **closed successfully.**')
+                await ctx.send(f'{Mgr.e.err}  The release feed channel has been **closed successfully.**')
 
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: commands.Context) -> None:
         deleted: bool = await self.delete_field(ctx, 'user')
         if deleted:
-            await ctx.send(f"{self.emoji}  Saved **user deleted.**")
+            await ctx.send(f"{Mgr.e.github}  Saved **user deleted.**")
         else:
-            await ctx.send(f"{self.e}  You don't have a user saved!")
+            await ctx.send(f"{Mgr.e.err}  You don't have a user saved!")
 
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: commands.Context) -> None:
         deleted: bool = await self.delete_field(ctx, 'org')
         if deleted:
-            await ctx.send(f"{self.emoji}  Saved **organization deleted.**")
+            await ctx.send(f"{Mgr.e.github}  Saved **organization deleted.**")
         else:
-            await ctx.send(f"{self.e}  You don't have an organization saved!")
+            await ctx.send(f"{Mgr.e.err}  You don't have an organization saved!")
 
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: commands.Context) -> None:
         deleted: bool = await self.delete_field(ctx, 'repo')
         if deleted:
-            await ctx.send(f"{self.emoji}  Saved **repo deleted.**")
+            await ctx.send(f"{Mgr.e.github}  Saved **repo deleted.**")
         else:
-            await ctx.send(f"{self.e}  You don't have a repo saved!")
+            await ctx.send(f"{Mgr.e.err}  You don't have a repo saved!")
 
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_entire_record(self, ctx: commands.Context) -> None:
         query: dict = await self.user_db.find_one_and_delete({"_id": int(ctx.author.id)})
         if not query:
-            await ctx.send(f"{self.e}  It appears that **you don't have anything stored!**")
+            await ctx.send(f"{Mgr.e.err}  It appears that **you don't have anything stored!**")
             return
-        await ctx.send(f"{self.emoji}  All of your stored data was **successfully deleted.**")
+        await ctx.send(f"{Mgr.e.github}  All of your stored data was **successfully deleted.**")
 
     async def delete_field(self, ctx: commands.Context, field: str) -> bool:
         query: dict = await self.user_db.find_one({"_id": ctx.author.id})

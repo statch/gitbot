@@ -2,14 +2,12 @@ import discord
 import datetime
 from discord.ext import commands
 from typing import Union, Optional
-from core.globs import Git
+from core.globs import Git, Mgr
 
 
 class User(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
@@ -21,7 +19,7 @@ class User(commands.Cog):
                 await ctx.invoke(info_command, user=stored)
             else:
                 await ctx.send(
-                    f'{self.e}  You don\'t have a quick access user configured! **Type** `git config` **to do it.**')
+                    f'{Mgr.e.err}  You don\'t have a quick access user configured! **Type** `git config` **to do it.**')
         else:
             await ctx.invoke(info_command, user=user)
 
@@ -36,10 +34,10 @@ class User(commands.Cog):
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Store').delete_user_field(ctx=ctx)
                 await ctx.send(
-                    f"{self.e}  The user you had saved has changed their name or deleted their account. Please "
+                    f"{Mgr.e.err}  The user you had saved has changed their name or deleted their account. Please "
                     f"**re-add them** using `git --config -user`")
             else:
-                await ctx.send(f"{self.emoji} This user **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.errmoji} This user **doesn't exist!**")
             return None
 
         form: str = 'Profile' if str(user)[0].isupper() else 'profile'
@@ -101,10 +99,10 @@ class User(commands.Cog):
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
-            await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
+            await ctx.send(f"{Mgr.e.errmoji} This repo **doesn't exist!**")
             return
         if not repos:
-            await ctx.send(f"{self.emoji} This user doesn't have any **public repos!**")
+            await ctx.send(f"{Mgr.e.errmoji} This user doesn't have any **public repos!**")
             return
         form: str = 'Repos' if user[0].isupper() else 'repos'
         embed: discord.Embed = discord.Embed(

@@ -5,18 +5,13 @@ import io
 from .list_plugin import *
 from discord.ext import commands
 from typing import Union, Optional
-from core.globs import Git
+from core.globs import Git, Mgr
 from ext.regex import MD_EMOJI_RE
 
 
 class Repo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.square: str = ":white_small_square:"
-        self.f: str = "<:file:762378114135097354>"
-        self.fd: str = "<:folder:762378091497914398>"
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.group(name='repo', aliases=['r'], invoke_without_command=True)
     async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
@@ -28,7 +23,7 @@ class Repo(commands.Cog):
                 await ctx.invoke(info_command, repo=stored)
             else:
                 await ctx.send(
-                    f'{self.e}  You don\'t have a quick access repo configured! **Type** `git config` **to do it.**')
+                    f'{Mgr.e.err}  You don\'t have a quick access repo configured! **Type** `git config` **to do it.**')
         else:
             await ctx.invoke(info_command, repo=repo)
 
@@ -43,10 +38,10 @@ class Repo(commands.Cog):
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Config').delete_field(ctx, 'repo')
                 await ctx.send(
-                    f"{self.e}  The repo you had saved changed its name or was deleted. Please **re-add it** "
+                    f"{Mgr.e.err}  The repo you had saved changed its name or was deleted. Please **re-add it** "
                     f"using `git --config -repo`")
             else:
-                await ctx.send(f"{self.emoji} This repo **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.errmoji} This repo **doesn't exist!**")
             return None
 
         embed = discord.Embed(
@@ -135,12 +130,12 @@ class Repo(commands.Cog):
             src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
-                await ctx.send(f"{self.emoji} This path **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.errmoji} This path **doesn't exist!**")
             else:
-                await ctx.send(f"{self.emoji} This repository **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.errmoji} This repository **doesn't exist!**")
             return
-        files: list = [f"{self.f}  [{f['name']}]({f['html_url']})" if f[
-                                                                          'type'] == 'file' else f"{self.fd}  [{f['name']}]({f['html_url']})"
+        files: list = [f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f[
+                                                                          'type'] == 'file' else f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})"
                        for f in src[:15]]
         if is_tree:
             link: str = str(src[0]['_links']['html'])
@@ -161,21 +156,21 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def download_command(self, ctx: commands.Context, repo: str) -> None:
-        msg: discord.Message = await ctx.send(f"{self.emoji}  Give me a second while I download the file...")
+        msg: discord.Message = await ctx.send(f"{Mgr.e.errmoji}  Give me a second while I download the file...")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
-            return await msg.edit(content=f"{self.e}  This repo **doesn't exist!**")
+            return await msg.edit(content=f"{Mgr.e.err}  This repo **doesn't exist!**")
         elif src_bytes is False:
             return await msg.edit(
-                content=f"{self.e}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+                content=f"{Mgr.e.err}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
         file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
             await ctx.send(file=file)
-            await msg.edit(content=f'{self.emoji}  Here\'s the source code of **{repo}!**')
+            await msg.edit(content=f'{Mgr.e.errmoji}  Here\'s the source code of **{repo}!**')
         except discord.errors.HTTPException:
             await msg.edit(
-                content=f"{self.e} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+                content=f"{Mgr.e.err} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
 
     @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
     @commands.cooldown(5, 40, commands.BucketType.user)

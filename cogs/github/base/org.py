@@ -1,15 +1,13 @@
 import discord
 import datetime
 from typing import Optional, Union
-from core.globs import Git
+from core.globs import Git, Mgr
 from discord.ext import commands
 
 
 class Org(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
@@ -21,7 +19,7 @@ class Org(commands.Cog):
                 await ctx.invoke(info_command, organization=stored)
             else:
                 await ctx.send(
-                    f'{self.e}  You don\'t have a quick access org configured! **Type** `git config` **to do it.**')
+                    f'{Mgr.e.err}  You don\'t have a quick access org configured! **Type** `git config` **to do it.**')
         else:
             await ctx.invoke(info_command, organization=org)
 
@@ -36,9 +34,9 @@ class Org(commands.Cog):
             if hasattr(ctx, 'invoked_with_stored'):
                 await self.bot.get_cog('Store').delete_org_field(ctx=ctx)
                 await ctx.send(
-                    f"{self.e}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
+                    f"{Mgr.e.err}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
             else:
-                await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.err} This organization **doesn't exist!**")
             return None
 
         form: str = "Profile" if str(organization)[0].isupper() else 'profile'
@@ -90,10 +88,10 @@ class Org(commands.Cog):
         repos: list = [x for x in await Git.get_org_repos(org)]
         form = 'Repos' if org[0].isupper() else 'repos'
         if o is None:
-            await ctx.send(f"{self.emoji} This organization **doesn't exist!**")
+            await ctx.send(f"{Mgr.e.errmoji} This organization **doesn't exist!**")
             return
         if not repos:
-            await ctx.send(f"{self.emoji} This organization doesn't have any **public repos!**")
+            await ctx.send(f"{Mgr.e.errmoji} This organization doesn't have any **public repos!**")
             return
         embed: discord.Embed = discord.Embed(
             title=f"{org}'s {form}",

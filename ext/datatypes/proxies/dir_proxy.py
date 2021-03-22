@@ -1,6 +1,6 @@
 import os
 import json
-from ext.datatypes.proxies.json_proxy import JSONProxy
+from .json_proxy import JSONProxy
 from typing import Union, Any, Optional
 
 

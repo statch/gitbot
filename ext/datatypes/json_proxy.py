@@ -3,11 +3,11 @@ from typing import Any, Union
 
 class JSONProxy(dict):
     def __init__(self, data: Union[dict, list]):
+        self.__items: Union[list, dict] = data
         if isinstance(data, dict):
             super().__init__(data)
             for k, v in data.items():
                 setattr(self, k, (v if not isinstance(v, dict) else JSONProxy(v)))
-        self.__items: list = data
 
     def __getattr__(self, item: str) -> Any:  # PyCharmo no bullo pleaso
         return getattr(self, item)

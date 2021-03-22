@@ -41,7 +41,7 @@ class Repo(commands.Cog):
                     f"{Mgr.e.err}  The repo you had saved changed its name or was deleted. Please **re-add it** "
                     f"using `git --config -repo`")
             else:
-                await ctx.send(f"{Mgr.e.errmoji} This repo **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.err} This repo **doesn't exist!**")
             return None
 
         embed = discord.Embed(
@@ -130,9 +130,9 @@ class Repo(commands.Cog):
             src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
-                await ctx.send(f"{Mgr.e.errmoji} This path **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.err} This path **doesn't exist!**")
             else:
-                await ctx.send(f"{Mgr.e.errmoji} This repository **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.err} This repository **doesn't exist!**")
             return
         files: list = [f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f[
                                                                           'type'] == 'file' else f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})"
@@ -156,7 +156,7 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def download_command(self, ctx: commands.Context, repo: str) -> None:
-        msg: discord.Message = await ctx.send(f"{Mgr.e.errmoji}  Give me a second while I download the file...")
+        msg: discord.Message = await ctx.send(f"{Mgr.e.github}  Give me a second while I download the file...")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
             return await msg.edit(content=f"{Mgr.e.err}  This repo **doesn't exist!**")
@@ -167,7 +167,7 @@ class Repo(commands.Cog):
         file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
             await ctx.send(file=file)
-            await msg.edit(content=f'{Mgr.e.errmoji}  Here\'s the source code of **{repo}!**')
+            await msg.edit(content=f'{Mgr.e.github}  Here\'s the source code of **{repo}!**')
         except discord.errors.HTTPException:
             await msg.edit(
                 content=f"{Mgr.e.err} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")

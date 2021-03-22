@@ -37,7 +37,7 @@ class User(commands.Cog):
                     f"{Mgr.e.err}  The user you had saved has changed their name or deleted their account. Please "
                     f"**re-add them** using `git --config -user`")
             else:
-                await ctx.send(f"{Mgr.e.errmoji} This user **doesn't exist!**")
+                await ctx.send(f"{Mgr.e.err} This user **doesn't exist!**")
             return None
 
         form: str = 'Profile' if str(user)[0].isupper() else 'profile'
@@ -99,10 +99,10 @@ class User(commands.Cog):
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
-            await ctx.send(f"{Mgr.e.errmoji} This repo **doesn't exist!**")
+            await ctx.send(f"{Mgr.e.err} This repo **doesn't exist!**")
             return
         if not repos:
-            await ctx.send(f"{Mgr.e.errmoji} This user doesn't have any **public repos!**")
+            await ctx.send(f"{Mgr.e.err} This user doesn't have any **public repos!**")
             return
         form: str = 'Repos' if user[0].isupper() else 'repos'
         embed: discord.Embed = discord.Embed(

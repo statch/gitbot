@@ -110,7 +110,7 @@ class Gist(commands.Cog):
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
-        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{Mgr.e.errxtension(first_file['extension'])}\n{first_file['text'][:449]}```")
+        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
 
         if footer:

@@ -88,10 +88,10 @@ class Org(commands.Cog):
         repos: list = [x for x in await Git.get_org_repos(org)]
         form = 'Repos' if org[0].isupper() else 'repos'
         if o is None:
-            await ctx.send(f"{Mgr.e.errmoji} This organization **doesn't exist!**")
+            await ctx.send(f"{Mgr.e.err} This organization **doesn't exist!**")
             return
         if not repos:
-            await ctx.send(f"{Mgr.e.errmoji} This organization doesn't have any **public repos!**")
+            await ctx.send(f"{Mgr.e.err} This organization doesn't have any **public repos!**")
             return
         embed: discord.Embed = discord.Embed(
             title=f"{org}'s {form}",

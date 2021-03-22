@@ -14,8 +14,8 @@ class Manager:
     def __init__(self, github_instance):
         self.git = github_instance
         self.e: JSONProxy = self.load_json('emoji')
+        self.locale: JSONProxy = self.load_json('locale/index')
         self.licenses: JSONProxy = self.load_json('licenses')
-        self.emojis: JSONProxy = self.load_json('emoji')
         self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
                                 (r.GITLAB_LINES_RE, 'lines'),
                                 (r.ISSUE_RE, 'issue'),

@@ -1,6 +1,7 @@
 import re
 from ext import regex
 from typing import Union
+from core.globs import Mgr
 from discord.ext import commands
 from aiohttp import ClientSession
 
@@ -17,12 +18,11 @@ class Lines(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
-        self.e: str = "<:ge:767823523573923890>"
         self.errors: dict = {
-            0: f'{self.e}  I cannot show **more than 25 lines**, sorry!',
-            1: f'{self.e}  There **isn\'t any content** on these lines!',
-            2: self.e + '  That {0} is **private or otherwise inaccessible.**',
-            3: self.e + '  That {0} **doesn\'t exist!**'
+            0: f'{Mgr.e.err}  I cannot show **more than 25 lines**, sorry!',
+            1: f'{Mgr.e.err}  There **isn\'t any content** on these lines!',
+            2: Mgr.e.err + '  That {0} is **private or otherwise inaccessible.**',
+            3: Mgr.e.err + '  That {0} **doesn\'t exist!**'
         }
 
     async def compile_text(self, url: str, data: tuple) -> Union[str, int]:
@@ -68,7 +68,7 @@ class Lines(commands.Cog):
             result: str = await self.handle_match(gitlab_match[0], 'gitlab')
             platform_term: str = 'project'
         else:
-            await ctx.send(f"{self.e}  The link has to be a GitHub or GitLab URL **mentioning lines!**")
+            await ctx.send(f"{Mgr.e.err}  The link has to be a GitHub or GitLab URL **mentioning lines!**")
             return
 
         if isinstance(result, str):

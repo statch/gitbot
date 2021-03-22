@@ -35,7 +35,7 @@ class BotInfo(commands.Cog):
         self.bot: commands.Bot = bot
         self.emoji: str = '<:github:772040411954937876>'
         self.s: str = "<:gs:767809543815954463>"
-        self.s_emoji: str = Mgr.emojis["statistics"]
+        self.s_emoji: str = Mgr.e["statistics"]
 
     @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
     @commands.cooldown(15, 30, commands.BucketType.member)

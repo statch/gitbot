@@ -15,10 +15,10 @@ class Events(commands.Cog):
 
     async def build_guild_embed(self, guild: discord.Guild, state: bool = True) -> discord.Embed:
         if state:
-            title: str = f'{Mgr.emojis["checkmark"]}  Joined a new guild!'
+            title: str = f'{Mgr.e["checkmark"]}  Joined a new guild!'
             color: int = 0x33ba7c
         else:
-            title: str = f'{Mgr.emojis["failure"]}  Removed from a guild.'
+            title: str = f'{Mgr.e["failure"]}  Removed from a guild.'
             color: int = 0xda4353
 
         embed = discord.Embed(

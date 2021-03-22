@@ -1,13 +1,9 @@
 import json
 import re
-from ext.datatypes import DirProxy, JSONProxy
+from ext.datatypes import DirProxy, JSONProxy, GitCommandData
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
-from collections import namedtuple
-
-json_path: str = r'./data/'
-GitCommandData = namedtuple('GitCommandData', 'data type args')
 
 
 class Manager:
@@ -30,15 +26,15 @@ class Manager:
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
-            match = fuzz.token_set_ratio(to_match, i["name"])
-            match1 = fuzz.token_set_ratio(to_match, i["key"])
-            match2 = fuzz.token_set_ratio(to_match, i["spdx_id"])
+            match = fuzz.token_set_ratio(to_match, i['name'])
+            match1 = fuzz.token_set_ratio(to_match, i['key'])
+            match2 = fuzz.token_set_ratio(to_match, i['spdx_id'])
             if any([match > 80, match1 > 80, match2 > 80]):
                 return i
         return None
 
     def load_json(self, name: str) -> JSONProxy:
-        to_load = json_path + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+        to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
         return JSONProxy(data)
@@ -83,7 +79,7 @@ class Manager:
 
     async def reverse(self, __sequence: Optional[Reversible]) -> Optional[Iterable]:
         if __sequence:
-            return type(__sequence)((reversed(__sequence)))
+            return type(__sequence)(reversed(__sequence))
         return None
 
     async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:

@@ -6,13 +6,11 @@ from typing import Union, List, Optional, Dict, AnyStr
 from gidgethub import BadRequest
 from datetime import date, datetime
 from itertools import cycle
-from collections import namedtuple
-from ext.datatypes import DirProxy
+from ext.datatypes import DirProxy, GhProfileData
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 GRAPHQL: str = 'https://api.github.com/graphql'
-GhStats = namedtuple('Stats', 'all_time month fortnight week day hour')
 SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 
@@ -66,14 +64,14 @@ class GitHubAPI:
             return res
         return res[key]
 
-    async def ghprofile_stats(self, name: str) -> Union[GhStats, None]:
+    async def ghprofile_stats(self, name: str) -> Union[GhProfileData, None]:
         if '/' in name or '&' in name:
             return None
         res = await (await self.ses.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
         period: dict = dict(res['payload']['period'])
         if not res['success'] or sum([int(v) for v in period.values()]) == 0:
             return None
-        return GhStats(*[int(v) for v in period.values()])
+        return GhProfileData(*[int(v) for v in period.values()])
 
     async def get_ratelimit(self) -> tuple:
         results: list = []

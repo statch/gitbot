@@ -17,13 +17,16 @@ class DirProxy:
     """
 
     def __init__(self, path: str, ext: Optional[Union[str, tuple]] = None, exclude: Union[str, tuple] = ()):
+        self.__items: list = []
         for file in (os.listdir(dir_ := os.path.join(os.getcwd(), path))):
             if file not in exclude and ext is None or file.endswith(ext):
                 with open(os.path.join(dir_, file), 'r') as fp:
-                    if file.endswith('.json'):
-                        setattr(self, file[:file.rindex('.')], JSONProxy(json.load(fp)))
-                    else:
-                        setattr(self, file[:file.rindex('.')], fp.read())
+                    content: Union[JSONProxy, str] = JSONProxy(json.load(fp)) if file.endswith('.json') else fp.read()
+                    self.__items.append(content)
+                    setattr(self, file[:file.rindex('.')], content)
 
-    def __getattr__(self, item: Any) -> Any:  # Dumb, but it's just to stop PyCharm from bullying me
-        return getattr(self, item)
+    def __iter__(self):
+        yield from self.__items
+
+    def __getitem__(self, item: Any) -> Any:
+        return self.__items[item]

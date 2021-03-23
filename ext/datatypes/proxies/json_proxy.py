@@ -18,9 +18,6 @@ class JSONProxy(dict):
             for k, v in data.items():
                 setattr(self, k, (v if not isinstance(v, dict) else JSONProxy(v)))
 
-    def __getattr__(self, item: str) -> Any:  # PyCharmo no bullo pleaso
-        return getattr(self, item)
-
     def __iter__(self):
         yield from self.__items
 

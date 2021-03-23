@@ -323,7 +323,9 @@ class Config(commands.Cog):
         return None
 
     async def setitem(self, ctx: commands.Context, item: str, value: str) -> bool:
-        exists: bool = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
+        exists: bool = True
+        if item in ('user', 'repo', 'org'):
+            exists: bool = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
         if exists:
             query = await self.user_db.find_one({"_id": ctx.author.id})
             if query is not None:

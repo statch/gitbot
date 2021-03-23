@@ -16,9 +16,9 @@ class DirProxy:
         The extensions to include when mapping, if None, everything will be included.
     """
 
-    def __init__(self, path: str, ext: Optional[Union[str, tuple]] = None):
+    def __init__(self, path: str, ext: Optional[Union[str, tuple]] = None, exclude: Union[str, tuple] = ()):
         for file in (os.listdir(dir_ := os.path.join(os.getcwd(), path))):
-            if ext is None or file.endswith(ext):
+            if file not in exclude and ext is None or file.endswith(ext):
                 with open(os.path.join(dir_, file), 'r') as fp:
                     if file.endswith('.json'):
                         setattr(self, file[:file.rindex('.')], JSONProxy(json.load(fp)))

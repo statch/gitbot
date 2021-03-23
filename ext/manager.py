@@ -1,5 +1,8 @@
 import json
 import re
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+from discord.ext import commands
 from ext.datatypes import DirProxy, JSONProxy, GitCommandData
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
@@ -9,7 +12,9 @@ from fuzzywuzzy import fuzz
 class Manager:
     def __init__(self, github_instance):
         self.git = github_instance
+        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
         self.e: JSONProxy = self.load_json('emoji')
+        self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
         self.locale: JSONProxy = self.load_json('locale/index')
         self.licenses: JSONProxy = self.load_json('licenses')
         self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
@@ -23,6 +28,7 @@ class Manager:
                                    'issue': self.git.get_issue,
                                    'pr': self.git.get_pull_request,
                                    'lines': 'lines'}
+        self.locale_cache: dict = {}
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -84,3 +90,16 @@ class Manager:
 
     async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
         return DirProxy(path=path, ext=ext)
+
+    async def error(self, ctx: commands.Context, msg: str) -> None:
+        await ctx.send(f'{self.e.err}  {msg}')
+
+    async def get_locale(self, ctx: commands.Context) -> JSONProxy:
+        if cached := self.locale_cache.get(ctx.author.id, None):
+            locale = cached
+        else:
+            stored: Optional[dict] = await self.db.users.find_one({'_id': ctx.author.id})
+            if sl := stored.get('locale', None):
+                locale = sl
+                self.locale_cache[ctx.author.id] = locale
+        return getattr(self.l, locale)

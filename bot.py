@@ -1,6 +1,7 @@
 import os
 import discord
 import logging
+from core.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
 from ext.decorators import is_me
@@ -96,6 +97,7 @@ async def unload_command(ctx: commands.Context, cog: str) -> None:
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
+    setattr(ctx, 'l', await Mgr.get_locale(ctx))
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False
 

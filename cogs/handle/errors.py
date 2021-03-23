@@ -10,23 +10,19 @@ class Errors(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"{Mgr.e.err}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
+            await Mgr.error(ctx, ctx.l.errors.missing_required_argument)
         elif isinstance(error, commands.CommandOnCooldown):
-            msg = Mgr.e.err + " " + '**You\'re on cooldown!** Please try again in {:.2f}s'.format(error.retry_after)
-            await ctx.send(msg)
+            await Mgr.error(ctx, ctx.l.errors.command_on_cooldown.format('{:.2f}'.format(error.retry_after)))
         elif isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send(
-                f"{Mgr.e.err}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**")
+            await Mgr.error(ctx, ctx.l.errors.max_concurrency_reached)
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.send(
-                f"{Mgr.e.err}  **I am missing permissions required to do this!**"
-                f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+            await Mgr.error(ctx,
+                ctx.l.errors.bot_missing_permissions.format(', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send(
-                f"{Mgr.e.err}  **You're missing permissions required to do this!**"
-                f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+            await Mgr.error(ctx,
+                ctx.l.errors.missing_permissions.format(', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send(f'{Mgr.e.err}  This command can only be used **inside a server!**')
+            await Mgr.error(ctx, ctx.l.errors.no_private_message)
         elif not PRODUCTION:
             raise error
         else:

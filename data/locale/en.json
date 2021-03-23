@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "missing_required_argument": "You didn't pass in all of the arguments, **use** `git --help` **for info.**",
+    "command_on_cooldown": "**You're on cooldown!** Please try again in {0}s",
+    "max_concurrency_reached": "This command is experiencing exceptional traffic. **Please try again in a few seconds.**",
+    "bot_missing_permissions": "**I am missing permissions required to do this!** I need {0}",
+    "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
+    "no_private_message": "This command can only be used **inside a server!**"
+  }
+}

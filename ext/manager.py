@@ -99,7 +99,7 @@ class Manager:
             locale = cached
         else:
             stored: Optional[dict] = await self.db.users.find_one({'_id': ctx.author.id})
-            if sl := stored.get('locale', None):
+            if stored is not None and (sl := stored.get('locale', None)):
                 locale = sl
                 self.locale_cache[ctx.author.id] = locale
         return getattr(self.l, locale)

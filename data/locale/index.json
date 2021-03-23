@@ -1,6 +1,9 @@
 {
-  "en": {
-    "full_name": "english",
-    "flag": ":flag_um:"
+  "master": "en",
+  "languages": {
+    "en": {
+      "full_name": "english",
+      "flag": ":flag_um:"
+    }
   }
 }

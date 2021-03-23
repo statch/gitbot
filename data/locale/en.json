@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "full_name": "english",
+    "flag": ":flag_um:"
+  },
   "errors": {
     "missing_required_argument": "You didn't pass in all of the arguments, **use** `git --help` **for info.**",
     "command_on_cooldown": "**You're on cooldown!** Please try again in {0}s",

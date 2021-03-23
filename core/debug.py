@@ -2,7 +2,7 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from ext.decorators import is_me
+from ext.decorators import dev_only
 from core.globs import Git, Mgr
 
 
@@ -23,7 +23,7 @@ class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @is_me()
+    @dev_only()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
     async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
@@ -40,7 +40,7 @@ class Debug(commands.Cog):
         else:
             await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
 
-    @is_me()
+    @dev_only()
     @commands.command(aliases=['--rate', '--ratelimit'])
     async def rate(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
@@ -69,7 +69,7 @@ class Debug(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    @is_me()
+    @dev_only()
     async def eval(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'

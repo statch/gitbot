@@ -4,7 +4,7 @@ import logging
 from core.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
-from ext.decorators import is_me
+from ext.decorators import dev_only
 
 load_dotenv()
 
@@ -78,19 +78,19 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
 
 
 @bot.command(name='reload')
-@is_me()
+@dev_only()
 async def reload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
 @bot.command(name='load')
-@is_me()
+@dev_only()
 async def load_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
 @bot.command(name='unload')
-@is_me()
+@dev_only()
 async def unload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
 

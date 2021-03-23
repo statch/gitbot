@@ -12,5 +12,49 @@
     "bot_missing_permissions": "**I am missing permissions required to do this!** I need {0}",
     "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
     "no_private_message": "This command can only be used **inside a server!**"
+  },
+  "privacy_policy": {
+    "title": "Privacy Policy",
+    "what": {
+      "title": "What is stored?",
+      "body": "The only data stored are your User ID and quick access users, repos and orgs."
+    },
+    "use": {
+      "title": "How is all this used anyway?",
+      "body": "It's used to provide storage for your saved users, repos and organizations, your User ID is essential for the Bot to know, what data is yours."
+    },
+    "access": {
+      "title": "Who has access to this data?",
+      "body": "Only the Bot's developer has access, no one else. Your data isn't viewed or accessed in any way unless it's required to provide the service."
+    },
+    "deletion": {
+      "title": "How can I get rid of this stored data?",
+      "body": "You can do that very easily by using the `git config -delete` command!"
+    },
+    "author": {
+      "title": "Who wrote this and can this be changed?",
+      "body": "This privacy policy was written by [wulf](https://dsc.bio/wulf), the Bot's developer, and yes, all of this is subject to change in the future."
+    }
+  },
+  "uptime": "**I have been online for:**\n{0}",
+  "invite": {
+    "server": "Support Server",
+    "invite_verb": "Invite",
+    "tagline": "Invite me to your server!"
+  },
+  "ping": "**My ping is:**\n**{0}** milliseconds",
+  "vote": "Vote for {0}!",
+  "stats": {
+    "title": "Bot Stats",
+    "body": "General stats regarding the Bot's functioning.",
+    "system": "System Usage",
+    "people": {
+      "title": "People",
+      "body": "I'm in **{0}** servers,\nand have **{1}** users"
+    },
+    "code": {
+      "title": "Code",
+      "body": "I am **{0}** lines of code,\nrunning on **{1}**"
+    }
   }
 }

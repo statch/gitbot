@@ -24,20 +24,21 @@ class PullRequest(commands.Cog):
             pr: dict = getattr(ctx, 'data')
             pr_number: int = pr['number']
         else:
-            if not pr_number and not repo.isnumeric():
-                await ctx.send(
-                    f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
-                return
-            elif not pr_number and repo.isnumeric():
-                num = repo
-                stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
-                if stored:
-                    repo = stored
-                    pr_number = num
-                else:
+            if not pr_number:
+                if not repo.isnumeric():
                     await ctx.send(
-                        f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                        f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
                     return
+                elif not pr_number and repo.isnumeric():
+                    num = repo
+                    stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+                    if stored:
+                        repo = stored
+                        pr_number = num
+                    else:
+                        await ctx.send(
+                            f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                        return
 
             try:
                 pr: dict = await Git.get_pull_request(repo, int(pr_number))

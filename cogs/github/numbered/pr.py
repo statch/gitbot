@@ -22,6 +22,7 @@ class PullRequest(commands.Cog):
     async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: Optional[str] = None):
         if hasattr(ctx, 'data'):
             pr: dict = getattr(ctx, 'data')
+            pr_number: int = pr['number']
         else:
             if not pr_number and not repo.isnumeric():
                 await ctx.send(

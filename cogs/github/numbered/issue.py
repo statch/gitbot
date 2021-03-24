@@ -16,6 +16,7 @@ class Issue(commands.Cog):
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str = None) -> None:
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
+            issue_number: int = issue['number']
         else:
             if not issue_number and not repo.isnumeric():
                 await ctx.send(

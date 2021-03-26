@@ -56,5 +56,14 @@
       "title": "Code",
       "body": "I am **{0}** lines of code,\nrunning on **{1}**"
     }
+  },
+  "license": {
+    "error": "I couldn't find a license matching the name you provided!",
+    "description": "Description",
+    "implementation": "Implementation",
+    "conditions": "Conditions",
+    "limitations": "Limitations",
+    "permissions": "Permissions",
+    "none": "None"
   }
 }

@@ -1,9 +1,11 @@
 {
   "master": "en",
-  "languages": {
-    "en": {
+  "languages": [
+    {
+      "name": "en",
       "full_name": "english",
+      "localized_name": "english",
       "flag": ":flag_um:"
     }
-  }
+  ]
 }

@@ -135,10 +135,7 @@ class Manager:
                     node[k] = v
             for k, v in node.items():
                 if isinstance(v, (JSONProxy, dict)):
-                    try:
-                        setattr(node, k, _recursively_fix(v, ref[k]))
-                    except AttributeError:
-                        pass
+                    node[k] = _recursively_fix(v, ref[k])
             return node
 
         for locale in self.l:

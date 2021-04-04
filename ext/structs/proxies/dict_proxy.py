@@ -1,14 +1,13 @@
 from typing import Any, Union
 
 
-class JSONProxy(dict):
-    """A wrapper around :class:`dict` (And :class:`list` for ease of use) allowing dotted access.
-    Mainly meant for use on dicts loaded from JSON files, but works on any type of :class:`dict`.
+class DictProxy(dict):
+    """A wrapper around :class:`dict` (Allows :class:`list` for ease of use when dealing with JSON files) allowing dotted access.
 
     Parameters
     ----------
     data: :class:`Union[:class:`dict`, :class:`list`]`
-        The object to wrap with JSONProxy.
+        The object to wrap with DictProxy.
     """
 
     def __init__(self, data: Union[dict, list]):
@@ -16,7 +15,7 @@ class JSONProxy(dict):
         if isinstance(data, dict):
             super().__init__(data)
             for k, v in data.items():
-                setattr(self, k, (v if not isinstance(v, dict) else JSONProxy(v)))
+                setattr(self, k, (v if not isinstance(v, dict) else DictProxy(v)))
 
     def __iter__(self):
         yield from self.__items
@@ -25,4 +24,4 @@ class JSONProxy(dict):
         return self.__items[item]
 
     def __setitem__(self, key, value):
-        setattr(self, key, JSONProxy(value) if isinstance(value, dict) else value)
+        setattr(self, key, DictProxy(value) if isinstance(value, dict) else value)

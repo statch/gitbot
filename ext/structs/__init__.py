@@ -1,3 +1,3 @@
 from .proxies.dir_proxy import DirProxy
-from .proxies.json_proxy import JSONProxy
+from .proxies.dict_proxy import DictProxy
 from .simple import *

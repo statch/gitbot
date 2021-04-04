@@ -1,8 +1,8 @@
 from typing import Union, Tuple, List
-from ..structs import JSONProxy, DirProxy
+from ..structs import DictProxy, DirProxy
 
 __all__: tuple = (
-    'IterableDictSequence'
+    'DictSequence'
 )
 
-IterableDictSequence = Union[Tuple[Union[dict, JSONProxy]], List[Union[dict, JSONProxy]], DirProxy]
+DictSequence = Union[Tuple[Union[dict, DictProxy]], List[Union[dict, DictProxy]], DirProxy]

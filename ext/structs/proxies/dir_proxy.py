@@ -1,6 +1,6 @@
 import os
 import json
-from .json_proxy import JSONProxy
+from .dict_proxy import DictProxy
 from typing import Union, Any, Optional
 
 
@@ -21,7 +21,7 @@ class DirProxy:
         for file in (os.listdir(dir_ := os.path.join(os.getcwd(), path))):
             if file not in exclude and ext is None or file.endswith(ext):
                 with open(os.path.join(dir_, file), 'r') as fp:
-                    content: Union[JSONProxy, str] = JSONProxy(json.load(fp)) if file.endswith('.json') else fp.read()
+                    content: Union[DictProxy, str] = DictProxy(json.load(fp)) if file.endswith('.json') else fp.read()
                     self.__items.append(content)
                     setattr(self, file[:file.rindex('.')], content)
 

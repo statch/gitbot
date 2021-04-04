@@ -5,8 +5,8 @@ import functools
 import operator
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from ext.types import IterableDictSequence
-from ext.structs import DirProxy, JSONProxy, GitCommandData
+from ext.types import DictSequence
+from ext.structs import DirProxy, DictProxy, GitCommandData
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
@@ -16,10 +16,10 @@ class Manager:
     def __init__(self, github_instance):
         self.git = github_instance
         self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
-        self.e: JSONProxy = self.load_json('emoji')
+        self.e: DictProxy = self.load_json('emoji')
         self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
-        self.locale: JSONProxy = self.load_json('locale/index')
-        self.licenses: JSONProxy = self.load_json('licenses')
+        self.locale: DictProxy = self.load_json('locale/index')
+        self.licenses: DictProxy = self.load_json('licenses')
         self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
                                 (r.GITLAB_LINES_RE, 'lines'),
                                 (r.ISSUE_RE, 'issue'),
@@ -44,11 +44,11 @@ class Manager:
                 return i
         return None
 
-    def load_json(self, name: str) -> JSONProxy:
+    def load_json(self, name: str) -> DictProxy:
         to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
-        return JSONProxy(data)
+        return DictProxy(data)
 
     async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
         for pattern in self.patterns:
@@ -99,7 +99,7 @@ class Manager:
     async def error(self, ctx: commands.Context, msg: str) -> None:
         await ctx.send(f'{self.e.err}  {msg}')
 
-    async def get_locale(self, ctx: commands.Context) -> JSONProxy:
+    async def get_locale(self, ctx: commands.Context) -> DictProxy:
         locale: str = 'en'
         if cached := self.locale_cache.get(ctx.author.id, None):
             locale = cached
@@ -110,13 +110,13 @@ class Manager:
                 self.locale_cache[ctx.author.id] = locale
         return getattr(self.l, locale)
 
-    def get_nested_key(self, __d: Union[dict, JSONProxy], __k: Union[Iterable[str]]) -> Any:
+    def get_nested_key(self, __d: Union[dict, DictProxy], __k: Union[Iterable[str]]) -> Any:
         return functools.reduce(operator.getitem, __k, __d)
 
     def get_by_key_from_sequence(self,
-                                 __sequence: IterableDictSequence,
+                                 __sequence: DictSequence,
                                  key: str,
-                                 value: Any) -> Optional[Union[dict, JSONProxy]]:
+                                 value: Any) -> Optional[Union[dict, DictProxy]]:
         if len((_key := key.split())) > 1:
             key: list = _key
         for d in __sequence:
@@ -129,12 +129,12 @@ class Manager:
         return None
 
     def __fix_missing_locales(self):
-        def _recursively_fix(node: JSONProxy, ref: JSONProxy) -> JSONProxy:
+        def _recursively_fix(node: DictProxy, ref: DictProxy) -> DictProxy:
             for k, v in ref.items():  # Surface fix
                 if k not in node:
                     node[k] = v
             for k, v in node.items():
-                if isinstance(v, (JSONProxy, dict)):
+                if isinstance(v, (DictProxy, dict)):
                     node[k] = _recursively_fix(v, ref[k])
             return node
 

@@ -6,5 +6,5 @@ __all__: tuple = (
     'AnyDict'
 )
 
-DictSequence = Union[Tuple[Union[dict, DictProxy]], List[Union[dict, DictProxy]], DirProxy]
 AnyDict = Union[dict, DictProxy]
+DictSequence = Union[Tuple[AnyDict], List[AnyDict], DirProxy]

@@ -110,13 +110,13 @@ class Manager:
                 self.locale_cache[ctx.author.id] = locale
         return getattr(self.l, locale)
 
-    def get_nested_key(self, __d: Union[dict, DictProxy], __k: Union[Iterable[str]]) -> Any:
+    def get_nested_key(self, __d: AnyDict, __k: Union[Iterable[str]]) -> Any:
         return functools.reduce(operator.getitem, __k, __d)
 
     def get_by_key_from_sequence(self,
                                  __sequence: DictSequence,
                                  key: str,
-                                 value: Any) -> Optional[Union[dict, DictProxy]]:
+                                 value: Any) -> Optional[AnyDict]:
         if len((_key := key.split())) > 1:
             key: list = _key
         for d in __sequence:

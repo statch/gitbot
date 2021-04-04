@@ -1,5 +1,5 @@
-query($UserName: String!, $FromTime: DateTime, $ToTime: DateTime) {
-  user(login: $UserName) {
+query($Login: String!, $FromTime: DateTime, $ToTime: DateTime) {
+  user(login: $Login) {
     createdAt
     company
     location

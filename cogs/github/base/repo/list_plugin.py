@@ -25,7 +25,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
                            f'repo into the command)')
             return
         stored: bool = True
-    issues: List[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=f'[{state.upper()}]'))
+    issues: List[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
     if not issues:
         await handle_none(ctx, 'issue', stored, lstate)
         return
@@ -77,7 +77,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
                            f'repo into the command)')
             return
         stored: bool = True
-    prs: List[dict] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=f'[{state.upper()}]'))
+    prs: List[dict] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
     if not prs:
         await handle_none(ctx, 'pull request', stored, lstate)
         return

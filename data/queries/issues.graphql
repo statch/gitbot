@@ -1,0 +1,35 @@
+query($Name: String!, $Owner: String!, $States: [IssueState!], $Last: Int!) {
+  repository(name: $Name, owner: $Owner) {
+    issues(states: $States, last: $Last) {
+      nodes {
+        author {
+          login
+          url
+          avatarUrl
+        }
+        url
+        createdAt
+        closed
+        closedAt
+        bodyText
+        title
+        number
+        state
+        comments {
+          totalCount
+        }
+        participants {
+          totalCount
+        }
+        assignees {
+          totalCount
+        }
+        labels(first: 100) {
+          nodes {
+            name
+          }
+        }
+      }
+    }
+  }
+}

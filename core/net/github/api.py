@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional, Dict, AnyStr
+from typing import Union, List, Optional
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
@@ -37,32 +37,6 @@ class GitHubAPI:
     @property
     def token(self) -> str:
         return next(self.tokens)
-
-    async def post_gql(self,
-                       query: str,
-                       key: Optional[str] = None,
-                       complex_: bool = False,
-                       just_query: bool = False) -> Union[Dict, AnyStr, None]:
-        res: dict = await (await self.ses.post(GRAPHQL,
-                                               json={'query': query},
-                                               headers={'Authorization': f'token {self.token}'})).json()
-        if just_query:
-            return res
-
-        if 'errors' in res:
-            if complex_:
-                if not res['data']['repository']:
-                    return 'repo'
-                return 'number'
-            return None
-        res: dict = res['data']
-        if not key:
-            return res
-        if len(split := key.split()) > 1:
-            for k in split:
-                res = res[k]
-            return res
-        return res[key]
 
     async def ghprofile_stats(self, name: str) -> Union[GhProfileData, None]:
         if '/' in name or '&' in name:
@@ -131,12 +105,12 @@ class GitHubAPI:
             return []
 
     async def get_user_gists(self, user: str):
-        query: str = """
-        {{ 
-          user(login: "{user}") {q}}}
-        """.format(user=user, q=self._queries.user_gists)
+        try:
+            data = await self.gh.graphql(self._queries.user_gists, **{'Login': user})
+        except QueryError:
+            return None
 
-        return await self.post_gql(query, 'user')
+        return data['user']
 
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
@@ -157,21 +131,18 @@ class GitHubAPI:
         return None
 
     async def get_latest_release(self, repo: str) -> Optional[dict]:
-        split: list = repo.split('/')
-        owner: str = split[0]
-        name: str = split[1]
+        owner, name = repo.split('/')
 
-        query: str = """
-        {{
-          repository(name: "{name}", owner: "{owner}") {q}}}
-        """.format(owner=owner, name=name, q=self._queries.release)
+        try:
+            data: dict = await self.gh.graphql(self._queries.release, **{'Name': name, 'Owner': owner})
+        except QueryError:
+            return None
 
-        data: dict = await self.post_gql(query, 'repository')
-        if data:
-            data['release'] = data['releases']['nodes'][0] if data['releases']['nodes'] else None
-            data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
-            del data['primaryLanguage']
-            del data['releases']
+        data = data['repository']
+        data['release'] = data['releases']['nodes'][0] if data['releases']['nodes'] else None
+        data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
+        del data['primaryLanguage']
+        del data['releases']
         return data
 
     async def get_repo(self, repo: str) -> Optional[dict]:
@@ -179,17 +150,16 @@ class GitHubAPI:
         owner: str = split[0]
         repository: str = split[1]
 
-        query: str = """
-        {{
-          repository(name: "{name}", owner: "{owner}") {q}}}
-        """.format(owner=owner, name=repository, q=self._queries.repo)
+        try:
+            data: dict = await self.gh.graphql(self._queries.repo, **{'Name': repository, 'Owner': owner})
+        except QueryError:
+            return None
 
-        data: dict = await self.post_gql(query, 'repository')
-        if data:
-            data['languages'] = data['languages']['totalCount']
-            data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
-            data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
-            data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
+        data = data['repository']
+        data['languages'] = data['languages']['totalCount']
+        data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
+        data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
+        data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
         return data
 
     async def get_pull_request(self,
@@ -201,32 +171,32 @@ class GitHubAPI:
             owner: str = split[0]
             repository: str = split[1]
 
-            query: str = """
-            {{
-              repository(name: "{name}", owner: "{owner}") {{
-                pullRequest(number: {number}) {q}
-              }}
-            }}
-            """.format(name=repository, owner=owner, number=number, q=self._queries.pull_request)
+            try:
+                data = await self.gh.graphql(self._queries.pull_request, **{'Name': repository,
+                                                                            'Owner': owner,
+                                                                            'Number': number})
+            except QueryError as e:
+                if 'number' in str(e):
+                    return 'number'
+                return 'repo'
 
-            data = await self.post_gql(query, 'repository pullRequest', complex_=True)
-        if isinstance(data, dict):
-            data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
-            data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
-            data['reviewers'] = {}
-            data['reviewers']['users'] = [
-                (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
-                 o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
-                in data['reviewRequests']['edges']]
-            data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
-            data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in
-                                             data['participants']['edges']]
+        data = data['repository']['pullRequest']
+        data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
+        data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
+        data['reviewers'] = {}
+        data['reviewers']['users'] = [
+            (o['node']['requestedReviewer']['login'] if 'login' in o['node']['requestedReviewer'] else
+             o['node']['requestedReviewer']['name'], o['node']['requestedReviewer']['url']) for o
+            in data['reviewRequests']['edges']]
+        data['reviewers']['totalCount'] = data['reviewRequests']['totalCount']
+        data['participants']['users'] = [(u['node']['login'], u['node']['url']) for u in
+                                         data['participants']['edges']]
         return data
 
     async def get_last_pull_requests_by_state(self,
                                               repo: str,
                                               last: int = 10,
-                                              state: str = '[OPEN]') -> Optional[List[dict]]:
+                                              state: str = 'OPEN') -> Optional[List[dict]]:
         if '/' not in repo or repo.count('/') > 1:
             return None
 
@@ -234,19 +204,14 @@ class GitHubAPI:
         owner: str = split[0]
         repository: str = split[1]
 
-        query: str = """
-        {{
-          repository(name: "{name}", owner: "{owner}") {{
-            pullRequests(states: {state}, last: {last}) {{
-              nodes {q}
-            }}
-          }}
-        }}
-        """.format(name=repository, owner=owner, state=state, last=last, q=self._queries.pull_request)
-
-        data: dict = await self.post_gql(query)
-        if 'repository' in data and 'pullRequests' in data['repository']:
-            return data['repository']['pullRequests']['nodes']
+        try:
+            data: dict = await self.gh.graphql(self._queries.pull_requests, **{'Name': repository,
+                                                                               'Owner': owner,
+                                                                               'States': state,
+                                                                               'Last': last})
+        except QueryError:
+            return None
+        return data['repository']['pullRequests']['nodes']
 
     async def get_issue(self,
                         repo: str,
@@ -261,15 +226,14 @@ class GitHubAPI:
             owner: str = split[0]
             repository: str = split[1]
 
-            query: str = """
-            {{
-              repository(name: "{repo_name}", owner: "{owner_name}") {{
-                issue(number: {issue_number}) {q}
-              }}
-            }}
-            """.format(repo_name=repository, owner_name=owner, issue_number=number, q=self._queries.issue)
-
-            data: dict = await self.post_gql(query, complex_=True)
+            try:
+                data: dict = await self.gh.graphql(self._queries.issue, **{'Name': repository,
+                                                                           'Owner': owner,
+                                                                           'Number': number})
+            except QueryError as e:
+                if 'number' in str(e):
+                    return 'number'
+                return 'repo'
         if isinstance(data, dict):
             if not had_keys_removed:
                 data: dict = data['repository']['issue']
@@ -285,36 +249,29 @@ class GitHubAPI:
             data['labels']: list = [lb['name'] for lb in list(data['labels']['nodes'])]
         return data
 
-    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = '[OPEN]') -> Optional[List[dict]]:
+    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[List[dict]]:
         if '/' not in repo or repo.count('/') > 1:
             return None
-
         split: list = repo.split('/')
         owner: str = split[0]
         repository: str = split[1]
 
-        query: str = """
-        {{
-          repository(name: "{name}", owner: "{owner}") {{
-            issues(states: {state}, last: {last}) {{
-              nodes {q}
-            }}
-          }}
-        }}
-        """.format(name=repository, owner=owner, state=state, last=last, q=self._queries.issue)
-
-        data: dict = await self.post_gql(query)
-        if 'repository' in data and 'issues' in data['repository']:
-            return data['repository']['issues']['nodes']
+        try:
+            data: dict = await self.gh.graphql(self._queries.issues, **{'Name': repository,
+                                                                        'Owner': owner,
+                                                                        'States': state,
+                                                                        'Last': last})
+        except QueryError:
+            return None
+        return data['repository']['issues']['nodes']
 
     async def get_user(self, user: str):
         try:
-            data = await self.gh.graphql(self._queries.user, **{'UserName': user,
+            data = await self.gh.graphql(self._queries.user, **{'Login': user,
                                                                 'FromTime': YEAR_START,
                                                                 'ToTime': datetime.utcnow().strftime('%Y-%m-%dT%XZ')})
         except QueryError:
             return None
-
         data_ = data['user']['contributionsCollection']['contributionCalendar']
         data['user']['contributions'] = data_['totalContributions'], data_['weeks'][-1]['contributionDays'][-1][
             'contributionCount']

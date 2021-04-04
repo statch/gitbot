@@ -81,7 +81,7 @@ class Manager:
             number: str = number[1:]
         try:
             number: int = int(number)
-        except TypeError:
+        except (TypeError, ValueError):
             return None
         matched = [i for i in items if i['number'] == number]
         if matched:

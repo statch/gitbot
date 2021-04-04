@@ -78,5 +78,14 @@
   },
   "info": {
     "no_info": "I couldn't fetch any info regarding the link you provided!"
+  },
+  "lines": {
+    "github_repo_term": "repository",
+    "gitlab_repo_term": "project",
+    "more_than_25": "I cannot show **more than 25 lines**, sorry!",
+    "no_content": "There **isn't any content** on these lines!",
+    "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
+    "nonexistent": "That {0} **doesn't exist!**",
+    "no_lines_mentioned": "The link has to be a GitHub or GitLab URL **mentioning lines!**"
   }
 }

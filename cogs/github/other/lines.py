@@ -18,12 +18,13 @@ class Lines(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
-        self.errors: dict = {
-            0: f'{Mgr.e.err}  I cannot show **more than 25 lines**, sorry!',
-            1: f'{Mgr.e.err}  There **isn\'t any content** on these lines!',
-            2: Mgr.e.err + '  That {0} is **private or otherwise inaccessible.**',
-            3: Mgr.e.err + '  That {0} **doesn\'t exist!**'
-        }
+
+    def get_error(self, ctx: commands.Context, code: int) -> str:
+        return {
+            0: ctx.l.lines.more_than_25,
+            1: ctx.l.lines.no_content,
+            2: ctx.l.lines.private_or_inaccessible,
+            3: ctx.l.lines.nonexistent}[code]
 
     async def compile_text(self, url: str, data: tuple) -> Union[str, int]:
         if data[4]:
@@ -63,18 +64,18 @@ class Lines(commands.Cog):
         gitlab_match: list = re.findall(regex.GITLAB_LINES_RE, link)
         if github_match:
             result: str = await self.handle_match(github_match[0])
-            platform_term: str = 'repository'
+            platform_term: str = ctx.l.lines.github_repo_term
         elif gitlab_match:
             result: str = await self.handle_match(gitlab_match[0], 'gitlab')
-            platform_term: str = 'project'
+            platform_term: str = ctx.l.lines.gitlab_repo_term
         else:
-            await ctx.send(f"{Mgr.e.err}  The link has to be a GitHub or GitLab URL **mentioning lines!**")
+            await Mgr.error(ctx, ctx.l.lines.no_lines_mentioned)
             return
 
         if isinstance(result, str):
             await ctx.send(result)
         elif isinstance(result, int):
-            await ctx.send(self.errors[result].format(platform_term))
+            await Mgr.error(ctx, self.get_error(ctx, result).format(platform_term))
 
     async def handle_match(self, match: tuple, type_: str = 'github') -> str:
         if type_ == 'github':

@@ -32,7 +32,7 @@ class Manager:
                                    'pr': self.git.get_pull_request,
                                    'lines': 'lines'}
         self.locale_cache: dict = {}
-        setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', 'en'))
+        setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', self.locale.master))
         self.__fix_missing_locales()
 
     def correlate_license(self, to_match: str) -> Optional[dict]:

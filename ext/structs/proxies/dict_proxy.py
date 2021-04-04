@@ -2,7 +2,10 @@ from typing import Any, Union
 
 
 class DictProxy(dict):
-    """A wrapper around :class:`dict` (Allows :class:`list` for ease of use when dealing with JSON files) allowing dotted access.
+    """A wrapper around :class:`dict` allowing dotted access.
+
+    .. note::
+        Allows :class:`list` as well for ease of use when dealing with JSON files.
 
     Parameters
     ----------

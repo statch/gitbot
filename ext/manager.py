@@ -5,7 +5,7 @@ import functools
 import operator
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from ext.types import DictSequence
+from ext.types import DictSequence, AnyDict
 from ext.structs import DirProxy, DictProxy, GitCommandData
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
@@ -128,16 +128,21 @@ class Manager:
                     return d
         return None
 
-    def __fix_missing_locales(self):
-        def _recursively_fix(node: DictProxy, ref: DictProxy) -> DictProxy:
-            for k, v in ref.items():  # Surface fix
+    def fix_dict(self,
+                 __dict: AnyDict,
+                 __ref: AnyDict) -> AnyDict:
+        def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
+            for k, v in ref.items():
                 if k not in node:
                     node[k] = v
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
-                    node[k] = _recursively_fix(v, ref[k])
+                    node[k] = recursively_fix(v, ref[k])
             return node
 
+        return recursively_fix(__dict, __ref)
+
+    def __fix_missing_locales(self):
         for locale in self.l:
             if locale != self.locale.master and 'meta' in locale:
-                setattr(self.l, locale.meta.name, _recursively_fix(locale, self.locale.master))
+                setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master))

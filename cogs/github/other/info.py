@@ -1,7 +1,7 @@
 from discord.ext import commands
 from core.globs import Mgr
 from typing import Optional, Union
-from ext.datatypes import GitCommandData
+from ext.structs import GitCommandData
 
 
 class Info(commands.Cog):

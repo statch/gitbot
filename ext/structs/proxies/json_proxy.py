@@ -23,3 +23,6 @@ class JSONProxy(dict):
 
     def __getitem__(self, item: Union[str, int]) -> Any:
         return self.__items[item]
+
+    def __setitem__(self, key, value):
+        setattr(self, key, JSONProxy(value) if isinstance(value, dict) else value)

@@ -1,9 +1,12 @@
 import json
 import re
 import os
+import functools
+import operator
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from ext.datatypes import DirProxy, JSONProxy, GitCommandData
+from ext.types import IterableDictSequence
+from ext.structs import DirProxy, JSONProxy, GitCommandData
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
@@ -29,6 +32,8 @@ class Manager:
                                    'pr': self.git.get_pull_request,
                                    'lines': 'lines'}
         self.locale_cache: dict = {}
+        setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', 'en'))
+        self.__fix_missing_locales()
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -95,11 +100,47 @@ class Manager:
         await ctx.send(f'{self.e.err}  {msg}')
 
     async def get_locale(self, ctx: commands.Context) -> JSONProxy:
+        locale: str = 'en'
         if cached := self.locale_cache.get(ctx.author.id, None):
             locale = cached
         else:
             stored: Optional[dict] = await self.db.users.find_one({'_id': ctx.author.id})
             if stored is not None and (sl := stored.get('locale', None)):
-                locale = sl
+                locale: str = sl
                 self.locale_cache[ctx.author.id] = locale
         return getattr(self.l, locale)
+
+    def get_nested_key(self, __d: Union[dict, JSONProxy], __k: Union[Iterable[str]]) -> Any:
+        return functools.reduce(operator.getitem, __k, __d)
+
+    def get_by_key_from_sequence(self,
+                                 __sequence: IterableDictSequence,
+                                 key: str,
+                                 value: Any) -> Optional[Union[dict, JSONProxy]]:
+        if len((_key := key.split())) > 1:
+            key: list = _key
+        for d in __sequence:
+            if isinstance(key, str):
+                if key in d and d[key] == value:
+                    return d
+            else:
+                if self.get_nested_key(d, key) == value:
+                    return d
+        return None
+
+    def __fix_missing_locales(self):
+        def _recursively_fix(node: JSONProxy, ref: JSONProxy) -> JSONProxy:
+            for k, v in ref.items():  # Surface fix
+                if k not in node:
+                    node[k] = v
+            for k, v in node.items():
+                if isinstance(v, (JSONProxy, dict)):
+                    try:
+                        setattr(node, k, _recursively_fix(v, ref[k]))
+                    except AttributeError:
+                        pass
+            return node
+
+        for locale in self.l:
+            if locale != self.locale.master and 'meta' in locale:
+                setattr(self.l, locale.meta.name, _recursively_fix(locale, self.locale.master))

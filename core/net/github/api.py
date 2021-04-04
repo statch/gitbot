@@ -3,10 +3,10 @@ import asyncio
 import gidgethub.aiohttp as gh
 from sys import version_info
 from typing import Union, List, Optional, Dict, AnyStr
-from gidgethub import BadRequest
+from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
-from ext.datatypes import DirProxy, GhProfileData
+from ext.structs import DirProxy, GhProfileData
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
@@ -308,53 +308,17 @@ class GitHubAPI:
             return data['repository']['issues']['nodes']
 
     async def get_user(self, user: str):
-        to: str = datetime.utcnow().strftime('%Y-%m-%dT%XZ')
-        query: str = """  # This isn't in self._queries because I didn't want to mess around formatting it with dates
-        {{ 
-          user(login: "{user}") {{
-            createdAt
-            company
-            location
-            bio
-            websiteUrl
-            avatarUrl
-            url
-            twitterUsername
-            organizations {{
-              totalCount
-            }}
-            followers {{
-              totalCount
-            }}
-            following {{
-              totalCount
-            }}
-            repositories {{
-              totalCount
-            }}
-            contributionsCollection(from: "{from_}", to: "{to}") {{
-              contributionCalendar {{
-                totalContributions
-                weeks {{
-                  contributionDays {{
-                    contributionCount
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-        """.format(user=user, from_=YEAR_START, to=to)
-
-        data = await self.post_gql(query, just_query=True)
-
-        if not data['data']['user']:
+        try:
+            data = await self.gh.graphql(self._queries.user, **{'UserName': user,
+                                                                'FromTime': YEAR_START,
+                                                                'ToTime': datetime.utcnow().strftime('%Y-%m-%dT%XZ')})
+        except QueryError:
             return None
 
-        data_ = data['data']['user']['contributionsCollection']['contributionCalendar']
-        data['data']['user']['contributions'] = data_['totalContributions'], data_['weeks'][-1]['contributionDays'][-1][
+        data_ = data['user']['contributionsCollection']['contributionCalendar']
+        data['user']['contributions'] = data_['totalContributions'], data_['weeks'][-1]['contributionDays'][-1][
             'contributionCount']
-        data = data['data']['user']
+        data = data['user']
         del data['contributionsCollection']
         data['organizations'] = data['organizations']['totalCount']
         data['public_repos'] = data['repositories']['totalCount']

@@ -1,0 +1,34 @@
+query($UserName: String!, $FromTime: DateTime, $ToTime: DateTime) {
+  user(login: $UserName) {
+    createdAt
+    company
+    location
+    bio
+    websiteUrl
+    avatarUrl
+    url
+    twitterUsername
+    organizations {
+      totalCount
+    }
+    followers {
+      totalCount
+    }
+    following {
+      totalCount
+    }
+    repositories {
+      totalCount
+    }
+    contributionsCollection(from: $FromTime, to: $ToTime) {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            contributionCount
+          }
+        }
+      }
+    }
+  }
+}

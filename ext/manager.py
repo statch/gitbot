@@ -3,6 +3,7 @@ import re
 import os
 import functools
 import operator
+import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
 from ext.types import DictSequence, AnyDict
@@ -49,6 +50,17 @@ class Manager:
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
         return DictProxy(data)
+
+    async def verify_send_perms(self, channel: discord.TextChannel) -> bool:
+        if isinstance(channel, discord.DMChannel):
+            return True
+        perms: list = list(iter(channel.permissions_for(channel.guild.me)))
+        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
+        if all(req in perms + overwrites for req in [("send_messages", True),
+                                                     ("read_messages", True),
+                                                     ("read_message_history", True)]) or ("administrator", True) in perms:
+            return True
+        return False
 
     async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
         for pattern in self.patterns:

@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from ext.explicit_checks import verify_send_perms
 from core.globs import Mgr
 
 
@@ -42,7 +41,7 @@ class Events(commands.Cog):
     async def on_guild_join(self, guild: discord.Guild) -> None:
         receiver = None
         async for channel in guild_text_channels(guild):
-            if await verify_send_perms(channel):
+            if await Mgr.verify_send_perms(channel):
                 receiver = channel
                 break
         embed = discord.Embed(
@@ -73,7 +72,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
-        can_send: bool = await verify_send_perms(message.channel)
+        can_send: bool = await Mgr.verify_send_perms(message.channel)
         if all([self.bot.user in message.mentions[:1], len(message.content) < 23, can_send]):
             embed = discord.Embed(
                 color=0xefefef,

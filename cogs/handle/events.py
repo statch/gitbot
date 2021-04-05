@@ -23,7 +23,6 @@ class Events(commands.Cog):
 
         embed = discord.Embed(
             title=title,
-            description=None,
             color=color,
         )
         owner = await self.bot.fetch_user(guild.owner_id)

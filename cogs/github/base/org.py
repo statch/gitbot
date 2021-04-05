@@ -45,7 +45,6 @@ class Org(commands.Cog):
         embed = discord.Embed(
             color=0xefefef,
             title=f"{organization}'s {form}",
-            description=None,
             url=org['html_url']
         )
 

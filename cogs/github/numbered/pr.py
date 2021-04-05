@@ -59,7 +59,7 @@ class PullRequest(commands.Cog):
             title=f"{PR_STATES[state.lower()]}  {title} #{pr_number}",
             url=pr['url'],
             color=0xefefef,
-            description=None
+
         )
         embed.set_thumbnail(url=pr['author']['avatarUrl'])
         if all(['bodyText' in pr and pr['bodyText'], len(pr['bodyText'])]):

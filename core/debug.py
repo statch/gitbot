@@ -49,8 +49,7 @@ class Debug(commands.Cog):
         rate = data[0]
         embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.e}  Rate-limiting',
-            description=None
+            title=f'{self.e}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]
         used_gql = sum(g['used'] for g in graphql)

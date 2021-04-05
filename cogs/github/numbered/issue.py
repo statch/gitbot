@@ -51,7 +51,6 @@ class Issue(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f"{em}  {issue['title']} #{issue_number}",
-            description=None,
             url=issue['url']
         )
         if all(['body' in issue, issue['body'], len(issue['body'])]):

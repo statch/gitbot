@@ -21,8 +21,7 @@ class License(commands.Cog):
         embed = Embed(
             color=0xefefef,
             title=lcns["name"],
-            url=lcns["html_url"],
-            description=None
+            url=lcns["html_url"]
         )
         embed.add_field(name=f"Description:", value=f'```{lcns["description"]}```', inline=False)
         embed.add_field(name="Implementation:", value=f'```{lcns["implementation"]}```', inline=False)

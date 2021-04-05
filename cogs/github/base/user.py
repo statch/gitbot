@@ -46,7 +46,6 @@ class User(commands.Cog):
         embed = discord.Embed(
             color=0xefefef,
             title=f"{user}'s {form}",
-            description=None,
             url=u['url']
         )
 

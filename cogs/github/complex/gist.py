@@ -92,7 +92,6 @@ class Gist(commands.Cog):
         embed = discord.Embed(
             color=await self.get_color_from_files(gist['files']),
             title=gist['description'],
-            description=None,
             url=gist['url']
         )
         first_file: dict = gist['files'][0]

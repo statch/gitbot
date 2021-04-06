@@ -17,8 +17,7 @@ class License(commands.Cog):
         embed = Embed(
             color=0xefefef,
             title=license_["name"],
-            url=license_["html_url"],
-            description=None
+            url=license_["html_url"]
         )
         embed.add_field(name=ctx.l.license.description, value=f'```{license_["description"]}```', inline=False)
         embed.add_field(name=ctx.l.license.implementation, value=f'```{license_["implementation"]}```', inline=False)

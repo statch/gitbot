@@ -47,7 +47,6 @@ class Repo(commands.Cog):
         embed = discord.Embed(
             color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] else 0xefefef,
             title=f"{repo}",
-            description=None,
             url=r['url']
         )
 

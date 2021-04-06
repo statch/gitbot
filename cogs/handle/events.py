@@ -22,7 +22,6 @@ class Events(commands.Cog):
 
         embed = discord.Embed(
             title=title,
-            description=None,
             color=color,
         )
         owner = await self.bot.fetch_user(guild.owner_id)
@@ -46,7 +45,6 @@ class Events(commands.Cog):
                 break
         embed = discord.Embed(
             color=0xefefef,
-            title=None,
             description=f":tada: **Hi! I'm {self.bot.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git --help` to get started.\n\nIf you have any problems, [join the support server!](https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
         )
         embed.set_thumbnail(url=self.bot.user.avatar_url)
@@ -76,7 +74,6 @@ class Events(commands.Cog):
         if all([self.bot.user in message.mentions[:1], len(message.content) < 23, can_send]):
             embed = discord.Embed(
                 color=0xefefef,
-                title=None,
                 description=f":tada: **Hi! I'm {self.bot.user.name}.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
             )
             embed.set_thumbnail(url=self.bot.user.avatar_url)

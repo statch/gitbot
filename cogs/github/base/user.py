@@ -25,6 +25,7 @@ class User(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='--info', aliases=['-i', '-info'])
     async def user_info_command(self, ctx: commands.Context, user: str) -> None:
+        ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:
@@ -54,12 +55,12 @@ class User(commands.Cog):
         if orgs_c == 1:
             orgs: str = f"{ctx.l.user.info.orgs.singular}\n"
         followers: str = ctx.l.user.info.followers.no_followers if u[
-                                                            'followers'] == 0 else ctx.fmt('user info followers plural', u['followers'], u['url'] + '?tab=followers')
+                                                            'followers'] == 0 else ctx.fmt('followers plural', u['followers'], u['url'] + '?tab=followers')
 
         if u['followers'] == 1:
-            followers: str = ctx.l.user.info.followers.singular.format(u['url'] + '?tab=followers')
-        following: str = "doesn't follow anyone, yet" if u[
-                                                             'following'] == 0 else f"follows [{u['following']} users]({u['url']}?tab=following)"
+            followers: str = ctx.fmt('followers singular', u['url'] + '?tab=followers')
+        following: str = ctx.l.user.info.following.no_following if u[
+                                                             'following'] == 0 else ctx.fmt('following plural', u['following'], u['url'] + '?tab=following')
         if u['following'] == 1:
             following: str = f"follows only [1 person]({u['url']}?tab=following)"
         follow: str = followers + ' and ' + following

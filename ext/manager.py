@@ -59,7 +59,8 @@ class Manager:
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
         if all(req in perms + overwrites for req in [("send_messages", True),
                                                      ("read_messages", True),
-                                                     ("read_message_history", True)]) or ("administrator", True) in perms:
+                                                     ("read_message_history", True)]) or (
+        "administrator", True) in perms:
             return True
         return False
 
@@ -160,8 +161,18 @@ class Manager:
             if locale != self.locale.master and 'meta' in locale:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master))
 
-    def fmt(self, ctx: commands.Context, locale_path: Union[tuple, str, list], /,  *args) -> str:
-        return self.get_nested_key(ctx.l, locale_path).format(*args)
+    def fmt(self, ctx: commands.Context) -> object:
+        self_ = self
 
-    def fmt_ctx_bindable(self, ctx: commands.Context) -> Callable:
-        return functools.partial(self.fmt, ctx)
+        class _Formatter:
+            def __init__(self, ctx_: commands.Context):
+                self._ctx: commands.Context = ctx_
+                self._prefix: str = ''
+
+            def __call__(self, resource_: Union[tuple, str, list], /, *args) -> str:
+                return self_.get_nested_key(ctx.l, self._prefix + resource_ if not resource_.startswith(self._prefix) else resource_).format(*args)
+
+            def set_prefix(self, prefix: str) -> None:
+                self._prefix: str = prefix.strip() + ' '
+
+        return _Formatter(ctx)

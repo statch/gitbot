@@ -117,6 +117,12 @@
         "plural": "Has [{0} followers]({1})",
         "singular": "Has only [one follower]({0})",
         "no_followers": "Isn't followed by anyone"
+      },
+      "linking_word": "and",
+      "following": {
+        "plural": "follows [{0} users]({1})",
+        "singular": "follows only [one person]({0})",
+        "no_following": "doesn't follow anyone, yet"
       }
     }
   }

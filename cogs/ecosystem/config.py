@@ -1,18 +1,13 @@
 import discord
 import asyncio
-import os
 from discord.ext import commands
 from core.globs import Git, Mgr
 from typing import Optional
-from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
-        self.user_db: AsyncIOMotorClient = self.db_client.users
-        self.guild_db: AsyncIOMotorClient = self.db_client.guilds
 
     @commands.group(name='config', aliases=['--config', '-cfg', 'cfg'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -37,9 +32,9 @@ class Config(commands.Cog):
     @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show(self, ctx: commands.Context) -> None:
-        query: dict = await self.user_db.find_one({"_id": int(ctx.author.id)})
+        query: dict = await Mgr.db.users.find_one({"_id": int(ctx.author.id)})
         if not isinstance(ctx.channel, discord.DMChannel):
-            release: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+            release: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         else:
             release = None
         if query is None and release is None or release and len(release) == 1 and query is None:
@@ -66,7 +61,7 @@ class Config(commands.Cog):
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(10, 30, commands.BucketType.guild)
     async def config_release_feed(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
-        g: dict = await self.guild_db.find_one({'_id': ctx.guild.id})
+        g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if not g:
             embed: discord.Embed = discord.Embed(
                 color=0xff009b,
@@ -108,7 +103,7 @@ class Config(commands.Cog):
                         feed = [{'repo': repo.lower(), 'release': r['release']['tagName']}] if r and r[
                             'release'] else []
                     if hook:
-                        await self.guild_db.insert_one(
+                        await Mgr.db.guilds.insert_one(
                             {'_id': ctx.guild.id, 'hook': hook.url[33:], 'feed': feed if feed else []})
                         success_embed: discord.Embed = discord.Embed(
                             color=0x33ba7c,
@@ -149,7 +144,7 @@ class Config(commands.Cog):
                     await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **already being logged!**')
                     return
             if len(g['feed']) < 3:
-                await self.guild_db.update_one({'_id': ctx.guild.id},
+                await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
                     {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
                 await ctx.send(f'{Mgr.e.github} **{repo}\'s** releases will now be logged.')
             else:
@@ -160,13 +155,13 @@ class Config(commands.Cog):
                                 f' You can remove a previously added repo by typing `git config -delete feed`'
                 )
                 embed_limit_reached.set_footer(text=f'You need the Manage Channels to do that.',
-                    icon_url=self.bot.user.avatar_url)
+                                               icon_url=self.bot.user.avatar_url)
                 await ctx.send(embed=embed_limit_reached)
 
     @config_command_group.command(name='--user', aliases=['-u', '-user', 'user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_user(self, ctx: commands.Context, user: str) -> None:
-        u = await self.setitem(ctx, 'user', user)
+        u = await Mgr.db.users.setitem(ctx, 'user', user)
         if u:
             await ctx.send(f"{Mgr.e.github}  Quick access user set to **{user}**")
         else:
@@ -175,7 +170,7 @@ class Config(commands.Cog):
     @config_command_group.command(name='--org', aliases=['--organization', '-O', '-org', 'org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_org(self, ctx: commands.Context, org: str) -> None:
-        o = await self.setitem(ctx, 'org', org)
+        o = await Mgr.db.users.setitem(ctx, 'org', org)
         if o:
             await ctx.send(f"{Mgr.e.github}  Quick access organization set to **{org}**")
         else:
@@ -184,7 +179,7 @@ class Config(commands.Cog):
     @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo', 'repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_repo(self, ctx, repo) -> None:
-        r = await self.setitem(ctx, 'repo', repo)
+        r = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
             await ctx.send(f"{Mgr.e.github}  Quick access repo set to **{repo}**")
         else:
@@ -225,12 +220,12 @@ class Config(commands.Cog):
                 )
                 await ctx.send(embed=embed)
             else:
-                guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+                guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
                 if guild:
                     for r in guild['feed']:
                         if r['repo'].lower() == repo.lower():
                             guild['feed'].remove(r)
-                            await self.guild_db.update_one({'_id': ctx.guild.id}, {'$set': {'feed': guild['feed']}})
+                            await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$set': {'feed': guild['feed']}})
                             await ctx.send(f'{Mgr.e.github}  `{repo}`\'s releases will **no longer be logged.**')
                             return
                     await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **not currently logged!**')
@@ -242,12 +237,12 @@ class Config(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
-        guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+        guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild is None:
             await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
         else:
             if guild['feed']:
-                await self.guild_db.update_one(guild, {'$set': {'feed': []}})
+                await Mgr.db.guilds.update_one(guild, {'$set': {'feed': []}})
             await ctx.send(f'{Mgr.e.github}  All release feeds were **closed successfully.**')
 
     @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
@@ -256,11 +251,11 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_guild_permissions()
     async def delete_feed_with_channel_command(self, ctx: commands.Context) -> None:
-        guild: Optional[dict] = await self.guild_db.find_one({'_id': ctx.guild.id})
+        guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild is None:
             await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
         else:
-            await self.guild_db.delete_one(guild)
+            await Mgr.db.guilds.delete_one(guild)
             try:
                 webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
                     adapter=discord.AsyncWebhookAdapter(Git.ses))
@@ -273,7 +268,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: commands.Context) -> None:
-        deleted: bool = await self.delete_field(ctx, 'user')
+        deleted: bool = await Mgr.db.users.delitem(ctx, 'user')
         if deleted:
             await ctx.send(f"{Mgr.e.github}  Saved **user deleted.**")
         else:
@@ -282,7 +277,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: commands.Context) -> None:
-        deleted: bool = await self.delete_field(ctx, 'org')
+        deleted: bool = await Mgr.db.users.delitem(ctx, 'org')
         if deleted:
             await ctx.send(f"{Mgr.e.github}  Saved **organization deleted.**")
         else:
@@ -291,7 +286,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: commands.Context) -> None:
-        deleted: bool = await self.delete_field(ctx, 'repo')
+        deleted: bool = await Mgr.db.users.delitem(ctx, 'repo')
         if deleted:
             await ctx.send(f"{Mgr.e.github}  Saved **repo deleted.**")
         else:
@@ -300,40 +295,11 @@ class Config(commands.Cog):
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_entire_record(self, ctx: commands.Context) -> None:
-        query: dict = await self.user_db.find_one_and_delete({"_id": int(ctx.author.id)})
+        query: dict = await Mgr.db.users.find_one_and_delete({"_id": int(ctx.author.id)})
         if not query:
             await ctx.send(f"{Mgr.e.err}  It appears that **you don't have anything stored!**")
             return
         await ctx.send(f"{Mgr.e.github}  All of your stored data was **successfully deleted.**")
-
-    async def delete_field(self, ctx: commands.Context, field: str) -> bool:
-        query: dict = await self.user_db.find_one({"_id": ctx.author.id})
-        if query is not None and field in query:
-            await self.user_db.update_one(query, {"$unset": {field: ""}})
-            del query[field]
-            if len(query) == 2:
-                await self.user_db.find_one_and_delete({"_id": ctx.author.id})
-            return True
-        return False
-
-    async def getitem(self, ctx: commands.Context, item: str) -> Optional[str]:
-        query: dict = await self.user_db.find_one({'_id': ctx.author.id})
-        if query and item in query:
-            return query[item]
-        return None
-
-    async def setitem(self, ctx: commands.Context, item: str, value: str) -> bool:
-        exists: bool = True
-        if item in ('user', 'repo', 'org'):
-            exists: bool = await ({'user': Git.get_user, 'repo': Git.get_repo, 'org': Git.get_org}[item])(value) is not None
-        if exists:
-            query = await self.user_db.find_one({"_id": ctx.author.id})
-            if query is not None:
-                await self.user_db.update_one(query, {"$set": {item: value}})
-            else:
-                await self.user_db.insert_one({"_id": ctx.author.id, item: value})
-            return True
-        return False
 
 
 def setup(bot: commands.Bot) -> None:

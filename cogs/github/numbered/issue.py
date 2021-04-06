@@ -22,7 +22,7 @@ class Issue(commands.Cog):
                         f'{Mgr.e.err}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
                     return
                 num = repo
-                stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+                stored = await Mgr.db.users.getitem(ctx, 'repo')
                 if stored:
                     repo = stored
                     issue_number = num

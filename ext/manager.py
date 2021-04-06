@@ -7,7 +7,7 @@ import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
 from ext.types import DictSequence, AnyDict
-from ext.structs import DirProxy, DictProxy, GitCommandData
+from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
 from fuzzywuzzy import fuzz
@@ -34,6 +34,7 @@ class Manager:
                                    'lines': 'lines'}
         self.locale_cache: dict = {}
         setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', self.locale.master))
+        setattr(self.db, 'users', UserCollection(self.db.users, self.git))
         self.__fix_missing_locales()
 
     def correlate_license(self, to_match: str) -> Optional[dict]:

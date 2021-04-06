@@ -19,7 +19,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog('Config').getitem(ctx, 'repo')
+        repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
             await ctx.send(f'{Mgr.e.err} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
                            f'repo into the command)')
@@ -71,7 +71,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog('Config').getitem(ctx, 'repo')
+        repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
             await ctx.send(f'{Mgr.e.err} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
                            f'repo into the command)')
@@ -117,7 +117,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
 async def handle_none(ctx: commands.Context, item: str, stored: bool, state: str) -> None:
     if item is None:
         if stored:
-            await ctx.bot.get_cog('Config').delete_field(ctx, 'repo')
+            await Mgr.db.users.delitem(ctx, 'repo')
             await ctx.send(
                 f'{Mgr.e.err} You invoked the command with your stored repo, but it\'s unavailable. **Please re-add it.**')
         else:

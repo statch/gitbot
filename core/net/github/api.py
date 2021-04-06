@@ -10,7 +10,6 @@ from ext.structs import DirProxy, GhProfileData
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
-GRAPHQL: str = 'https://api.github.com/graphql'
 SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 

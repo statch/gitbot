@@ -13,7 +13,7 @@ class User(commands.Cog):
     async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'user --info')
         if not user:
-            stored = await self.bot.get_cog('Config').getitem(ctx, 'user')
+            stored = await Mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, user=stored)
@@ -32,7 +32,7 @@ class User(commands.Cog):
             u = await Git.get_user(user)
         if not u:
             if hasattr(ctx, 'invoked_with_stored'):
-                await self.bot.get_cog('Store').delete_user_field(ctx=ctx)
+                await Mgr.db.users.delitem(ctx, 'user')
                 await ctx.send(
                     f"{Mgr.e.err}  The user you had saved has changed their name or deleted their account. Please "
                     f"**re-add them** using `git --config -user`")

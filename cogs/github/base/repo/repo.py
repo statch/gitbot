@@ -17,7 +17,7 @@ class Repo(commands.Cog):
     async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'repo --info')
         if not repo:
-            stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+            stored = Mgr.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, repo=stored)
@@ -36,7 +36,7 @@ class Repo(commands.Cog):
             r: Union[dict, None] = await Git.get_repo(str(repo))
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
-                await self.bot.get_cog('Config').delete_field(ctx, 'repo')
+                await Mgr.db.users.delete_field(ctx, 'repo')
                 await ctx.send(
                     f"{Mgr.e.err}  The repo you had saved changed its name or was deleted. Please **re-add it** "
                     f"using `git --config -repo`")

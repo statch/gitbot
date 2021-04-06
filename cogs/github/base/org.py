@@ -13,7 +13,7 @@ class Org(commands.Cog):
     async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'org --info')
         if not org:
-            stored = await self.bot.get_cog('Config').getitem(ctx, 'org')
+            stored = await Mgr.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, organization=stored)
@@ -32,7 +32,7 @@ class Org(commands.Cog):
             org = await Git.get_org(organization)
         if not org:
             if hasattr(ctx, 'invoked_with_stored'):
-                await self.bot.get_cog('Store').delete_org_field(ctx=ctx)
+                await Mgr.db.users.delitem(ctx, 'org')
                 await ctx.send(
                     f"{Mgr.e.err}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
             else:

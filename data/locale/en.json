@@ -15,9 +15,19 @@
   },
   "generic": {
     "nonexistent": {
-      "repo": "This repository **doesn't exist!**",
-      "user": "This user **doesn't exist!**",
-      "org": "This organization **doesn't exist!**",
+      "user": {
+        "base": "This user **doesn't exist!**",
+        "qa": "You don't have a quick access user configured! **Type** `git config` **to do it.**",
+        "qa_changed": "The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config -user`"
+      },
+      "repo": {
+        "base": "This repository **doesn't exist!**",
+        "qa": "You don't have a quick access repo configured! **Type** `git config` **to do it.**"
+      },
+      "org": {
+        "base": "This organization **doesn't exist!**",
+        "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**"
+      },
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
       "issue_number": "An issue with this number **doesn't exist!**"
@@ -87,5 +97,27 @@
     "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
     "nonexistent": "That {0} **doesn't exist!**",
     "no_lines_mentioned": "The link has to be a GitHub or GitLab URL **mentioning lines!**"
+  },
+  "user": {
+    "repos": {
+      "no_public": "This user doesn't have any **public repos!**",
+      "more": "View {0} more on Github"
+    },
+    "info": {
+      "glossary": ["Bio", "Info", "Links"],
+      "joined_at": "Joined GitHub on {0}",
+      "company": "Works at {0}",
+      "no_company": "Isn't part of a company",
+      "orgs": {
+        "plural": "Belongs to {0} organizations",
+        "singular": "Belongs to one organization",
+        "no_orgs": "Doesn't belong to any organizations"
+      },
+      "followers": {
+        "plural": "Has [{0} followers]({1})",
+        "singular": "Has only [one follower]({0})",
+        "no_followers": "Isn't followed by anyone"
+      }
+    }
   }
 }

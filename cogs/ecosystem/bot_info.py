@@ -50,7 +50,7 @@ class BotInfo(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f'{Mgr.e.timer}  {ctx.l.uptime.format(uptime_stamp)}'
+            description=f'{Mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
         )
         await ctx.send(embed=embed)
 
@@ -59,7 +59,7 @@ class BotInfo(commands.Cog):
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            description=f"{Mgr.e.timer}  {ctx.l.ping.format(round(self.bot.latency * 1000))}"
+            description=f"{Mgr.e.timer}  {ctx.fmt('ping', round(self.bot.latency * 1000))}"
         )
         await ctx.send(embed=embed)
 
@@ -102,7 +102,7 @@ class BotInfo(commands.Cog):
             description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
                         "https://botsfordiscord.com/bot/761269120691470357) "
         )
-        embed.set_author(name=ctx.l.vote.format(self.bot.user.name), icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=ctx.fmt('vote', self.bot.user.name), icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='stats', aliases=['--stats', '-stats'])
@@ -116,9 +116,9 @@ class BotInfo(commands.Cog):
                         inline=False)
         embed.add_field(name=ctx.l.stats.system, value=f"{cpu}\n{memory}")
         embed.add_field(name=ctx.l.stats.people.title,
-                        value=ctx.l.stats.people.body.format(len(self.bot.guilds), users))
+                        value=ctx.fmt('stats people body', len(self.bot.guilds), users))
         embed.add_field(name=ctx.l.stats.code.title,
-                        value=ctx.l.stats.code.body.format(LINES_OF_CODE, f'{platform.system()} {platform.release()}'))
+                        value=ctx.fmt('stats code body', LINES_OF_CODE, f'{platform.system()} {platform.release()}'))
         await ctx.send(embed=embed)
 
 

@@ -26,7 +26,8 @@
       },
       "org": {
         "base": "This organization **doesn't exist!**",
-        "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**"
+        "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**",
+        "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`"
       },
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",

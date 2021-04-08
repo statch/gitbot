@@ -89,7 +89,7 @@ class Config(commands.Cog):
                     else:
                         try:
                             channel: Optional[discord.TextChannel] = await commands.TextChannelConverter().convert(ctx,
-                                msg.content)
+                                                                                                                   msg.content)
                         except commands.BadArgument:
                             await ctx.send(
                                 f'{Mgr.e.err}  **That is not a valid channel!** Try again, or type `cancel` to quit.')
@@ -145,7 +145,7 @@ class Config(commands.Cog):
                     return
             if len(g['feed']) < 3:
                 await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
-                    {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
+                                               {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
                 await ctx.send(f'{Mgr.e.github} **{repo}\'s** releases will now be logged.')
             else:
                 embed_limit_reached: discord.Embed = discord.Embed(
@@ -193,11 +193,11 @@ class Config(commands.Cog):
                 color=0xefefef,
                 title=f"{Mgr.e.github}  Delete Quick Access Data",
                 description=f"**You can delete stored quick access data by running the following commands:**\n"
-                            f"`git config --delete user`" + f' {Mgr.e.arrow} ' + 'delete the quick access user\n'
-                                                                             f"`git config --delete org`" + f' {Mgr.e.arrow} ' + 'delete the quick access organization\n'
-                                                                                                                             f"`git config --delete repo`" + f' {Mgr.e.arrow} ' + 'delete the quick access repo\n'
-                                                                                                                                                                              f"`git config --delete all`" + f' {Mgr.e.arrow} ' + 'delete all of your quick access data\n'
-                                                                                                                                                                                                                              f"`git config --delete feed` {Mgr.e.arrow} view options regarding deleting release feed data"
+                            f"`git config --delete user` {Mgr.e.arrow} delete the quick access user\n"
+                            f"`git config --delete org` {Mgr.e.arrow} delete the quick access organization\n"
+                            f"`git config --delete repo` {Mgr.e.arrow} delete the quick access repo\n"
+                            f"`git config --delete all` {Mgr.e.arrow} delete all of your quick access data\n"
+                            f"`git config --delete feed` {Mgr.e.arrow} view options regarding deleting release feed data"
             )
             await ctx.send(embed=embed)
 
@@ -258,7 +258,7 @@ class Config(commands.Cog):
             await Mgr.db.guilds.delete_one(guild)
             try:
                 webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + guild['hook'],
-                    adapter=discord.AsyncWebhookAdapter(Git.ses))
+                                                                    adapter=discord.AsyncWebhookAdapter(Git.ses))
                 await webhook.delete()
             except (discord.NotFound, discord.HTTPException):
                 pass

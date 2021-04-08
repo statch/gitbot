@@ -85,7 +85,7 @@ class Gist(commands.Cog):
                 timeout_embed.set_footer(text='To pick an option, simply send a number next time!')
                 await base_msg.edit(embed=timeout_embed)
                 return
-        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content), 'The content is a preview of the first file of the gist'))
+        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content()), 'The content is a preview of the first file of the gist'))
 
     async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]

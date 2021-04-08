@@ -12,7 +12,7 @@ class License(commands.Cog):
     async def license_command(self, ctx: commands.Context, *, license_: str) -> None:
         license_: dict = Mgr.correlate_license(license_)
         if license_ is None:
-            await Mgr.error(ctx, ctx.l.license.error)
+            await ctx.err(ctx.l.license.error)
             return
         embed = Embed(
             color=0xefefef,

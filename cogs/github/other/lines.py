@@ -1,9 +1,8 @@
 import re
-from ext import regex
 from typing import Union
-from core.globs import Mgr
-from discord.ext import commands
 from aiohttp import ClientSession
+from discord.ext import commands
+from ext import regex
 
 
 async def compile_github_link(data: tuple) -> str:
@@ -69,13 +68,13 @@ class Lines(commands.Cog):
             result: str = await self.handle_match(gitlab_match[0], 'gitlab')
             platform_term: str = ctx.l.glossary.gitlab_repo_term
         else:
-            await Mgr.error(ctx, ctx.l.lines.no_lines_mentioned)
+            await ctx.err(ctx.l.lines.no_lines_mentioned)
             return
 
         if isinstance(result, str):
             await ctx.send(result)
         elif isinstance(result, int):
-            await Mgr.error(ctx, self.get_error(ctx, result).format(platform_term))
+            await ctx.err(self.get_error(ctx, result).format(platform_term))
 
     async def handle_match(self, match: tuple, type_: str = 'github') -> str:
         if type_ == 'github':

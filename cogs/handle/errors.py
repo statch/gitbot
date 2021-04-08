@@ -1,6 +1,5 @@
 from discord.ext import commands
 from bot import PRODUCTION
-from core.globs import Mgr
 
 
 class Errors(commands.Cog):
@@ -11,17 +10,17 @@ class Errors(commands.Cog):
     async def on_command_error(self, ctx: commands.Context, error) -> None:
         ctx.fmt.set_prefix('errors')
         if isinstance(error, commands.MissingRequiredArgument):
-            await Mgr.error(ctx, ctx.l.errors.missing_required_argument)
+            await ctx.err(ctx.l.errors.missing_required_argument)
         elif isinstance(error, commands.CommandOnCooldown):
-            await Mgr.error(ctx, ctx.fmt('command_on_cooldown', '{:.2f}'.format(error.retry_after)))
+            await ctx.err(ctx.fmt('command_on_cooldown', '{:.2f}'.format(error.retry_after)))
         elif isinstance(error, commands.MaxConcurrencyReached):
-            await Mgr.error(ctx, ctx.l.errors.max_concurrency_reached)
+            await ctx.err(ctx.l.errors.max_concurrency_reached)
         elif isinstance(error, commands.BotMissingPermissions):
-            await Mgr.error(ctx, ctx.fmt('bot_missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
+            await ctx.err(ctx.fmt('bot_missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.MissingPermissions):
-            await Mgr.error(ctx, ctx.fmt('missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
+            await ctx.err(ctx.fmt('missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.NoPrivateMessage):
-            await Mgr.error(ctx, ctx.l.errors.no_private_message)
+            await ctx.err(ctx.l.errors.no_private_message)
         elif not PRODUCTION:
             raise error
         else:

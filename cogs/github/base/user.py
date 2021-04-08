@@ -13,12 +13,12 @@ class User(commands.Cog):
     async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'user --info')
         if not user:
-            stored = await Mgr.db.users.getitem(ctx, 'user')
+            stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, user=stored)
             else:
-                await Mgr.error(ctx, ctx.l.generic.nonexistent.user.qa)
+                await ctx.err(ctx.l.generic.nonexistent.user.qa)
         else:
             await ctx.invoke(info_command, user=user)
 
@@ -29,13 +29,13 @@ class User(commands.Cog):
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:
-            u = await Git.get_user(user)
+            u: dict = await Git.get_user(user)
         if not u:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'user')
-                await Mgr.error(ctx, ctx.l.generic.nonexistent.user.qa_changed)
+                await ctx.err(ctx.l.generic.nonexistent.user.qa_changed)
             else:
-                await Mgr.error(ctx, ctx.l.generic.nonexistent.user)
+                await ctx.err(ctx.l.generic.nonexistent.user)
             return None
 
         form: str = 'Profile' if str(user)[0].isupper() else 'profile'
@@ -101,10 +101,10 @@ class User(commands.Cog):
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
-            await Mgr.error(ctx, ctx.l.generic.nonexistent.user.base)
+            await ctx.err(ctx.l.generic.nonexistent.user.base)
             return
         if not repos:
-            await Mgr.error(ctx, ctx.l.user.repos.no_public)
+            await ctx.err(ctx.l.user.repos.no_public)
             return
         title: str = ctx.fmt('owner_if_cap', user) if user[0].isupper() else ctx.fmt('owner', user)
         embed: discord.Embed = discord.Embed(

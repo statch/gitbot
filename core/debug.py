@@ -95,7 +95,10 @@ class Debug(commands.Cog):
             exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used
 
             result = (await eval(f'{fn_name}()', env))  # pylint: disable=eval-used
-            await ctx.send(result)
+            try:
+                await ctx.send(result)
+            except discord.errors.HTTPException:
+                await ctx.send('Evaluation successful, no output.')
 
 
 def setup(bot: commands.Bot) -> None:

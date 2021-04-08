@@ -180,7 +180,7 @@ class GitHubAPI:
                 return 'repo'
 
         data = data['repository']['pullRequest']
-        data['labels']: list = [l['node']['name'] for l in data['labels']['edges']]
+        data['labels']: list = [lb['node']['name'] for lb in data['labels']['edges']]
         data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
         data['reviewers'] = {}
         data['reviewers']['users'] = [

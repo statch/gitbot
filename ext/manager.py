@@ -9,7 +9,7 @@ from discord.ext import commands
 from ext.types import DictSequence, AnyDict
 from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from ext import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Literal
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine
 from fuzzywuzzy import fuzz
 
 
@@ -59,8 +59,7 @@ class Manager:
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
         if all(req in perms + overwrites for req in [("send_messages", True),
                                                      ("read_messages", True),
-                                                     ("read_message_history", True)]) or (
-        "administrator", True) in perms:
+                                                     ("read_message_history", True)]) or ("administrator", True) in perms:
             return True
         return False
 
@@ -112,6 +111,9 @@ class Manager:
 
     async def error(self, ctx: commands.Context, msg: str) -> None:
         await ctx.send(f'{self.e.err}  {msg}')
+
+    def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
+        return functools.partial(self.error, ctx)
 
     async def get_locale(self, ctx: commands.Context) -> DictProxy:
         locale: str = 'en'

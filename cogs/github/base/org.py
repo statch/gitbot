@@ -13,13 +13,12 @@ class Org(commands.Cog):
     async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'org --info')
         if not org:
-            stored = await Mgr.db.users.getitem(ctx, 'org')
+            stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(info_command, organization=stored)
             else:
-                await ctx.send(
-                    f'{Mgr.e.err}  You don\'t have a quick access org configured! **Type** `git config` **to do it.**')
+                await ctx.err(ctx.l.generic.nonexistent.org.qa)
         else:
             await ctx.invoke(info_command, organization=org)
 
@@ -29,14 +28,13 @@ class Org(commands.Cog):
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
         else:
-            org = await Git.get_org(organization)
+            org: dict = await Git.get_org(organization)
         if not org:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'org')
-                await ctx.send(
-                    f"{Mgr.e.err}  The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`")
+                await ctx.err(ctx.l.generic.nonexistent.org.qa_changed)
             else:
-                await ctx.send(f"{Mgr.e.err} This organization **doesn't exist!**")
+                await ctx.err(ctx.l.generic.nonexistent.org.base)
             return None
 
         form: str = "Profile" if str(organization)[0].isupper() else 'profile'
@@ -62,7 +60,7 @@ class Org(commands.Cog):
         else:
             location: str = "\n"
 
-        created_at = f"Created on {datetime.datetime.strptime(org['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
+        created_at: str = f"Created on {datetime.datetime.strptime(org['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
         info: str = f"{created_at}{repos}{members}{location}{email}"
         embed.add_field(name=":mag_right: Info:", value=info, inline=False)
         blog: tuple = (org['blog'], "Website")

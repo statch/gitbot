@@ -1,6 +1,6 @@
 import discord
 import datetime
-from typing import Optional
+from typing import Optional, Union
 from core.globs import Git, Mgr
 from discord.ext import commands
 
@@ -20,7 +20,7 @@ class PullRequest(commands.Cog):
     async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: Optional[str] = None):
         if hasattr(ctx, 'data'):
             pr: dict = getattr(ctx, 'data')
-            pr_number: int = pr['number']
+            pr_number: Union[str, int] = pr['number']
         else:
             if not pr_number:
                 if not repo.isnumeric():
@@ -121,13 +121,13 @@ class PullRequest(commands.Cog):
         participant_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['participants']['users']]
 
         assignee_strings = assignee_strings if len(assignee_strings) <= 3 else assignee_strings[
-                                                                               :3] + f'- and {len(assignee_strings) - 3} more'
+                                                                               :3].extend(f'- and {len(assignee_strings) - 3} more')
 
         reviewer_strings = reviewer_strings if len(reviewer_strings) <= 3 else reviewer_strings[
-                                                                               :3] + f'- and {len(reviewer_strings) - 3} more'
+                                                                               :3].extend(f'- and {len(reviewer_strings) - 3} more')
 
         participant_strings = participant_strings if len(participant_strings) <= 3 else participant_strings[
-                                                                                        :3] + f'- and {len(participant_strings)} more'
+                                                                                        :3].extend(f'- and {len(participant_strings)} more')
 
         cross_repo: str = f'This pull request came from a fork.' if pr['isCrossRepository'] else ''
         info: str = f'{user}{closed}{comments_and_reviews}{files_changed}{additions_and_deletions}{cross_repo}'

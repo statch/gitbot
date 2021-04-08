@@ -38,7 +38,7 @@ There are some general information commands too, for example:
 - `git --uptime` - Bot's uptime
 - `git --ping` - Bot's ping
 
-Make sure to checkout our [official website](https://statch.github.io/gitbot "GitBot Official Website")
+Make sure to check out our [official website](https://statch.github.io/gitbot "GitBot Official Website")
 
 If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)
 

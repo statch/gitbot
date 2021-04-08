@@ -1,6 +1,6 @@
 import discord
 import datetime
-from typing import Optional
+from typing import Optional, Union
 from core.globs import Git, Mgr
 from discord.ext import commands
 
@@ -14,7 +14,7 @@ class Issue(commands.Cog):
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str = None) -> None:
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
-            issue_number: int = issue['number']
+            issue_number: Union[int, str] = issue['number']
         else:
             if not issue_number:
                 if not repo.isnumeric():

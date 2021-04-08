@@ -176,12 +176,3 @@ class Manager:
                 self._prefix: str = prefix.strip() + ' '
 
         return _Formatter(ctx)
-
-    def locale_prefix(self, __prefix: str) -> commands.Command:
-        def pred(ctx: commands.Context) -> Literal[True]:
-            if not hasattr(ctx, 'fmt'):
-                setattr(ctx, 'fmt', self.fmt(ctx))
-            ctx.fmt.set_prefix(__prefix)
-            return True
-
-        return commands.check(pred)

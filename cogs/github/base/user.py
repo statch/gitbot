@@ -23,9 +23,9 @@ class User(commands.Cog):
             await ctx.invoke(info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @Mgr.locale_prefix('user info')
-    @user_command_group.command(name='--info', aliases=['-i', '-info'])
+    @user_command_group.command(name='--info', aliases=['-i', '-info', 'info'])
     async def user_info_command(self, ctx: commands.Context, user: str) -> None:
+        ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:
@@ -62,8 +62,8 @@ class User(commands.Cog):
         following: str = ctx.l.user.info.following.no_following if u[
                                                              'following'] == 0 else ctx.fmt('following plural', u['following'], u['url'] + '?tab=following')
         if u['following'] == 1:
-            following: str = f"follows only [1 person]({u['url']}?tab=following)"
-        follow: str = followers + ' and ' + following
+            following: str = ctx.fmt('following singular', f'{u["url"]}?tab=following')
+        follow: str = followers + f' {ctx.l.user.info.linking_word} ' + following
 
         repos: str = "Has no repositories, yet\n" if u[
                                                          'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
@@ -95,9 +95,9 @@ class User(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @Mgr.locale_prefix('user repos')
     @user_command_group.command(name='--repos', aliases=['-r', '-repos', 'repos'])
     async def user_repos_command(self, ctx: commands.Context, user: str) -> None:
+        ctx.fmt.set_prefix('user repos')
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:

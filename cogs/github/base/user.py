@@ -79,7 +79,7 @@ class User(commands.Cog):
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
         w_url: str = u['websiteUrl']
         if w_url:
-            blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'http://{w_url}', "Website")
+            blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', "Website")
         else:
             blog: tuple = (None, 'Website')
         twitter: tuple = (

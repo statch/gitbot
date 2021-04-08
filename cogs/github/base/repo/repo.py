@@ -50,7 +50,7 @@ class Repo(commands.Cog):
             return None
 
         embed = discord.Embed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] else 0xefefef,
+            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else 0xefefef,
             title=f"{repo}",
             url=r['url']
         )

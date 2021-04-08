@@ -59,7 +59,7 @@ class Org(commands.Cog):
                                                          'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
         if org['public_repos'] == 1:
             repos: str = f"Has only [1 repository]({org['html_url']})\n"
-        if org['location'] is not None:
+        if 'location' in org and org['location'] is not None:
             location: str = f"Is based in {org['location']}\n"
         else:
             location: str = "\n"

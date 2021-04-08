@@ -33,6 +33,11 @@
       "issue_number": "An issue with this number **doesn't exist!**"
     }
   },
+  "glossary": {
+    "github_repo_term": "repository",
+    "gitlab_repo_term": "project",
+    "website": "website"
+  },
   "privacy_policy": {
     "title": "Privacy Policy",
     "what": {
@@ -90,8 +95,6 @@
     "no_info": "I couldn't fetch any info regarding the link you provided!"
   },
   "lines": {
-    "github_repo_term": "repository",
-    "gitlab_repo_term": "project",
     "more_than_25": "I cannot show **more than 25 lines**, sorry!",
     "no_content": "There **isn't any content** on these lines!",
     "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
@@ -101,7 +104,9 @@
   "user": {
     "repos": {
       "no_public": "This user doesn't have any **public repos!**",
-      "more": "View {0} more on Github"
+      "more": "View {0} more on Github",
+      "owner": "{0}'s repos",
+      "owner_if_cap": "{0}'s Repos"
     },
     "info": {
       "glossary": ["Bio", "Info", "Links"],
@@ -123,7 +128,13 @@
         "plural": "follows [{0} users]({1})",
         "singular": "follows only [one person]({0})",
         "no_following": "doesn't follow anyone, yet"
-      }
+      },
+      "repos": {
+        "plural": "Has a total of [{0} repositories]({1})",
+        "singular": "Has only [one repository]({0})",
+        "no_repos": "Has no repositories, yet"
+      },
+      "contributions": "{0} contributions this year, {0} today"
     }
   }
 }

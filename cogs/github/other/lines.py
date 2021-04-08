@@ -64,10 +64,10 @@ class Lines(commands.Cog):
         gitlab_match: list = re.findall(regex.GITLAB_LINES_RE, link)
         if github_match:
             result: str = await self.handle_match(github_match[0])
-            platform_term: str = ctx.l.lines.github_repo_term
+            platform_term: str = ctx.l.glossary.github_repo_term
         elif gitlab_match:
             result: str = await self.handle_match(gitlab_match[0], 'gitlab')
-            platform_term: str = ctx.l.lines.gitlab_repo_term
+            platform_term: str = ctx.l.glossary.gitlab_repo_term
         else:
             await Mgr.error(ctx, ctx.l.lines.no_lines_mentioned)
             return

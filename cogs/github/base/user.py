@@ -35,7 +35,7 @@ class User(commands.Cog):
                 await Mgr.db.users.delitem(ctx, 'user')
                 await Mgr.error(ctx, ctx.l.generic.nonexistent.user.qa_changed)
             else:
-                await ctx.send(f"{Mgr.e.err} This user **doesn't exist!**")
+                await Mgr.error(ctx, ctx.l.generic.nonexistent.user)
             return None
 
         form: str = 'Profile' if str(user)[0].isupper() else 'profile'
@@ -65,12 +65,12 @@ class User(commands.Cog):
             following: str = ctx.fmt('following singular', f'{u["url"]}?tab=following')
         follow: str = followers + f' {ctx.l.user.info.linking_word} ' + following
 
-        repos: str = "Has no repositories, yet\n" if u[
-                                                         'public_repos'] == 0 else f"Has a total of [{u['public_repos']} repositories]({u['url']}?tab=repositories)\n"
+        repos: str = f"{ctx.l.user.info.repos.no_repos}\n" if u[
+                                                         'public_repos'] == 0 else ctx.fmt('repos plural', u['public_repos'], f"{u['url']}?tab=repositories") + '\n'
         if u['public_repos'] == 1:
-            repos: str = f"Has only [1 repository]({u['url']}?tab=repositories)\n"
+            repos: str = ctx.fmt('repos singular', f"{u['url']}?tab=repositories") + '\n'
         if contrib_count is not None:
-            contrib: str = f"\n{contrib_count[0]} contributions this year, {contrib_count[1]} today\n"
+            contrib: str = '\n' + ctx.fmt('contributions', contrib_count[0], contrib_count[1]) + '\n'
         else:
             contrib: str = ""
 
@@ -81,7 +81,7 @@ class User(commands.Cog):
         if w_url:
             blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', "Website")
         else:
-            blog: tuple = (None, 'Website')
+            blog: tuple = (None, ctx.l.glossary.website.capitalize())
         twitter: tuple = (
             f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u else None, "Twitter")
         links: list = [blog, twitter]
@@ -106,9 +106,9 @@ class User(commands.Cog):
         if not repos:
             await Mgr.error(ctx, ctx.l.user.repos.no_public)
             return
-        form: str = 'Repos' if user[0].isupper() else 'repos'
+        title: str = ctx.fmt('owner_if_cap', user) if user[0].isupper() else ctx.fmt('owner', user)
         embed: discord.Embed = discord.Embed(
-            title=f"{user}'s {form}",
+            title=title,
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=0xefefef,

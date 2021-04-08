@@ -29,6 +29,10 @@
         "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**",
         "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`"
       },
+      "repos": {
+        "user": "This user doesn't have any **public repos!**",
+        "org": "This organization doesn't have any **public repos!**"
+      },
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
       "issue_number": "An issue with this number **doesn't exist!**"
@@ -106,11 +110,11 @@
     "repos": {
       "no_public": "This user doesn't have any **public repos!**",
       "more": "View {0} more on Github",
-      "owner": "{0}'s repos",
-      "owner_if_cap": "{0}'s Repos"
+      "owner": "{0}'s repos"
     },
     "info": {
       "glossary": ["Bio", "Info", "Links"],
+      "title": "{0}'s Profile",
       "joined_at": "Joined GitHub on {0}",
       "company": "Works at {0}",
       "no_company": "Isn't part of a company",
@@ -136,6 +140,17 @@
         "no_repos": "Has no repositories, yet"
       },
       "contributions": "{0} contributions this year, {0} today"
+    }
+  },
+  "org": {
+    "repos": {
+      "owner": "{0}'s repos",
+      "more": "View {0} more on Github"
+    },
+    "info": {
+      "title": "{0}'s Profile",
+      "members": "Has [{0} public members]({1})",
+      "one_members": "Has only [one public member]({0})"
     }
   }
 }

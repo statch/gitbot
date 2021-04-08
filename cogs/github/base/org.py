@@ -23,8 +23,9 @@ class Org(commands.Cog):
             await ctx.invoke(info_command, organization=org)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @org_command_group.command(name='--info', aliases=['-i', '-info'])
+    @org_command_group.command(name='--info', aliases=['-i', '-info', 'info'])
     async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
+        ctx.fmt.set_prefix('org info')
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
         else:
@@ -37,17 +38,16 @@ class Org(commands.Cog):
                 await ctx.err(ctx.l.generic.nonexistent.org.base)
             return None
 
-        form: str = "Profile" if str(organization)[0].isupper() else 'profile'
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{organization}'s {form}",
+            title=ctx.fmt('title', organization) if organization[0].isupper() else ctx.fmt('title', organization.lower()),
             url=org['html_url']
         )
 
         mem: list = await Git.get_org_members(organization)
-        members: str = f"Has [{len(mem)} public members](https://github.com/orgs/{organization}/people)\n"
+        members: str = ctx.fmt('members', len(mem), f"({org['html_url']}/people)") + '\n'
         if len(mem) == 1:
-            members: str = f"Has only [one public member](https://github.com/orgs/{organization}/people)\n"
+            members: str = ctx.fmt('one_member', f"({org['html_url']}/people)") + '\n'
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
             embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")
@@ -79,27 +79,27 @@ class Org(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @org_command_group.command(name='--repos', aliases=['-r', '-repos'])
+    @org_command_group.command(name='--repos', aliases=['-r', '-repos', 'repos'])
     async def org_repos_command(self, ctx: commands.Context, org: str) -> None:
+        ctx.fmt.set_prefix('org repos')
         o: Union[dict, None] = await Git.get_org(org)
         repos: list = [x for x in await Git.get_org_repos(org)]
-        form = 'Repos' if org[0].isupper() else 'repos'
         if o is None:
-            await ctx.send(f"{Mgr.e.err} This organization **doesn't exist!**")
+            await ctx.err(ctx.l.generic.nonexistent.org.base)
             return
         if not repos:
-            await ctx.send(f"{Mgr.e.err} This organization doesn't have any **public repos!**")
+            await ctx.err(ctx.l.generic.nonexistent.repos.org)
             return
         embed: discord.Embed = discord.Embed(
-            title=f"{org}'s {form}",
+            title=ctx.fmt('owner_if_cap', org) if org[0].isupper() else ctx.fmt('owner', org),
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=0xefefef,
             url=f"https://github.com/{org}"
         )
-        if c := len(repos) > 15:
-            how_much: str = str(c - 15) if c - 15 < 15 else "15+"
-            embed.set_footer(text=f"View {how_much} more on GitHub")
+        if (c := len(repos)) > 15:
+            more: str = str(c - 15)
+            embed.set_footer(text=ctx.fmt('more', more))
         embed.set_thumbnail(url=o["avatar_url"])
         await ctx.send(embed=embed)
 

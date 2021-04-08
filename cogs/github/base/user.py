@@ -38,10 +38,9 @@ class User(commands.Cog):
                 await ctx.err(ctx.l.generic.nonexistent.user)
             return None
 
-        form: str = 'Profile' if str(user)[0].isupper() else 'profile'
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{user}'s {form}",
+            title=ctx.fmt('title', user) if user[0].isupper() else ctx.fmt('title', user.lower()),
             url=u['url']
         )
 
@@ -106,7 +105,7 @@ class User(commands.Cog):
         if not repos:
             await ctx.err(ctx.l.user.repos.no_public)
             return
-        title: str = ctx.fmt('owner_if_cap', user) if user[0].isupper() else ctx.fmt('owner', user)
+        title: str = ctx.fmt('owner', user) if user[0].isupper() else ctx.fmt('owner', user).lower()
         embed: discord.Embed = discord.Embed(
             title=title,
             description='\n'.join(

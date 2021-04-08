@@ -101,9 +101,9 @@ class Manager:
             return matched[0]
         return None
 
-    async def reverse(self, __sequence: Optional[Reversible]) -> Optional[Iterable]:
-        if __sequence:
-            return type(__sequence)(reversed(__sequence))
+    async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
+        if seq:
+            return type(seq)(reversed(seq))
         return None
 
     async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
@@ -126,16 +126,16 @@ class Manager:
                 self.locale_cache[ctx.author.id] = locale
         return getattr(self.l, locale)
 
-    def get_nested_key(self, __d: AnyDict, __k: Union[Iterable[str], str]) -> Any:
-        return functools.reduce(operator.getitem, __k if not isinstance(__k, str) else __k.split(), __d)
+    def get_nested_key(self, dict_: AnyDict, key_: Union[Iterable[str], str]) -> Any:
+        return functools.reduce(operator.getitem, key_ if not isinstance(key_, str) else key_.split(), dict_)
 
     def get_by_key_from_sequence(self,
-                                 __sequence: DictSequence,
+                                 seq: DictSequence,
                                  key: str,
                                  value: Any) -> Optional[AnyDict]:
         if len((_key := key.split())) > 1:
             key: list = _key
-        for d in __sequence:
+        for d in seq:
             if isinstance(key, str):
                 if key in d and d[key] == value:
                     return d
@@ -144,9 +144,7 @@ class Manager:
                     return d
         return None
 
-    def fix_dict(self,
-                 __dict: AnyDict,
-                 __ref: AnyDict) -> AnyDict:
+    def fix_dict(self, dict_: AnyDict, ref_: AnyDict) -> AnyDict:
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
                 if k not in node:
@@ -156,7 +154,7 @@ class Manager:
                     node[k] = recursively_fix(v, ref[k])
             return node
 
-        return recursively_fix(__dict, __ref)
+        return recursively_fix(dict_, ref_)
 
     def __fix_missing_locales(self):
         for locale in self.l:
@@ -171,8 +169,8 @@ class Manager:
                 self._ctx: commands.Context = ctx_
                 self._prefix: str = ''
 
-            def __call__(self, resource_: Union[tuple, str, list], /, *args) -> str:
-                return self_.get_nested_key(ctx.l, self._prefix + resource_ if not resource_.startswith(self._prefix) else resource_).format(*args)
+            def __call__(self, resource: Union[tuple, str, list], /, *args) -> str:
+                return self_.get_nested_key(ctx.l, self._prefix + resource if not resource.startswith(self._prefix) else resource).format(*args)
 
             def set_prefix(self, prefix: str) -> None:
                 self._prefix: str = prefix.strip() + ' '

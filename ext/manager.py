@@ -9,7 +9,7 @@ from discord.ext import commands
 from ext.types import DictSequence, AnyDict
 from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from ext import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Literal
 from fuzzywuzzy import fuzz
 
 
@@ -176,3 +176,12 @@ class Manager:
                 self._prefix: str = prefix.strip() + ' '
 
         return _Formatter(ctx)
+
+    def locale_prefix(self, __prefix: str) -> commands.Command:
+        def pred(ctx: commands.Context) -> Literal[True]:
+            if not hasattr(ctx, 'fmt'):
+                setattr(ctx, 'fmt', self.fmt(ctx))
+            ctx.fmt.set_prefix(__prefix)
+            return True
+
+        return commands.check(pred)

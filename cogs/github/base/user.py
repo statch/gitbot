@@ -23,9 +23,9 @@ class User(commands.Cog):
             await ctx.invoke(info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
+    @Mgr.locale_prefix('user info')
     @user_command_group.command(name='--info', aliases=['-i', '-info'])
     async def user_info_command(self, ctx: commands.Context, user: str) -> None:
-        ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
         else:
@@ -74,12 +74,14 @@ class User(commands.Cog):
         else:
             contrib: str = ""
 
-        joined_at: str = ctx.l.user.info.joined_at.format(datetime.datetime.strptime(u['createdAt'],
-                                                                                     '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')) + '\n'
+        joined_at: str = ctx.fmt('joined_at', datetime.datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')) + '\n'
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
         w_url: str = u['websiteUrl']
-        blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'http://{w_url}', "Website")
+        if w_url:
+            blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'http://{w_url}', "Website")
+        else:
+            blog: tuple = (None, 'Website')
         twitter: tuple = (
             f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u else None, "Twitter")
         links: list = [blog, twitter]
@@ -93,7 +95,8 @@ class User(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @user_command_group.command(name='--repos', aliases=['-r', '-repos'])
+    @Mgr.locale_prefix('user repos')
+    @user_command_group.command(name='--repos', aliases=['-r', '-repos', 'repos'])
     async def user_repos_command(self, ctx: commands.Context, user: str) -> None:
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
@@ -111,9 +114,9 @@ class User(commands.Cog):
             color=0xefefef,
             url=f"https://github.com/{user}"
         )
-        if c := len(repos) > 15:
-            more: str = str(c - 15) if c - 15 < 15 else "15+"
-            embed.set_footer(text=ctx.l.user.repos.more.format(more))
+        if (c := len(repos)) > 15:
+            more: str = str(c - 15)
+            embed.set_footer(text=ctx.fmt('more', more))
         embed.set_thumbnail(url=u["avatarUrl"])
         await ctx.send(embed=embed)
 

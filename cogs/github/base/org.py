@@ -1,6 +1,7 @@
 import discord
 import datetime
 from typing import Optional, Union
+from babel.dates import format_date
 from core.globs import Git, Mgr
 from discord.ext import commands
 
@@ -40,7 +41,8 @@ class Org(commands.Cog):
 
         embed = discord.Embed(
             color=0xefefef,
-            title=ctx.fmt('title', organization) if organization[0].isupper() else ctx.fmt('title', organization.lower()),
+            title=ctx.fmt('title', organization) if organization[0].isupper() else ctx.fmt('title',
+                                                                                           organization.lower()),
             url=org['html_url']
         )
 
@@ -50,20 +52,23 @@ class Org(commands.Cog):
             members: str = ctx.fmt('one_member', f"({org['html_url']}/people)") + '\n'
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
-            embed.add_field(name=":notepad_spiral: Description:", value=f"```{org['description']}```")
-        repos: str = "Has no repositories, yet\n" if org[
-                                                         'public_repos'] == 0 else f"Has a total of [{org['public_repos']} repositories]({org['html_url']})\n"
+            embed.add_field(name=f":notepad_spiral: {ctx.l.org.info.glossary[0]}:", value=f"```{org['description']}```")
+        repos: str = f"{ctx.l.org.info.repos.no_repos}\n" if org['public_repos'] == 0 else ctx.fmt('repos plural',
+                                                                                                   org['public_repos'],
+                                                                                                   f"{org['url']}?tab=repositories") + '\n'
         if org['public_repos'] == 1:
-            repos: str = f"Has only [1 repository]({org['html_url']})\n"
+            repos: str = ctx.fmt('repos singular', f"{org['url']}?tab=repositories") + '\n'
         if 'location' in org and org['location'] is not None:
-            location: str = f"Is based in {org['location']}\n"
+            location: str = ctx.fmt('location', org['location']) + '\n'
         else:
             location: str = "\n"
 
-        created_at: str = f"Created on {datetime.datetime.strptime(org['created_at'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
+        created_at: str = ctx.fmt('created_at',
+                                  format_date(datetime.datetime.strptime(org['created_at'],
+                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'full', locale=ctx.l.meta.name)) + '\n'
         info: str = f"{created_at}{repos}{members}{location}{email}"
-        embed.add_field(name=":mag_right: Info:", value=info, inline=False)
-        blog: tuple = (org['blog'], "Website")
+        embed.add_field(name=f":mag_right: {ctx.l.org.info.glossary[1]}:", value=info, inline=False)
+        blog: tuple = (org['blog'], ctx.l.org.info.glossary[3])
         twitter: tuple = (
             f'https://twitter.com/{org["twitter_username"]}' if "twitter_username" in org and org[
                 'twitter_username'] is not None else None,
@@ -74,7 +79,7 @@ class Org(commands.Cog):
             if lnk[0] is not None and len(lnk[0]) != 0:
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
-            embed.add_field(name=f":link: Links:", value='\n'.join(link_strings), inline=False)
+            embed.add_field(name=f":link: {ctx.l.org.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
         await ctx.send(embed=embed)
 
@@ -91,7 +96,7 @@ class Org(commands.Cog):
             await ctx.err(ctx.l.generic.nonexistent.repos.org)
             return
         embed: discord.Embed = discord.Embed(
-            title=ctx.fmt('owner_if_cap', org) if org[0].isupper() else ctx.fmt('owner', org),
+            title=ctx.fmt('owner', org) if org[0].isupper() else ctx.fmt('owner', org).lower(),
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=0xefefef,

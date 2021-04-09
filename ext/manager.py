@@ -4,6 +4,7 @@ import os
 import functools
 import operator
 import discord
+from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
 from ext.types import DictSequence, AnyDict
@@ -36,6 +37,14 @@ class Manager:
         setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', self.locale.master))
         setattr(self.db, 'users', UserCollection(self.db.users, self.git))
         self.__fix_missing_locales()
+
+    def log(self,
+            message: str,
+            category: str = 'core',
+            bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
+            category_color: Fore = Fore.MAGENTA,
+            message_color: Fore = '') -> None:
+        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
 
     def correlate_license(self, to_match: str) -> Optional[dict]:
         for i in list(self.licenses):
@@ -148,7 +157,8 @@ class Manager:
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
                 if k not in node:
-                    node[k] = v
+                    self.log(f'missing key {k} patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                    node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
                     node[k] = recursively_fix(v, ref[k])

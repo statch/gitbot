@@ -23,7 +23,7 @@ bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=T
                                  description='Seamless GitHub-Discord integration.',
                                  fetch_offline_members=False)
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s:%(name)s]: %(message)s')
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')

@@ -113,7 +113,7 @@
       "owner": "{0}'s repos"
     },
     "info": {
-      "glossary": ["Bio", "Info", "Links"],
+      "glossary": ["Bio", "Info", "Links", "Website"],
       "title": "{0}'s Profile",
       "joined_at": "Joined GitHub on {0}",
       "company": "Works at {0}",
@@ -148,9 +148,17 @@
       "more": "View {0} more on Github"
     },
     "info": {
+      "glossary": ["Description", "Info", "Links", "Website"],
       "title": "{0}'s Profile",
+      "created_at": "Created on {0}",
       "members": "Has [{0} public members]({1})",
-      "one_members": "Has only [one public member]({0})"
+      "one_members": "Has only [one public member]({0})",
+      "repos": {
+        "plural": "Has a total of [{0} repositories]({1})",
+        "singular": "Has only [one repository]({0})",
+        "no_repos": "Has no repositories, yet"
+      },
+      "location": "Is based in {0}"
     }
   }
 }

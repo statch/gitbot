@@ -1,7 +1,7 @@
 discord.py==1.6.0
 aiohttp==3.7.4.post0
-gidgethub==5.0.0
-python-dotenv==0.15.0
+gidgethub~=5.0.1
+python-dotenv~=0.17.0
 fuzzywuzzy~=0.18.0
 python-Levenshtein==0.12.2
 motor==2.3.1
@@ -11,3 +11,5 @@ dblpy==0.4.0
 dlabs.py
 statcord.py
 beautifulsoup4~=4.9.3
+Babel~=2.9.0
+colorama~=0.4.4

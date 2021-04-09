@@ -1,5 +1,6 @@
 import discord
 import datetime
+from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from core.globs import Git, Mgr
@@ -73,12 +74,14 @@ class User(commands.Cog):
         else:
             contrib: str = ""
 
-        joined_at: str = ctx.fmt('joined_at', datetime.datetime.strptime(u['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')) + '\n'
+        joined_at: str = ctx.fmt('joined_at',
+                                  format_date(datetime.datetime.strptime(u['createdAt'],
+                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'medium', locale=ctx.l.meta.name)) + '\n'
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
         w_url: str = u['websiteUrl']
         if w_url:
-            blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', "Website")
+            blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', ctx.l.user.info.glossary[3])
         else:
             blog: tuple = (None, ctx.l.glossary.website.capitalize())
         twitter: tuple = (

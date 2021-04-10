@@ -69,12 +69,13 @@ class Events(commands.Cog):
         await channel.send(embed=embed_l)
 
     @commands.Cog.listener()
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         can_send: bool = await Mgr.verify_send_perms(message.channel)
+        locale = await Mgr.get_locale(message.author.id)
         if all([self.bot.user in message.mentions[:1], len(message.content) < 23, can_send]):
             embed = discord.Embed(
                 color=0xefefef,
-                description=f":tada: **Hi! I'm {self.bot.user.name}.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
+                description=locale.events.mention
             )
             embed.set_thumbnail(url=self.bot.user.avatar_url)
             embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)

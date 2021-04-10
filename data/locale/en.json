@@ -13,6 +13,9 @@
     "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
     "no_private_message": "This command can only be used **inside a server!**"
   },
+  "events": {
+    "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
+  },
   "generic": {
     "nonexistent": {
       "user": {

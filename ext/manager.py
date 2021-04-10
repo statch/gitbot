@@ -124,15 +124,16 @@ class Manager:
     def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
         return functools.partial(self.error, ctx)
 
-    async def get_locale(self, ctx: commands.Context) -> DictProxy:
+    async def get_locale(self, __id: Union[commands.Context, int]) -> DictProxy:
+        _id: Union[commands.Context, int] = __id if not isinstance(__id, commands.Context) else __id.author.id
         locale: str = self.locale.master.meta.name
-        if cached := self.locale_cache.get(ctx.author.id, None):
+        if cached := self.locale_cache.get(_id, None):
             locale: str = cached
         else:
-            stored: Optional[dict] = await self.db.users.find_one({'_id': ctx.author.id})
+            stored: Optional[dict] = await self.db.users.find_one({'_id': _id})
             if stored is not None and (sl := stored.get('locale', None)):
                 locale: str = sl
-                self.locale_cache[ctx.author.id] = locale
+                self.locale_cache[_id] = locale
         try:
             return getattr(self.l, locale)
         except AttributeError:

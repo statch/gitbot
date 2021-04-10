@@ -118,8 +118,8 @@ class Manager:
     async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
         return DirProxy(path=path, ext=ext)
 
-    async def error(self, ctx: commands.Context, msg: str) -> None:
-        await ctx.send(f'{self.e.err}  {msg}')
+    async def error(self, ctx: commands.Context, msg: str, **kwargs) -> None:
+        await ctx.send(f'{self.e.err}  {msg}', **kwargs)
 
     def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
         return functools.partial(self.error, ctx)

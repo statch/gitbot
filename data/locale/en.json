@@ -18,25 +18,39 @@
       "user": {
         "base": "This user **doesn't exist!**",
         "qa": "You don't have a quick access user configured! **Type** `git config` **to do it.**",
-        "qa_changed": "The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config -user`"
+        "qa_changed": "The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config user`"
       },
       "repo": {
         "base": "This repository **doesn't exist!**",
-        "qa": "You don't have a quick access repo configured! **Type** `git config` **to do it.**"
+        "qa": "You don't have a quick access repo configured! **Type** `git config` **to do it.**",
+        "qa_changed": "The repo you had saved has changed its name or has been deleted. Please **re-add them** using `git --config repo`",
+        "saved_repo_unavailable": "You invoked the command with your stored repo, but it's unavailable. **Please re-add it.**",
+        "no_pulls_with_state": "This repo doesn't have any **{0} pull requests!**",
+        "no_issues_with_state": "This repo doesn't have any **{0} issues!**",
+        "no_pulls_with_state_qa": "Your saved repo doesn't have any **{0} pull requests!**",
+        "no_issues_with_state_qa": "Your saved repo doesn't have any **{0} issues!**"
       },
       "org": {
         "base": "This organization **doesn't exist!**",
         "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**",
-        "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config -org`"
+        "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config org`"
       },
       "repos": {
         "user": "This user doesn't have any **public repos!**",
         "org": "This organization doesn't have any **public repos!**"
       },
+      "path": "This path **doesn't exist!**",
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
       "issue_number": "An issue with this number **doesn't exist!**"
-    }
+    },
+    "issue": {
+      "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
+    },
+    "pr": {
+      "invalid_state": "`{0}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)"
+    },
+    "invalid_index": "{0} is not a valid number **from the list!**"
   },
   "glossary": {
     "github_repo_term": "repository",
@@ -192,6 +206,22 @@
       },
       "fork_notice": "This repo is a fork of {0}",
       "license": "Licensed under the {0}"
+    },
+    "files": {
+      "view_more": "View {0} more on GitHub"
+    },
+    "download": {
+      "wait": "Give me a second while I download the file...",
+      "file_too_big": "That file is too big, **please download it directly here:**\n{0}",
+      "done": "Here's the source code of **{0}!**"
+    },
+    "issues": {
+      "title": "Latest {0} issues in {1}",
+      "footer_tip": "You can quickly inspect a specific issue from the list by typing its number!\nYou can type cancel to quit."
+    },
+    "pulls": {
+      "title": "Latest {0} pull requests in {1}",
+      "footer_tip": "You can quickly inspect a specific PR from the list by typing its number!\nYou can type cancel to quit."
     }
   }
 }

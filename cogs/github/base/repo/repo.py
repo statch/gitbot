@@ -122,6 +122,7 @@ class Repo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs', 'fs'])
     async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
+        ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
             repo = "/".join(repo_or_path.split("/", 2)[:2])
@@ -132,9 +133,9 @@ class Repo(commands.Cog):
             src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
-                await ctx.send(f"{Mgr.e.err} This path **doesn't exist!**")
+                await ctx.err(ctx.l.generic.nonexistent.path)
             else:
-                await ctx.send(f"{Mgr.e.err} This repository **doesn't exist!**")
+                await ctx.err(ctx.l.generic.nonexistent.repo.base)
             return
         files: list = [f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f[
                                                                           'type'] == 'file' else f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})"
@@ -151,28 +152,29 @@ class Repo(commands.Cog):
             url=link
         )
         if len(src) > 15:
-            embed.set_footer(text=f"View {len(src) - 15} more on GitHub")
+            embed.set_footer(text=ctx.fmt('view_more', len(src) - 15))
         await ctx.send(embed=embed)
 
     @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def download_command(self, ctx: commands.Context, repo: str) -> None:
-        msg: discord.Message = await ctx.send(f"{Mgr.e.github}  Give me a second while I download the file...")
+        ctx.fmt.set_prefix('repo download')
+        msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
-            return await msg.edit(content=f"{Mgr.e.err}  This repo **doesn't exist!**")
+            return await msg.edit(content=f"{Mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
         elif src_bytes is False:
             return await msg.edit(
-                content=f"{Mgr.e.err}  That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+                content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
         file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
             await ctx.send(file=file)
-            await msg.edit(content=f'{Mgr.e.github}  Here\'s the source code of **{repo}!**')
+            await msg.edit(content=f'{Mgr.e.github}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
-                content=f"{Mgr.e.err} That file is too big, **please download it directly here:**\nhttps://github.com/{repo}")
+                content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
     @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
     @commands.cooldown(5, 40, commands.BucketType.user)

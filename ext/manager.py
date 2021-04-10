@@ -125,15 +125,18 @@ class Manager:
         return functools.partial(self.error, ctx)
 
     async def get_locale(self, ctx: commands.Context) -> DictProxy:
-        locale: str = 'en'
+        locale: str = self.locale.master.meta.name
         if cached := self.locale_cache.get(ctx.author.id, None):
-            locale = cached
+            locale: str = cached
         else:
             stored: Optional[dict] = await self.db.users.find_one({'_id': ctx.author.id})
             if stored is not None and (sl := stored.get('locale', None)):
                 locale: str = sl
                 self.locale_cache[ctx.author.id] = locale
-        return getattr(self.l, locale)
+        try:
+            return getattr(self.l, locale)
+        except AttributeError:
+            return self.locale.master
 
     def get_nested_key(self, dict_: AnyDict, key_: Union[Iterable[str], str]) -> Any:
         return functools.reduce(operator.getitem, key_ if not isinstance(key_, str) else key_.split(), dict_)

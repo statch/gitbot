@@ -160,5 +160,38 @@
       },
       "location": "Is based in {0}"
     }
+  },
+  "repo": {
+    "info": {
+      "glossary": ["Description", "Info", "Links", "Topics", "Homepage"],
+      "created_at": "Created on {0}",
+      "issues": {
+        "plural": "Has [{0} open issues]({1})",
+        "singular": "Has only [one open issue]({0})",
+        "no_issues": "Doesn't have any open issues"
+      },
+      "forks": {
+        "plural": "Has been forked [{0} times]({1})",
+        "singular": "Has been forked [only once]({0})",
+        "no_forks": "No one has forked this repo, yet"
+      },
+      "languages": {
+        "main": "Written mainly using {0}",
+        "with_num": "Written in {0} languages, mainly {1}"
+      },
+      "watchers": {
+        "plural": "Has [{0} watchers]({1})",
+        "singular": "Has only [one watcher]({0})",
+        "no_watchers": "Has no watchers"
+      },
+      "linking_word": "and",
+      "stargazers": {
+        "plural": "[{0} stargazers]({1})",
+        "singular": "[one stargazer]({0})",
+        "no_stargazers": "no stargazers"
+      },
+      "fork_notice": "This repo is a fork of {0}",
+      "license": "Licensed under the {0}"
+    }
   }
 }

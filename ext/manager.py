@@ -176,17 +176,21 @@ class Manager:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master))
 
     def fmt(self, ctx: commands.Context) -> object:
-        self_ = self
+        self_: Manager = self
 
         class _Formatter:
             def __init__(self, ctx_: commands.Context):
-                self._ctx: commands.Context = ctx_
-                self._prefix: str = ''
+                self.ctx: commands.Context = ctx_
+                self.prefix: str = ''
 
             def __call__(self, resource: Union[tuple, str, list], /, *args) -> str:
-                return self_.get_nested_key(ctx.l, self._prefix + resource if not resource.startswith(self._prefix) else resource).format(*args)
+                resource: str = self.prefix + resource if not resource.startswith(self.prefix) else resource
+                try:
+                    return self_.get_nested_key(self.ctx.l, resource).format(*args)
+                except IndexError:
+                    return self_.get_nested_key(self_.locale.master, resource).format(*args)
 
             def set_prefix(self, prefix: str) -> None:
-                self._prefix: str = prefix.strip() + ' '
+                self.prefix: str = prefix.strip() + ' '
 
         return _Formatter(ctx)

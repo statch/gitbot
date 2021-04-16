@@ -1,6 +1,7 @@
 import discord
 import datetime
 import asyncio
+from babel.dates import format_date
 from discord.ext import commands
 from core.globs import Git, Mgr
 from typing import Optional, Tuple, Union
@@ -17,16 +18,17 @@ class Gist(commands.Cog):
     @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str, ind: Optional[Union[int, str]] = None) -> None:
+        ctx.fmt.set_prefix('gist')
         data: dict = await Git.get_user_gists(user)
         if not data:
-            await ctx.send(f'{Mgr.e.err}  This user **doesn\'t exist!**')
+            await ctx.err(ctx.l.generic.nonexistent.user.base)
             return
         if (gists := len(data['gists']['nodes'])) < 2:
             if gists == 0:
-                await ctx.send(f'{Mgr.e.err}  This user doesn\'t have any **public gists!**')
+                await ctx.err(ctx.l.generic.nonexistent.gist)
             else:
-                await ctx.send(embed=await self.build_gist_embed(data, 1,
-                                                                 footer='You didn\'t see the gist list because this user has only one gist.'))
+                await ctx.send(embed=await self.build_gist_embed(ctx, data, 1,
+                                                                 footer=ctx.l.gist.no_list))
             return
 
         def gist_url(gist: dict) -> str:
@@ -40,28 +42,24 @@ class Gist(commands.Cog):
 
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=f'{user}\'s gists',
+            title=ctx.fmt('title', user),
             description='\n'.join(gist_strings),
             url=data['url']
         )
 
-        embed.set_footer(text=f'Ten latest gists from {user}.\nTo inspect a specific gist, simply send its number in this channel.')
+        embed.set_footer(text=ctx.fmt('footer', user))
 
         base_msg: discord.Message = await ctx.send(embed=embed)
 
         def validate_index(index: Union[int, str]) -> Tuple[bool, Optional[str]]:
-            if not str(index).isnumeric():
-                return False, f'{Mgr.e.github}  Please pick a number **between 1 and {len(gist_strings)}**'
-            elif int(index) > 10:
-                return False, f'{Mgr.e.github} Please pass in a number **smaller than 10!**'
-            elif int(index) > len(gist_strings):
-                return False, f'{Mgr.e.github} This user doesn\'t have that many gists!'
+            if not str(index).isnumeric() or int(index) > len(gist_strings):
+                return False, ctx.fmt('index_error', len(gist_strings))
             return True, None
 
         if ind:
             if (i := validate_index(ind))[0]:
                 await base_msg.delete()
-                await ctx.send(embed=await self.build_gist_embed(data, int(ind), 'The content is a preview of the first file of the gist'))
+                await ctx.send(embed=await self.build_gist_embed(ctx, data, int(ind), ctx.l.gist.content_notice))
                 return
             await ctx.send(i[1], delete_after=7)
 
@@ -74,20 +72,21 @@ class Gist(commands.Cog):
                                                                timeout=30)
                 success, err_msg = validate_index(msg.content)
                 if not success:
-                    await ctx.send(err_msg, delete_after=7)
+                    await ctx.err(err_msg, delete_after=7)
                     continue
                 break
             except asyncio.TimeoutError:
                 timeout_embed = discord.Embed(
                     color=0xffd500,
-                    title=f'Timed Out'
+                    title=ctx.l.gist.timeout.title
                 )
-                timeout_embed.set_footer(text='To pick an option, simply send a number next time!')
+                timeout_embed.set_footer(text=ctx.l.gist.timeout.tip)
                 await base_msg.edit(embed=timeout_embed)
                 return
-        await ctx.send(embed=await self.build_gist_embed(data, int(msg.clean_content()), 'The content is a preview of the first file of the gist'))
+        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.clean_content()), ctx.l.gist.content_notice))
 
-    async def build_gist_embed(self, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
+    async def build_gist_embed(self, ctx: commands.Context, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
+        ctx.fmt.set_prefix('gist')
         gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(
             color=await self.get_color_from_files(gist['files']),
@@ -96,21 +95,32 @@ class Gist(commands.Cog):
         )
         first_file: dict = gist['files'][0]
 
-        created_at: str = f"Created by [{data['login']}]({data['url']}) on {datetime.datetime.strptime(gist['createdAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
-        updated_at: str = f"Last updated at {datetime.datetime.strptime(gist['updatedAt'], '%Y-%m-%dT%H:%M:%SZ').strftime('%e, %b %Y')}\n"
-        stargazers = f"Has [{gist['stargazerCount']} stargazers]({gist['url']}/stargazers)" if gist[
-                                                                                                   'stargazerCount'] != 1 else f"Has [one stargazer]({gist['url']}/stargazers)"
+        created_at: str = ctx.fmt('created_at',
+                                  data['login'],
+                                  data['url'],
+                                  format_date(datetime.datetime.strptime(gist['createdAt'],
+                                                                         '%Y-%m-%dT%H:%M:%SZ').date(),
+                                                                         'medium',
+                                                                         locale=ctx.l.meta.name)) + '\n'
+
+        updated_at: str = ctx.fmt('updated_at', format_date(datetime.datetime.strptime(gist['updatedAt'],
+                                                                                       '%Y-%m-%dT%H:%M:%SZ').date(),
+                                                                                       'medium',
+                                                                                       locale=ctx.l.meta.name)) + '\n'
+
+        stargazers = ctx.fmt('stargazers plural', gist['stargazerCount'], f"{gist['url']}/stargazers") if gist[
+                                                                                                   'stargazerCount'] != 1 else ctx.fmt('stargazers singular', f"{gist['url']}/stargazers")
         if gist['stargazerCount'] == 0:
-            stargazers = "Has no stargazers"
+            stargazers = ctx.l.gist.stargazers.no_stargazers
         comment_count = gist['comments']['totalCount']
-        comments = f"and [{comment_count} comments]({gist['url']})" if comment_count != 1 else f"and [one comment]({gist['url']})"
+        comments = f' {ctx.l.gist.linking_word} ' + ctx.fmt('comments plural', comment_count, gist['url']) if comment_count != 1 else ctx.fmt('comments singular', gist['url'])
         if gist['stargazerCount'] == 0:
-            comments = "and no comments"
+            comments = f' {ctx.l.gist.linking_word} {ctx.l.gist.comments.no_comments}'
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
-        embed.add_field(name=':notepad_spiral: Contents:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
-        embed.add_field(name=":mag_right: Info:", value=info, inline=False)
+        embed.add_field(name=f':notepad_spiral: {ctx.l.gist.glossary[0]}:', value=f"```{self.extension(first_file['extension'])}\n{first_file['text'][:449]}```")
+        embed.add_field(name=f":mag_right: {ctx.l.gist.glossary[1]}:", value=info, inline=False)
 
         if footer:
             embed.set_footer(text=footer)

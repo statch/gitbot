@@ -42,6 +42,7 @@
         "user": "This user doesn't have any **public repos!**",
         "org": "This organization doesn't have any **public repos!**"
       },
+      "gist": "This user doesn't have any **public gists!**",
       "path": "This path **doesn't exist!**",
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
@@ -225,6 +226,31 @@
     "pulls": {
       "title": "Latest {0} pull requests in {1}",
       "footer_tip": "You can quickly inspect a specific PR from the list by typing its number!\nYou can type cancel to quit."
+    }
+  },
+  "gist": {
+    "glossary": ["Contents", "Info"],
+    "title": "{0}'s gists",
+    "created_at": "Created by [{0}]({1}) on {2}",
+    "updated_at": "Last updated on {0}",
+    "stargazers": {
+      "plural": "Has [{0} stargazers]({1})",
+      "singular": "Has [one stargazer]{0}",
+      "no_stargazers": "Has no stargazers"
+    },
+    "linking_word": "and",
+    "comments": {
+      "plural": "[{0} comments]({1})",
+      "singular": "[one comment]({0})",
+      "no_comments": "no comments"
+    },
+    "no_list": "You didn't see the gist list because this user has only one gist.",
+    "footer": "Ten latest gists from {0}.\nTo inspect a specific gist, simply send its number in this channel.",
+    "index_error": "Please pick a number **between 1 and {0}**",
+    "content_notice": "The content is a preview of the first file of the gist",
+    "timeout": {
+      "title": "Timed Out",
+      "tip": "To pick an option, simply send a number next time!"
     }
   }
 }

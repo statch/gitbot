@@ -102,7 +102,7 @@ class BotInfo(commands.Cog):
             description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
                         "https://botsfordiscord.com/bot/761269120691470357) "
         )
-        embed.set_author(name=ctx.fmt('vote', self.bot.user.name), icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='stats', aliases=['--stats', '-stats'])

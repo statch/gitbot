@@ -46,7 +46,8 @@
       "path": "This path **doesn't exist!**",
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
-      "issue_number": "An issue with this number **doesn't exist!**"
+      "issue_number": "An issue with this number **doesn't exist!**",
+      "qa": "**You don't have any quick access data configured!** Use `git config` to do it"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -91,7 +92,7 @@
     "tagline": "Invite me to your server!"
   },
   "ping": "**My ping is:**\n**{0}** milliseconds",
-  "vote": "Vote for {0}!",
+  "vote": "Vote for GitBot!",
   "stats": {
     "title": "Bot Stats",
     "body": "General stats regarding the Bot's functioning.",
@@ -251,6 +252,33 @@
     "timeout": {
       "title": "Timed Out",
       "tip": "To pick an option, simply send a number next time!"
+    }
+  },
+  "config": {
+    "default": {
+      "brief_1": "**In this section you can configure various aspects of your experience**",
+      "title": "**Quick Access**",
+      "brief_2": "These commands allow you to save a user, repo or org to get with a short command.",
+      "commands": {
+        "user": "Access a saved user with `git user`",
+        "org": "Access a saved organization with `git org`",
+        "repo": "Access a saved repo with `git repo`",
+        "feed": "Subscribe to new releases of a repository"
+      },
+      "deletion": "**You can delete stored data by typing** `git config --delete`",
+      "footer": "To see what you have saved, use git config --show"
+    },
+    "show": {
+      "title": "Your GitBot Config",
+      "heading": "**Quick Access:**",
+      "list": {
+        "user": "User: {0}",
+        "org": "Organization: {0}",
+        "repo": "Repo: {0}",
+        "feed": "Release Feed:"
+      },
+      "item_not_set": "Not set",
+      "item_not_configured": "Not configured"
     }
   }
 }

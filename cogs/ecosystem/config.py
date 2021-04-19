@@ -13,45 +13,45 @@ class Config(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_command_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            lines: list = ["**In this section you can configure various aspects of your experience**",
-                           "\n**Quick access**",
-                           "These commands allow you to save a user, repo or org to get with a short command.",
-                           "`git config --user {username}` " + Mgr.e.arrow + " Access a saved user with `git user`",
-                           "`git config --org {org}` " + Mgr.e.arrow + " Access a saved organization with `git org`",
-                           "`git config --repo {repo}` " + Mgr.e.arrow + " Access a saved repo with `git repo`",
-                           "`git config --feed {repo}` " + Mgr.e.arrow + " Subscribe to new releases of a repository",
-                           "\n**You can delete stored data by typing** `git config --delete`"]
+            lines: list = [ctx.l.config.default.brief_1,
+                           "\n" + ctx.l.config.default.title,
+                           ctx.l.config.default.brief_2,
+                           "`git config --user {username}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.user,
+                           "`git config --org {org}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.org,
+                           "`git config --repo {repo}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.repo,
+                           "`git config --feed {repo}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
+                           "\n" + ctx.l.config.default.deletion]
             embed = discord.Embed(
                 color=0xefefef,
                 title=f"{Mgr.e.github}  GitBot Config",
                 description='\n'.join(lines)
             )
-            embed.set_footer(text='To see what you have saved, use git config --show')
+            embed.set_footer(text=ctx.l.config.default.footer)
             await ctx.send(embed=embed)
 
     @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show(self, ctx: commands.Context) -> None:
+        ctx.fmt.set_prefix('config show')
         query: dict = await Mgr.db.users.find_one({"_id": int(ctx.author.id)})
         if not isinstance(ctx.channel, discord.DMChannel):
             release: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         else:
             release = None
         if query is None and release is None or release and len(release) == 1 and query is None:
-            await ctx.send(
-                f'{Mgr.e.err}  **You don\'t have any quick access data configured!** Use `git config` to do it')
+            await ctx.err(ctx.l.generic.nonexistent.qa)
             return
-        user: str = f"User: `{query['user']}`" if 'user' in query else "User: `Not set`"
-        org: str = f"Organization: `{query['org']}`" if 'org' in query else "Organization: `Not set`"
-        repo: str = f"Repo: `{query['repo']}`" if 'repo' in query else "Repo: `Not set`"
-        feed: str = 'Release Feed:\n' + '\n'.join(
+        user: str = ctx.fmt('list user', f'`{query["user"]}`' if 'user' in query else f'`{ctx.l.config.show.item_not_set}`')
+        org: str = ctx.fmt('list org', f'`{query["org"]}`' if 'org' in query else f'`{ctx.l.config.show.item_not_set}`')
+        repo: str = ctx.fmt('list repo', f'`{query["repo"]}`' if 'repo' in query else f'`{ctx.l.config.show.item_not_set}`')
+        feed: str = f'{ctx.l.config.show.list.feed}\n' + '\n'.join(
             [f'{Mgr.e.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
-            'feed'] else 'Release Feed: `Not configured`'
+            'feed'] else f'{ctx.l.config.show.list.feed} `{ctx.l.config.show.item_not_configured}`'
         data: list = [user, org, repo, feed]
         embed = discord.Embed(
             color=0xefefef,
-            title=f"{Mgr.e.github}  Your {self.bot.user.name} Config",
-            description="**Quick access:**\n" + '\n'.join(data)
+            title=f"{Mgr.e.github}  {ctx.l.config.show.title}",
+            description=f"{ctx.l.config.show.heading}\n" + '\n'.join(data)
         )
         await ctx.send(embed=embed)
 

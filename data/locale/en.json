@@ -308,6 +308,63 @@
           "footer": "Simply send a channel name/mention next time!"
         }
       }
+    },
+    "qa_set": {
+      "user": "Quick access user set to **{0}**",
+      "org": "Quick access organization set to **{0}**",
+      "repo": "Quick access repo set to **{0}**"
+    },
+    "delete": {
+      "default": {
+        "title": "Delete Quick Access Data",
+        "description": "**You can delete stored quick access data by running the following commands:**",
+        "commands": {
+          "user": "delete the quick access user",
+          "org": "delete the quick access organization",
+          "repo": "delete the quick access repo",
+          "feed": "view options regarding deleting release feed data",
+          "all": "delete all of your quick access data"
+        }
+      },
+      "feed": {
+        "no_channel": "You don't have a release feed channel configured!",
+        "nothing_deleted": "You don't have a release feed configured, so **nothing was deleted.**",
+        "default": {
+          "title": "Delete Release Feed data",
+          "description": "**You can delete stored release feed data by running the following commands:**",
+          "commands": {
+            "repo": "unsubscribe from a specific repo",
+            "all": "unsubscribe from all repos",
+            "total": "unsubscribe from all releases and delete the feed webhook"
+          }
+        },
+        "repo": {
+          "success": "`{0}` releases will **no longer be logged.**",
+          "not_logged": "That repo's releases are **not currently logged!**"
+        },
+        "all": {
+          "success": "All release feeds were **closed successfully.**"
+        },
+        "total": {
+          "success": "The release feed channel has been **closed successfully.**"
+        }
+      }
+    },
+    "user": {
+      "success": "Saved **user deleted.**",
+      "not_saved": "You don't have a user saved!"
+    },
+    "org": {
+      "success": "Saved **organization deleted.**",
+      "not_saved": "You don't have an organization saved!"
+    },
+    "repo": {
+      "success": "Saved **repo deleted.**",
+      "not_saved": "You don't have a repo saved!"
+    },
+    "all": {
+      "success": "It appears that **you don't have anything stored!**",
+      "not_saved": "All of your stored data was **successfully deleted.**"
     }
   }
 }

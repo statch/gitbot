@@ -154,29 +154,29 @@ class Config(commands.Cog):
     @config_command_group.command(name='--user', aliases=['-u', '-user', 'user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_user(self, ctx: commands.Context, user: str) -> None:
-        u = await Mgr.db.users.setitem(ctx, 'user', user)
+        u: bool = await Mgr.db.users.setitem(ctx, 'user', user)
         if u:
-            await ctx.send(f"{Mgr.e.github}  Quick access user set to **{user}**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set user', user))}")
         else:
-            await ctx.send(f'{Mgr.e.err}  This user **doesn\'t exist!**')
+            await ctx.err(ctx.l.generic.nonexistent.user.base)
 
     @config_command_group.command(name='--org', aliases=['--organization', '-O', '-org', 'org'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_org(self, ctx: commands.Context, org: str) -> None:
-        o = await Mgr.db.users.setitem(ctx, 'org', org)
+        o: bool = await Mgr.db.users.setitem(ctx, 'org', org)
         if o:
-            await ctx.send(f"{Mgr.e.github}  Quick access organization set to **{org}**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set org', org))}")
         else:
-            await ctx.send(f'{Mgr.e.err}  This organization **doesn\'t exist!**')
+            await ctx.err(ctx.l.generic.nonexistent.org.base)
 
     @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo', 'repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_repo(self, ctx, repo) -> None:
-        r = await Mgr.db.users.setitem(ctx, 'repo', repo)
+        r: bool = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
-            await ctx.send(f"{Mgr.e.github}  Quick access repo set to **{repo}**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set repo', repo))}")
         else:
-            await ctx.send(f'{Mgr.e.err}  This repo **doesn\'t exist!**')
+            await ctx.err(ctx.l.generic.nonexistent.repo.base)
 
     @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete', '--delete'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -184,13 +184,13 @@ class Config(commands.Cog):
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
                 color=0xefefef,
-                title=f"{Mgr.e.github}  Delete Quick Access Data",
-                description=f"**You can delete stored quick access data by running the following commands:**\n"
-                            f"`git config --delete user` {Mgr.e.arrow} delete the quick access user\n"
-                            f"`git config --delete org` {Mgr.e.arrow} delete the quick access organization\n"
-                            f"`git config --delete repo` {Mgr.e.arrow} delete the quick access repo\n"
-                            f"`git config --delete all` {Mgr.e.arrow} delete all of your quick access data\n"
-                            f"`git config --delete feed` {Mgr.e.arrow} view options regarding deleting release feed data"
+                title=f"{Mgr.e.github}  {ctx.l.config.delete.default.title}",
+                description=f"{ctx.l.config.delete.default.description}\n"
+                            f"`git config --delete user` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.user}\n"
+                            f"`git config --delete org` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.org}\n"
+                            f"`git config --delete repo` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.repo}\n"
+                            f"`git config --delete feed` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.feed}\n"
+                            f"`git config --delete all` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.all}"
             )
             await ctx.send(embed=embed)
 
@@ -199,17 +199,16 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(15, 30, commands.BucketType.guild)
     async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
+        ctx.fmt.set_prefix('config delete feed default')
         if ctx.invoked_subcommand is None:
             if not repo:
                 embed: discord.Embed = discord.Embed(
                     color=0xefefef,
-                    title='Delete Release Feed data',
-                    description=f'**You can delete stored release feed data by running the following commands:**\n'
-                                f'`git config -delete feed {{repo}}` {Mgr.e.arrow} unsubscribe from a specific repo\n'
-                                f'`git config -delete feed all` {Mgr.e.arrow} unsubscribe from all repos\n'
-                                f'`git config -delete feed total` {Mgr.e.arrow} unsubscribe from all releases and delete '
-                                f'the '
-                                f'feed webhook'
+                    title=ctx.l.config.delete.feed.default.title,
+                    description=f'{ctx.l.config.delete.feed.default.description}\n'
+                                f'`git config -delete feed {{repo}}` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.repo}\n'
+                                f'`git config -delete feed all` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.all}\n'
+                                f'`git config -delete feed total` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.total}'
                 )
                 await ctx.send(embed=embed)
             else:
@@ -219,11 +218,11 @@ class Config(commands.Cog):
                         if r['repo'].lower() == repo.lower():
                             guild['feed'].remove(r)
                             await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$set': {'feed': guild['feed']}})
-                            await ctx.send(f'{Mgr.e.github}  `{repo}`\'s releases will **no longer be logged.**')
+                            await ctx.send(f'{Mgr.e.github}  {ctx.l.config.delete.feed.repo.success.format(repo)}')
                             return
-                    await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **not currently logged!**')
+                    await ctx.err(ctx.l.config.delete.feed.repo.not_logged)
                 else:
-                    await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed channel configured!')
+                    await ctx.err(ctx.l.config.delete.feed.no_channel)
 
     @delete_feed_group.command(name='all', aliases=['-all', '--all'])
     @commands.guild_only()
@@ -232,11 +231,11 @@ class Config(commands.Cog):
     async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild is None:
-            await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
+            await ctx.err(ctx.l.config.delete.feed.nothing_deleted)
         else:
             if guild['feed']:
                 await Mgr.db.guilds.update_one(guild, {'$set': {'feed': []}})
-            await ctx.send(f'{Mgr.e.github}  All release feeds were **closed successfully.**')
+            await ctx.send(f'{Mgr.e.github}  {ctx.l.config.delete.feed.all.success}')
 
     @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
     @commands.guild_only()
@@ -246,7 +245,7 @@ class Config(commands.Cog):
     async def delete_feed_with_channel_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild is None:
-            await ctx.send(f'{Mgr.e.err}  You don\'t have a release feed configured, so **nothing was deleted.**')
+            await ctx.err(ctx.l.config.delete.feed.nothing_deleted)
         else:
             await Mgr.db.guilds.delete_one(guild)
             try:
@@ -256,43 +255,43 @@ class Config(commands.Cog):
             except (discord.NotFound, discord.HTTPException):
                 pass
             finally:
-                await ctx.send(f'{Mgr.e.err}  The release feed channel has been **closed successfully.**')
+                await ctx.send(f'{Mgr.e.github}  {ctx.l.config.delete.feed.total.success}')
 
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'user')
         if deleted:
-            await ctx.send(f"{Mgr.e.github}  Saved **user deleted.**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.user.success}")
         else:
-            await ctx.send(f"{Mgr.e.err}  You don't have a user saved!")
+            await ctx.err(ctx.l.config.delete.user.not_saved)
 
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'org')
         if deleted:
-            await ctx.send(f"{Mgr.e.github}  Saved **organization deleted.**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.org.success}")
         else:
-            await ctx.send(f"{Mgr.e.err}  You don't have an organization saved!")
+            await ctx.err(ctx.l.config.delete.org.not_saved)
 
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'repo')
         if deleted:
-            await ctx.send(f"{Mgr.e.github}  Saved **repo deleted.**")
+            await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.repo.success}")
         else:
-            await ctx.send(f"{Mgr.e.err}  You don't have a repo saved!")
+            await ctx.err(ctx.l.config.delete.repo.not_saved)
 
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def delete_entire_record(self, ctx: commands.Context) -> None:
         query: dict = await Mgr.db.users.find_one_and_delete({"_id": int(ctx.author.id)})
         if not query:
-            await ctx.send(f"{Mgr.e.err}  It appears that **you don't have anything stored!**")
+            await ctx.err(ctx.l.config.delete.all.not_saved)
             return
-        await ctx.send(f"{Mgr.e.github}  All of your stored data was **successfully deleted.**")
+        await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.all.success}")
 
 
 def setup(bot: commands.Bot) -> None:

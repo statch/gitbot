@@ -61,17 +61,15 @@ class Config(commands.Cog):
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(10, 30, commands.BucketType.guild)
     async def config_release_feed(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+        ctx.fmt.set_prefix('config feed')
         g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if not g:
             embed: discord.Embed = discord.Embed(
                 color=0xff009b,
-                title='Release Feed channel configuration',
-                description=f'It appears that you don\'t have a Release Feed channel configured yet.\n'
-                            f'**Let\'s configure one now, shall we?**\n\n'
-                            f'Simply specify the channel you want to receive the updates in below by typing its name '
-                            f'or mention, or type `create` for the bot to make the channel for you. '
+                title=ctx.l.config.feed.embeds.start.title,
+                description=ctx.l.config.feed.embeds.start.description
             )
-            embed.set_footer(text='You can type cancel to quit at any point.')
+            embed.set_footer(text=ctx.l.config.feed.embeds.start.footer)
             base_msg: discord.Message = await ctx.send(embed=embed)
             while True:
                 try:
@@ -81,7 +79,7 @@ class Config(commands.Cog):
                                                                    timeout=30)
                     if (m := msg.content.lower()) == 'cancel':
                         await base_msg.delete()
-                        await ctx.send(f'{Mgr.e.github}  Release Feed channel setup **cancelled.**')
+                        await ctx.err(ctx.l.config.feed.cancelled)
                         return
                     elif m == 'create':
                         channel: Optional[discord.TextChannel] = await ctx.guild.create_text_channel('release-feeds',
@@ -91,8 +89,7 @@ class Config(commands.Cog):
                             channel: Optional[discord.TextChannel] = await commands.TextChannelConverter().convert(ctx,
                                                                                                                    msg.content)
                         except commands.BadArgument:
-                            await ctx.send(
-                                f'{Mgr.e.err}  **That is not a valid channel!** Try again, or type `cancel` to quit.')
+                            await ctx.err(ctx.l.config.feed.invalid_channel)
                             continue
                     hook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name,
                                                                          reason=f'Release Feed channel setup by {ctx.author}')
@@ -107,14 +104,11 @@ class Config(commands.Cog):
                             {'_id': ctx.guild.id, 'hook': hook.url[33:], 'feed': feed if feed else []})
                         success_embed: discord.Embed = discord.Embed(
                             color=0x33ba7c,
-                            title=f'Release Feed channel configured!',
-                            description=f'You can now add repos whose new updates should be logged in'
-                                        f' {channel.mention} by using `git config feed {{repo}}`.'
-                                        f' Each time there is a new release,'
-                                        f' an embed will show up with some info and changes.'
+                            title=ctx.l.config.feed.embeds.success.title,
+                            description=ctx.l.config.feed.embeds.success.description
                         )
                         if r:
-                            success_embed.set_footer(text=f'{repo} has already been added :)')
+                            success_embed.set_footer(text=ctx.fmt('embeds success footer', repo))
                         try:
                             await msg.delete()
                         except discord.errors.Forbidden:
@@ -122,39 +116,38 @@ class Config(commands.Cog):
                         await base_msg.edit(embed=success_embed)
                         return
                     await base_msg.delete()
-                    await ctx.send(f'{Mgr.e.err}  **Something went wrong,** please report this in the support server.')
+                    await ctx.err(ctx.l.generic.unspecified)
                     return
                 except asyncio.TimeoutError:
                     timeout_embed = discord.Embed(
                         color=0xffd500,
-                        title=f'Timed Out'
+                        title=ctx.l.config.feed.embeds.timeout.title
                     )
-                    timeout_embed.set_footer(text='Simply send a channel name/mention next time!')
+                    timeout_embed.set_footer(text=ctx.l.config.feed.embeds.timeout.footer)
                     await base_msg.edit(embed=timeout_embed)
                     return
         if g and not repo:
-            await ctx.send(f'{Mgr.e.err} Please pass in a repository which you wish to follow!')
+            await ctx.err(ctx.l.config.feed.no_arg)
             return
         r: dict = await Git.get_latest_release(repo)
         if not r:
-            await ctx.send(f'{Mgr.e.err}  This repo **doesn\'t exist!**')
+            await ctx.err(ctx.l.generic.nonexistent.repo.base)
         if g:
             for r_ in g['feed']:
                 if r_['repo'].lower() == repo.lower():
-                    await ctx.send(f'{Mgr.e.err}  That repo\'s releases are **already being logged!**')
+                    await ctx.err(ctx.l.config.feed.already_logged)
                     return
             if len(g['feed']) < 3:
                 await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
                                                {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
-                await ctx.send(f'{Mgr.e.github} **{repo}\'s** releases will now be logged.')
+                await ctx.err(ctx.fmt('success', repo))
             else:
                 embed_limit_reached: discord.Embed = discord.Embed(
                     color=0xda4353,
-                    title='Release Feed repo limit reached!',
-                    description=f'This guild has reached the **limit of 3 release feed repos.**'
-                                f' You can remove a previously added repo by typing `git config -delete feed`'
+                    title=ctx.l.config.feed.embeds.limit_reached.title,
+                    description=ctx.l.config.feed.embeds.limit_reached.description
                 )
-                embed_limit_reached.set_footer(text=f'You need the Manage Channels to do that.',
+                embed_limit_reached.set_footer(text=ctx.l.config.feed.embeds.limit_reached.footer,
                                                icon_url=self.bot.user.avatar_url)
                 await ctx.send(embed=embed_limit_reached)
 

@@ -55,7 +55,8 @@
     "pr": {
       "invalid_state": "`{0}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)"
     },
-    "invalid_index": "{0} is not a valid number **from the list!**"
+    "invalid_index": "{0} is not a valid number **from the list!**",
+    "unspecified": "**Something went wrong,** please report this in the support server."
   },
   "glossary": {
     "github_repo_term": "repository",
@@ -279,6 +280,34 @@
       },
       "item_not_set": "Not set",
       "item_not_configured": "Not configured"
+    },
+    "feed": {
+      "cancelled": "Release Feed channel setup **cancelled.**",
+      "no_arg": "Please pass in a repository which you wish to follow!",
+      "invalid_channel": "**That is not a valid channel!** Try again, or type `cancel` to quit.",
+      "already_logged": "This repo's releases are **already being logged!**",
+      "success": "New **{0}** releases will now be logged.",
+      "embeds": {
+        "start": {
+          "title": "Release Feed channel configuration",
+          "description": "It appears that you don't have a Release Feed channel configured yet.\n**Let's configure one now, shall we?**\n\nSimply specify the channel you want to receive the updates in below by typing its name or mention, or type `create` for the bot to make the channel for you.",
+          "footer": "You can type cancel to quit at any point."
+        },
+        "success": {
+          "title": "Release Feed channel configured!",
+          "description": "You can now add repos whose new updates should be logged in {0} by using `git config feed {{repo}}`. Each time there is a new release, an embed will show up with some info and changes.",
+          "footer": "{0} has already been added :)"
+        },
+        "limit_reached": {
+          "title": "Release Feed repo limit reached!",
+          "description": "This guild has reached the **limit of 3 release feed repos.** You can remove a previously added repo by typing `git config -delete feed`",
+          "footer": "You need the Manage Channels permission to do that."
+        },
+        "timeout": {
+          "title": "Timed Out",
+          "footer": "Simply send a channel name/mention next time!"
+        }
+      }
     }
   }
 }

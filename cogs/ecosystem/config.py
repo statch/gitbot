@@ -105,7 +105,7 @@ class Config(commands.Cog):
                         success_embed: discord.Embed = discord.Embed(
                             color=0x33ba7c,
                             title=ctx.l.config.feed.embeds.success.title,
-                            description=ctx.l.config.feed.embeds.success.description
+                            description=ctx.fmt('embeds success description', channel.mention)
                         )
                         if r:
                             success_embed.set_footer(text=ctx.fmt('embeds success footer', repo))

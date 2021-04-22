@@ -444,5 +444,39 @@
         "info": "automatically inspect a link and get info on it"
       }
     }
+  },
+  "aliases": {
+    "default": {
+      "title": "Aliases",
+      "description": "In this section you'll find shorthands of my commands\n**You can access specific parts by typing:**",
+      "sections": {
+        "github": "for GitHub command aliases",
+        "info": "for other aliases",
+        "config": "for configuration command aliases",
+        "utility": "for utility command aliases"
+      },
+      "footer": "You can find usage of these commands by typing git --help"
+    },
+    "github": {
+      "title": "GitHub Aliases",
+      "argument_omitted": "Some commands default to their `info` variant if it's omitted:",
+      "generic_aliases": "There are generic aliases as well:",
+      "footer": "You can find usage of these commands by typing git --help github"
+    },
+    "info": {
+      "title": "Info Aliases",
+      "description": "Shorthands for commands not tied to GitHub itself",
+      "footer": "You can find usage of these commands by typing git --help info"
+    },
+    "config": {
+      "title": "Config Aliases",
+      "description": "Shorthands for commands used to store your preferred orgs, repos, users and feeds",
+      "footer": "You can find usage of these commands by typing git --help config"
+    },
+    "utility": {
+      "title": "Utility Aliases",
+      "description": "**Shorthands for commands used to fetch data related to Git and GitHub**",
+      "footer": "You can find usage of these commands by typing git --help utility"
+    }
   }
 }

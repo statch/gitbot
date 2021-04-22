@@ -100,63 +100,62 @@ class Help(commands.Cog):
 
     @commands.group(name='--aliases', aliases=['aliases'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def alias_command(self, ctx: commands.Context) -> None:
+    async def alias_command_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            lines: list = ["In this section you'll find shorthands of my commands",
-                           "\n**You can access specific parts by typing:**",
-                           "`git aliases github` - for GitHub command aliases",
-                           "`git aliases info` - for other aliases",
-                           "`git aliases config` - for configuration command aliases",
-                           "`git aliases utility` - for utility command aliases"]
+            lines: list = [ctx.l.aliases.default.description,
+                           f"`git aliases github` - {ctx.l.aliases.default.sections.github}",
+                           f"`git aliases info` - {ctx.l.aliases.default.sections.info}",
+                           f"`git aliases config` - {ctx.l.aliases.default.sections.config}",
+                           f"`git aliases utility` - {ctx.l.aliases.default.sections.utility}"]
             embed = discord.Embed(
-                title=f"{Mgr.e.err}  Aliases",
+                title=f"{Mgr.e.err}  {ctx.l.aliases.default.title}",
                 color=0xefefef,
                 description="\n".join(lines)
             )
-            embed.set_footer(text=f"You can find usage of these commands by typing git --help")
+            embed.set_footer(text=ctx.l.aliases.default.footer)
             await ctx.send(embed=embed)
 
-    @alias_command.command(name="github", aliases=['-github', '--github'])
+    @alias_command_group.command(name="github", aliases=['-github', '--github'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def github_aliases(self, ctx: commands.Context) -> None:
-        lines: list = ["Some commands default to their `info` variant if it's omitted:",
+        lines: list = [ctx.l.aliases.github.argument_omitted,
                        f"`git user -info` {Mgr.e.arrow} `git user`",
                        f"`git repo -info` {Mgr.e.arrow} `git repo`",
                        f"`git org -info` {Mgr.e.arrow} `git org`",
-                       f"There are generic aliases as well:",
+                       ctx.l.aliases.github.generic_aliases,
                        f"`git user -repos` {Mgr.e.arrow} `git user -r`",
                        f"`git org -repos` {Mgr.e.arrow} `git org -r`",
                        f"`git issue` {Mgr.e.arrow} `git i`"]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  GitHub Aliases",
+            title=f"{Mgr.e.err}  {ctx.l.aliases.github.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help github")
+        embed.set_footer(text=ctx.l.aliases.github.footer)
         await ctx.send(embed=embed)
 
-    @alias_command.command(name="utility", aliases=['-utility', '--utility'])
+    @alias_command_group.command(name="utility", aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utility_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
-            "**Shorthands for commands used to fetch data related to Git and GitHub**",
+            ctx.l.aliases.utility.description,
             f"`git license` {Mgr.e.arrow} `git info -L`",
             f"`git repo --download` {Mgr.e.arrow} `git repo -dl`",
             f"`git lines` {Mgr.e.arrow} `git -l`"
         ]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Utility Aliases",
+            title=f"{Mgr.e.err}  {ctx.l.aliases.utility.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git --help utility")
+        embed.set_footer(text=ctx.l.aliases.utility.footer)
         await ctx.send(embed=embed)
 
-    @alias_command.command(name="config", aliases=['-config', '--config'])
+    @alias_command_group.command(name="config", aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
-            "Shorthands for commands used to store your preferred orgs, repos, users and feeds",
+            ctx.l.aliases.config.description,
             f"`git config` {Mgr.e.arrow} `git cfg`",
             f"`git config -show` {Mgr.e.arrow} `git cfg -S`",
             f"`git config --user` {Mgr.e.arrow} `git cfg -U`",
@@ -165,27 +164,27 @@ class Help(commands.Cog):
             f"`git config --feed` {Mgr.e.arrow} `git cfg -F`"
         ]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Config Aliases",
+            title=f"{Mgr.e.err}  {ctx.l.aliases.config.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git config")
+        embed.set_footer(text=ctx.l.aliases.config.footer)
         await ctx.send(embed=embed)
 
-    @alias_command.command(name="info", aliases=["-info", "--info"])
+    @alias_command_group.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_command_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
-            "Shorthands for commands not tied to GitHub itself",
+            ctx.l.aliases.info.description,
             f"`git uptime` {Mgr.e.arrow} `git up`",
             f"`git ping` {Mgr.e.arrow} `git p`"
         ]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Info Aliases",
+            title=f"{Mgr.e.err}  {ctx.l.aliases.info.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find usage of these commands by typing git help info")
+        embed.set_footer(text=ctx.l.aliases.info.footer)
         await ctx.send(embed=embed)
 
 

@@ -1,4 +1,4 @@
-![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/834748874551197706/gitbot-dark-wbg.png?width=1440&height=360)
+![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/834749442333736970/gitbot-light-nobg.png?width=1440&height=360)
 
 # GitBot - The no. 1 GitHub Discord Bot 
 

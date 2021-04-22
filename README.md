@@ -12,9 +12,12 @@ _________________
 - Exploring a user's gists
 - And much, much more!
 
+### To get started yourself, use the `git help` command!
 
-Make sure to check out our [official website](https://statch.github.io/gitbot "GitBot Official Website")
+_________________
 
-If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)
+
+Make sure to check out our [official website](https://statch.github.io/gitbot "GitBot Official Website")  
+**If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)**
 
 **© 2020-2021 statch, Not affiliated with** [**GitHub Inc.**](https://github.com/)

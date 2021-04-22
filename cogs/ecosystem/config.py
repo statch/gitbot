@@ -16,10 +16,10 @@ class Config(commands.Cog):
             lines: list = [ctx.l.config.default.brief_1,
                            "\n" + ctx.l.config.default.title,
                            ctx.l.config.default.brief_2,
-                           "`git config --user {username}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.user,
-                           "`git config --org {org}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.org,
-                           "`git config --repo {repo}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.repo,
-                           "`git config --feed {repo}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
+                           f"`git config --user {{{ctx.l.argument_placeholders.user}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.user,
+                           f"`git config --org {{{ctx.l.argument_placeholders.org}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.org,
+                           f"`git config --repo {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.repo,
+                           f"`git config --feed {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
                            "\n" + ctx.l.config.default.deletion]
             embed = discord.Embed(
                 color=0xefefef,
@@ -206,7 +206,7 @@ class Config(commands.Cog):
                     color=0xefefef,
                     title=ctx.l.config.delete.feed.default.title,
                     description=f'{ctx.l.config.delete.feed.default.description}\n'
-                                f'`git config -delete feed {{repo}}` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.repo}\n'
+                                f'`git config -delete feed {{{ctx.l.argument_placeholders.repo}}}` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.repo}\n'
                                 f'`git config -delete feed all` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.all}\n'
                                 f'`git config -delete feed total` {Mgr.e.arrow} {ctx.l.config.delete.feed.default.commands.total}'
                 )

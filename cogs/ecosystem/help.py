@@ -29,18 +29,18 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def github_help(self, ctx: commands.Context) -> None:
         lines: list = [ctx.l.help.github.description,
-                       f"`git user -info {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.user.info}",
-                       f"`git user -repos {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.user.repos}",
-                       f"`git gist {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.gist}",
-                       f"`git org -info {{{ctx.l.help.arguments.org}}}` - {ctx.l.help.github.commands.org.info}",
-                       f"`git org -repos {{{ctx.l.help.arguments.org}}}` - {ctx.l.help.github.commands.org.repos}",
+                       f"`git user -info {{{ctx.l.argument_placeholders.user}}}` - {ctx.l.help.github.commands.user.info}",
+                       f"`git user -repos {{{ctx.l.argument_placeholders.user}}}` - {ctx.l.help.github.commands.user.repos}",
+                       f"`git gist {{{ctx.l.argument_placeholders.user}}}` - {ctx.l.help.github.commands.gist}",
+                       f"`git org -info {{{ctx.l.argument_placeholders.org}}}` - {ctx.l.help.github.commands.org.info}",
+                       f"`git org -repos {{{ctx.l.argument_placeholders.org}}}` - {ctx.l.help.github.commands.org.repos}",
                        f"\n{ctx.l.help.github.commands.repo_argument_note}",
-                       f"\n`git issue {{{ctx.l.help.arguments.repo}}} {{{ctx.l.help.arguments.issue_number}}}` - {ctx.l.help.github.commands.issue}",
-                       f"`git pr {{{ctx.l.help.arguments.repo}}} {{{ctx.l.help.arguments.pr_number}}}` - {ctx.l.help.github.commands.pr}",
-                       f"`git repo -info {{{ctx.l.help.arguments.repo}}}` - {ctx.l.help.github.commands.repo.info}",
-                       f"`git repo -files {{{ctx.l.help.arguments.repo}}}` - {ctx.l.help.github.commands.repo.files}",
-                       f"`git repo -issues {{{ctx.l.help.arguments.repo}}} ({ctx.l.help.arguments.state})` - {ctx.l.help.github.commands.repo.issues}",
-                       f"`git repo -pulls {{{ctx.l.help.arguments.repo}}} ({ctx.l.help.arguments.state})` - {ctx.l.help.github.commands.repo.pulls}"]
+                       f"\n`git issue {{{ctx.l.argument_placeholders.repo}}} {{{ctx.l.argument_placeholders.issue_number}}}` - {ctx.l.help.github.commands.issue}",
+                       f"`git pr {{{ctx.l.argument_placeholders.repo}}} {{{ctx.l.argument_placeholders.pr_number}}}` - {ctx.l.help.github.commands.pr}",
+                       f"`git repo -info {{{ctx.l.argument_placeholders.repo}}}` - {ctx.l.help.github.commands.repo.info}",
+                       f"`git repo -files {{{ctx.l.argument_placeholders.repo}}}` - {ctx.l.help.github.commands.repo.files}",
+                       f"`git repo -issues {{{ctx.l.argument_placeholders.repo}}} ({ctx.l.argument_placeholders.state})` - {ctx.l.help.github.commands.repo.issues}",
+                       f"`git repo -pulls {{{ctx.l.argument_placeholders.repo}}} ({ctx.l.argument_placeholders.state})` - {ctx.l.help.github.commands.repo.pulls}"]
 
         embed = discord.Embed(
             title=f"{Mgr.e.err}  {ctx.l.help.github.title}",
@@ -54,9 +54,9 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
         lines: list = [ctx.l.help.utility.description,
-                       f"`git license {{{ctx.l.help.arguments.license}}}` - {ctx.l.help.utility.commands.license}",
-                       f"`git lines {{{ctx.l.help.arguments.link}}}` - {ctx.l.help.utility.commands.lines}",
-                       f"`git info {{{ctx.l.help.arguments.link}}}` - {ctx.l.help.utility.commands.info}"]
+                       f"`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}",
+                       f"`git lines {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.lines}",
+                       f"`git info {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.info}"]
         embed = discord.Embed(
             title=f"{Mgr.e.err}  {ctx.l.help.utility.title}",
             color=0xefefef,

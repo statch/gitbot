@@ -1,4 +1,4 @@
-![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/834749442333736970/gitbot-light-nobg.png?width=1440&height=360)
+![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/834755493250727957/gitbot-light-color-nobg.png?width=1440&height=360)
 
 _________________
 

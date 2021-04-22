@@ -4,7 +4,7 @@ _________________
 
 [![CodeFactor](https://www.codefactor.io/repository/github/statch/gitbot/badge/main)](https://www.codefactor.io/repository/github/statch/gitbot/overview/main) [![issues](https://img.shields.io/github/issues/statch/gitbot)](https://github.com/statch/gitbot/issues) ![code size](https://img.shields.io/github/languages/code-size/statch/gitbot) ![visits](https://api.ghprofile.me/view?username=statch-gitbot&style=flat&label=visits) [![discord](https://img.shields.io/discord/737430006271311913.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/3e5fwpA)
 
-#### GitBot is a programmer toolkit aimed to help software developers work faster and connect with their friends on GitHub. It features:
+#### GitBot is a programmer toolkit for developers to stay productive and connect with their friends on GitHub. It features:
 - Command syntax themed after the `git` CLI
 - Repository release feeds
 - User, organization and repo info

@@ -11,94 +11,91 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def help_command(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
-            lines: list = ["In this section you'll find info and usage of my commands.",
-                           "\n**You can access specific parts by typing:**",
-                           "`git help github` to fetch information from GitHub",
-                           "`git help info` for commands that provide information about the bot itself",
-                           "`git help config` to store your preferred orgs, repos, user and feeds",
-                           "`git help utility` for other useful commands",
-                           "\n**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)"]
+            lines: list = [ctx.l.help.default.description,
+                           f"`git help github` {ctx.l.help.default.sections.github}",
+                           f"`git help info` {ctx.l.help.default.sections.info}",
+                           f"`git help config` {ctx.l.help.default.sections.config}",
+                           f"`git help utility` {ctx.l.help.default.sections.utility}",
+                           f"\n{ctx.l.help.default.support_server_note}"]
             embed = discord.Embed(
-                title=f"{Mgr.e.err}  Help",
+                title=f"{Mgr.e.err}  {ctx.l.help.default.title}",
                 color=0xefefef,
                 description="\n".join(lines)
             )
-            embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+            embed.set_footer(text=ctx.l.help.default.footer)
             await ctx.send(embed=embed)
 
     @help_command.command(name='github', aliases=['-github', '--github'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def github_help(self, ctx: commands.Context) -> None:
-        lines: list = ["**Words in curly braces symbolize arguments that the command requires**",
-                       "`git user -info {username}` - get information about a user",
-                       "`git user -repos {username}` - view a user's repos",
-                       "`git gist {username}` - view a user's gists",
-                       "`git org -info {organization}` - get info about an organization",
-                       "`git org -repos {organization}` - view an organization's repos",
-                       "\n**Important!** Repo commands that follow, require the exact syntax of `username/repo-name` "
-                       "in place of the `{repo}` argument, ex. `itsmewulf/GitHub-Discord`",
-                       "\n`git issue {repo} {issue number}` - get detailed info on an issue",
-                       "`git pr {repo} {pr number}` - get detailed info on a pull request",
-                       "`git repo -info {repo}` - get info about a repository",
-                       "`git repo -files {repo}` - get the repo's file structure",
-                       "`git repo -issues {repo} (state)` - get 10 latest issues from a repo (state defaults to "
-                       "OPEN). If no repo is passed, the stored one is used",
-                       "`git repo -pulls {repo} (state)` - identical to the above, except for pull requests"]
+        lines: list = [ctx.l.help.github.description,
+                       f"`git user -info {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.user.info}",
+                       f"`git user -repos {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.user.repos}",
+                       f"`git gist {{{ctx.l.help.arguments.user}}}` - {ctx.l.help.github.commands.gist}",
+                       f"`git org -info {{{ctx.l.help.arguments.org}}}` - {ctx.l.help.github.commands.org.info}",
+                       f"`git org -repos {{{ctx.l.help.arguments.org}}}` - {ctx.l.help.github.commands.org.repos}",
+                       f"\n{ctx.l.help.github.commands.repo_argument_note}",
+                       f"\n`git issue {{{ctx.l.help.arguments.repo}}} {{{ctx.l.help.arguments.issue_number}}}` - {ctx.l.help.github.commands.issue}",
+                       f"`git pr {{{ctx.l.help.arguments.repo}}} {{{ctx.l.help.arguments.pr_number}}}` - {ctx.l.help.github.commands.pr}",
+                       f"`git repo -info {{{ctx.l.help.arguments.repo}}}` - {ctx.l.help.github.commands.repo.info}",
+                       f"`git repo -files {{{ctx.l.help.arguments.repo}}}` - {ctx.l.help.github.commands.repo.files}",
+                       f"`git repo -issues {{{ctx.l.help.arguments.repo}}} ({ctx.l.help.arguments.state})` - {ctx.l.help.github.commands.repo.issues}",
+                       f"`git repo -pulls {{{ctx.l.help.arguments.repo}}} ({ctx.l.help.arguments.state})` - {ctx.l.help.github.commands.repo.pulls}"]
 
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  GitHub Help",
+            title=f"{Mgr.e.err}  {ctx.l.help.github.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(text=ctx.l.help.alias_note)
         await ctx.send(embed=embed)
 
     @help_command.command(name='utility', aliases=['-utility', '--utility'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
-        lines: list = ["These commands let you fetch various data related to Git and GitHub.",
-                       "`git license {license}` - get info about a license",
-                       "`git lines {link}` - get the lines mentioned in a GitHub or GitLab link",
-                       "`git info {link}` - automatically inspect a link and get info on it"]
+        lines: list = [ctx.l.help.utility.description,
+                       f"`git license {{{ctx.l.help.arguments.license}}}` - {ctx.l.help.utility.commands.license}",
+                       f"`git lines {{{ctx.l.help.arguments.link}}}` - {ctx.l.help.utility.commands.lines}",
+                       f"`git info {{{ctx.l.help.arguments.link}}}` - {ctx.l.help.utility.commands.info}"]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Utility Help",
+            title=f"{Mgr.e.err}  {ctx.l.help.utility.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(text=ctx.l.help.alias_note)
         await ctx.send(embed=embed)
 
     @help_command.command(name='config', aliases=['-config', '--config'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_help(self, ctx: commands.Context) -> None:
-        lines: list = ["**These commands affect the behavior of the Bot.**",
-                       "`git config` - get detailed info on your options",
-                       "`git config -show` - shows your current settings"]
+        lines: list = [ctx.l.help.config.description,
+                       f"`git config` - {ctx.l.help.config.commands.default}",
+                       f"`git config -show` - {ctx.l.help.config.commands.show}"]
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Config Help",
+            title=f"{Mgr.e.err}  {ctx.l.help.config.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(text=ctx.l.help.alias_note)
         await ctx.send(embed=embed)
 
     @help_command.command(name="info", aliases=["-info", "--info"])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def info_help(self, ctx: commands.Context) -> None:
-        lines: list = ["These commands have no ties to GitHub and focus on the Bot itself.",
-                       "`git aliases` - get a list of command shorthands",
-                       "`git privacy` - the Bot's privacy policy",
-                       "`git vote` - vote for the Bot!",
-                       "`git stats` - some stats regarding the Bot",
-                       "`git uptime` - see the time since the last restart of the Bot",
-                       "`git ping` - see the Bot's latency"]
+        lines: list = [ctx.l.help.info.description,
+                       f"`git aliases` - {ctx.l.help.info.commands.aliases}",
+                       f"`git privacy` - {ctx.l.help.info.commands.privacy}",
+                       f"`git vote` - {ctx.l.help.info.commands.vote}",
+                       f"`git stats` - {ctx.l.help.info.commands.stats}",
+                       f"`git uptime` - {ctx.l.help.info.commands.uptime}",
+                       f"`git ping` - {ctx.l.help.info.commands.ping}"]
 
         embed = discord.Embed(
-            title=f"{Mgr.e.err}  Info Help",
+            title=f"{Mgr.e.err}  {ctx.l.help.info.title}",
             color=0xefefef,
             description="\n".join(lines)
         )
-        embed.set_footer(text=f"You can find a list of aliases by using the git --aliases command")
+        embed.set_footer(text=ctx.l.help.alias_note)
         await ctx.send(embed=embed)
 
     @commands.group(name='--aliases', aliases=['aliases'])

@@ -366,5 +366,83 @@
       "success": "It appears that **you don't have anything stored!**",
       "not_saved": "All of your stored data was **successfully deleted.**"
     }
+  },
+  "help": {
+    "arguments": {
+        "user": "username",
+        "org": "organization",
+        "repo": "repo",
+        "issue_number": "issue number",
+        "pr_number": "pr number",
+        "state": "state",
+        "license": "license",
+        "link": "link"
+    },
+    "alias_note": "You can find a list of aliases by using the git --aliases command",
+    "default": {
+      "title": "Help",
+      "description": "In this section you'll find info and usage of my commands.\n**You can access specific parts by typing:**",
+      "sections": {
+        "github": "to fetch information from GitHub",
+        "info": "for commands that provide information about the bot itself",
+        "config": "to store your preferred orgs, repos, user and feeds",
+        "utility": "for other useful commands"
+      },
+      "support_server_note": "**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)",
+      "footer": "You can find a list of aliases by using the git --aliases command"
+    },
+    "github": {
+      "title": "GitHub Help",
+      "description": "**Words in curly braces symbolize arguments that the command requires**",
+      "commands": {
+        "user": {
+          "info": "get information about a user",
+          "repos": "view a user's repos"
+        },
+        "org": {
+          "info": "get info about an organization",
+          "repos": "view an organization's repos"
+        },
+        "repo_argument_note": "**Important!** Repo commands that follow, require the exact syntax of `owner/repo-name` in place of the `{repo}` argument, ex. `statch/gitbot`",
+        "repo": {
+          "info": "get info about a repository",
+          "files": "get a repo's file structure",
+          "issues": "get 10 latest issues from a repo (state defaults to OPEN). If no repo is passed, the stored one is used",
+          "pulls": "identical to the above, except for pull requests"
+        },
+        "gist": "view a user's gists",
+        "issue": "get detailed info on an issue",
+        "pr": "get detailed info on a pull request"
+      }
+    },
+    "info": {
+      "title": "Info Help",
+      "description": "These commands have no ties to GitHub and focus on the Bot itself.",
+      "commands": {
+        "aliases": "get a list of command shorthands",
+        "privacy": "the Bot's privacy policy",
+        "vote": "vote for the Bot!",
+        "stats": "some stats regarding the Bot",
+        "uptime": "see the time since the last restart of the Bot",
+        "ping": "see the Bot's latency"
+      }
+    },
+    "config": {
+      "title": "Config Help",
+      "description": "**These commands affect the behavior of the Bot.**",
+      "commands": {
+        "default": "get detailed info on your options",
+        "show": "shows your current settings"
+      }
+    },
+    "utility": {
+      "title": "Utility Help",
+      "description": "These commands let you fetch various data related to Git and GitHub.",
+      "commands": {
+        "license": "get info about a license",
+        "lines": "get the lines mentioned in a GitHub or GitLab link",
+        "info": "automatically inspect a link and get info on it"
+      }
+    }
   }
 }

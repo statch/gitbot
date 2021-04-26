@@ -265,6 +265,31 @@
       "tip": "To pick an option, simply send a number next time!"
     }
   },
+  "issue": {
+    "glossary": ["Body", "Info", "Labels"],
+    "stored_no_number": "If you want to access the stored repo's issues, please pass in an **issue number!**",
+    "second_argument_number": "The second argument must be an issue **number!**",
+    "created_at": "Created by {0} on {1}",
+    "closed_at": "Closed on {0}",
+    "comments": {
+      "plural": "Has {0} comments",
+      "singular": "Has one comment",
+      "no_comments": "Has no comments"
+    },
+    "linking_word": "and",
+    "assignees": {
+      "plural": "{0} assignees",
+      "singular": "one assignee",
+      "no_assignees": "no assignees"
+    },
+    "participants": {
+      "plural": "{0} people have participated in this issue",
+      "singular": "One person has participated in this issue"
+    }
+  },
+  "pr": {
+
+  },
   "config": {
     "default": {
       "brief_1": "**In this section you can configure various aspects of your experience**",

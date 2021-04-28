@@ -120,14 +120,13 @@ class PullRequest(commands.Cog):
         reviewer_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['reviewers']['users']]
         participant_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['participants']['users']]
 
-        assignee_strings = assignee_strings if len(assignee_strings) <= 3 else assignee_strings[
-                                                                               :3].extend(ctx.fmt('more_items', len(assignee_strings) - 3))
+        def _extend(_list: list, item: str) -> list:
+            _list.extend(item)
+            return _list
 
-        reviewer_strings = reviewer_strings if len(reviewer_strings) <= 3 else reviewer_strings[
-                                                                               :3].extend(ctx.fmt('more_items', len(reviewer_strings) - 3))
-
-        participant_strings = participant_strings if len(participant_strings) <= 3 else participant_strings[
-                                                                                        :3].extend(ctx.fmt('more_items', len(participant_strings) - 3))
+        assignee_strings = assignee_strings if len(assignee_strings) <= 3 else _extend(assignee_strings[:3], ctx.fmt('more_items', len(assignee_strings) - 3))
+        reviewer_strings = reviewer_strings if len(reviewer_strings) <= 3 else _extend(reviewer_strings[:3], ctx.fmt('more_items', len(reviewer_strings) - 3))
+        participant_strings = participant_strings if len(participant_strings) <= 3 else _extend(participant_strings[:3], ctx.fmt('more_items', len(participant_strings) - 3))
 
         cross_repo: str = ctx.l.pr.fork if pr['isCrossRepository'] else ''
         info: str = f'{user}{closed}{comments_and_reviews}{files_changed}{additions_and_deletions}{cross_repo}'

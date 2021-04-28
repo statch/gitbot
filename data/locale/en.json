@@ -288,7 +288,47 @@
     }
   },
   "pr": {
-
+    "glossary": ["Info", "Participants", "Assignees", "Reviewers", "Labels"],
+    "stored_no_number": "If you want to access the stored repo's PRs, please pass in a **pull request number!**",
+    "second_argument_number": "The second argument must be a pull request **number!**",
+    "created_at": "Created by {0} on {1}",
+    "closed_at": "Closed on {0}",
+    "comments": {
+      "plural": "Has {0} comments",
+      "singular": "Has one comment",
+      "no_comments": "Has no comments"
+    },
+    "linking_word_1": "and",
+    "reviews": {
+      "plural": "{0} reviews",
+      "singular": "one review",
+      "no_reviews": "no reviews"
+    },
+    "files": {
+      "plural": "[{0} files]({1}) have been changed",
+      "singular": "[One file]({0}) was changed"
+    },
+    "linking_word_2": "in",
+    "commits": {
+      "plural": "{0} commits",
+      "singular": "one commit"
+    },
+    "additions": {
+      "plural": "Updated with {0} additions",
+      "singular": "Updated with one addition",
+      "no_additions": "Updated with no additions"
+    },
+    "linking_word_3": "and",
+    "deletions": {
+      "plural": "{0} deletions",
+      "singular": "one deletion",
+      "no_deletions": "no deletions"
+    },
+    "more_items": "and {0} more",
+    "fork": "This pull request came from a fork.",
+    "no_participants": "No participants",
+    "no_assignees": "No assignees",
+    "no_reviewers": "No reviewers"
   },
   "config": {
     "default": {
@@ -398,8 +438,8 @@
       "not_saved": "You don't have a repo saved!"
     },
     "all": {
-      "success": "It appears that **you don't have anything stored!**",
-      "not_saved": "All of your stored data was **successfully deleted.**"
+      "success": "All of your stored data was **successfully deleted.**",
+      "not_saved": "It appears that **you don't have anything stored!**"
     }
   },
   "help": {

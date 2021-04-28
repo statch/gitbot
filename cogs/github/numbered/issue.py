@@ -22,17 +22,17 @@ class Issue(commands.Cog):
                 if not repo.isnumeric():
                     await ctx.err(ctx.l.issue.stored_no_number)
                     return
-                num = repo
-                stored = await Mgr.db.users.getitem(ctx, 'repo')
+                num: str = repo
+                stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
                 if stored:
-                    repo = stored
-                    issue_number = num
+                    repo: str = stored
+                    issue_number: str = num
                 else:
                     await ctx.err(ctx.l.generic.nonexistent.repo.qa)
                     return
 
             try:
-                issue = await Git.get_issue(repo, int(issue_number))
+                issue: Union[dict, str] = await Git.get_issue(repo, int(issue_number))
             except ValueError:
                 await ctx.err(ctx.l.issue.second_argument_number)
                 return

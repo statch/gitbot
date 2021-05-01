@@ -25,7 +25,7 @@ class UserCollection(AsyncIOMotorCollection):
         super().__init__(collection.database, collection.name)
 
     async def delitem(self,  __id: Identifiable, field: str) -> bool:
-        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
+        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         query: dict = await self.find_one({"_id": __id})
         if query is not None and field in query:
             await self.update_one(query, {"$unset": {field: ""}})
@@ -36,14 +36,14 @@ class UserCollection(AsyncIOMotorCollection):
         return False
 
     async def getitem(self, __id: Identifiable, item: str) -> Optional[str]:
-        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
+        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         query: dict = await self.find_one({'_id': __id})
         if query and item in query:
             return query[item]
         return None
 
     async def setitem(self,  __id: Identifiable, item: str, value: str) -> bool:
-        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
+        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         valid: bool = True
         if item in ('user', 'repo', 'org'):
             valid: bool = await ({'user': self._git.get_user, 'repo': self._git.get_repo, 'org': self._git.get_org}[item])(value) is not None

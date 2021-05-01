@@ -220,6 +220,7 @@ class Config(commands.Cog):
                         return
                 await Mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
                 setattr(ctx, 'l', await Mgr.get_locale(ctx))
+                Mgr.locale_cache[ctx.author.id] = l_[0]['name']
                 await ctx.send(f"{Mgr.e.github}  {ctx.fmt('success', l_[0]['localized_name'].capitalize())}")
                 return
             else:

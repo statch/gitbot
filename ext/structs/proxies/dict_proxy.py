@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, Optional, List, Dict
 
 
 class DictProxy(dict):
@@ -13,7 +13,9 @@ class DictProxy(dict):
         The object to wrap with DictProxy.
     """
 
-    def __init__(self, data: Union[dict, list]):
+    def __init__(self, data: Optional[Union[List[Union[list, str, int]], Dict[str, Union[list, str, int]]]] = None):
+        if data is None:
+            data: dict = {}
         self.__items: Union[list, dict] = data
         if isinstance(data, dict):
             super().__init__(data)

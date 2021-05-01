@@ -7,7 +7,7 @@ import discord
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from ext.types import DictSequence, AnyDict
+from ext.types import DictSequence, AnyDict, Identifiable
 from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from ext import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
@@ -121,15 +121,15 @@ class Manager:
     def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
         return functools.partial(self.error, ctx)
 
-    async def get_locale(self, __id: Union[commands.Context, int]) -> DictProxy:
-        _id: Union[commands.Context, int] = __id if not isinstance(__id, commands.Context) else __id.author.id
+    async def get_locale(self, __id: Identifiable) -> DictProxy:
+        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         locale: str = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id, None):
             locale: str = cached
         else:
-            stored: Optional[dict] = await self.db.users.find_one({'_id': _id})
-            if stored is not None and (sl := stored.get('locale', None)):
-                locale: str = sl
+            stored: Optional[str] = await self.db.users.getitem(__id, 'locale')
+            if stored:
+                locale: str = stored
                 self.locale_cache[_id] = locale
         try:
             return getattr(self.l, locale)

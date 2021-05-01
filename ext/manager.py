@@ -10,7 +10,7 @@ from discord.ext import commands
 from ext.types import DictSequence, AnyDict
 from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from ext import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
 
 
@@ -35,7 +35,7 @@ class Manager:
                                    'lines': 'lines'}
         self.locale_cache: dict = {}
         setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', self.locale.master))
-        setattr(self.db, 'users', UserCollection(self.db.users, self.git))
+        setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
         self.__fix_missing_locales()
 
     def log(self,
@@ -93,7 +93,6 @@ class Manager:
                     return GitCommandData(obj, 'user', m)
                 repo = await action(match)
                 return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
-        return None
 
     async def get_most_common(self, items: list) -> Any:
         return max(set(items), key=items.count)
@@ -108,12 +107,10 @@ class Manager:
         matched = [i for i in items if i['number'] == number]
         if matched:
             return matched[0]
-        return None
 
     async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
         if seq:
             return type(seq)(reversed(seq))
-        return None
 
     async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
         return DirProxy(path=path, ext=ext)
@@ -155,13 +152,20 @@ class Manager:
             else:
                 if self.get_nested_key(d, key) == value:
                     return d
-        return None
 
-    def fix_dict(self, dict_: AnyDict, ref_: AnyDict) -> AnyDict:
+    def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
+        for locale in self.locale.languages:
+            for k, v in locale.items():
+                match: int = fuzz.token_set_ratio(attribute, v)
+                if v == attribute or match > 80:
+                    return locale, match == 100
+
+    def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
                 if k not in node:
-                    self.log(f'missing key {k} patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                    if locale:
+                        self.log(f'missing key {k} patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
@@ -173,7 +177,7 @@ class Manager:
     def __fix_missing_locales(self):
         for locale in self.l:
             if locale != self.locale.master and 'meta' in locale:
-                setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master))
+                setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master, locale=True))
 
     def fmt(self, ctx: commands.Context) -> object:
         self_: Manager = self

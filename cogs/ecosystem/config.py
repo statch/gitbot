@@ -23,7 +23,7 @@ class Config(commands.Cog):
                            "\n" + ctx.l.config.default.deletion]
             embed = discord.Embed(
                 color=0xefefef,
-                title=f"{Mgr.e.github}  GitBot Config",
+                title=f"{Mgr.e.github}  {ctx.l.config.default.embed_title}",
                 description='\n'.join(lines)
             )
             embed.set_footer(text=ctx.l.config.default.footer)
@@ -31,7 +31,7 @@ class Config(commands.Cog):
 
     @config_command_group.command(name='--show', aliases=['-S', '-show', 'show'])
     @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_show(self, ctx: commands.Context) -> None:
+    async def config_show_command(self, ctx: commands.Context) -> None:
         ctx.fmt.set_prefix('config show')
         query: dict = await Mgr.db.users.find_one({"_id": int(ctx.author.id)})
         if not isinstance(ctx.channel, discord.DMChannel):
@@ -59,8 +59,8 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
-    @commands.cooldown(10, 30, commands.BucketType.guild)
-    async def config_release_feed(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+    @commands.cooldown(3, 30, commands.BucketType.guild)
+    async def config_release_feed_command(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
         ctx.fmt.set_prefix('config feed')
         g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if not g:
@@ -97,7 +97,7 @@ class Config(commands.Cog):
                     r: Optional[dict] = None
                     if repo:
                         r: dict = await Git.get_latest_release(repo)
-                        feed = [{'repo': repo.lower(), 'release': r['release']['tagName']}] if r and r[
+                        feed: list = [{'repo': repo.lower(), 'release': r['release']['tagName']}] if r and r[
                             'release'] else []
                     if hook:
                         await Mgr.db.guilds.insert_one(
@@ -152,8 +152,8 @@ class Config(commands.Cog):
                 await ctx.send(embed=embed_limit_reached)
 
     @config_command_group.command(name='--user', aliases=['-u', '-user', 'user'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_user(self, ctx: commands.Context, user: str) -> None:
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def config_user_command(self, ctx: commands.Context, user: str) -> None:
         u: bool = await Mgr.db.users.setitem(ctx, 'user', user)
         if u:
             await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set user', user))}")
@@ -161,8 +161,8 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.generic.nonexistent.user.base)
 
     @config_command_group.command(name='--org', aliases=['--organization', '-O', '-org', 'org'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_org(self, ctx: commands.Context, org: str) -> None:
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def config_org_command(self, ctx: commands.Context, org: str) -> None:
         o: bool = await Mgr.db.users.setitem(ctx, 'org', org)
         if o:
             await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set org', org))}")
@@ -170,16 +170,75 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.generic.nonexistent.org.base)
 
     @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo', 'repo'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_repo(self, ctx, repo) -> None:
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def config_repo_command(self, ctx: commands.Context, repo: str) -> None:
         r: bool = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
             await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set repo', repo))}")
         else:
             await ctx.err(ctx.l.generic.nonexistent.repo.base)
 
+    @config_command_group.command(name='--lang', aliases=['-lang', 'lang', '--locale', '-locale', 'locale'])
+    @commands.has_permissions(add_reactions=True)
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def config_locale_command(self, ctx: commands.Context, locale: Optional[str] = None) -> None:
+        ctx.fmt.set_prefix('config locale')
+        if locale:
+            l_ = Mgr.get_locale_meta_by_attribute(locale.lower())
+            if l_:
+                if not l_[1]:  # If it's not an exact match
+                    match_confirmation_embed: discord.Embed = discord.Embed(
+                        color=0xff009b,
+                        title=f'{Mgr.e.github}  {ctx.l.config.locale.match_confirmation_embed.title}',
+                        description=ctx.fmt('match_confirmation_embed description', l_[0]['localized_name'])
+                    )
+                    match_confirmation_embed.set_footer(text=ctx.l.config.locale.match_confirmation_embed.footer)
+                    msg: discord.Message = await ctx.send(embed=match_confirmation_embed)
+                    await msg.add_reaction(Mgr.e.checkmark)
+                    await msg.add_reaction(Mgr.e.failure)
+                    try:
+                        def check(_reaction: discord.Reaction, _member: discord.Member) -> bool:
+                            return all([_reaction.custom_emoji,
+                                        _reaction.emoji.id in (770244076896256010, 770244084727283732),
+                                        _member.id == ctx.author.id,
+                                        _reaction.message.id == msg.id])
+                        reaction: discord.Reaction
+                        reaction, _ = await self.bot.wait_for('reaction_add',
+                                                              timeout=30,
+                                                              check=check)
+                        await msg.delete()
+                        if reaction.emoji.id == 770244076896256010:
+                            await ctx.send(f'{Mgr.e.github}  {ctx.l.config.locale.cancelled}')
+                            return
+                    except asyncio.TimeoutError:
+                        timeout_embed = discord.Embed(
+                            color=0xffd500,
+                            title=ctx.l.config.locale.timeout_embed.title
+                        )
+                        timeout_embed.set_footer(text=ctx.l.config.locale.timeout_embed.footer)
+                        await msg.edit(embed=timeout_embed)
+                        return
+                await Mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
+                setattr(ctx, 'l', await Mgr.get_locale(ctx))
+                await ctx.send(f"{Mgr.e.github}  {ctx.fmt('success', l_[0]['localized_name'].capitalize())}")
+                return
+            else:
+                await ctx.err(ctx.fmt('failure', locale), delete_after=3)
+
+        def _format(locale_: dict):
+            formatted: str = f'{Mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}'
+            return formatted if ctx.l.meta.name != locale_['name'] else f'**{formatted}**'
+
+        languages: list = [_format(l_) for l_ in Mgr.locale.languages]
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            title=f'{Mgr.e.github}  {ctx.l.config.locale.title}',
+            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.argument_placeholders.lang}}}`')}\n" + '\n'.join(languages)
+        )
+        await ctx.send(embed=embed)
+
     @config_command_group.group(name='-delete', aliases=['-D', '-del', 'delete', '--delete'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_field_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
@@ -197,7 +256,7 @@ class Config(commands.Cog):
     @delete_field_group.group(name='feed', aliases=['-feed', '--feed'], invoke_without_command=True)
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
-    @commands.cooldown(15, 30, commands.BucketType.guild)
+    @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
         ctx.fmt.set_prefix('config delete feed default')
         if ctx.invoked_subcommand is None:
@@ -226,7 +285,7 @@ class Config(commands.Cog):
 
     @delete_feed_group.command(name='all', aliases=['-all', '--all'])
     @commands.guild_only()
-    @commands.cooldown(15, 30, commands.BucketType.guild)
+    @commands.cooldown(5, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     async def delete_all_feeds_command(self, ctx: commands.Context) -> None:
         guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
@@ -239,7 +298,7 @@ class Config(commands.Cog):
 
     @delete_feed_group.command(name='total', aliases=['-total', '--total', '-t'])
     @commands.guild_only()
-    @commands.cooldown(10, 30, commands.BucketType.guild)
+    @commands.cooldown(5, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_guild_permissions()
     async def delete_feed_with_channel_command(self, ctx: commands.Context) -> None:
@@ -258,7 +317,7 @@ class Config(commands.Cog):
                 await ctx.send(f'{Mgr.e.github}  {ctx.l.config.delete.feed.total.success}')
 
     @delete_field_group.command(name='user', aliases=['-U', '-user', '--user'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'user')
         if deleted:
@@ -267,7 +326,7 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.config.delete.user.not_saved)
 
     @delete_field_group.command(name='org', aliases=['-O', '-org', 'organization', '-organization'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'org')
         if deleted:
@@ -276,7 +335,7 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.config.delete.org.not_saved)
 
     @delete_field_group.command(name='repo', aliases=['-R', '-repo'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
+    @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: commands.Context) -> None:
         deleted: bool = await Mgr.db.users.delitem(ctx, 'repo')
         if deleted:
@@ -285,8 +344,8 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.config.delete.repo.not_saved)
 
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def delete_entire_record(self, ctx: commands.Context) -> None:
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def delete_entire_record_command(self, ctx: commands.Context) -> None:
         query: dict = await Mgr.db.users.find_one_and_delete({"_id": int(ctx.author.id)})
         if not query:
             await ctx.err(ctx.l.config.delete.all.not_saved)

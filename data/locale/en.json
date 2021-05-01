@@ -21,7 +21,8 @@
     "pr_number": "pr number",
     "state": "state",
     "license": "license",
-    "link": "link"
+    "link": "link",
+    "lang": "language"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -342,7 +343,8 @@
         "feed": "Subscribe to new releases of a repository"
       },
       "deletion": "**You can delete stored data by typing** `git config --delete`",
-      "footer": "To see what you have saved, use git config --show"
+      "footer": "To see what you have saved, use git config --show",
+      "embed_title": "GitBot Config"
     },
     "show": {
       "title": "Your GitBot Config",
@@ -388,6 +390,22 @@
       "user": "Quick access user set to **{0}**",
       "org": "Quick access organization set to **{0}**",
       "repo": "Quick access repo set to **{0}**"
+    },
+    "locale": {
+      "success": "Bot language set to **{0}**.",
+      "failure": "`{0}` is not a **valid, supported language!**",
+      "match_confirmation_embed": {
+        "title": "Confirm Language",
+        "description": "Your requested language didn't match any of the available ones in full, but it was **very close to `{0}`**. Did you mean to choose that one?",
+        "footer": "React with an appropriate emoji to pick an option!"
+      },
+      "timeout_embed": {
+        "title": "Timed Out",
+        "footer": "Simply pick an option next time!"
+      },
+      "title": "Bot Language",
+      "description": "Here you can change the language of the Bot.\nSimply type {0}\nAll translations are provided by our [community](https://github.com/statch/gitbot/tree/main/data/locale)",
+      "cancelled": "Language change **cancelled.**"
     },
     "delete": {
       "default": {

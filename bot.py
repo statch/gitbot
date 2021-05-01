@@ -14,12 +14,13 @@ PREFIX: str = str(os.getenv('PREFIX'))
 
 intents: discord.Intents = discord.Intents(
     messages=True,
-    guilds=True
+    guilds=True,
+    guild_reactions=True
 )
 
 bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
                                  intents=intents, help_command=None,
-                                 guild_ready_timeout=1, max_messages=None,
+                                 guild_ready_timeout=1, status=discord.Status.idle,
                                  description='Seamless GitHub-Discord integration.',
                                  fetch_offline_members=False)
 

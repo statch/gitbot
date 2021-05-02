@@ -348,12 +348,25 @@
     },
     "show": {
       "title": "Your GitBot Config",
-      "heading": "**Quick Access:**",
-      "list": {
-        "user": "User: {0}",
-        "org": "Organization: {0}",
-        "repo": "Repo: {0}",
-        "feed": "Release Feed:"
+      "qa": {
+        "heading": "**Quick Access:**",
+        "list": {
+          "user": "User: {0}",
+          "org": "Organization: {0}",
+          "repo": "Repo: {0}"
+        }
+      },
+      "guild": {
+        "heading": "**Server Settings:**",
+        "list": {
+          "feed": "Release Feed:"
+        }
+      },
+      "accessibility": {
+        "heading": "**Accessibility:**",
+        "list": {
+          "locale": "Language: {0}"
+        }
       },
       "item_not_set": "Not set",
       "item_not_configured": "Not configured"

@@ -41,17 +41,24 @@ class Config(commands.Cog):
         if query is None and release is None or release and len(release) == 1 and query is None:
             await ctx.err(ctx.l.generic.nonexistent.qa)
             return
-        user: str = ctx.fmt('list user', f'`{query["user"]}`' if 'user' in query else f'`{ctx.l.config.show.item_not_set}`')
-        org: str = ctx.fmt('list org', f'`{query["org"]}`' if 'org' in query else f'`{ctx.l.config.show.item_not_set}`')
-        repo: str = ctx.fmt('list repo', f'`{query["repo"]}`' if 'repo' in query else f'`{ctx.l.config.show.item_not_set}`')
-        feed: str = f'{ctx.l.config.show.list.feed}\n' + '\n'.join(
+        lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
+        user: str = ctx.fmt('qa list user', f'`{query["user"]}`' if 'user' in query else f'`{ctx.l.config.show.item_not_set}`')
+        org: str = ctx.fmt('qa list org', f'`{query["org"]}`' if 'org' in query else f'`{ctx.l.config.show.item_not_set}`')
+        repo: str = ctx.fmt('qa list repo', f'`{query["repo"]}`' if 'repo' in query else f'`{ctx.l.config.show.item_not_set}`')
+        feed: str = f'{ctx.l.config.show.guild.list.feed}\n' + '\n'.join(
             [f'{Mgr.e.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
-            'feed'] else f'{ctx.l.config.show.list.feed} `{ctx.l.config.show.item_not_configured}`'
-        data: list = [user, org, repo, feed]
+            'feed'] else f'{ctx.l.config.show.guild.list.feed} `{ctx.l.config.show.item_not_configured}`'
+        accessibility: list = ctx.l.config.show.accessibility.heading + '\n' + '\n'.join([lang])
+        qa: list = ctx.l.config.show.qa.heading + '\n' + '\n'.join([user, org, repo])
+        guild: list = ctx.l.config.show.guild.heading + '\n' + '\n'.join([feed])
+        shortest_heading_len: int = min(map(len, [ctx.l.config.show.accessibility.heading,
+                                                  ctx.l.config.show.guild.heading,
+                                                  ctx.l.config.show.qa.heading]))
+        linebreak: str = f'\n{"⎯" * shortest_heading_len}\n'
         embed = discord.Embed(
             color=0xefefef,
             title=f"{Mgr.e.github}  {ctx.l.config.show.title}",
-            description=f"{ctx.l.config.show.heading}\n" + '\n'.join(data)
+            description=f"{accessibility}{linebreak}{qa}{linebreak}{guild}"
         )
         await ctx.send(embed=embed)
 

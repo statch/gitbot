@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorCollection
 from discord.ext import commands
 from typing import Optional
-from ext.types import Identifiable
+from ext.typehints import Identifiable
 
 
 class UserCollection(AsyncIOMotorCollection):

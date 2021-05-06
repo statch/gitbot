@@ -7,20 +7,20 @@ class CaseInsensitiveDict(dict):
     Due to the casefold() calls, it only accepts :class:`str` as keys
     """
 
-    def __contains__(self, k: str) -> bool:
-        return super().__contains__(k.casefold())
+    def __contains__(self, key: str) -> bool:
+        return super().__contains__(key.casefold())
 
-    def __delitem__(self, k: str) -> None:
-        return super().__delitem__(k.casefold())
+    def __delitem__(self, key: str) -> None:
+        return super().__delitem__(key.casefold())
 
-    def __getitem__(self, k: str) -> Any:
-        return super().__getitem__(k.casefold())
+    def __getitem__(self, key: str) -> Any:
+        return super().__getitem__(key.casefold())
 
-    def get(self, k: str, default: Any = None) -> Any:
-        return super().get(k.casefold(), default)
+    def get(self, key: str, default: Any = None) -> Any:
+        return super().get(key.casefold(), default)
 
-    def pop(self, k: str, default: Any = None) -> Any:
-        return super().pop(k.casefold(), default)
+    def pop(self, key: str, default: Any = None) -> Any:
+        return super().pop(key.casefold(), default)
 
-    def __setitem__(self, k: str, v: Any) -> None:
-        super().__setitem__(k.casefold(), v)
+    def __setitem__(self, key: str, value: Any) -> None:
+        super().__setitem__(key.casefold(), value)

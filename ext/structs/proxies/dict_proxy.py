@@ -1,4 +1,4 @@
-from typing import Any, Union, Optional, List, Dict
+from typing import Any, Union, Optional, List, Dict, Generator
 from ..case_insensitive_dict import CaseInsensitiveDict
 
 
@@ -21,12 +21,15 @@ class DictProxy(CaseInsensitiveDict):
         if isinstance(data, dict):
             super().__init__(data)
             for k, v in data.items():
-                setattr(self, k.lower(), (v if not isinstance(v, dict) else DictProxy(v)))
+                setattr(self, k.casefold(), (v if not isinstance(v, dict) else DictProxy(v)))
         else:
             self.__getitem__ = lambda i: self.__items[i]
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[int, str]:
         yield from self.__items
 
     def __getattr__(self, item: Union[str, int]) -> Any:
-        return self[item.lower() if isinstance(item, str) else item]
+        return super().__getitem__(item)
+
+    def __setattr__(self, key: str, value: Any) -> None:
+        return super().__setitem__(key, value if type(value) != 'dict' else DictProxy(value))

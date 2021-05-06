@@ -1,6 +1,7 @@
 from typing import Union, Tuple, List
 from discord.ext import commands
-from ..structs import DictProxy, DirProxy, CaseInsensitiveDict
+from ..structs.case_insensitive_dict import CaseInsensitiveDict
+from ..structs import DictProxy, DirProxy
 
 __all__: tuple = (
     'DictSequence',

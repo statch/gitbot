@@ -25,7 +25,7 @@ class DictProxy(CaseInsensitiveDict):
         else:
             self.__getitem__ = lambda i: self.__items[i]
 
-    def __iter__(self) -> Iterator[Union[int, str]]:
+    def __iter__(self) -> Iterator[Any]:
         yield from self.__items
 
     def __getattr__(self, item: Union[str, int]) -> Any:

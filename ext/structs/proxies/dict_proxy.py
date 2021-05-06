@@ -1,8 +1,9 @@
 from typing import Any, Union, Optional, List, Dict
+from ..case_insensitive_dict import CaseInsensitiveDict
 
 
-class DictProxy(dict):
-    """A wrapper around :class:`dict` allowing dotted access.
+class DictProxy(CaseInsensitiveDict):
+    """A wrapper around :class:`CaseInsensitiveDict` allowing dotted access.
 
     .. note::
         Allows :class:`list` as well for ease of use when dealing with JSON files.
@@ -20,7 +21,7 @@ class DictProxy(dict):
         if isinstance(data, dict):
             super().__init__(data)
             for k, v in data.items():
-                setattr(self, k, (v if not isinstance(v, dict) else DictProxy(v)))
+                setattr(self, k.lower(), (v if not isinstance(v, dict) else DictProxy(v)))
         else:
             self.__getitem__ = lambda i: self.__items[i]
 
@@ -28,4 +29,4 @@ class DictProxy(dict):
         yield from self.__items
 
     def __getattr__(self, item: Union[str, int]) -> Any:
-        return self[item]
+        return self[item.lower() if isinstance(item, str) else item]

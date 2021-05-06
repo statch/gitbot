@@ -340,6 +340,7 @@
         "user": "Access a saved user with `git user`",
         "org": "Access a saved organization with `git org`",
         "repo": "Access a saved repo with `git repo`",
+        "locale": "Change the Bot's language",
         "feed": "Subscribe to new releases of a repository"
       },
       "deletion": "**You can delete stored data by typing** `git config --delete`",
@@ -454,23 +455,24 @@
         "total": {
           "success": "The release feed channel has been **closed successfully.**"
         }
+      },
+      "user": {
+        "success": "Saved **user deleted.**",
+        "not_saved": "You don't have a user saved!"
+      },
+      "org": {
+        "success": "Saved **organization deleted.**",
+        "not_saved": "You don't have an organization saved!"
+      },
+      "repo": {
+        "success": "Saved **repo deleted.**",
+        "not_saved": "You don't have a repo saved!"
+      },
+      "locale": "Bot language reset to **English**.",
+      "all": {
+        "success": "All of your stored data was **successfully deleted.**",
+        "not_saved": "It appears that **you don't have anything stored!**"
       }
-    },
-    "user": {
-      "success": "Saved **user deleted.**",
-      "not_saved": "You don't have a user saved!"
-    },
-    "org": {
-      "success": "Saved **organization deleted.**",
-      "not_saved": "You don't have an organization saved!"
-    },
-    "repo": {
-      "success": "Saved **repo deleted.**",
-      "not_saved": "You don't have a repo saved!"
-    },
-    "all": {
-      "success": "All of your stored data was **successfully deleted.**",
-      "not_saved": "It appears that **you don't have anything stored!**"
     }
   },
   "help": {

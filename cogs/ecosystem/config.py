@@ -19,6 +19,7 @@ class Config(commands.Cog):
                            f"`git config --user {{{ctx.l.argument_placeholders.user}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.user,
                            f"`git config --org {{{ctx.l.argument_placeholders.org}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.org,
                            f"`git config --repo {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.repo,
+                           f"`git config --language` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.locale,
                            f"`git config --feed {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
                            "\n" + ctx.l.config.default.deletion]
             embed = discord.Embed(
@@ -241,7 +242,7 @@ class Config(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=f'{Mgr.e.github}  {ctx.l.config.locale.title}',
-            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.argument_placeholders.lang}}}`')}\n" + '\n'.join(languages)
+            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.argument_placeholders.lang}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(languages)
         )
         await ctx.send(embed=embed)
 
@@ -350,6 +351,12 @@ class Config(commands.Cog):
             await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.repo.success}")
         else:
             await ctx.err(ctx.l.config.delete.repo.not_saved)
+
+    @delete_field_group.command(name='language', aliases=['-language', '--language', 'lang', '-lang', '--lang'])
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def delete_locale_command(self, ctx: commands.Context) -> None:
+        await Mgr.db.users.delitem(ctx, 'locale')
+        await ctx.send(f"{Mgr.e.github}  {ctx.l.config.delete.locale}")
 
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(5, 30, commands.BucketType.user)

@@ -15,8 +15,17 @@ from fuzzywuzzy import fuzz
 
 
 class Manager:
-    def __init__(self, github_instance):
-        self.git = github_instance
+    """
+    A class containing database, locale and utility functions
+
+    Parameters
+    ----------
+    github: :class:`core.net.github.api.GitHubAPI`
+        The GitHub API instance to use
+    """
+
+    def __init__(self, github):
+        self.git = github
         self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
         self.e: DictProxy = self.load_json('emoji')
         self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
@@ -43,10 +52,27 @@ class Manager:
             category: str = 'core',
             bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
             category_color: Fore = Fore.MAGENTA,
-            message_color: Fore = '') -> None:
+            message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+        """
+        Colorful logging function because why not.
+
+        :param message: The message to log
+        :param category: The text in brackets
+        :param bracket_color: The color of the brackets
+        :param category_color: The color of the text in the brackets
+        :param message_color: The color of the message
+        """
+
         print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
 
-    def correlate_license(self, to_match: str) -> Optional[dict]:
+    def correlate_license(self, to_match: str) -> Optional[DictProxy]:
+        """
+        Get a license matching the query.
+
+        :param to_match: The query to search by
+        :return: The license matched or None if match is less than 80
+        """
+
         for i in list(self.licenses):
             match = fuzz.token_set_ratio(to_match, i['name'])
             match1 = fuzz.token_set_ratio(to_match, i['key'])
@@ -56,12 +82,26 @@ class Manager:
         return None
 
     def load_json(self, name: str) -> DictProxy:
+        """
+        Load a JSON file from the data dir
+
+        :param name: The name of the JSON file
+        :return: The loaded JSON wrapped in DictProxy
+        """
+
         to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
         return DictProxy(data)
 
     async def verify_send_perms(self, channel: discord.TextChannel) -> bool:
+        """
+        Check if the client can comfortably send a message to a channel
+
+        :param channel: The channel to check permissions for
+        :return: Whether the client can send a message or not
+        """
+
         if isinstance(channel, discord.DMChannel):
             return True
         perms: list = list(iter(channel.permissions_for(channel.guild.me)))
@@ -73,6 +113,13 @@ class Manager:
         return False
 
     async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
+        """
+        Get the command data required for invocation from a link
+
+        :param link: The link to exchange for command data
+        :return: The command data requested
+        """
+
         for pattern in self.patterns:
             match: list = re.findall(pattern[0], link)
             if match:
@@ -94,10 +141,25 @@ class Manager:
                 repo = await action(match)
                 return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
 
-    async def get_most_common(self, items: list) -> Any:
+    async def get_most_common(self, items: Union[list, tuple]) -> Any:
+        """
+        Get the most common item from a list/tuple
+
+        :param items: The iterable to return the most common item of
+        :return: The most common item from the iterable
+        """
+
         return max(set(items), key=items.count)
 
-    async def validate_number(self, number: str, items: List[dict]) -> Optional[dict]:
+    async def validate_number(self, number: str, items: List[AnyDict]) -> Optional[dict]:
+        """
+        Validate an index against a list of indexed dicts
+
+        :param number: The number to safely convert, then check
+        :param items: The list of indexed dicts to check against
+        :return: The dict matching the index
+        """
+
         if number.startswith('#'):
             number: str = number[1:]
         try:
@@ -109,19 +171,57 @@ class Manager:
             return matched[0]
 
     async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
+        """
+        Reverse function with a None failsafe and recasting to the original type
+
+        :param seq: The sequence to reverse
+        :return: The reversed sequence if not None, else None
+        """
+
         if seq:
             return type(seq)(reversed(seq))
 
-    async def readdir(self, path: str, ext: Union[str, list, tuple]) -> DirProxy:
-        return DirProxy(path=path, ext=ext)
+    async def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None) -> DirProxy:
+        """
+        Read a directory and return a file-mapping object
+
+        :param path: The directory path
+        :param ext: The extensions to include, None for all
+        :return: The mapped directory
+        """
+
+        if os.path.isdir(path):
+            return DirProxy(path=path, ext=ext)
 
     async def error(self, ctx: commands.Context, msg: str, **kwargs) -> None:
+        """
+        Context.send() with an emoji slapped in front ;-;
+
+        :param ctx: The command invocation context
+        :param msg: The message content
+        :param kwargs: ctx.send keyword arguments
+        """
+
         await ctx.send(f'{self.e.err}  {msg}', **kwargs)
 
     def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
+        """
+        Manager.error with the Context parameter removed
+
+        :param ctx: The command invocation context
+        :return: A partial version of Manager.error bindable to Context
+        """
+
         return functools.partial(self.error, ctx)
 
     async def get_locale(self, __id: Identifiable) -> DictProxy:
+        """
+        Get the locale associated with a user, defaults to English
+
+        :param __id: The user object/ID to get the locale for
+        :return: The locale associated with the user
+        """
+
         _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         locale: str = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id, None):
@@ -137,12 +237,29 @@ class Manager:
             return self.locale.master
 
     def get_nested_key(self, dict_: AnyDict, key_: Union[Iterable[str], str]) -> Any:
+        """
+        Get a nested dictionary key
+
+        :param dict_: The dictionary to get the key from
+        :param key_: The key to get
+        :return: The value associated with the key
+        """
+
         return functools.reduce(operator.getitem, key_ if not isinstance(key_, str) else key_.split(), dict_)
 
     def get_by_key_from_sequence(self,
                                  seq: DictSequence,
                                  key: str,
                                  value: Any) -> Optional[AnyDict]:
+        """
+        Get a dictionary from an iterable, where d[key] == value
+
+        :param seq: The sequence of dicts
+        :param key: The key to check
+        :param value: The wanted value
+        :return: The dictionary with the matching value, if any
+        """
+
         if len((_key := key.split())) > 1:
             key: list = _key
         for d in seq:
@@ -154,6 +271,14 @@ class Manager:
                     return d
 
     def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
+        """
+        Get a locale from a potentially malformed attribute.
+        If there isn't a match above 80, returns None
+
+        :param attribute: The attribute to match
+        :return: The locale or None if not matched
+        """
+
         for locale in self.locale.languages:
             for k, v in locale.items():
                 match: int = fuzz.token_set_ratio(attribute, v)
@@ -161,6 +286,15 @@ class Manager:
                     return locale, match == 100
 
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
+        """
+        Add missing keys to the dictionary
+
+        :param dict_: The dictionary to fix
+        :param ref_: The dictionary to refer to when getting the keys
+        :param locale: Whether the dictionaries are locales (logging)
+        :return: The fixed dict
+        """
+
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
                 if k not in node:
@@ -175,11 +309,22 @@ class Manager:
         return recursively_fix(dict_, ref_)
 
     def __fix_missing_locales(self):
+        """
+        Fill in locales with missing keys with the Master locale
+        """
+
         for locale in self.l:
             if locale != self.locale.master and 'meta' in locale:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master, locale=True))
 
     def fmt(self, ctx: commands.Context) -> object:
+        """
+        Instantiate a new Formatter object. Meant for binding to Context.
+
+        :param ctx: The command invocation Context
+        :return: The Formatter object created with the Context
+        """
+
         self_: Manager = self
 
         class _Formatter:

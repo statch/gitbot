@@ -99,8 +99,8 @@ async def unload_command(ctx: commands.Context, cog: str) -> None:
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
-    setattr(ctx, 'fmt', Mgr.fmt(ctx))
     setattr(ctx, 'l', await Mgr.get_locale(ctx))
+    setattr(ctx, 'fmt', Mgr.fmt(ctx))
     setattr(ctx, 'err', Mgr.error_ctx_bindable(ctx))
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False

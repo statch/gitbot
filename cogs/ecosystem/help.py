@@ -54,6 +54,7 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
         lines: list = [ctx.l.help.utility.description,
+                       f"`git commits` - {ctx.l.help.utility.commands.commits}",
                        f"`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}",
                        f"`git lines {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.lines}",
                        f"`git info {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.info}"]

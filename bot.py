@@ -38,6 +38,7 @@ extensions: list = [
     'cogs.github.numbered.pr',
     'cogs.github.numbered.issue',
     'cogs.github.complex.gist',
+    'cogs.github.other.commits',
     'cogs.github.other.lines',
     'cogs.github.other.info',
     'cogs.github.other.license',
@@ -98,8 +99,8 @@ async def unload_command(ctx: commands.Context, cog: str) -> None:
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
-    setattr(ctx, 'l', await Mgr.get_locale(ctx))
     setattr(ctx, 'fmt', Mgr.fmt(ctx))
+    setattr(ctx, 'l', await Mgr.get_locale(ctx))
     setattr(ctx, 'err', Mgr.error_ctx_bindable(ctx))
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False

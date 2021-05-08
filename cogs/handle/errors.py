@@ -1,5 +1,6 @@
 from discord.ext import commands
 from bot import PRODUCTION
+from core.globs import Mgr
 
 
 class Errors(commands.Cog):
@@ -8,6 +9,7 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error) -> None:
+        setattr(ctx, 'fmt', Mgr.fmt(ctx))
         ctx.fmt.set_prefix('errors')
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.err(ctx.l.errors.missing_required_argument)

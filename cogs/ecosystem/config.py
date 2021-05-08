@@ -21,6 +21,7 @@ class Config(commands.Cog):
                            f"`git config --repo {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.repo,
                            f"`git config --language` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.locale,
                            f"`git config --feed {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
+                           "`git commits` " + Mgr.e.arrow + " " + ctx.l.help.utility.commands.commits,
                            "\n" + ctx.l.config.default.deletion]
             embed = discord.Embed(
                 color=0xefefef,

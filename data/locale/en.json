@@ -345,7 +345,8 @@
       "Click `Add webhook`"
     ],
     "footer": "And that's it! You will now receive a notification whenever there's a new commit!",
-    "webhook_failed": "**Webhook creation failed.** Try verifying my permissions!"
+    "webhook_failed": "**Webhook creation failed.** Try verifying my permissions!",
+    "do_not_share_warning": "**Do not share the webhook URL**"
   },
   "config": {
     "default": {

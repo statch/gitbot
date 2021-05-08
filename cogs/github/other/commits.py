@@ -22,10 +22,11 @@ class Commits(commands.Cog):
             return
         embed: discord.Embed = discord.Embed(
             color=0x4287f5,
-            title=f'{Mgr.e.github} Commit Feed',
+            title=f'{Mgr.e.github}  Commit Feed',
             description=(ctx.l.commits.description
                          + '\n'
-                         + '\n'.join([f'{Mgr.e.square} {instruction}' for instruction in ctx.l.commits.instructions]))
+                         + '\n'.join([f'{Mgr.e.square} {instruction}' for instruction in ctx.l.commits.instructions])
+                         + '\n' + ':warning: ' + ctx.l.commits.do_not_share_warning + ' :warning:')
         )
         embed.set_footer(text=ctx.l.commits.footer)
         try:

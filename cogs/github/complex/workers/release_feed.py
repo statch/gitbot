@@ -1,25 +1,21 @@
 import asyncio
-import os
 import discord
 import datetime
 from bot import logger
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
-from motor.motor_asyncio import AsyncIOMotorClient
-from core.globs import Git
+from core.globs import Git, Mgr
 
 
 class ReleaseFeed(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION'))
-        self.db: AsyncIOMotorClient = self.db_client.store.guilds
         self.release_feed_worker.start()
 
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:
-        async for doc in self.db.find({}):
+        async for doc in Mgr.db.guilds.find({}):
             changed: bool = False
             update: list = []
             for item in doc['feed']:
@@ -67,7 +63,7 @@ class ReleaseFeed(commands.Cog):
         await self.doc_send(doc, embed)
 
     async def update_with_data(self, guild_id: int, to_update: List[Tuple[str]]) -> None:
-        await self.db.find_one_and_update({'_id': guild_id}, {
+        await Mgr.db.guilds.find_one_and_update({'_id': guild_id}, {
             '$set': {'feed': [dict(repo=repo, release=release) for repo, release in to_update]}})
 
     async def handle_missing_item(self, doc: dict, item: dict) -> None:
@@ -77,7 +73,7 @@ class ReleaseFeed(commands.Cog):
             description=f'A repository previously saved as `{item["repo"]}` was **deleted or renamed** by the owner. '
                         f'Please re-add it under the new name.'
         )
-        await self.db.update_one(doc, {'$pull': {'feed': item}})
+        await Mgr.db.guilds.update_one(doc, {'$pull': {'feed': item}})
         await self.doc_send(doc, embed)
 
     @release_feed_worker.before_loop
@@ -87,7 +83,7 @@ class ReleaseFeed(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        await self.db.find_one_and_delete({'_id': guild.id})
+        await Mgr.db.guilds.find_one_and_delete({'_id': guild.id})
 
     async def doc_send(self, doc: dict, embed: discord.Embed) -> bool:
         try:
@@ -95,7 +91,7 @@ class ReleaseFeed(commands.Cog):
                                                                 adapter=discord.AsyncWebhookAdapter(Git.ses))
             await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
-            await self.db.find_one_and_delete({'_id': doc['_id']})
+            await Mgr.db.guilds.find_one_and_delete({'_id': doc['_id']})
             return False
         return True
 

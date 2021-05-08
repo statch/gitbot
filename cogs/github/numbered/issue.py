@@ -1,48 +1,46 @@
 import discord
 import datetime
-from typing import Optional
-from core.globs import Git
+from typing import Optional, Union
+from babel.dates import format_date
+from core.globs import Git, Mgr
 from discord.ext import commands
 
 
 class Issue(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.command(name='issue', aliases=['-issue', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str = None) -> None:
+        ctx.fmt.set_prefix('issue')
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
-            issue_number: int = issue['number']
+            issue_number: Union[int, str] = issue['number']
         else:
             if not issue_number:
                 if not repo.isnumeric():
-                    await ctx.send(
-                        f'{self.e}  If you want to access the stored repo\'s PRs, please pass in a **pull request number!**')
+                    await ctx.err(ctx.l.issue.stored_no_number)
                     return
-                num = repo
-                stored = await self.bot.get_cog('Config').getitem(ctx, 'repo')
+                num: str = repo
+                stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
                 if stored:
-                    repo = stored
-                    issue_number = num
+                    repo: str = stored
+                    issue_number: str = num
                 else:
-                    await ctx.send(
-                        f'{self.e}  You don\'t have a quick access repo stored! **Type** `git config` **to do it.**')
+                    await ctx.err(ctx.l.generic.nonexistent.repo.qa)
                     return
 
             try:
-                issue = await Git.get_issue(repo, int(issue_number))
+                issue: Union[dict, str] = await Git.get_issue(repo, int(issue_number))
             except ValueError:
-                await ctx.send(f"{self.e}  The second argument must be an issue **number!**")
+                await ctx.err(ctx.l.issue.second_argument_number)
                 return
             if isinstance(issue, str):
                 if issue == 'repo':
-                    await ctx.send(f"{self.e}  This repository **doesn't exist!**")
+                    await ctx.err(ctx.l.generic.nonexistent.repo.base)
                 else:
-                    await ctx.send(f"{self.e}  An issue with this number **doesn't exist!**")
+                    await ctx.err(ctx.l.generic.nonexistent.issue_number)
                 return
 
         em: str = f"<:issue_open:788517560164810772>"
@@ -61,42 +59,46 @@ class Issue(commands.Cog):
         else:
             body = None
         if body:
-            embed.add_field(name=':notepad_spiral: Body:', value=f"```{body}```", inline=False)
+            embed.add_field(name=f':notepad_spiral: {ctx.l.issue.glossary[0]}:', value=f"```{body}```", inline=False)
 
-        created_at: datetime = datetime.datetime.strptime(issue['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
-
-        user: str = f"Created by [{issue['author']['login']}]({issue['author']['url']}) \
-         on {created_at.strftime('%e, %b %Y')}"
+        user: str = ctx.fmt('created_at',
+                            f"[{issue['author']['login']}]({issue['author']['url']})",
+                            format_date(datetime.datetime.strptime(issue['createdAt'],
+                                                                   '%Y-%m-%dT%H:%M:%SZ').date(),
+                                                                   'full',
+                                                                   locale=ctx.l.meta.name))
 
         if issue['closed']:
-            closed_at: datetime = datetime.datetime.strptime(issue['closedAt'], '%Y-%m-%dT%H:%M:%SZ')
-            closed: str = f"\nClosed on {closed_at.strftime('%e, %b %Y')}\n"
+            closed: str = '\n' + ctx.fmt('closed_at', format_date(datetime.datetime.strptime(issue['closedAt'],
+                                                                  '%Y-%m-%dT%H:%M:%SZ').date(),
+                                                                  'full',
+                                                                  locale=ctx.l.meta.name)) + '\n'
         else:
             closed: str = '\n'
 
-        assignees: str = f"{issue['assigneeCount']} assignees"
+        assignees: str = ctx.fmt('assignees plural', issue['assigneeCount'])
         if issue['assigneeCount'] == 1:
-            assignees: str = 'one assignee'
+            assignees: str = ctx.l.issue.assignees.singular
         elif issue['assigneeCount'] == 0:
-            assignees: str = 'no assignees'
+            assignees: str = ctx.l.issue.assignees.no_assignees
 
-        comments: str = f"Has {issue['commentCount']} comments"
+        comments: str = ctx.fmt('comments plural', issue['commentCount'])
         if issue['commentCount'] == 1:
-            comments: str = "Has only one comment"
+            comments: str = ctx.l.issue.comments.singular
         elif issue['commentCount'] == 0:
-            comments: str = "Has no comments"
+            comments: str = ctx.l.issue.comments.no_comments
 
-        comments_and_assignees: str = f"{comments} and {assignees}"
+        comments_and_assignees: str = f"{comments} {ctx.l.issue.linking_word} {assignees}"
 
-        participants: str = f"\n{issue['participantCount']} people have participated in this issue" if \
-            issue['participantCount'] != 1 else "\nOne person has participated in this issue"
+        participants: str = f"\n{ctx.fmt('participants plural', issue['participantCount'])}" if \
+            issue['participantCount'] != 1 else f"\n{ctx.l.issue.participants.singular}"
 
         info: str = f"{user}{closed}{comments_and_assignees}{participants}"
 
-        embed.add_field(name=':mag_right: Info:', value=info, inline=False)
+        embed.add_field(name=f':mag_right: {ctx.l.issue.glossary[1]}:', value=info, inline=False)
 
         if issue['labels']:
-            embed.add_field(name=':label: Labels:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
+            embed.add_field(name=f':label: {ctx.l.issue.glossary[2]}:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
 
         embed.set_thumbnail(url=issue['author']['avatarUrl'])
         await ctx.send(embed=embed)

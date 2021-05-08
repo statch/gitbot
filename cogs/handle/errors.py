@@ -5,33 +5,27 @@ from bot import PRODUCTION
 class Errors(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.e: str = "<:ge:767823523573923890>"
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error) -> None:
+        ctx.fmt.set_prefix('errors')
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"{self.e}  You didn't pass in all of the arguments, **use** `git --help` **for info.**")
+            await ctx.err(ctx.l.errors.missing_required_argument)
         elif isinstance(error, commands.CommandOnCooldown):
-            msg = self.e + " " + '**You\'re on cooldown!** Please try again in {:.2f}s'.format(error.retry_after)
-            await ctx.send(msg)
+            await ctx.err(ctx.fmt('command_on_cooldown', '{:.2f}'.format(error.retry_after)))
         elif isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send(
-                f"{self.e}  This command is experiencing exceptional traffic. **Please try again in a few seconds.**")
+            await ctx.err(ctx.l.errors.max_concurrency_reached)
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.send(
-                f"{self.e}  **I am missing permissions required to do this!**"
-                f" I need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+            await ctx.err(ctx.fmt('bot_missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send(
-                f"{self.e}  **You're missing permissions required to do this!**"
-                f" You need {', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')}")
+            await ctx.err(ctx.fmt('missing_permissions', ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
         elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send(f'{self.e}  This command can only be used **inside a server!**')
+            await ctx.err(ctx.l.errors.no_private_message)
         elif not PRODUCTION:
             raise error
         else:
             print(error)
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Errors(bot))

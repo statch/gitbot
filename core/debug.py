@@ -2,8 +2,8 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from ext.decorators import is_me
-from core.globs import Git
+from ext.decorators import dev_only
+from core.globs import Git, Mgr
 
 
 def insert_returns(body):
@@ -22,10 +22,8 @@ def insert_returns(body):
 class Debug(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.e: str = '<:ge:767823523573923890>'
 
-    @is_me()
+    @dev_only()
     @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
     async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
@@ -38,18 +36,18 @@ class Debug(commands.Cog):
         if cor.get(event, None) is not None:
             e = cor.get(event, None)
             self.bot.dispatch(event, e)
-            await ctx.send(f'{self.emoji} Dispatched event `{event}`')
+            await ctx.send(f'{Mgr.e.github} Dispatched event `{event}`')
         else:
-            await ctx.send(f'{self.e}  Failed to dispatch event `{event}`')
+            await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
 
-    @is_me()
+    @dev_only()
     @commands.command(aliases=['--rate', '--ratelimit'])
     async def rate(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
         embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.e}  Rate-limiting'
+            title=f'{Mgr.e.err}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]
         used_gql = sum(g['used'] for g in graphql)
@@ -70,7 +68,7 @@ class Debug(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    @is_me()
+    @dev_only()
     async def eval(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'
@@ -97,8 +95,11 @@ class Debug(commands.Cog):
             exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used
 
             result = (await eval(f'{fn_name}()', env))  # pylint: disable=eval-used
-            await ctx.send(result)
+            try:
+                await ctx.send(result)
+            except discord.errors.HTTPException:
+                await ctx.send('Evaluation successful, no output.')
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Debug(bot))

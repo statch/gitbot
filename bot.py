@@ -1,9 +1,10 @@
 import os
 import discord
 import logging
+from core.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
-from ext.decorators import is_me
+from ext.decorators import dev_only
 
 load_dotenv()
 
@@ -13,16 +14,17 @@ PREFIX: str = str(os.getenv('PREFIX'))
 
 intents: discord.Intents = discord.Intents(
     messages=True,
-    guilds=True
+    guilds=True,
+    guild_reactions=True
 )
 
 bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
                                  intents=intents, help_command=None,
-                                 guild_ready_timeout=1, max_messages=None,
+                                 guild_ready_timeout=1, status=discord.Status.idle,
                                  description='Seamless GitHub-Discord integration.',
                                  fetch_offline_members=False)
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s:%(name)s]: %(message)s')
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')
@@ -77,25 +79,28 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
 
 
 @bot.command(name='reload')
-@is_me()
+@dev_only()
 async def reload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
 @bot.command(name='load')
-@is_me()
+@dev_only()
 async def load_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
 @bot.command(name='unload')
-@is_me()
+@dev_only()
 async def unload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
 
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
+    setattr(ctx, 'l', await Mgr.get_locale(ctx))
+    setattr(ctx, 'fmt', Mgr.fmt(ctx))
+    setattr(ctx, 'err', Mgr.error_ctx_bindable(ctx))
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False
 

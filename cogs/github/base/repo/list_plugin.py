@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from discord.ext import commands
-from typing import Optional, List
+from typing import Optional, Iterable, List, Union
 from core.globs import Git, Mgr
 
 __all__: tuple = (
@@ -10,25 +10,22 @@ __all__: tuple = (
 )
 
 
-err: str = "<:ge:767823523573923890>"
-
-
 async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    ctx.fmt.set_prefix('repo issues')
     if (lstate := state.lower()) not in ('open', 'closed'):
-        await ctx.send(f'{err} `{state}` is not a **valid issue state!** (Try `open` or `closed`)')
+        await ctx.err(ctx.l.generic.issue.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed'):
         state, lstate = s, s
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog('Config').getitem(ctx, 'repo')
+        repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
-            await ctx.send(f'{err} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
-                           f'repo into the command)')
+            await ctx.err(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    issues: List[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=f'[{state.upper()}]'))
+    issues: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
     if not issues:
         await handle_none(ctx, 'issue', stored, lstate)
         return
@@ -37,13 +34,12 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
 
     embed: discord.Embed = discord.Embed(
         color=0xefefef,
-        title=f'Latest {lstate} issues in `{repo}`',
+        title=ctx.fmt('title', f'`{lstate}`', repo),
         url=f'https://github.com/{repo}/issues',
         description='\n'.join(issue_strings)
     )
 
-    embed.set_footer(text='You can quickly inspect a specific issue from the list by typing its number!\nYou can '
-                          'type cancel to quit.')
+    embed.set_footer(text=ctx.l.repo.issues.footer_tip)
 
     await ctx.send(embed=embed)
 
@@ -55,7 +51,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
             if msg.content.lower() == 'cancel':
                 return
             if not (issue := await Mgr.validate_number(num := msg.content, issues)):
-                await ctx.send(f'{err} `{num}` is not a valid number **from the list!**', delete_after=7)
+                await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
                 ctx.data = await Git.get_issue('', 0, issue, True)
@@ -66,21 +62,21 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
 
 
 async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    ctx.fmt.set_prefix('repo pulls')
     if (lstate := state.lower()) not in ('open', 'closed', 'merged'):
-        await ctx.send(f'{err} `{state}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)')
+        await ctx.err(ctx.l.generic.pr.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed', 'merged'):
         state, lstate = s, s
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.get_cog('Config').getitem(ctx, 'repo')
+        repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
-            await ctx.send(f'{err} **You don\'t have a quick access repo configured!** (You didn\'t pass a '
-                           f'repo into the command)')
+            await ctx.err(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    prs: List[dict] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=f'[{state.upper()}]'))
+    prs: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
     if not prs:
         await handle_none(ctx, 'pull request', stored, lstate)
         return
@@ -89,13 +85,12 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
 
     embed: discord.Embed = discord.Embed(
         color=0xefefef,
-        title=f'Latest {lstate} pull requests in `{repo}`',
+        title=ctx.fmt('title', f'`{lstate}`', repo),
         url=f'https://github.com/{repo}/pulls',
         description='\n'.join(pr_strings)
     )
 
-    embed.set_footer(text='You can quickly inspect a specific PR from the list by typing its number!\nYou can '
-                          'type cancel to quit.')
+    embed.set_footer(text=ctx.l.repo.pulls.footer_tip)
 
     await ctx.send(embed=embed)
 
@@ -107,7 +102,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
             if msg.content.lower() == 'cancel':
                 return
             if not (pr := await Mgr.validate_number(num := msg.content, prs)):
-                await ctx.send(f'{err} `{num}` is not a valid number **from the list!**', delete_after=7)
+                await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
                 ctx.data = await Git.get_pull_request('', 0, pr)
@@ -120,16 +115,21 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
 async def handle_none(ctx: commands.Context, item: str, stored: bool, state: str) -> None:
     if item is None:
         if stored:
-            await ctx.bot.get_cog('Config').delete_field(ctx, 'repo')
-            await ctx.send(
-                f'{err} You invoked the command with your stored repo, but it\'s unavailable. **Please re-add it.**')
+            await Mgr.db.users.delitem(ctx, 'repo')
+            await ctx.err(ctx.l.generic.nonexistent.repo.saved_repo_unavailable)
         else:
-            await ctx.send(f'{err}  This repo doesn\'t exist!')
+            await ctx.err(ctx.l.generic.nonexistent.repo.base)
     else:
         if not stored:
-            await ctx.send(f'{err} This repo doesn\'t have any **{state} {item}s!**')
+            if item == 'issue':
+                await ctx.err(ctx.l.generic.nonexistent.repo.no_issues_with_state.format(f'`{state}`'))
+            else:
+                await ctx.err(ctx.l.generic.nonexistent.repo.no_pulls_with_state.format(f'`{state}`'))
         else:
-            await ctx.send(f'{err} Your saved repo doesn\'t have any **{state} {item}s!**')
+            if item == 'issue':
+                await ctx.err(ctx.l.generic.nonexistent.repo.no_issues_with_state_qa.format(f'`{state}`'))
+            else:
+                await ctx.err(ctx.l.generic.nonexistent.repo.no_pulls_with_state_qa.format(f'`{state}`'))
     return
 
 

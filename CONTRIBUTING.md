@@ -1,7 +1,7 @@
 ## Contributing
 *Want to help out? This is how!*
 
-1. [Create a bug report, feature request, or other issue](https://github.com/py-mine/PyMine/issues), and assign yourself.
+1. [Create a bug report, feature request, or other issue](https://github.com/py-mine/PyMine/issues) and assign yourself.
 2. Fork the repository, or create a new branch.
 3. Make your changes, with descriptive commit names. Remember to follow the [style guide](#style-guide)!
 4. [Create a pull request](https://github.com/py-mine/PyMine/pulls) with a detailed description of the issue resolved, link the issue you created, and request a reviewer.

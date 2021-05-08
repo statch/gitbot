@@ -33,9 +33,6 @@ LINES_OF_CODE: int = sum([dir_line_count('./cogs'),
 class BotInfo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.emoji: str = '<:github:772040411954937876>'
-        self.s: str = "<:gs:767809543815954463>"
-        self.s_emoji: str = Mgr.emojis["statistics"]
 
     @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
@@ -53,7 +50,7 @@ class BotInfo(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
             title=None,
-            description=f'{self.s}  **I have been online for:**\n{uptime_stamp}'
+            description=f'{Mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
         )
         await ctx.send(embed=embed)
 
@@ -62,7 +59,7 @@ class BotInfo(commands.Cog):
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            description=f"{self.s}  **My ping is:**\n**{round(self.bot.latency * 1000)}** milliseconds"
+            description=f"{Mgr.e.timer}  {ctx.fmt('ping', round(self.bot.latency * 1000))}"
         )
         await ctx.send(embed=embed)
 
@@ -71,21 +68,18 @@ class BotInfo(commands.Cog):
     async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            title=f'{self.emoji}  Privacy Policy'
+            title=f'{Mgr.e.github}  {ctx.l.privacy_policy.title}'
         )
-        embed.add_field(name="What is stored?", inline=False,
-                        value="The only data stored are your User ID and quick access users, repos and orgs.")
-        embed.add_field(name="How is all this used anyway?", inline=False,
-                        value="It's used to provide storage for your saved users, repos and organizations, your User "
-                              "ID is essential for the Bot to know, what data is yours.")
-        embed.add_field(name="Who has access to this data?", inline=False,
-                        value="Only the Bot's developer has access, no one else. Your data isn't viewed or accessed "
-                              "in any way unless it's required to provide the service.")
-        embed.add_field(name="How can I get rid of this stored data?", inline=False,
-                        value="You can do that very easily by using the `git config -delete` command!")
-        embed.add_field(name="Who wrote this and can this be changed?", inline=False,
-                        value="This privacy policy was written by [wulf](https://dsc.bio/wulf), the Bot's developer, "
-                              "and yes, all of this is subject to change in the future.")
+        embed.add_field(name=ctx.l.privacy_policy.what.title, inline=False,
+                        value=ctx.l.privacy_policy.what.body)
+        embed.add_field(name=ctx.l.privacy_policy.use.title, inline=False,
+                        value=ctx.l.privacy_policy.use.body)
+        embed.add_field(name=ctx.l.privacy_policy.access.title, inline=False,
+                        value=ctx.l.privacy_policy.access.body)
+        embed.add_field(name=ctx.l.privacy_policy.deletion.title, inline=False,
+                        value=ctx.l.privacy_policy.deletion.body)
+        embed.add_field(name=ctx.l.privacy_policy.author.title, inline=False,
+                        value=ctx.l.privacy_policy.author.body)
         await ctx.send(embed=embed)
 
     @commands.command(name='invite', aliases=['--invite', '-invite'])
@@ -93,11 +87,11 @@ class BotInfo(commands.Cog):
     async def invite_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xefefef,
-            description=f"[**Invite {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id"
-                        f"=761269120691470357&scope=bot&permissions=67488832) | [**Support Server**]("
+            description=f"[**{ctx.l.invite.invite_verb} {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id"
+                        f"=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]("
                         f"https://discord.gg/3e5fwpA) "
         )
-        embed.set_author(icon_url=self.bot.user.avatar_url, name='Invite me to your server!')
+        embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.invite.tagline)
         await ctx.send(embed=embed)
 
     @commands.command(name='vote', aliases=['--vote', '-vote'])
@@ -108,7 +102,7 @@ class BotInfo(commands.Cog):
             description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
                         "https://botsfordiscord.com/bot/761269120691470357) "
         )
-        embed.set_author(name=f'Vote for {self.bot.user.name}!', icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='stats', aliases=['--stats', '-stats'])
@@ -116,15 +110,15 @@ class BotInfo(commands.Cog):
     async def stats_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(color=0xefefef)
         users: int = sum([x.member_count for x in self.bot.guilds])
-        memory: str = "**{:.3f}GB** of RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
-        cpu: str = f"**{psutil.cpu_percent()}%** CPU, and"
-        embed.add_field(name=f"{self.s_emoji}  Bot Stats", value=f"General stats regarding the Bot's functioning.",
+        memory: str = "**{:.3f}GB** RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
+        cpu: str = f"**{psutil.cpu_percent()}%** CPU,"
+        embed.add_field(name=f"{Mgr.e.stats}  {ctx.l.stats.title}", value=ctx.l.stats.body,
                         inline=False)
-        embed.add_field(name="System Usage", value=f"{cpu}\n{memory}")
-        embed.add_field(name="People",
-                        value=f"I'm in **{len(self.bot.guilds)}** servers,\nand have **{users}** users")
-        embed.add_field(name="Code",
-                        value=f"I am **{LINES_OF_CODE}** lines of code,\nrunning on **{platform.system()} {platform.release()}**")
+        embed.add_field(name=ctx.l.stats.system, value=f"{cpu}\n{memory}")
+        embed.add_field(name=ctx.l.stats.people.title,
+                        value=ctx.fmt('stats people body', len(self.bot.guilds), users))
+        embed.add_field(name=ctx.l.stats.code.title,
+                        value=ctx.fmt('stats code body', LINES_OF_CODE, f'{platform.system()} {platform.release()}'))
         await ctx.send(embed=embed)
 
 

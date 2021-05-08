@@ -11,3 +11,5 @@ dblpy==0.4.0
 dlabs.py
 statcord.py
 beautifulsoup4~=4.9.3
+Babel~=2.9.0
+colorama~=0.4.4

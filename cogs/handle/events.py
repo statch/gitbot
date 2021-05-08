@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from ext.explicit_checks import verify_send_perms
 from core.globs import Mgr
 
 
@@ -15,10 +14,10 @@ class Events(commands.Cog):
 
     async def build_guild_embed(self, guild: discord.Guild, state: bool = True) -> discord.Embed:
         if state:
-            title: str = f'{Mgr.emojis["checkmark"]}  Joined a new guild!'
+            title: str = f'{Mgr.e.checkmark}  Joined a new guild!'
             color: int = 0x33ba7c
         else:
-            title: str = f'{Mgr.emojis["failure"]}  Removed from a guild.'
+            title: str = f'{Mgr.e.failure}  Removed from a guild.'
             color: int = 0xda4353
 
         embed = discord.Embed(
@@ -41,12 +40,11 @@ class Events(commands.Cog):
     async def on_guild_join(self, guild: discord.Guild) -> None:
         receiver = None
         async for channel in guild_text_channels(guild):
-            if await verify_send_perms(channel):
+            if await Mgr.verify_send_perms(channel):
                 receiver = channel
                 break
         embed = discord.Embed(
             color=0xefefef,
-            title=None,
             description=f":tada: **Hi! I'm {self.bot.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git --help` to get started.\n\nIf you have any problems, [join the support server!](https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
         )
         embed.set_thumbnail(url=self.bot.user.avatar_url)
@@ -71,13 +69,13 @@ class Events(commands.Cog):
         await channel.send(embed=embed_l)
 
     @commands.Cog.listener()
-    async def on_message(self, message) -> None:
-        can_send: bool = await verify_send_perms(message.channel)
+    async def on_message(self, message: discord.Message) -> None:
+        can_send: bool = await Mgr.verify_send_perms(message.channel)
+        locale = await Mgr.get_locale(message.author.id)
         if all([self.bot.user in message.mentions[:1], len(message.content) < 23, can_send]):
             embed = discord.Embed(
                 color=0xefefef,
-                title=None,
-                description=f":tada: **Hi! I'm {self.bot.user.name}.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
+                description=locale.events.mention
             )
             embed.set_thumbnail(url=self.bot.user.avatar_url)
             embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)

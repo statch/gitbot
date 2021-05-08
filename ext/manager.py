@@ -43,7 +43,7 @@ class Manager:
                                    'pr': self.git.get_pull_request,
                                    'lines': 'lines'}
         self.locale_cache: dict = {}
-        setattr(self.locale, 'master', self.get_by_key_from_sequence(self.l, 'meta name', self.locale.master))
+        setattr(self.locale, 'master', self.l.en)
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
         self.__fix_missing_locales()
 

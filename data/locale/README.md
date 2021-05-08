@@ -1,4 +1,4 @@
-# GitBot Localization
+# 🌐 GitBot Localization
 *Here you can contribute to the accessibility of GitBot by providing translations of commands.*
 
 # Adding a locale

@@ -227,7 +227,7 @@ class Manager:
         if cached := self.locale_cache.get(_id, None):
             locale: str = cached
         else:
-            stored: Optional[str] = await self.db.users.getitem(__id, 'locale')
+            stored: Optional[str] = await self.db.users.getitem(_id, 'locale')
             if stored:
                 locale: str = stored
                 self.locale_cache[_id] = locale

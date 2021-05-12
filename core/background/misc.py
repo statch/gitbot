@@ -21,7 +21,7 @@ class MiscellaneousBackgroundTasks(commands.Cog):
                                   discord.Activity(type=discord.ActivityType.watching, name="git --help"),
                                   discord.Activity(
                                       type=discord.ActivityType.listening, name="your Git feed")])
-        await self.bot.change_presence(activity=next(presences), status=discord.Status.idle)
+        await self.bot.change_presence(activity=next(presences), status=discord.Status.online)
 
     @status_changer.before_loop
     async def wait_for_ready(self):

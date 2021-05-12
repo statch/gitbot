@@ -20,7 +20,7 @@ intents: discord.Intents = discord.Intents(
 
 bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
                                  intents=intents, help_command=None,
-                                 guild_ready_timeout=1, status=discord.Status.idle,
+                                 guild_ready_timeout=1, status=discord.Status.online,
                                  description='Seamless GitHub-Discord integration.',
                                  fetch_offline_members=False)
 

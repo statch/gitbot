@@ -3,7 +3,7 @@ import datetime
 import asyncio
 from babel.dates import format_date
 from discord.ext import commands
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 from typing import Optional, Tuple, Union
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',

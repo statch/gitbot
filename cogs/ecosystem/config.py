@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from discord.ext import commands
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 from typing import Optional
 
 

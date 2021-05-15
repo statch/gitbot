@@ -4,7 +4,7 @@ import datetime
 import os
 import psutil
 from discord.ext import commands
-from globs import Mgr
+from lib.globs import Mgr
 from os.path import isfile, isdir, join
 
 

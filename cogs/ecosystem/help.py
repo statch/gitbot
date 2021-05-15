@@ -1,5 +1,5 @@
 import discord
-from globs import Mgr
+from lib.globs import Mgr
 from discord.ext import commands
 
 

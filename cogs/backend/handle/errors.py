@@ -1,6 +1,6 @@
 from discord.ext import commands
 from bot import PRODUCTION
-from globs import Mgr
+from lib.globs import Mgr
 
 
 class Errors(commands.Cog):

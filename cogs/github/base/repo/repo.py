@@ -6,7 +6,7 @@ from .list_plugin import *
 from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 from utils.regex import MD_EMOJI_RE
 
 

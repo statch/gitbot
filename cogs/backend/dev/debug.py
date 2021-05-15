@@ -3,7 +3,7 @@ import discord
 import datetime as dt
 import ast
 from utils.decorators import dev_only
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 
 
 def insert_returns(body):

@@ -1,7 +1,7 @@
 import discord
 import datetime
 from typing import Optional, Union
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 from babel.dates import format_date
 from discord.ext import commands
 

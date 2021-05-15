@@ -5,7 +5,7 @@ from bot import logger
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Optional
 from discord.ext import tasks, commands
-from globs import Git, Mgr
+from lib.globs import Git, Mgr
 
 
 class ReleaseFeed(commands.Cog):

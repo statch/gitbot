@@ -1,7 +1,7 @@
 import os
 import discord
 import logging
-from globs import Mgr
+from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
 from utils.decorators import dev_only

@@ -1,5 +1,5 @@
 from discord.ext import commands
-from globs import Mgr
+from lib.globs import Mgr
 from discord import Embed
 
 

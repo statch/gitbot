@@ -1,5 +1,5 @@
 from discord.ext import commands
-from globs import Mgr
+from lib.globs import Mgr
 from typing import Optional, Union
 from lib.structs import GitCommandData
 

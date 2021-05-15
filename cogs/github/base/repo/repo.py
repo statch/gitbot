@@ -64,7 +64,7 @@ class Repo(commands.Cog):
             watchers: str = ctx.l.repo.info.watchers.no_watchers
         stargazers: str = ctx.l.repo.info.stargazers.no_stargazers + '\n' if star == 0 else ctx.fmt('stargazers plural', star, f"{r['url']}/stargazers") + '\n'
         if star == 1:
-            stargazers: str = ctx.fmt('stargazers singular', f"{r['url']}/stargazers")
+            stargazers: str = ctx.fmt('stargazers singular', f"{r['url']}/stargazers") + '\n'
 
         watchers_stargazers: str = f"{watchers} {ctx.l.repo.info.linking_word} {stargazers}"
 

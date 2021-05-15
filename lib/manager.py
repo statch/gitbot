@@ -7,9 +7,9 @@ import discord
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from ext.typehints import DictSequence, AnyDict, Identifiable
-from ext.structs import DirProxy, DictProxy, GitCommandData, UserCollection
-from ext import regex as r
+from lib.typehints import DictSequence, AnyDict, Identifiable
+from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
+from lib.utils import regex as r
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
 

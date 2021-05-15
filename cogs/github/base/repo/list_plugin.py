@@ -2,7 +2,7 @@ import discord
 import asyncio
 from discord.ext import commands
 from typing import Optional, Iterable, List, Union
-from core.globs import Git, Mgr
+from globs import Git, Mgr
 
 __all__: tuple = (
     'issue_list',

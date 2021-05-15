@@ -2,8 +2,8 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from ext.decorators import dev_only
-from core.globs import Git, Mgr
+from utils.decorators import dev_only
+from globs import Git, Mgr
 
 
 def insert_returns(body):

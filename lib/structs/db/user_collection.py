@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorCollection
 from discord.ext import commands
 from typing import Optional
-from ext.typehints import Identifiable
+from lib.typehints import Identifiable
 
 
 class UserCollection(AsyncIOMotorCollection):
@@ -15,7 +15,7 @@ class UserCollection(AsyncIOMotorCollection):
     github: :class:`core.net.github.api.GitHubAPI`
         The GitHub API instance for validating inserts
 
-    mgr: :class:`ext.manager.Manager`
+    mgr: :class:`lib.manager.Manager`
         The Manager instance for validating inserts
     """
 

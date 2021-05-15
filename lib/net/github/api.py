@@ -6,7 +6,7 @@ from typing import Union, List, Optional
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
-from ext.structs import DirProxy, GhProfileData
+from lib.structs import DirProxy, GhProfileData
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'

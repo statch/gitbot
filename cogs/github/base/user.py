@@ -3,7 +3,7 @@ import datetime
 from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
-from core.globs import Git, Mgr
+from globs import Git, Mgr
 
 
 class User(commands.Cog):

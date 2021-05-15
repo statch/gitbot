@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from core.globs import Mgr, Git
+from globs import Mgr
 
 
 class Commits(commands.Cog):

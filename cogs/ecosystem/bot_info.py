@@ -4,7 +4,7 @@ import datetime
 import os
 import psutil
 from discord.ext import commands
-from core.globs import Mgr
+from globs import Mgr
 from os.path import isfile, isdir, join
 
 
@@ -25,9 +25,7 @@ def dir_line_count(directory) -> int:
     return sum(map(lambda item: item_line_count(join(directory, item)), os.listdir(directory)))
 
 
-LINES_OF_CODE: int = sum([dir_line_count('./cogs'),
-                          dir_line_count('./ext'),
-                          dir_line_count('./core')])
+LINES_OF_CODE: int = sum((dir_line_count('./cogs'), dir_line_count('./lib')))
 
 
 class BotInfo(commands.Cog):

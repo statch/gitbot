@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from core.globs import Mgr
+from globs import Mgr
 
 
 async def guild_text_channels(guild: discord.Guild):

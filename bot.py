@@ -1,10 +1,10 @@
 import os
 import discord
 import logging
-from core.globs import Mgr
+from globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
-from ext.decorators import dev_only
+from utils.decorators import dev_only
 
 load_dotenv()
 
@@ -30,8 +30,8 @@ logging.getLogger('discord.gateway').setLevel(logging.WARNING)
 logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
-    'core.background.misc',
-    'core.debug',
+    'cogs.backend.tasks.misc',
+    'cogs.backend.dev.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',
     'cogs.github.base.repo.repo',
@@ -46,8 +46,8 @@ extensions: list = [
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',
-    'cogs.handle.errors',
-    'cogs.handle.events'
+    'cogs.backend.handle.errors',
+    'cogs.backend.handle.events'
 ]
 
 if PRODUCTION:

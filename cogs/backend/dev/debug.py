@@ -2,7 +2,7 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from utils.decorators import dev_only
+from lib.utils.decorators import dev_only
 from lib.globs import Git, Mgr
 
 

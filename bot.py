@@ -4,7 +4,7 @@ import logging
 from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
-from utils.decorators import dev_only
+from lib.utils.decorators import dev_only
 
 load_dotenv()
 

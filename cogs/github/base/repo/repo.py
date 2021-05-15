@@ -7,7 +7,7 @@ from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
-from utils.regex import MD_EMOJI_RE
+from lib.utils.regex import MD_EMOJI_RE
 
 
 class Repo(commands.Cog):

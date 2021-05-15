@@ -2,7 +2,7 @@ import re
 from typing import Union
 from aiohttp import ClientSession
 from discord.ext import commands
-from utils import regex
+from lib.utils import regex
 
 
 async def compile_github_link(data: tuple) -> str:

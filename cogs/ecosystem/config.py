@@ -165,7 +165,7 @@ class Config(commands.Cog):
     async def config_user_command(self, ctx: commands.Context, user: str) -> None:
         u: bool = await Mgr.db.users.setitem(ctx, 'user', user)
         if u:
-            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set user', user))}")
+            await ctx.send(f"{Mgr.e.github}  {ctx.fmt('config qa_set user', user)}")
         else:
             await ctx.err(ctx.l.generic.nonexistent.user.base)
 
@@ -174,7 +174,7 @@ class Config(commands.Cog):
     async def config_org_command(self, ctx: commands.Context, org: str) -> None:
         o: bool = await Mgr.db.users.setitem(ctx, 'org', org)
         if o:
-            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set org', org))}")
+            await ctx.send(f"{Mgr.e.github}  {ctx.fmt('config qa_set org', org)}")
         else:
             await ctx.err(ctx.l.generic.nonexistent.org.base)
 
@@ -183,7 +183,7 @@ class Config(commands.Cog):
     async def config_repo_command(self, ctx: commands.Context, repo: str) -> None:
         r: bool = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
-            await ctx.send(f"{Mgr.e.github}  {ctx.err(ctx.fmt('config qa_set repo', repo))}")
+            await ctx.send(f"{Mgr.e.github}  {ctx.fmt('config qa_set repo', repo)}")
         else:
             await ctx.err(ctx.l.generic.nonexistent.repo.base)
 

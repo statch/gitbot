@@ -36,7 +36,7 @@ class User(commands.Cog):
                 await Mgr.db.users.delitem(ctx, 'user')
                 await ctx.err(ctx.l.generic.nonexistent.user.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.user)
+                await ctx.err(ctx.l.generic.nonexistent.user.base)
             return None
 
         embed = discord.Embed(

@@ -84,12 +84,12 @@ class User(commands.Cog):
             blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', ctx.l.user.info.glossary[3])
         else:
             blog: tuple = (None, ctx.l.glossary.website.capitalize())
-        twitter: tuple = (
-            f'https://twitter.com/{u["twitterUsername"]}' if "twitterUsername" in u else None, "Twitter")
+        twitter: tuple = ((
+            f'https://twitter.com/{u["twitterUsername"]}') if "twitterUsername" in u and u['twitterUsername'] is not None else None, "Twitter")
         links: list = [blog, twitter]
         link_strings: list = []
         for lnk in links:
-            if lnk[0] is not None and len(lnk[0]) != 0:
+            if lnk[0] is not None and lnk[0] != '':
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
             embed.add_field(name=f":link: {ctx.l.user.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)

@@ -22,6 +22,7 @@ class LinesOfCode(commands.Cog):
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
             await ctx.err(ctx.l.generic.nonexistent.repo.base)
+            return
         processed: Optional[dict] = await self.process_repo(ctx, repo)
         if not processed:
             await ctx.err(ctx.l.loc.file_too_big)

@@ -74,7 +74,7 @@ class GitHubAPI:
             return []
 
     async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
-        if '/' not in repo:
+        if '/' not in repo or repo.count('/') > 1:
             return []
         try:
             return await self.gh.getitem(f"/repos/{repo}/contents")
@@ -118,6 +118,8 @@ class GitHubAPI:
             return None
 
     async def get_repo_zip(self, repo: str) -> Optional[Union[bool, bytes]]:
+        if '/' not in repo or repo.count('/') > 1:
+            return None
         res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
                                  headers={"Authorization": f"token {self.token}"})
         if res.status == 200:
@@ -145,6 +147,8 @@ class GitHubAPI:
         return data
 
     async def get_repo(self, repo: str) -> Optional[dict]:
+        if '/' not in repo or repo.count('/') > 1:
+            return None
         split: list = repo.split('/')
         owner: str = split[0]
         repository: str = split[1]
@@ -166,6 +170,8 @@ class GitHubAPI:
                                number: int,
                                data: Optional[dict] = None) -> Union[dict, str]:
         if not data:
+            if '/' not in repo or repo.count('/') > 1:
+                return 'repo'
             split: list = repo.split('/')
             owner: str = split[0]
             repository: str = split[1]

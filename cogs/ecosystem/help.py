@@ -55,6 +55,7 @@ class Help(commands.Cog):
     async def utlity_help(self, ctx: commands.Context) -> None:
         lines: list = [ctx.l.help.utility.description,
                        f"`git commits` - {ctx.l.help.utility.commands.commits}",
+                       f"`git loc {{{ctx.l.argument_placeholders.repo}}}` - {ctx.l.help.utility.commands.loc}",
                        f"`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}",
                        f"`git lines {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.lines}",
                        f"`git info {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.info}"]

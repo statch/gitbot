@@ -331,6 +331,18 @@
     "no_assignees": "No assignees",
     "no_reviewers": "No reviewers"
   },
+  "loc": {
+    "file_too_big": "Sorry, I can't process this repo as it's **too big!**",
+    "title": "Lines of Code in {0}",
+    "description": "A total of **{0}** lines across **{1}** files.",
+    "stats": {
+      "code": "Code",
+      "blank": "Blank",
+      "comments": "Comments",
+      "detailed": "Detailed"
+    },
+    "footer": "This command is powered by the CLOC CLI tool."
+  },
   "commits": {
     "dm_title": "Webhook URL",
     "dm_failed": "**I can't send you a DM**, so we can't proceed. Process aborted, webhook deleted.",
@@ -555,6 +567,7 @@
       "description": "These commands let you fetch various data related to Git and GitHub.",
       "commands": {
         "commits": "quickly set up commit feeds in the current channel",
+        "loc": "get lines of code count of a repository with details",
         "license": "get info about a license",
         "lines": "get the lines mentioned in a GitHub or GitLab link",
         "info": "automatically inspect a link and get info on it"

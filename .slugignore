@@ -2,3 +2,5 @@
 docs/
 .github/
 .pylintrc
+.graphqlconfig
+schema.graphql

@@ -4,6 +4,8 @@ import os
 import functools
 import operator
 import discord
+import zipfile
+import os.path
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
@@ -64,6 +66,19 @@ class Manager:
         """
 
         print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
+
+    async def unzip_file(self, zip_path: str, output_dir: str) -> None:
+        """
+        Unzip a ZIP file to a specified location
+
+        :param zip_path: The location of the ZIP file
+        :param output_dir: The output directory to extract ZIP file contents to
+        """
+
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        with zipfile.ZipFile(zip_path, 'r') as _zip:
+            _zip.extractall(output_dir)
 
     def correlate_license(self, to_match: str) -> Optional[DictProxy]:
         """

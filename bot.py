@@ -1,6 +1,7 @@
-import os
+import os.path
 import discord
 import logging
+import platform
 from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -42,6 +43,7 @@ extensions: list = [
     'cogs.github.other.lines',
     'cogs.github.other.info',
     'cogs.github.other.license',
+    'cogs.github.other.loc',
     'cogs.github.complex.workers.release_feed',
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
@@ -121,4 +123,7 @@ async def on_ready() -> None:
 
 
 if __name__ == '__main__':
+    logger.info(f'Running on {platform.system()} {platform.release()}')
+    if not os.path.exists('./tmp'):
+        os.mkdir('tmp')
     bot.run(os.getenv('BOT_TOKEN'))

@@ -2,6 +2,7 @@ import os.path
 import discord
 import logging
 import platform
+import subprocess
 from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -126,4 +127,5 @@ if __name__ == '__main__':
     logger.info(f'Running on {platform.system()} {platform.release()}')
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
+    subprocess.call(('cpan', 'Regexp::Common'))
     bot.run(os.getenv('BOT_TOKEN'))

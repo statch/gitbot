@@ -2,7 +2,7 @@ import os.path
 import discord
 import logging
 import platform
-import subprocess
+import requests
 from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -123,9 +123,16 @@ async def on_ready() -> None:
     logger.info(f'discord.py version: {discord.__version__}\n')
 
 
+def prepare_cloc() -> None:
+    if not os.path.exists('cloc.pl'):
+        res: requests.Response = requests.get('https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
+        with open('cloc.pl', 'wb') as fp:
+            fp.write(res.content)
+
+
 if __name__ == '__main__':
     logger.info(f'Running on {platform.system()} {platform.release()}')
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
-    subprocess.call(('cpan', 'Regexp::Common'))
+    prepare_cloc()
     bot.run(os.getenv('BOT_TOKEN'))

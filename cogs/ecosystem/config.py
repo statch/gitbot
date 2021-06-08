@@ -187,7 +187,7 @@ class Config(commands.Cog):
         else:
             await ctx.err(ctx.l.generic.nonexistent.repo.base)
 
-    @config_command_group.command(name='--lang', aliases=['-lang', 'lang', '--locale', '-locale', 'locale'])
+    @config_command_group.command(name='--lang', aliases=['-lang', 'lang', '--locale', '-locale', 'locale', '--language', '-language', 'language'])
     @commands.has_permissions(add_reactions=True)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_locale_command(self, ctx: commands.Context, locale: Optional[str] = None) -> None:
@@ -233,7 +233,7 @@ class Config(commands.Cog):
                 await ctx.send(f"{Mgr.e.github}  {ctx.fmt('success', l_[0]['localized_name'].capitalize())}")
                 return
             else:
-                await ctx.err(ctx.fmt('failure', locale), delete_after=3)
+                await ctx.err(ctx.fmt('failure', locale), delete_after=7)
 
         def _format(locale_: dict):
             formatted: str = f'{Mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}'

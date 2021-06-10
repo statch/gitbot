@@ -6,6 +6,12 @@
       "full_name": "english",
       "localized_name": "english",
       "flag": ":flag_um:"
-    }
+    },
+    {
+      "name": "pt-br",
+      "full_name": "portuguese brazilian",
+      "localized_name": "portuguese",
+      "flag": ":flag_br:"
+    },
   ]
 }

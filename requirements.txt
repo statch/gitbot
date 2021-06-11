@@ -12,5 +12,6 @@ statcord.py
 beautifulsoup4==4.9.3
 Babel==2.9.1
 colorama==0.4.4
-aiofiles==0.7.0
 requests==2.25.1
+py-carbon
+aiofiles==0.7.0

@@ -6,9 +6,9 @@ from ..structs import DictProxy, DirProxy
 __all__: tuple = (
     'DictSequence',
     'AnyDict',
-    'Identifiable'
+    'Identity'
 )
 
 AnyDict = Union[dict, DictProxy, CaseInsensitiveDict]
 DictSequence = Union[Tuple[AnyDict], List[AnyDict], DirProxy]
-Identifiable = Union[commands.Context, int]
+Identity = Union[int, str, commands.Context]

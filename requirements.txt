@@ -1,7 +1,7 @@
 discord.py==1.7.2
 aiohttp==3.7.4.post0
 gidgethub==5.0.1
-python-dotenv==0.17.0
+python-dotenv==0.17.1
 fuzzywuzzy==0.18.0
 motor==2.4.0
 dnspython==2.1.0
@@ -12,6 +12,6 @@ statcord.py
 beautifulsoup4==4.9.3
 Babel==2.9.1
 colorama==0.4.4
-aiofiles==0.6.0
 requests==2.25.1
 py-carbon
+aiofiles==0.7.0

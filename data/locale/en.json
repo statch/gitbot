@@ -22,7 +22,8 @@
     "state": "state",
     "license": "license",
     "link": "link",
-    "lang": "language"
+    "lang": "language",
+    "link_or_codeblock": "link or codeblock"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -130,8 +131,8 @@
   "info": {
     "no_info": "I couldn't fetch any info regarding the link you provided!"
   },
-  "lines": {
-    "more_than_25": "I cannot show **more than 25 lines**, sorry!",
+  "snippets": {
+    "length_limit_exceeded": "I cannot show **more than {0} lines**, sorry!",
     "no_content": "There **isn't any content** on these lines!",
     "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
     "nonexistent": "That {0} **doesn't exist!**",
@@ -569,7 +570,8 @@
         "commits": "quickly set up commit feeds in the current channel",
         "loc": "get lines of code count of a repository with details",
         "license": "get info about a license",
-        "lines": "get the lines mentioned in a GitHub or GitLab link",
+        "snippet": "generate a beautiful image of the lines mentioned in a GitHub or GitLab link or a codeblock",
+        "snippet_raw": "get the lines mentioned in a GitHub or GitLab link",
         "info": "automatically inspect a link and get info on it"
       }
     }

@@ -57,7 +57,8 @@ class Help(commands.Cog):
                        f"`git commits` - {ctx.l.help.utility.commands.commits}",
                        f"`git loc {{{ctx.l.argument_placeholders.repo}}}` - {ctx.l.help.utility.commands.loc}",
                        f"`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}",
-                       f"`git lines {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.lines}",
+                       f"`git snippet {{{ctx.l.argument_placeholders.link_or_codeblock}}}` - {ctx.l.help.utility.commands.snippet}",
+                       f"`git snippet --raw {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.snippet_raw}",
                        f"`git info {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.info}"]
         embed = discord.Embed(
             title=f"{Mgr.e.err}  {ctx.l.help.utility.title}",

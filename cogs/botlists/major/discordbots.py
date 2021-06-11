@@ -4,7 +4,7 @@ from os import getenv
 
 
 class DiscordBotsStats(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.token: str = getenv("DISCORDBOTS")
         self.post_dbots_stats.start()

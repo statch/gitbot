@@ -9,9 +9,10 @@ import os.path
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from lib.typehints import DictSequence, AnyDict, Identifiable
+from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
+from lib.utils.decorators import normalize_identity
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
 
@@ -66,6 +67,29 @@ class Manager:
         """
 
         print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
+
+    def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
+        """
+        Run an operation on an object if bool(object) == True
+
+        :param obj: The object to run the operation on
+        :param op: The operation to run if object is True
+        :param args: Optional arguments for op
+        :param kwargs: Optional keyword arguments for op
+        :return: The result of the operation or the unchanged object
+        """
+
+        return op(obj, *args, **kwargs) if obj else obj
+
+    def strip_codeblock(self, codeblock: str) -> str:
+        """
+        Extract code from the codeblock while retaining indentation.
+
+        :param codeblock: The codeblock to strip
+        :return: The code extracted from the codeblock
+        """
+
+        return re.sub(r'^.*?\n', '\n', codeblock.strip('`')).rstrip().lstrip('\n')
 
     async def unzip_file(self, zip_path: str, output_dir: str) -> None:
         """
@@ -229,15 +253,15 @@ class Manager:
 
         return functools.partial(self.error, ctx)
 
-    async def get_locale(self, __id: Identifiable) -> DictProxy:
+    @normalize_identity
+    async def get_locale(self, _id: Identity) -> DictProxy:
         """
-        Get the locale associated with a user, defaults to English
+        Get the locale associated with a user, defaults to the master locale
 
-        :param __id: The user object/ID to get the locale for
+        :param _id: The user object/ID to get the locale for
         :return: The locale associated with the user
         """
 
-        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         locale: str = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id, None):
             locale: str = cached
@@ -314,11 +338,14 @@ class Manager:
             for k, v in ref.items():
                 if k not in node:
                     if locale:
-                        self.log(f'missing key {k} patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                        self.log(f'missing key "{k}" patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
-                    node[k] = recursively_fix(v, ref[k])
+                    try:
+                        node[k] = recursively_fix(v, ref[k])
+                    except KeyError:
+                        pass
             return node
 
         return recursively_fix(dict_, ref_)

@@ -6,7 +6,7 @@ import requests
 from lib.globs import Mgr
 from discord.ext import commands
 from dotenv import load_dotenv
-from lib.utils.decorators import dev_only
+from lib.utils.decorators import restricted
 
 load_dotenv()
 
@@ -41,7 +41,7 @@ extensions: list = [
     'cogs.github.numbered.issue',
     'cogs.github.complex.gist',
     'cogs.github.other.commits',
-    'cogs.github.other.lines',
+    'cogs.github.other.snippets.snippets',
     'cogs.github.other.info',
     'cogs.github.other.license',
     'cogs.github.other.loc',
@@ -83,19 +83,19 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
 
 
 @bot.command(name='reload')
-@dev_only()
+@restricted()
 async def reload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
 @bot.command(name='load')
-@dev_only()
+@restricted()
 async def load_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
 @bot.command(name='unload')
-@dev_only()
+@restricted()
 async def unload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
 

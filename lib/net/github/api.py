@@ -10,7 +10,7 @@ from lib.structs import DirProxy, GhProfileData
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
-SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
+DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 
 class GitHubAPI:
@@ -117,14 +117,16 @@ class GitHubAPI:
         except BadRequest:
             return None
 
-    async def get_repo_zip(self, repo: str) -> Optional[Union[bool, bytes]]:
+    async def get_repo_zip(self,
+                           repo: str,
+                           size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:
         if '/' not in repo or repo.count('/') > 1:
             return None
         res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
                                  headers={"Authorization": f"token {self.token}"})
         if res.status == 200:
             try:
-                await res.content.readexactly(SIZE_THRESHOLD_BYTES)
+                await res.content.readexactly(size_threshold)
             except asyncio.IncompleteReadError as read:
                 return read.partial
             else:

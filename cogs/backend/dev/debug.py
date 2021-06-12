@@ -24,8 +24,8 @@ class Debug(commands.Cog):
         self.bot: commands.Bot = bot
 
     @restricted()
-    @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event'])
-    async def manually_trigger_event(self, ctx: commands.Context, event: str) -> None:
+    @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event', '-dispatch', '-event'])
+    async def event_dispatch_command(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
         cor = {
             'guild_join': ctx.guild,
@@ -41,8 +41,8 @@ class Debug(commands.Cog):
             await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
 
     @restricted()
-    @commands.command(aliases=['--rate', '--ratelimit'])
-    async def rate(self, ctx: commands.Context) -> None:
+    @commands.command(aliases=['--rate', '--ratelimit', 'rate', '-rate', 'ratelimit', '-ratelimit'])
+    async def ratelimit_command(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
         embed = discord.Embed(
@@ -66,10 +66,10 @@ class Debug(commands.Cog):
                         `{dt.datetime.fromtimestamp(search[0]['reset']).strftime('%X')}`")
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='eval', aliases=['-eval', '--eval'])
     @commands.is_owner()
     @restricted()
-    async def eval(self, ctx: commands.Context, *, cmd: str) -> None:
+    async def eval_command(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'
 

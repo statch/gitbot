@@ -56,19 +56,19 @@ class GitHubAPI:
 
     async def get_user_repos(self, user: str) -> Optional[list]:
         try:
-            return list([x for x in await self.gh.getitem(f"/users/{user}/repos") if x['private'] is False])
+            return list([x for x in await self.gh.getitem(f'/users/{user}/repos') if x['private'] is False])
         except BadRequest:
             return None
 
     async def get_org(self, org: str) -> Optional[dict]:
         try:
-            return await self.gh.getitem(f"/orgs/{org}")
+            return await self.gh.getitem(f'/orgs/{org}')
         except BadRequest:
             return None
 
     async def get_org_repos(self, org: str) -> Union[List[dict], list]:
         try:
-            res = list([x for x in await self.gh.getitem(f"/orgs/{org}/repos") if x['private'] is False])
+            res = list([x for x in await self.gh.getitem(f'/orgs/{org}/repos') if x['private'] is False])
             return res
         except BadRequest:
             return []
@@ -77,7 +77,7 @@ class GitHubAPI:
         if '/' not in repo or repo.count('/') > 1:
             return []
         try:
-            return await self.gh.getitem(f"/repos/{repo}/contents")
+            return await self.gh.getitem(f'/repos/{repo}/contents')
         except BadRequest:
             return []
 
@@ -87,19 +87,19 @@ class GitHubAPI:
         if path[0] == '/':
             path = path[1:]
         try:
-            return await self.gh.getitem(f"/repos/{repo}/contents/{path}")
+            return await self.gh.getitem(f'/repos/{repo}/contents/{path}')
         except BadRequest:
             return []
 
     async def get_user_orgs(self, user: str) -> Union[List[dict], list]:
         try:
-            return list(await self.gh.getitem(f"/users/{user}/orgs"))
+            return list(await self.gh.getitem(f'/users/{user}/orgs'))
         except BadRequest:
             return []
 
     async def get_org_members(self, org: str) -> Union[List[dict], list]:
         try:
-            return list(await self.gh.getitem(f"/orgs/{org}/members"))
+            return list(await self.gh.getitem(f'/orgs/{org}/members'))
         except BadRequest:
             return []
 
@@ -113,7 +113,7 @@ class GitHubAPI:
 
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
-            return dict(await self.gh.getitem(f"/gists/{gist_id}"))
+            return dict(await self.gh.getitem(f'/gists/{gist_id}'))
         except BadRequest:
             return None
 
@@ -122,8 +122,8 @@ class GitHubAPI:
                            size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:
         if '/' not in repo or repo.count('/') > 1:
             return None
-        res = await self.ses.get(BASE_URL + f"/repos/{repo}/zipball",
-                                 headers={"Authorization": f"token {self.token}"})
+        res = await self.ses.get(BASE_URL + f'/repos/{repo}/zipball',
+                                 headers={'Authorization': f'token {self.token}'})
         if res.status == 200:
             try:
                 await res.content.readexactly(size_threshold)

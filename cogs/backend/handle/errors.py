@@ -1,3 +1,5 @@
+import discord
+import traceback
 from discord.ext import commands
 from bot import PRODUCTION
 from lib.globs import Mgr
@@ -26,7 +28,38 @@ class Errors(commands.Cog):
         elif not PRODUCTION:
             raise error
         else:
+            await self.log_error_in_discord(ctx, error)
             print(error)
+
+    async def log_error_in_discord(self, ctx: commands.Context, error: Exception) -> None:
+        embed: discord.Embed = discord.Embed(
+            color=0xda4353,
+            title=f'Error in `{ctx.command}` command'
+        )
+        guild_id: str = str(ctx.guild.id) if not isinstance(ctx.channel, discord.DMChannel) else 'DM'
+        embed.add_field(name='Message', value=f'```{error}```', inline=False)
+        embed.add_field(name='Traceback', value=f'```{self.format_tb(error.__traceback__)}```', inline=False)
+        embed.add_field(name='Arguments', value=f'```properties\nargs={self.format_args(ctx.args)}\nkwargs={self.format_kwargs(ctx.kwargs)}```', inline=False)
+        embed.add_field(name='Location', value=f'**Guild ID:** `{guild_id}`\n**Author ID:** `{ctx.author.id}`', inline=False)
+
+        channel: discord.TextChannel = await self.bot.fetch_channel(853247229036593164)
+        if channel:
+            await channel.send(embed=embed)
+
+    def format_tb(self, tb) -> str:
+        return '\n\n'.join([i.strip() for i in traceback.format_tb(tb, -5)])
+
+    def format_args(self, args: list) -> str:
+        for i, arg in enumerate(args):
+            if repr(arg).startswith('<cogs'):
+                args[i]: str = repr(arg).split()[0].strip('<')
+            elif 'Context' in repr(arg):
+                args[i]: str = 'ctx'
+        return f"[{', '.join(args)}]"
+
+    def format_kwargs(self, kwargs: dict) -> str:
+        items: str = ', '.join([f"{k}=\'{v}\'" for k, v in kwargs.items()])
+        return f'dict({items})' if items else 'No keyword arguments'
 
 
 def setup(bot: commands.Bot) -> None:

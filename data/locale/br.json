@@ -170,7 +170,7 @@
         "singular": "Possui apenas [um repositório]({0})",
         "no_repos": "Ainda não há nenhum repositório"
       },
-      "contributions": "{0} contribuições neste ano, {0} hoje"
+      "contributions": "{0} contribuições neste ano, {1} hoje"
     }
   },
   "org": {

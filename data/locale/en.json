@@ -171,7 +171,7 @@
         "singular": "Has only [one repository]({0})",
         "no_repos": "Has no repositories, yet"
       },
-      "contributions": "{0} contributions this year, {0} today"
+      "contributions": "{0} contributions this year, {1} today"
     }
   },
   "org": {

@@ -1,5 +1,6 @@
 import discord
 import traceback
+from fuzzywuzzy import fuzz
 from discord.ext import commands
 from bot import PRODUCTION
 from lib.globs import Mgr
@@ -32,18 +33,28 @@ class Errors(commands.Cog):
             print(error)
 
     async def log_error_in_discord(self, ctx: commands.Context, error: Exception) -> None:
-        embed: discord.Embed = discord.Embed(
-            color=0xda4353,
-            title=f'Error in `{ctx.command}` command'
-        )
-        guild_id: str = str(ctx.guild.id) if not isinstance(ctx.channel, discord.DMChannel) else 'DM'
-        embed.add_field(name='Message', value=f'```{error}```', inline=False)
-        embed.add_field(name='Traceback', value=f'```{self.format_tb(error.__traceback__)}```', inline=False)
-        embed.add_field(name='Arguments', value=f'```properties\nargs={self.format_args(ctx.args)}\nkwargs={self.format_kwargs(ctx.kwargs)}```', inline=False)
-        embed.add_field(name='Location', value=f'**Guild ID:** `{guild_id}`\n**Author ID:** `{ctx.author.id}`', inline=False)
-
         channel: discord.TextChannel = await self.bot.fetch_channel(853247229036593164)
         if channel:
+            guild_id: str = str(ctx.guild.id) if not isinstance(ctx.channel, discord.DMChannel) else 'DM'
+            if ctx.command:
+                embed: discord.Embed = discord.Embed(
+                    color=0xda4353,
+                    title=f'Error in `{ctx.command}` command'
+                )
+                embed.add_field(name='Message', value=f'```{error}```', inline=False)
+                embed.add_field(name='Traceback', value=f'```{self.format_tb(error.__traceback__)}```', inline=False)
+                embed.add_field(name='Arguments', value=f'```properties\nargs={self.format_args(ctx.args)}\nkwargs={self.format_kwargs(ctx.kwargs)}```', inline=False)
+
+            elif 'is not found' in (error := str(error)):
+                embed: discord.Embed = discord.Embed(
+                    color=0x0384fc,
+                    title=f'Nonexistent command!',
+                    description=f'```{error}```'
+                )
+                embed.set_footer(text=f'Closest existing command: "' + str(self.match_closest_command(error[error.index('"') + 1:error.rindex('"')])) + '"')
+            else:
+                return
+            embed.add_field(name='Location', value=f'**Guild ID:** `{guild_id}`\n**Author ID:** `{ctx.author.id}`', inline=False)
             await channel.send(embed=embed)
 
     def format_tb(self, tb) -> str:
@@ -60,6 +71,13 @@ class Errors(commands.Cog):
     def format_kwargs(self, kwargs: dict) -> str:
         items: str = ', '.join([f"{k}=\'{v}\'" for k, v in kwargs.items()])
         return f'dict({items})' if items else 'No keyword arguments'
+
+    def match_closest_command(self, command: str) -> str:
+        best = 0, None
+        for cmd in self.bot.walk_commands():
+            if (m := fuzz.token_set_ratio(str(cmd), command)) > best[0]:
+                best = m, str(cmd)
+        return best[1]
 
 
 def setup(bot: commands.Bot) -> None:

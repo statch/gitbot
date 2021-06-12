@@ -280,7 +280,7 @@ class GitHubAPI:
         except QueryError:
             return None
         data_ = data['user']['contributionsCollection']['contributionCalendar']
-        data['user']['contributions'] = data_['totalContributions'], data_['weeks'][-1]['contributionDays'][-1][
+        data['user']['contributions'] = data_['totalContributions'], data_['weeks'][1]['contributionDays'][1][
             'contributionCount']
         data = data['user']
         del data['contributionsCollection']

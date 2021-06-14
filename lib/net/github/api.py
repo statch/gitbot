@@ -187,7 +187,6 @@ class GitHubAPI:
                     return 'number'
                 return 'repo'
 
-        data = data['repository']['pullRequest']
         data['labels']: list = [lb['node']['name'] for lb in data['labels']['edges']]
         data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
         data['reviewers'] = {}

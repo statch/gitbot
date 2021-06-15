@@ -184,7 +184,7 @@
       "title": "{0}'s Profile",
       "created_at": "Created on {0}",
       "members": "Has [{0} public members]({1})",
-      "one_members": "Has only [one public member]({0})",
+      "one_member": "Has only [one public member]({0})",
       "repos": {
         "plural": "Has a total of [{0} repositories]({1})",
         "singular": "Has only [one repository]({0})",

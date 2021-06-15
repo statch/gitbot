@@ -7,7 +7,7 @@ class Help(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.group(name='--help', aliases=['help', '-H'])
+    @commands.group(name='--help', aliases=['help', '-H', '-help'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def help_command(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:

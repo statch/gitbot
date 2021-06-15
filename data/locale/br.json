@@ -183,7 +183,7 @@
       "title": "Perfil: {0}",
       "created_at": "Criado em {0}",
       "members": "Possui [{0} membros públicos]({1})",
-      "one_members": "Possui apenas [um membro público]({0})",
+      "one_member": "Possui apenas [um membro público]({0})",
       "repos": {
         "plural": "Possui um total de [{0} repositórios]({1})",
         "singular": "Possui apenas [um repositório]({0})",

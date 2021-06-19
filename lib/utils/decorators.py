@@ -17,16 +17,6 @@ def restricted() -> commands.Command:
     return commands.check(pred)
 
 
-def _normalize_repo(repo: str) -> str:
-    repo: str = repo.strip()
-    match: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.GITHUB_REPO_URL, repo)
-    if match:
-        return f'{match[0][0]}/{match[0][1]}'
-    elif repo.count('/') == 1:
-        return repo
-    return repo
-
-
 def normalize_argument(func: Union[Callable, Coroutine],
                        target: str,
                        normalizing_func: Union[Callable, Coroutine],
@@ -87,6 +77,15 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
 
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
-        return await normalize_argument(func, 'repo', _normalize_repo, *args, **kwargs)
+        def normalize_repo(repo: str) -> str:
+            repo: str = repo.strip()
+            match: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.GITHUB_REPO_URL, repo)
+            if match:
+                return f'{match[0][0]}/{match[0][1]}'
+            elif repo.count('/') == 1:
+                return repo
+            return repo
+
+        return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)
 
     return wrapper

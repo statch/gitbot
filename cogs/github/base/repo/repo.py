@@ -7,6 +7,7 @@ from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
+from lib.utils.decorators import normalize_repository
 from lib.utils.regex import MD_EMOJI_RE
 
 
@@ -15,6 +16,7 @@ class Repo(commands.Cog):
         self.bot: commands.Bot = bot
 
     @commands.group(name='repo', aliases=['r'], invoke_without_command=True)
+    @normalize_repository
     async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'repo --info')
         if not repo:
@@ -29,6 +31,7 @@ class Repo(commands.Cog):
 
     @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
+    @normalize_repository
     async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
@@ -158,6 +161,7 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
+    @normalize_repository
     async def download_command(self, ctx: commands.Context, repo: str) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
@@ -178,11 +182,13 @@ class Repo(commands.Cog):
 
     @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
     @commands.cooldown(5, 40, commands.BucketType.user)
+    @normalize_repository
     async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
 
     @repo_command_group.command(name='pulls', aliases=['-pulls', '--pulls', 'prs', '-prs', '--prs'])
     @commands.cooldown(5, 40, commands.BucketType.user)
+    @normalize_repository
     async def pull_request_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
 

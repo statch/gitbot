@@ -3,12 +3,16 @@ import discord
 import logging
 import platform
 import requests
+import sentry_sdk
 from lib.globs import Mgr
 from discord.ext import commands
-from dotenv import load_dotenv
 from lib.utils.decorators import restricted
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    print("Found .env file, loading environment variables from it.")
+    load_dotenv(override=True)
+except ModuleNotFoundError:
+    pass
 
 PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
 NO_TYPING_COMMANDS: list = os.getenv('NO_TYPING_COMMANDS').split()
@@ -135,4 +139,9 @@ if __name__ == '__main__':
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
     prepare_cloc()
+    if PRODUCTION and (dsn := os.environ.get('SENTRY_DSN')):
+        sentry_sdk.init(
+            dsn=dsn,
+            traces_sample_rate=0.5
+        )
     bot.run(os.getenv('BOT_TOKEN'))

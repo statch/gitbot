@@ -2,6 +2,7 @@ import discord
 import asyncio
 from discord.ext import commands
 from lib.globs import Git, Mgr
+from lib.utils.decorators import normalize_repository
 from typing import Optional
 
 
@@ -9,7 +10,7 @@ class Config(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.group(name='config', aliases=['--config', '-cfg', 'cfg'])
+    @commands.group(name='config', aliases=['--config', '-cfg', 'cfg', '-config', '--cfg', 'configure', '--configure', '-configure'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_command_group(self, ctx: commands.Context) -> None:
         if ctx.invoked_subcommand is None:
@@ -69,7 +70,9 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(3, 30, commands.BucketType.guild)
+    @normalize_repository
     async def config_release_feed_command(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+        print(f'repo: {repo}')
         ctx.fmt.set_prefix('config feed')
         g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if not g:
@@ -180,6 +183,7 @@ class Config(commands.Cog):
 
     @config_command_group.command(name='--repo', aliases=['--repository', '-R', '-repo', 'repo'])
     @commands.cooldown(5, 30, commands.BucketType.user)
+    @normalize_repository
     async def config_repo_command(self, ctx: commands.Context, repo: str) -> None:
         r: bool = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
@@ -267,6 +271,7 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
+    @normalize_repository
     async def delete_feed_group(self, ctx: commands.Context, repo: Optional[str]) -> None:
         ctx.fmt.set_prefix('config delete feed default')
         if ctx.invoked_subcommand is None:
@@ -362,7 +367,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='all', aliases=['-A', '-all'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_entire_record_command(self, ctx: commands.Context) -> None:
-        query: dict = await Mgr.db.users.find_one_and_delete({"_id": int(ctx.author.id)})
+        query: dict = await Mgr.db.users.find_one_and_delete({'_id': int(ctx.author.id)})
         if not query:
             await ctx.err(ctx.l.config.delete.all.not_saved)
             return

@@ -7,6 +7,7 @@ from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
 from lib.structs import DirProxy, GhProfileData
+from lib.utils.decorators import normalize_repository
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
@@ -31,10 +32,10 @@ class GitHubAPI:
         self._queries: DirProxy = DirProxy('./data/queries/', ('.gql', '.graphql'))
         self.tokens: cycle = cycle(t for t in tokens if t is not None)
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.token)
+        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.__token)
 
     @property
-    def token(self) -> str:
+    def __token(self) -> str:
         return next(self.tokens)
 
     async def ghprofile_stats(self, name: str) -> Union[GhProfileData, None]:
@@ -73,6 +74,7 @@ class GitHubAPI:
         except BadRequest:
             return []
 
+    @normalize_repository
     async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
         if '/' not in repo or repo.count('/') > 1:
             return []
@@ -81,6 +83,7 @@ class GitHubAPI:
         except BadRequest:
             return []
 
+    @normalize_repository
     async def get_tree_file(self, repo: str, path: str):
         if '/' not in repo:
             return []
@@ -117,13 +120,14 @@ class GitHubAPI:
         except BadRequest:
             return None
 
+    @normalize_repository
     async def get_repo_zip(self,
                            repo: str,
                            size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:
         if '/' not in repo or repo.count('/') > 1:
             return None
         res = await self.ses.get(BASE_URL + f'/repos/{repo}/zipball',
-                                 headers={'Authorization': f'token {self.token}'})
+                                 headers={'Authorization': f'token {self.__token}'})
         if res.status == 200:
             try:
                 await res.content.readexactly(size_threshold)
@@ -133,8 +137,12 @@ class GitHubAPI:
                 return False
         return None
 
+    @normalize_repository
     async def get_latest_release(self, repo: str) -> Optional[dict]:
-        owner, name = repo.split('/')
+        if len(_split := repo.split('/')) == 2:
+            owner, name = _split
+        else:
+            return None
 
         try:
             data: dict = await self.gh.graphql(self._queries.release, **{'Name': name, 'Owner': owner})
@@ -148,9 +156,8 @@ class GitHubAPI:
         del data['releases']
         return data
 
+    @normalize_repository
     async def get_repo(self, repo: str) -> Optional[dict]:
-        if '/' not in repo or repo.count('/') > 1:
-            return None
         split: list = repo.split('/')
         owner: str = split[0]
         repository: str = split[1]
@@ -167,6 +174,7 @@ class GitHubAPI:
         data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
         return data
 
+    @normalize_repository
     async def get_pull_request(self,
                                repo: str,
                                number: int,
@@ -199,6 +207,7 @@ class GitHubAPI:
                                          data['participants']['edges']]
         return data
 
+    @normalize_repository
     async def get_last_pull_requests_by_state(self,
                                               repo: str,
                                               last: int = 10,
@@ -219,6 +228,7 @@ class GitHubAPI:
             return None
         return data['repository']['pullRequests']['nodes']
 
+    @normalize_repository
     async def get_issue(self,
                         repo: str,
                         number: int,
@@ -255,6 +265,7 @@ class GitHubAPI:
             data['labels']: list = [lb['name'] for lb in list(data['labels']['nodes'])]
         return data
 
+    @normalize_repository
     async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[List[dict]]:
         if '/' not in repo or repo.count('/') > 1:
             return None

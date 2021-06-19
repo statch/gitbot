@@ -1,9 +1,6 @@
 import os.path
 import discord
 import logging
-import platform
-import requests
-import sentry_sdk
 from lib.globs import Mgr
 from discord.ext import commands
 from lib.utils.decorators import restricted
@@ -125,23 +122,3 @@ async def before_invoke(ctx: commands.Context) -> None:
 async def on_ready() -> None:
     logger.info(f'The bot is ready.')
     logger.info(f'discord.py version: {discord.__version__}\n')
-
-
-def prepare_cloc() -> None:
-    if not os.path.exists('cloc.pl'):
-        res: requests.Response = requests.get('https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
-        with open('cloc.pl', 'wb') as fp:
-            fp.write(res.content)
-
-
-if __name__ == '__main__':
-    logger.info(f'Running on {platform.system()} {platform.release()}')
-    if not os.path.exists('./tmp'):
-        os.mkdir('tmp')
-    prepare_cloc()
-    if PRODUCTION and (dsn := os.environ.get('SENTRY_DSN')):
-        sentry_sdk.init(
-            dsn=dsn,
-            traces_sample_rate=0.5
-        )
-    bot.run(os.getenv('BOT_TOKEN'))

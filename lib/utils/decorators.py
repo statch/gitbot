@@ -77,6 +77,14 @@ def normalize_identity(func: Union[Callable, Coroutine]) -> Union[Callable, Coro
 
 
 def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+    """
+    Normalize the repo argument to be in the owner/repo-name format if possible.
+    It's important to place this UNDER discord-specific decorators in commands.
+
+    :param func: The function to wrap with this decorator
+    :return: The function with the repo argument normalized
+    """
+
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
         return await normalize_argument(func, 'repo', _normalize_repo, *args, **kwargs)

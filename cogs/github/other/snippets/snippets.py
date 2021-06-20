@@ -1,5 +1,6 @@
 import re
 import discord
+from operator import getitem
 from .snippet_tools import handle_url, gen_carbon_inmemory
 from aiohttp import ClientSession
 from discord.ext import commands
@@ -29,7 +30,7 @@ class Snippets(commands.Cog):
                 await ctx.send(
                     file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(link_or_codeblock)))
                 await msg.delete()
-            else:
+            elif bool(Mgr.opt(re.findall(regex.GITHUB_LINES_RE, link_or_codeblock) or re.findall(regex.GITLAB_LINES_RE, link_or_codeblock), getitem, 0)):
                 msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
                 text, err = await handle_url(ctx, link_or_codeblock,
                                              max_line_count=CARBON_LEN_THRESHOLD, wrap_in_codeblock=False)
@@ -40,6 +41,8 @@ class Snippets(commands.Cog):
                         file=discord.File(filename='snippet.png', fp=img))
                 else:
                     await ctx.err(err)
+            else:
+                await ctx.err(ctx.l.snippets.no_lines_mentioned)
 
     @snippet_command_group.command(name='--raw', aliases=['-raw', 'raw'])
     @commands.cooldown(10, 30, commands.BucketType.user)

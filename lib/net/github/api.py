@@ -76,7 +76,7 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
-        if '/' not in repo or repo.count('/') > 1:
+        if repo.count('/') != 1:
             return []
         try:
             return await self.gh.getitem(f'/repos/{repo}/contents')
@@ -85,7 +85,7 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_tree_file(self, repo: str, path: str):
-        if '/' not in repo:
+        if repo.count('/') != 1:
             return []
         if path[0] == '/':
             path = path[1:]
@@ -159,20 +159,21 @@ class GitHubAPI:
     @normalize_repository
     async def get_repo(self, repo: str) -> Optional[dict]:
         split: list = repo.split('/')
-        owner: str = split[0]
-        repository: str = split[1]
+        if len(split) == 2:
+            owner: str = split[0]
+            repository: str = split[1]
 
-        try:
-            data: dict = await self.gh.graphql(self._queries.repo, **{'Name': repository, 'Owner': owner})
-        except QueryError:
-            return None
+            try:
+                data: dict = await self.gh.graphql(self._queries.repo, **{'Name': repository, 'Owner': owner})
+            except QueryError:
+                return None
 
-        data = data['repository']
-        data['languages'] = data['languages']['totalCount']
-        data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
-        data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
-        data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
-        return data
+            data = data['repository']
+            data['languages'] = data['languages']['totalCount']
+            data['topics'] = (data['repositoryTopics']['nodes'], data['repositoryTopics']['totalCount'])
+            data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
+            data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
+            return data
 
     @normalize_repository
     async def get_pull_request(self,
@@ -180,7 +181,7 @@ class GitHubAPI:
                                number: int,
                                data: Optional[dict] = None) -> Union[dict, str]:
         if not data:
-            if '/' not in repo or repo.count('/') > 1:
+            if repo.count('/') != 1:
                 return 'repo'
             split: list = repo.split('/')
             owner: str = split[0]
@@ -212,7 +213,7 @@ class GitHubAPI:
                                               repo: str,
                                               last: int = 10,
                                               state: str = 'OPEN') -> Optional[List[dict]]:
-        if '/' not in repo or repo.count('/') > 1:
+        if repo.count('/') != 1:
             return None
 
         split: list = repo.split('/')
@@ -235,7 +236,7 @@ class GitHubAPI:
                         data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
                         had_keys_removed: bool = False) -> Union[dict, str]:
         if not data:
-            if '/' not in repo or repo.count('/') > 1:
+            if repo.count('/') != 1:
                 return 'repo'
 
             split: list = repo.split('/')
@@ -267,7 +268,7 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[List[dict]]:
-        if '/' not in repo or repo.count('/') > 1:
+        if repo.count('/') != 1:
             return None
         split: list = repo.split('/')
         owner: str = split[0]

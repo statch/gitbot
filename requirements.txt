@@ -1,7 +1,7 @@
 discord.py==1.7.3
 aiohttp==3.7.4.post0
 gidgethub==5.0.1
-python-dotenv==0.17.1
+python-dotenv==0.18.0
 fuzzywuzzy==0.18.0
 motor==2.4.0
 dnspython==2.1.0

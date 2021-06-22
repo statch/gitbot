@@ -8,7 +8,7 @@ class Info(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='info')
+    @commands.command(name='info', aliases=['-info', '--info'])
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def info_command(self, ctx: commands.Context, link: str) -> None:
         ref: Optional[Union[tuple, str, GitCommandData]] = await Mgr.get_link_reference(link)
@@ -29,10 +29,11 @@ class Info(commands.Cog):
         else:
             setattr(ctx, 'data', ref.data)
             cmd: commands.Command = self.bot.get_command(ref.type)
-            if isinstance(args := ref.args, (tuple, list)):
-                await ctx.invoke(cmd, *args)
-            else:
-                await ctx.invoke(cmd, args)
+            if cmd:
+                if isinstance(args := ref.args, (tuple, list)):
+                    await ctx.invoke(cmd, *args)
+                else:
+                    await ctx.invoke(cmd, **{list(cmd.params.items())[-1][0]: args})
 
 
 def setup(bot: commands.Bot) -> None:

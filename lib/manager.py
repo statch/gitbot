@@ -34,8 +34,8 @@ class Manager:
         self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
-                                (r.GITLAB_LINES_RE, 'lines'),
+        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'snippet'),
+                                (r.GITLAB_LINES_RE, 'snippet'),
                                 (r.ISSUE_RE, 'issue'),
                                 (r.PR_RE, 'pr'),
                                 (r.REPO_RE, 'repo'),
@@ -44,7 +44,7 @@ class Manager:
                                    'user_org': None,
                                    'issue': self.git.get_issue,
                                    'pr': self.git.get_pull_request,
-                                   'lines': 'lines'}
+                                   'snippet': 'snippet'}
         self.locale_cache: dict = {}
         setattr(self.locale, 'master', self.l.en)
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
@@ -165,7 +165,7 @@ class Manager:
                 match: Union[str, tuple] = match[0]
                 action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
                 if isinstance(action, str):
-                    return GitCommandData(link, 'lines', link)
+                    return GitCommandData(link, 'snippet', link)
                 if isinstance(match, tuple) and action:
                     match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
                     obj: Union[dict, str] = await action(match[0], int(match[1]))

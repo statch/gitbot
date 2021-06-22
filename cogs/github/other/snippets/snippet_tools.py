@@ -20,7 +20,7 @@ async def get_text_from_url_and_data(ctx: commands.Context,
                                      data: tuple,
                                      max_line_count: int = 25,
                                      wrap_in_codeblock: bool = True) -> Optional[tuple]:
-    if data[4]:
+    if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
             return None, ctx.fmt('length_limit_exceeded', max_line_count)
 
@@ -32,18 +32,18 @@ async def get_text_from_url_and_data(ctx: commands.Context,
 
     lines_: list = content.splitlines(keepends=True)
 
-    if not data[4] and lines_[int(data[4]) - 1] == '\n':  # if the request is a single, empty line
+    if not data[5] and lines_[int(data[4]) - 1] == '\n':  # if the request is a single, empty line
         return None, ctx.l.snippets.no_content
 
     extension: str = url[url.rindex('.') + 1:]
     extension: str = 'js' if extension == 'ts' else extension
 
     lines: list = []
-    for line in lines_[int(data[4]) - 1:int(data[5]) if data[5] != '' else int(data[4])]:
+    for line in lines_[int(data[4]) - 1:int(data[5]) if data[5] else int(data[4])]:
         if line == '\r\n' or line.endswith('\n'):
             lines.append(line)
             continue
-        lines.append(f"{line}\n")
+        lines.append(f'{line}\n')
 
     text: str = ''.join(lines)
     return f"```{extension}\n{text}\n```" if wrap_in_codeblock else text, None
@@ -58,7 +58,7 @@ async def _compile_gitlab_link(data: tuple) -> str:
 
 
 async def gen_carbon_inmemory(code: str) -> io.BytesIO:
-    return await (await Carbon.generate_basic_image(Mgr.strip_codeblock(code))).memorize()
+    return await (await Carbon.generate_basic_image(code)).memorize()
 
 
 async def compile_url(match: tuple) -> str:

@@ -150,9 +150,10 @@ class Config(commands.Cog):
                     await ctx.err(ctx.l.config.feed.already_logged)
                     return
             if len(g['feed']) < 3:
-                await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
-                                               {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
-                await ctx.err(ctx.fmt('success', repo))
+                if r:
+                    await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
+                                                   {'$push': {'feed': {'repo': repo, 'release': r['release']['tagName'] if r['release'] else None}}})
+                    await ctx.err(ctx.fmt('success', repo))
             else:
                 embed_limit_reached: discord.Embed = discord.Embed(
                     color=0xda4353,

@@ -2,8 +2,9 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from lib.utils.decorators import restricted
+from utils.decorators import restricted
 from lib.globs import Git, Mgr
+from lib.utils.decorators import gitbot_command
 
 
 def insert_returns(body):
@@ -24,7 +25,7 @@ class Debug(commands.Cog):
         self.bot: commands.Bot = bot
 
     @restricted()
-    @commands.command(name='dispatch', aliases=['--event', '--dispatch', 'event', '-dispatch', '-event'])
+    @gitbot_command(name='dispatch', aliases=['event'])
     async def event_dispatch_command(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
         cor = {
@@ -41,7 +42,7 @@ class Debug(commands.Cog):
             await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
 
     @restricted()
-    @commands.command(aliases=['--rate', '--ratelimit', 'rate', '-rate', 'ratelimit', '-ratelimit'])
+    @gitbot_command(name='ratelimit', aliases=['rate'])
     async def ratelimit_command(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
@@ -66,9 +67,9 @@ class Debug(commands.Cog):
                         `{dt.datetime.fromtimestamp(search[0]['reset']).strftime('%X')}`")
         await ctx.send(embed=embed)
 
-    @commands.command(name='eval', aliases=['-eval', '--eval'])
     @commands.is_owner()
     @restricted()
+    @gitbot_command(name='eval')
     async def eval_command(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'

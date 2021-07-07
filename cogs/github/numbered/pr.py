@@ -4,7 +4,7 @@ from typing import Optional, Union
 from lib.globs import Git, Mgr
 from babel.dates import format_date
 from discord.ext import commands
-from lib.utils.decorators import normalize_repository
+from utils.decorators import normalize_repository
 
 PR_STATES: dict = {
     "open": Mgr.e.pr_open,

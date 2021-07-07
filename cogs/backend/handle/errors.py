@@ -1,6 +1,5 @@
 import discord
 import traceback
-from fuzzywuzzy import fuzz
 from discord.ext import commands
 from bot import PRODUCTION
 from lib.globs import Mgr
@@ -51,7 +50,9 @@ class Errors(commands.Cog):
                     title=f'Nonexistent command!',
                     description=f'```{error}```'
                 )
-                embed.set_footer(text=f'Closest existing command: "' + str(self.match_closest_command(error[error.index('"') + 1:error.rindex('"')])) + '"')
+                embed.set_footer(text=f'Closest existing command: "' + str(Mgr.get_closest_match_from_iterable(
+                                                                           error[error.index('"') + 1:error.rindex('"')],
+                                                                           map(str, self.bot.walk_commands()))) + '"')
             else:
                 return
             embed.add_field(name='Location', value=f'**Guild ID:** `{guild_id}`\n**Author ID:** `{ctx.author.id}`', inline=False)
@@ -71,13 +72,6 @@ class Errors(commands.Cog):
     def format_kwargs(self, kwargs: dict) -> str:
         items: str = ', '.join([f"{k}=\'{v}\'" for k, v in kwargs.items()])
         return f'dict({items})' if items else 'No keyword arguments'
-
-    def match_closest_command(self, command: str) -> str:
-        best = 0, None
-        for cmd in self.bot.walk_commands():
-            if (m := fuzz.token_set_ratio(str(cmd), command)) > best[0]:
-                best = m, str(cmd)
-        return best[1]
 
 
 def setup(bot: commands.Bot) -> None:

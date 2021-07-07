@@ -6,6 +6,7 @@ from aiohttp import ClientSession
 from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr
+from lib.utils.decorators import gitbot_group
 
 RAW_CODEBLOCK_LEN_THRESHOLD: int = 25
 CARBON_LEN_THRESHOLD: int = 50
@@ -16,7 +17,7 @@ class Snippets(commands.Cog):
         self.bot: commands.Bot = bot
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
 
-    @commands.group(name='snippet', aliases=['-snippet', '--snippet'], invoke_without_command=True)
+    @gitbot_group(name='snippet', invoke_without_command=True)
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def snippet_command_group(self, ctx: commands.Context, *, link_or_codeblock: str) -> None:
         ctx.fmt.set_prefix('snippets')
@@ -44,7 +45,7 @@ class Snippets(commands.Cog):
             else:
                 await ctx.err(ctx.l.snippets.no_lines_mentioned)
 
-    @snippet_command_group.command(name='--raw', aliases=['-raw', 'raw'])
+    @snippet_command_group.command(name='raw')
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def raw_snippet_command(self, ctx: commands.Context, link: str) -> None:
         ctx.fmt.set_prefix('snippets')

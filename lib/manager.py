@@ -12,7 +12,7 @@ from discord.ext import commands
 from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
-from lib.utils.decorators import normalize_identity
+from utils.decorators import normalize_identity
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
 
@@ -49,6 +49,21 @@ class Manager:
         setattr(self.locale, 'master', self.l.en)
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
         self.__fix_missing_locales()
+
+    def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
+        """
+        Iterate through an iterable of :class:`str` and return the item that resembles to_match the most.
+
+        :param to_match: The :class:`str` to pair with a match
+        :param iterable: The iterable to search for matches
+        :return: The closest match
+        """
+
+        best = 0, None
+        for i in iterable:
+            if (m := fuzz.token_set_ratio(str(i), to_match)) > best[0]:
+                best = m, str(i)
+        return best[1]
 
     def log(self,
             message: str,

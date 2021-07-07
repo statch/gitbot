@@ -2,8 +2,44 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Union, Any, Coroutine
+from typing import Callable, Union, Any, Coroutine, List
 from lib.utils import regex
+
+
+class _GitBotCommandGroup(commands.Group):
+    def __init__(self, func, **attrs):
+        super().__init__(func, **attrs)
+
+    def command(self, *args, **kwargs):
+        def decorator(func: Coroutine):
+            kwargs.setdefault('parent', self)
+            result = gitbot_command(*args, **kwargs)(func)
+            self.add_command(result)
+            return result
+
+        return decorator
+
+    def group(self, *args, **kwargs):
+        def decorator(func):
+            kwargs.setdefault('parent', self)
+            result = gitbot_group(*args, **kwargs)(func)
+            self.add_command(result)
+            return result
+
+        return decorator
+
+
+def _inject_aliases(name: str, **attrs) -> dict:
+    def gen_aliases(_name: str) -> tuple:
+        return _name, f'-{_name}', f'--{_name}'
+
+    aliases: List[str] = attrs.get('aliases') or []
+    to_add: List[str] = []
+    for alias in aliases:
+        to_add.extend(gen_aliases(alias))
+    aliases.extend([*to_add, *(gen_aliases(name)[1:])])
+    attrs['aliases']: List[str] = list(set(aliases))
+    return attrs
 
 
 def restricted() -> commands.Command:
@@ -19,7 +55,7 @@ def restricted() -> commands.Command:
 
 def normalize_argument(func: Union[Callable, Coroutine],
                        target: str,
-                       normalizing_func: Union[Callable, Coroutine],
+                       normalizing_func: Callable,
                        /,
                        *args,
                        **kwargs) -> Union[Callable, Coroutine]:
@@ -89,3 +125,32 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
         return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)
 
     return wrapper
+
+
+def gitbot_command(name: str, cls=commands.Command, **attrs) -> Callable:
+    """
+    A command decorator that automatically injects "-" and "--" aliases.
+
+    :param name: The command name
+    :param cls: The command class
+    :param attrs: Additional attributes
+    """
+
+    def decorator(func) -> commands.Command:
+        return cls(func, name=name, **_inject_aliases(name, **attrs))
+
+    return decorator
+
+
+def gitbot_group(name: str, **attrs) -> Callable:
+    """
+    A group decorator that automatically injects "-" and "--" aliases.
+
+    :param name: The group name
+    :param attrs: Additional attributes
+    """
+
+    def decorator(func) -> _GitBotCommandGroup:
+        return _GitBotCommandGroup(func, name=name, **_inject_aliases(name, **attrs))
+
+    return decorator

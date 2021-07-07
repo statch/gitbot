@@ -4,13 +4,14 @@ from typing import Optional, Union
 from babel.dates import format_date
 from lib.globs import Git, Mgr
 from discord.ext import commands
+from lib.utils.decorators import gitbot_group
 
 
 class Org(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.group(name='org', aliases=['o'], invoke_without_command=True)
+    @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'org --info')
         if not org:
@@ -24,7 +25,7 @@ class Org(commands.Cog):
             await ctx.invoke(info_command, organization=org)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @org_command_group.command(name='--info', aliases=['-i', '-info', 'info'])
+    @org_command_group.command(name='info', aliases=['i'])
     async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
         ctx.fmt.set_prefix('org info')
         if hasattr(ctx, 'data'):
@@ -84,7 +85,7 @@ class Org(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @org_command_group.command(name='--repos', aliases=['-r', '-repos', 'repos'])
+    @org_command_group.command(name='repos', aliases=['r'])
     async def org_repos_command(self, ctx: commands.Context, org: str) -> None:
         ctx.fmt.set_prefix('org repos')
         o: Union[dict, None] = await Git.get_org(org)

@@ -4,13 +4,14 @@ from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
+from lib.utils.decorators import gitbot_group
 
 
 class User(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.group(name='user', aliases=['u'], invoke_without_command=True)
+    @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'user --info')
         if not user:
@@ -24,7 +25,7 @@ class User(commands.Cog):
             await ctx.invoke(info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @user_command_group.command(name='--info', aliases=['-i', '-info', 'info'])
+    @user_command_group.command(name='info', aliases=['i'])
     async def user_info_command(self, ctx: commands.Context, user: str) -> None:
         ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
@@ -97,7 +98,7 @@ class User(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @user_command_group.command(name='--repos', aliases=['-r', '-repos', 'repos'])
+    @user_command_group.command(name='repos', aliases=['r'])
     async def user_repos_command(self, ctx: commands.Context, user: str) -> None:
         ctx.fmt.set_prefix('user repos')
         u: Union[dict, None] = await Git.get_user(user)

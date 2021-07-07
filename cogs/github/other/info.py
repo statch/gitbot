@@ -2,13 +2,14 @@ from discord.ext import commands
 from lib.globs import Mgr
 from typing import Optional, Union
 from lib.structs import GitCommandData
+from lib.utils.decorators import gitbot_command
 
 
 class Info(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='info', aliases=['-info', '--info'])
+    @gitbot_command(name='info')
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def info_command(self, ctx: commands.Context, link: str) -> None:
         ref: Optional[Union[tuple, str, GitCommandData]] = await Mgr.get_link_reference(link)

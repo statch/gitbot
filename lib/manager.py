@@ -12,7 +12,7 @@ from discord.ext import commands
 from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
-from utils.decorators import normalize_identity
+from lib.utils.decorators import normalize_identity
 from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
 

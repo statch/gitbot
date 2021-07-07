@@ -3,7 +3,7 @@ import datetime
 from typing import Optional, Union
 from babel.dates import format_date
 from lib.globs import Git, Mgr
-from utils.decorators import normalize_repository
+from lib.utils.decorators import normalize_repository
 from discord.ext import commands
 
 

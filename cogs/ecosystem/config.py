@@ -2,7 +2,7 @@ import discord
 import asyncio
 from discord.ext import commands
 from lib.globs import Git, Mgr
-from utils.decorators import normalize_repository, gitbot_group
+from lib.utils.decorators import normalize_repository, gitbot_group
 from typing import Optional
 
 

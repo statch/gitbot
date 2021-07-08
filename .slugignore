@@ -1,5 +1,6 @@
 *.md
 docs/
+Dockerfile
 .github/
 .pylintrc
 .graphqlconfig

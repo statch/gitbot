@@ -10,19 +10,19 @@ class _GitBotCommandGroup(commands.Group):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
-    def command(self, *args, **kwargs):
-        def decorator(func: Coroutine):
+    def command(self, *args, **kwargs) -> Callable:
+        def decorator(func: Coroutine) -> commands.Command:
             kwargs.setdefault('parent', self)
-            result = gitbot_command(*args, **kwargs)(func)
+            result: commands.Command = gitbot_command(*args, **kwargs)(func)
             self.add_command(result)
             return result
 
         return decorator
 
-    def group(self, *args, **kwargs):
-        def decorator(func):
+    def group(self, *args, **kwargs) -> Callable:
+        def decorator(func: Coroutine) -> commands.Command:
             kwargs.setdefault('parent', self)
-            result = gitbot_group(*args, **kwargs)(func)
+            result: commands.Command = gitbot_group(*args, **kwargs)(func)
             self.add_command(result)
             return result
 
@@ -34,9 +34,7 @@ def _inject_aliases(name: str, **attrs) -> dict:
         return _name, f'-{_name}', f'--{_name}'
 
     aliases: List[str] = attrs.get('aliases') or []
-    to_add: List[str] = []
-    for alias in aliases:
-        to_add.extend(gen_aliases(alias))
+    to_add: List[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))
     aliases.extend([*to_add, *(gen_aliases(name)[1:])])
     attrs['aliases']: List[str] = list(set(aliases))
     return attrs

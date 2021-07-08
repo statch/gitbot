@@ -114,6 +114,8 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
         def normalize_repo(repo: str) -> str:
+            if not repo:
+                return repo
             repo: str = repo.strip()
             match: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.GITHUB_REPO_URL, repo)
             if match:

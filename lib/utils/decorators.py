@@ -118,8 +118,6 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
             match: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.GITHUB_REPO_URL, repo)
             if match:
                 return f'{match[0][0]}/{match[0][1]}'
-            elif repo.count('/') == 1:
-                return repo
             return repo
 
         return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)

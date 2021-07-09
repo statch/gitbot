@@ -2,7 +2,7 @@ import discord
 import datetime
 import re
 import io
-from .list_plugin import *
+from .list_plugin import issue_list, pull_request_list
 from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional

@@ -29,7 +29,6 @@ class PullRequest(commands.Cog):
             if not pr_number:
                 if not repo.isnumeric():
                     await ctx.err(ctx.l.pr.stored_no_number)
-                    return
                 elif not pr_number and repo.isnumeric():
                     num: str = repo
                     stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
@@ -38,7 +37,7 @@ class PullRequest(commands.Cog):
                         pr_number: str = num
                     else:
                         await ctx.err(ctx.l.generic.nonexistent.repo.qa)
-                        return
+                return
 
             try:
                 pr: Union[dict, str] = await Git.get_pull_request(repo, int(pr_number))

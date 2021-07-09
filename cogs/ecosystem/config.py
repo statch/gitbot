@@ -237,8 +237,7 @@ class Config(commands.Cog):
                 Mgr.locale_cache[ctx.author.id] = l_[0]['name']
                 await ctx.send(f"{Mgr.e.github}  {ctx.fmt('success', l_[0]['localized_name'].capitalize())}")
                 return
-            else:
-                await ctx.err(ctx.fmt('failure', locale), delete_after=7)
+            await ctx.err(ctx.fmt('failure', locale), delete_after=7)
 
         def _format(locale_: dict):
             formatted: str = f'{Mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}'

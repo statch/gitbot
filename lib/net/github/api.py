@@ -195,6 +195,7 @@ class GitHubAPI:
                 if 'number' in str(e):
                     return 'number'
                 return 'repo'
+        data: dict = data['repository']['pullRequest'] if 'repository' in data else data
         data['labels']: list = [lb['node']['name'] for lb in data['labels']['edges']]
         data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
         data['reviewers'] = {}

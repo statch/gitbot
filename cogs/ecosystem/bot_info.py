@@ -81,6 +81,16 @@ class BotInfo(commands.Cog):
                         value=ctx.l.privacy_policy.author.body)
         await ctx.send(embed=embed)
 
+    @gitbot_command(name='support')
+    @commands.cooldown(15, 30, commands.BucketType.member)
+    async def support_command(self, ctx: commands.Context) -> None:
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            description=ctx.l.support.description
+        )
+        embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.support.title)
+        await ctx.send(embed=embed)
+
     @gitbot_command(name='invite')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def invite_command(self, ctx: commands.Context) -> None:

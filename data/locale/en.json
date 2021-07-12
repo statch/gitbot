@@ -11,7 +11,12 @@
     "max_concurrency_reached": "This command is experiencing exceptional traffic. **Please try again in a few seconds.**",
     "bot_missing_permissions": "**I am missing permissions required to do this!** I need {0}",
     "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
-    "no_private_message": "This command can only be used **inside a server!**"
+    "no_private_message": "This command can only be used **inside a server!**",
+    "command_not_found": {
+      "title": "This command doesn't exist!",
+      "description": "The **closest existing command** is: {0}",
+      "footer": "If you believe this is an error, please contact support."
+    }
   },
   "argument_placeholders": {
     "user": "username",
@@ -504,6 +509,10 @@
         "not_saved": "It appears that **you don't have anything stored!**"
       }
     }
+  },
+  "support": {
+    "title": "GitBot Support Server",
+    "description": "If you have any problems, feel free to join the [support server.](https://discord.gg/3e5fwpA)"
   },
   "help": {
     "alias_note": "You can find a list of aliases by using the git --aliases command",

@@ -6,7 +6,7 @@ from discord.ext import commands
 from lib.utils.decorators import restricted
 try:
     from dotenv import load_dotenv
-    print("Found .env file, loading environment variables from it.")
+    Mgr.log("Found .env file, loading environment variables from it.")
     load_dotenv(override=True)
 except ModuleNotFoundError:
     pass
@@ -34,7 +34,7 @@ logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
     'cogs.backend.tasks.misc',
-    'cogs.backend.dev.debug',
+    'cogs.backend.debug.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',
     'cogs.github.base.repo.repo',
@@ -47,6 +47,7 @@ extensions: list = [
     'cogs.github.other.license',
     'cogs.github.other.loc',
     'cogs.github.complex.workers.release_feed',
+    'cogs.ecosystem.dev',
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',

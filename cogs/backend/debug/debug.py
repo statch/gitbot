@@ -34,8 +34,7 @@ class Debug(commands.Cog):
             'member_join': ctx.author,
             'member_remove': ctx.author
         }
-        if cor.get(event, None) is not None:
-            e = cor.get(event, None)
+        if (e := cor.get(event)) is not None:
             self.bot.dispatch(event, e)
             await ctx.send(f'{Mgr.e.github} Dispatched event `{event}`')
         else:

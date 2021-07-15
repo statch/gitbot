@@ -618,5 +618,18 @@
       "description": "**Shorthands for commands used to fetch data related to Git and GitHub**",
       "footer": "You can find usage of these commands by typing git --help utility"
     }
+  },
+  "dev": {
+    "default": {
+      "title": "GitBot Development Commands",
+      "description": "Commands in this group are meant to be used by **GitBot's maintainers** and **contributors** to its GitHub repository.",
+      "footer": "If you'd like to contribute yourself, click the link in this embed's title.",
+      "commands": {
+        "missing_locales": "get a list of missing (non-translated) keys for a locale"
+      }
+    },
+    "missing_locales": {
+      "title": "Missing keys in `{0}`"
+    }
   }
 }

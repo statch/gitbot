@@ -31,7 +31,7 @@ class _GitBotCommandGroup(commands.Group):
 
 def _inject_aliases(name: str, **attrs) -> dict:
     def gen_aliases(_name: str) -> tuple:
-        return _name, f'-{_name}', f'--{_name}'
+        return _name, f'-{_name}', f'--{_name}', f'—{_name}', f'——{_name}'
 
     aliases: List[str] = attrs.get('aliases') or []
     to_add: List[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))

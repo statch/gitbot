@@ -1,4 +1,4 @@
-from typing import Any, Union, Optional, Iterator
+from typing import Any, Union, Optional, Iterator, Dict
 from ..case_insensitive_dict import CaseInsensitiveDict
 
 
@@ -14,7 +14,7 @@ class DictProxy(CaseInsensitiveDict):
         The object to wrap with DictProxy.
     """
 
-    def __init__(self, data: Optional[Union[list, dict]] = None):
+    def __init__(self, data: Optional[Union[list, Dict[str, Any]]] = None):
         if data is None:
             data: dict = {}
         self.__items: Union[list, dict] = data
@@ -25,6 +25,10 @@ class DictProxy(CaseInsensitiveDict):
         else:
             self.__getitem__ = lambda i: self.__items[i]
 
+    @property
+    def actual(self) -> Union[Dict[str, Any], list]:
+        return self.__items
+
     def __iter__(self) -> Iterator[Any]:
         yield from self.__items
 
@@ -32,4 +36,4 @@ class DictProxy(CaseInsensitiveDict):
         return super().__getitem__(item)
 
     def __setattr__(self, key: str, value: Any) -> None:
-        return super().__setitem__(key, value if type(value) != 'dict' else DictProxy(value))
+        super().__setitem__(key, value if type(value) != 'dict' else DictProxy(value))

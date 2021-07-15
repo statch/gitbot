@@ -48,6 +48,7 @@ class Manager:
         self.locale_cache: dict = {}
         setattr(self.locale, 'master', self.l.en)
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
+        self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
 
     def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
@@ -95,6 +96,33 @@ class Manager:
         """
 
         return op(obj, *args, **kwargs) if obj else obj
+
+    def dict_full_path(self,
+                       dict_: AnyDict,
+                       key: str,
+                       value: Optional[Any] = None) -> Optional[Tuple[str, ...]]:
+        """
+        Get the full path of a dictionary key in the form of a tuple.
+        The value is an optional parameter that can be used to determine which key's path to return if many are present.
+
+        :param dict_: The dictionary to which the key belongs
+        :param key: The key to get the full path to
+        :param value: The optional value for determining if a key is the right one
+        :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
+        """
+
+        if hasattr(dict_, 'actual'):
+            dict_: dict = dict_.actual
+
+        def _recursive(__prev: tuple = ()) -> Optional[Tuple[str, ...]]:
+            reduced: dict = self.get_nested_key(dict_, __prev)
+            for k, v in reduced.items():
+                if k == key and (value is None or (value is not None and v == value)):
+                    return *__prev, key
+                if isinstance(v, dict):
+                    if ret := _recursive((*__prev, k)):
+                        return ret
+        return _recursive()
 
     def strip_codeblock(self, codeblock: str) -> str:
         """
@@ -162,7 +190,8 @@ class Manager:
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
         if all(req in perms + overwrites for req in [("send_messages", True),
                                                      ("read_messages", True),
-                                                     ("read_message_history", True)]) or ("administrator", True) in perms:
+                                                     ("read_message_history", True)]) \
+                or ("administrator", True) in perms:
             return True
         return False
 
@@ -324,6 +353,18 @@ class Manager:
                 if self.get_nested_key(d, key) == value:
                     return d
 
+    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], bool]]:
+        """
+        Get keys missing from a locale in comparison to the master locale
+
+        :param locale: Any meta attribute of the locale
+        :return: The missing keys for the locale and the confidence of the attribute match
+        """
+
+        locale_data: Optional[Tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
+        if locale_data:
+            return [item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None], locale_data[1]
+
     def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
         """
         Get a locale from a potentially malformed attribute.
@@ -354,6 +395,7 @@ class Manager:
                 if k not in node:
                     if locale:
                         self.log(f'missing key "{k}" patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                        self._missing_locale_keys[dict_.meta.name].append(self.dict_full_path(ref_.actual, k, v))
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):

@@ -363,7 +363,9 @@ class Manager:
 
         locale_data: Optional[Tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
         if locale_data:
-            return list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None)), locale_data[1]
+            missing: list = list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
+            missing.sort(key=lambda path: len(path) * sum(map(len, path)))
+            return missing, locale_data[1]
 
     def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
         """

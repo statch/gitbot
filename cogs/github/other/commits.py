@@ -18,7 +18,7 @@ class Commits(commands.Cog):
         try:
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Commits',
                                                                         reason=f'GitHub Commits setup by {ctx.author}')
-        except discord.errors.HTTPException:
+        except (discord.errors.HTTPException, discord.errors.Forbidden):
             await ctx.err(ctx.l.commits.webhook_failed)
             return
         embed: discord.Embed = discord.Embed(

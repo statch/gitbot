@@ -82,7 +82,7 @@ class Manager:
         :param message_color: The color of the message
         """
 
-        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
+        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}{Style.RESET_ALL}')
 
     def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
         """

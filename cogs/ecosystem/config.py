@@ -72,7 +72,6 @@ class Config(commands.Cog):
     @commands.cooldown(3, 30, commands.BucketType.guild)
     @normalize_repository
     async def config_release_feed_command(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
-        print(f'repo: {repo}')
         ctx.fmt.set_prefix('config feed')
         g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if not g:

@@ -59,8 +59,7 @@ class LinesOfCode(commands.Cog):
             async with aiofiles.open(tmp_zip_path, 'wb') as fp:
                 await fp.write(files)
             await Mgr.unzip_file(tmp_zip_path, tmp_dir_path)
-            output: Any = subprocess.check_output(['/bin/perl', 'cloc.pl', '--json', tmp_dir_path])
-            output: dict = json.loads(output)
+            output: dict = json.loads(subprocess.check_output(['/bin/perl', 'cloc.pl', '--json', tmp_dir_path]))
         except subprocess.CalledProcessError:
             pass
         else:

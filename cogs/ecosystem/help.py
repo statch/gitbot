@@ -143,9 +143,8 @@ class Help(commands.Cog):
     async def utility_aliases(self, ctx: commands.Context) -> None:
         lines: list = [
             ctx.l.aliases.utility.description,
-            f'`git license` {Mgr.e.arrow} `git info -L`',
             f'`git repo --download` {Mgr.e.arrow} `git repo -dl`',
-            f'`git lines` {Mgr.e.arrow} `git -l`'
+            f'`git commits` {Mgr.e.arrow} `git logging`'
         ]
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.aliases.utility.title}',

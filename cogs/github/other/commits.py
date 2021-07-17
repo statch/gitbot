@@ -8,7 +8,7 @@ class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @gitbot_command(name='commits', aliases=['commit'])
+    @gitbot_command(name='commits', aliases=['commit', 'logs', 'logging', 'log'])
     @commands.cooldown(3, 60, commands.BucketType.guild)
     @commands.bot_has_permissions(manage_webhooks=True)
     @commands.has_permissions(manage_webhooks=True)

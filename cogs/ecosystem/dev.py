@@ -35,7 +35,6 @@ class Dev(commands.Cog):
         locale_data: Optional[Tuple[List[Tuple[str, ...]], bool]] = Mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
             await ctx.err('This locale doesn\'t exist!')
-            return
         else:
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])

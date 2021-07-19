@@ -69,7 +69,7 @@ class Org(commands.Cog):
                                                              '%Y-%m-%dT%H:%M:%SZ').date(), 'full', locale=ctx.l.meta.name)) + '\n'
         info: str = f"{created_at}{repos}{members}{location}{email}"
         embed.add_field(name=f":mag_right: {ctx.l.org.info.glossary[1]}:", value=info, inline=False)
-        blog: tuple = (org['blog'], ctx.l.org.info.glossary[3])
+        blog: tuple = (org['blog'] if 'blog' in org else None, ctx.l.org.info.glossary[3])
         twitter: tuple = (
             f'https://twitter.com/{org["twitter_username"]}' if "twitter_username" in org and org[
                 'twitter_username'] is not None else None,

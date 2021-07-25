@@ -32,9 +32,14 @@ class Dev(commands.Cog):
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: commands.Context, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
-        locale_data: Optional[Tuple[List[Tuple[str, ...]], bool]] = Mgr.get_missing_keys_for_locale(locale_)
+        locale_data: Optional[Tuple[List[Tuple[str, ...]], dict, bool]] = Mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
-            await ctx.err('This locale doesn\'t exist!')
+            await ctx.err(ctx.l.generic.nonexistent.locale)
+        elif not locale_data[0]:
+            if locale_data[1]['name'] == Mgr.locale.master.meta.name:
+                await ctx.err(ctx.fmt('no_master_locale', f'`{locale_data[1]["name"]}`'))
+            else:
+                await ctx.send(ctx.l.dev.missing_locales.no_missing_keys)
         else:
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])

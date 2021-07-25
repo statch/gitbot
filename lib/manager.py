@@ -13,7 +13,7 @@ from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
 from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple, Dict
 from fuzzywuzzy import fuzz
 
 
@@ -46,7 +46,7 @@ class Manager:
                                    'pr': self.git.get_pull_request,
                                    'snippet': 'snippet'}
         self.locale_cache: dict = {}
-        setattr(self.locale, 'master', self.l.en)
+        setattr(self.locale, 'master', getattr(self.l, self.locale.master))
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
@@ -353,7 +353,7 @@ class Manager:
                 if self.get_nested_key(d, key) == value:
                     return d
 
-    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], bool]]:
+    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], DictProxy, bool]]:
         """
         Get keys missing from a locale in comparison to the master locale
 
@@ -365,7 +365,7 @@ class Manager:
         if locale_data:
             missing: list = list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
             missing.sort(key=lambda path: len(path) * sum(map(len, path)))
-            return missing, locale_data[1]
+            return missing, locale_data[0], locale_data[1]
 
     def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
         """

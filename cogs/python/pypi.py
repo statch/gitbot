@@ -21,6 +21,20 @@ class PyPI(commands.Cog):
     async def pypi_command_group(self, ctx: commands.Context, project: Optional[str] = None) -> None:
         if project is not None:
             await ctx.invoke(self.project_info_command, project=project)
+        else:
+            commands_: list = [
+                f'`git pypi {{{ctx.l.argument_placeholders.package}}}` - {ctx.l.pypi.default.commands.info}',
+                f'`git pypi downloads {{{ctx.l.argument_placeholders.package}}}` - {ctx.l.pypi.default.commands.downloads}'
+            ]
+            embed: discord.Embed = discord.Embed(
+                color=0x3572a5,
+                title=ctx.l.pypi.default.title,
+                description=ctx.l.pypi.default.description
+                            + '\n\n'
+                            + '\n'.join(commands_)
+            )
+            embed.set_thumbnail(url='https://raw.githubusercontent.com/github/explore/666de02829613e0244e9441b114edb85781e972c/topics/pip/pip.png')
+            await ctx.send(embed=embed)
 
     @pypi_command_group.command('info', aliases=['i'])
     @commands.cooldown(5, 30, commands.BucketType.user)

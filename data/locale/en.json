@@ -28,7 +28,8 @@
     "license": "license",
     "link": "link",
     "lang": "language",
-    "link_or_codeblock": "link or codeblock"
+    "link_or_codeblock": "link or codeblock",
+    "package": "package"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -583,7 +584,8 @@
         "license": "get info about a license",
         "snippet": "generate a beautiful image of the lines mentioned in a GitHub or GitLab link or a codeblock",
         "snippet_raw": "get the lines mentioned in a GitHub or GitLab link",
-        "info": "automatically inspect a link and get info on it"
+        "info": "automatically inspect a link and get info on it",
+        "pypi": "fetch PyPI information about Python packages"
       }
     }
   },
@@ -638,7 +640,12 @@
   },
   "pypi": {
     "default": {
-
+      "title": "Python Package Index Commands",
+      "description": "Commands in this group are related to PyPI,\nthe package index for Python.\nBelow you can find a list of the commands in this group.",
+      "commands": {
+        "info": "Get information about a package",
+        "downloads": "Get download stats of a package"
+      }
     },
     "info": {
       "glossary": ["Summary", "Info", "Links", "Homepage", "Documentation", "Bugtracker"],

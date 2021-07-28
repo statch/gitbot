@@ -1,4 +1,9 @@
+import io
 import discord
+import plotly.express as px
+import plotly.io
+import plotly.graph_objects as go
+import pandas as pd
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from typing import Optional
@@ -17,7 +22,7 @@ class PyPI(commands.Cog):
         if project is not None:
             await ctx.invoke(self.project_info_command, project=project)
 
-    @pypi_command_group.command('info')
+    @pypi_command_group.command('info', aliases=['i'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def project_info_command(self, ctx: commands.Context, project: str) -> None:
         ctx.fmt.set_prefix('pypi info')
@@ -70,10 +75,38 @@ class PyPI(commands.Cog):
         else:
             await ctx.err(ctx.l.generic.nonexistent.python_package)
 
-    @pypi_command_group.command('releases')
-    @commands.cooldown(5, 30, commands.BucketType.user)
+    @pypi_command_group.command('downloads', aliases=['dl'])
+    @commands.cooldown(3, 30, commands.BucketType.user)
+    @commands.max_concurrency(7)
     async def project_releases_command(self, ctx: commands.Context, project: str) -> None:
-        pass
+        ctx.fmt.set_prefix('pypi downloads')
+        downloads_overall: Optional[dict] = await _PyPI.get_project_overall_downloads(project)
+        if downloads_overall and (data := downloads_overall['data']):
+            downloads_recent: dict = (await _PyPI.get_project_recent_downloads(project))['data']
+            df: pd.DataFrame = pd.DataFrame({'date': [item['date'] for item in data],
+                                             'downloads': [item['downloads'] for item in data]})
+            fig: go.Figure = px.line(df,
+                                     x='date',
+                                     y='downloads',
+                                     labels={'date': ctx.l.pypi.downloads.glossary[0],
+                                             'downloads': ctx.l.pypi.downloads.glossary[1]},
+                                     template='plotly_dark')
+            embed: discord.Embed = discord.Embed(
+                color=0x3572a5,
+                title=ctx.fmt('title', project, len(data) - 1),
+                url=f'https://pypistats.org/packages/{project.replace(".", "-").lower()}',
+                description=f'{ctx.fmt("stats yesterday", downloads_recent["last_day"])}\n'
+                            f'{ctx.fmt("stats last_week", downloads_recent["last_week"])}\n'
+                            f'{ctx.fmt("stats last_month", downloads_recent["last_month"])}'
+            )
+            embed.set_thumbnail(url='https://raw.githubusercontent.com/github/explore/666de02829613e0244e9441b114edb85781e972c/topics/pip/pip.png')
+            embed.set_footer(text=ctx.l.pypi.downloads.footer)
+            await ctx.send(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
+                                                                                           format='png',
+                                                                                           engine='kaleido')),
+                                                          filename=f'{project}-downloads-overall.png'))
+        else:
+            await ctx.err(ctx.l.generic.nonexistent.python_package)
 
 
 def setup(bot: commands.Bot) -> None:

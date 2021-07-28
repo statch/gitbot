@@ -646,6 +646,16 @@
       "first_upload": "First release uploaded at {0}",
       "requires_python": "Requires Python version {0}",
       "license": "Licensed under the {0} license"
+    },
+    "downloads": {
+      "title": "{0} downloads over the last {1} days",
+      "footer": "PyPi project statistics are provided by pypistats.org",
+      "glossary": ["Date", "Downloads"],
+      "stats": {
+        "yesterday": "Yesterday: **{0}**",
+        "last_week": "Last Week: **{0}**",
+        "last_month": "Last Month: **{0}**"
+      }
     }
   }
 }

@@ -239,13 +239,36 @@ class Manager:
         return max(set(items), key=items.count)
 
     def construct_gravatar_url(self, email: str, size: int = 512, default: Optional[str] = None) -> str:
+        """
+        Construct a valid Gravatar URL with optional size and default parameters
+
+        :param email: The email to fetch the Gravatar for
+        :param size: The size of the Gravatar, default is 512
+        :param default: The URL to default to if the email address doesn't have a Gravatar
+        :return: The Gravatar URL constructed with the arguments
+        """
+
         url: str = f'https://www.gravatar.com/avatar/{hashlib.md5(email.encode("utf8").lower()).hexdigest()}?s={size}'
         if default:
             url += f'&d={quote_plus(default)}'
         return url
 
-    async def ensure_http_status(self, url: str, code: int = 200, alt: Optional[Any] = None) -> Any:
-        if (await self.ses.get(url)).status == code:
+    async def ensure_http_status(self,
+                                 url: str,
+                                 code: int = 200,
+                                 method: str = 'GET',
+                                 alt: Optional[Any] = None) -> Any:
+        """
+        Ensure that an HTTP request returned a particular status, if not, return the alt parameter
+
+        :param url: The URL to request
+        :param code: The wanted status code
+        :param method: The method of the request
+        :param alt: The value to return if the status code is different from the code parameter
+        :return: The URL if the statuses match, or the alt parameter if not
+        """
+
+        if (await self.ses.request(method=method, url=url)).status == code:
             return url
         return alt
 

@@ -6,6 +6,8 @@ import operator
 import discord
 import zipfile
 import os.path
+import hashlib
+import aiohttp
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
@@ -13,8 +15,9 @@ from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
 from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple, Dict
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
 from fuzzywuzzy import fuzz
+from urllib.parse import quote_plus
 
 
 class Manager:
@@ -29,6 +32,7 @@ class Manager:
 
     def __init__(self, github):
         self.git = github
+        self.ses: aiohttp.ClientSession = self.git.ses
         self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
         self.e: DictProxy = self.load_json('emoji')
         self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
@@ -233,6 +237,17 @@ class Manager:
         """
 
         return max(set(items), key=items.count)
+
+    def construct_gravatar_url(self, email: str, size: int = 512, default: Optional[str] = None) -> str:
+        url: str = f'https://www.gravatar.com/avatar/{hashlib.md5(email.encode("utf8").lower()).hexdigest()}?s={size}'
+        if default:
+            url += f'&d={quote_plus(default)}'
+        return url
+
+    async def ensure_http_status(self, url: str, code: int = 200, alt: Optional[Any] = None) -> Any:
+        if (await self.ses.get(url)).status == code:
+            return url
+        return alt
 
     async def validate_number(self, number: str, items: List[AnyDict]) -> Optional[dict]:
         """

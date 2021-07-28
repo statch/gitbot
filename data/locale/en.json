@@ -65,7 +65,8 @@
       "pr_number": "A pull request with this number **doesn't exist!**",
       "issue_number": "An issue with this number **doesn't exist!**",
       "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
-      "locale": "This locale doesn't exist!"
+      "locale": "This locale doesn't exist!",
+      "python_package": "A Python Package with this name doesn't exist on PyPI!"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -633,6 +634,18 @@
       "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
       "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
       "title": "Missing keys in `{0}`"
+    }
+  },
+  "pypi": {
+    "default": {
+
+    },
+    "info": {
+      "glossary": ["Summary", "Info", "Links", "Homepage", "Documentation", "Bugtracker"],
+      "author": "Created by {0}",
+      "first_upload": "First release uploaded at {0}",
+      "requires_python": "Requires Python version {0}",
+      "license": "Licensed under the {0} license"
     }
   }
 }

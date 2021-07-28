@@ -3,7 +3,6 @@ import datetime
 import re
 import io
 from .list_plugin import issue_list, pull_request_list
-from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
@@ -18,16 +17,15 @@ class Repo(commands.Cog):
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
     async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
-        info_command: commands.Command = self.bot.get_command(f'repo --info')
         if not repo:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(info_command, repo=stored)
+                await ctx.invoke(self.repo_info_command, repo=stored)
             else:
                 await ctx.err(ctx.l.generic.nonexistent.repo.qa)
         else:
-            await ctx.invoke(info_command, repo=repo)
+            await ctx.invoke(self.repo_info_command, repo=repo)
 
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
@@ -86,8 +84,7 @@ class Repo(commands.Cog):
             forked = ctx.fmt('fork_notice', f"[{r['parent']['nameWithOwner']}]({r['parent']['url']})") + '\n'
 
         created_at = ctx.fmt('created_at',
-                                  format_date(datetime.datetime.strptime(r['createdAt'],
-                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'full', locale=ctx.l.meta.name)) + '\n'
+                                  f'<t:{int(datetime.datetime.strptime(r["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
 
         languages = ""
         if lang := r['primaryLanguage']:

@@ -1,6 +1,5 @@
 import discord
 import datetime
-from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
@@ -13,16 +12,15 @@ class User(commands.Cog):
 
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
-        info_command: commands.Command = self.bot.get_command(f'user --info')
         if not user:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(info_command, user=stored)
+                await ctx.invoke(self.user_info_command, user=stored)
             else:
                 await ctx.err(ctx.l.generic.nonexistent.user.qa)
         else:
-            await ctx.invoke(info_command, user=user)
+            await ctx.invoke(self.user_info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='info', aliases=['i'])
@@ -76,8 +74,8 @@ class User(commands.Cog):
             contrib: str = ""
 
         joined_at: str = ctx.fmt('joined_at',
-                                  format_date(datetime.datetime.strptime(u['createdAt'],
-                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'medium', locale=ctx.l.meta.name)) + '\n'
+                                  f'<t:{int(datetime.datetime.strptime(u["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
         w_url: str = u['websiteUrl']

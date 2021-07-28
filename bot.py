@@ -52,7 +52,8 @@ extensions: list = [
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',
     'cogs.backend.handle.errors',
-    'cogs.backend.handle.events'
+    'cogs.backend.handle.events',
+    'cogs.python.pypi'
 ]
 
 if PRODUCTION:

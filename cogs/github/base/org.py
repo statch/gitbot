@@ -1,7 +1,6 @@
 import discord
 import datetime
 from typing import Optional, Union
-from babel.dates import format_date
 from lib.globs import Git, Mgr
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
@@ -13,16 +12,15 @@ class Org(commands.Cog):
 
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
-        info_command: commands.Command = self.bot.get_command(f'org --info')
         if not org:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(info_command, organization=stored)
+                await ctx.invoke(self.org_info_command, organization=stored)
             else:
                 await ctx.err(ctx.l.generic.nonexistent.org.qa)
         else:
-            await ctx.invoke(info_command, organization=org)
+            await ctx.invoke(self.org_info_command, organization=org)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='info', aliases=['i'])
@@ -65,8 +63,7 @@ class Org(commands.Cog):
             location: str = "\n"
 
         created_at: str = ctx.fmt('created_at',
-                                  format_date(datetime.datetime.strptime(org['created_at'],
-                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'full', locale=ctx.l.meta.name)) + '\n'
+                                  f'<t:{int(datetime.datetime.strptime(org["created_at"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
         info: str = f"{created_at}{repos}{members}{location}{email}"
         embed.add_field(name=f":mag_right: {ctx.l.org.info.glossary[1]}:", value=info, inline=False)
         blog: tuple = (org['blog'] if 'blog' in org else None, ctx.l.org.info.glossary[3])

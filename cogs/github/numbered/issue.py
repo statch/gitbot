@@ -1,7 +1,6 @@
 import discord
 import datetime
 from typing import Optional, Union
-from babel.dates import format_date
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository
 from discord.ext import commands
@@ -65,16 +64,11 @@ class Issue(commands.Cog):
 
         user: str = ctx.fmt('created_at',
                             f"[{issue['author']['login']}]({issue['author']['url']})",
-                            format_date(datetime.datetime.strptime(issue['createdAt'],
-                                                                   '%Y-%m-%dT%H:%M:%SZ').date(),
-                                                                   'full',
-                                                                   locale=ctx.l.meta.name))
+                            f'<t:{int(datetime.datetime.strptime(issue["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>')
 
         if issue['closed']:
-            closed: str = '\n' + ctx.fmt('closed_at', format_date(datetime.datetime.strptime(issue['closedAt'],
-                                                                  '%Y-%m-%dT%H:%M:%SZ').date(),
-                                                                  'full',
-                                                                  locale=ctx.l.meta.name)) + '\n'
+            closed: str = '\n' + ctx.fmt('closed_at',
+                                         f'<t:{int(datetime.datetime.strptime(issue["closedAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
         else:
             closed: str = '\n'
 

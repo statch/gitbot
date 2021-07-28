@@ -1,7 +1,6 @@
 import discord
 import datetime
 import asyncio
-from babel.dates import format_date
 from discord.ext import commands
 from lib.globs import Git, Mgr
 from typing import Optional, Tuple, Union
@@ -84,7 +83,7 @@ class Gist(commands.Cog):
                 timeout_embed.set_footer(text=ctx.l.gist.timeout.tip)
                 await base_msg.edit(embed=timeout_embed)
                 return
-        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.clean_content()), ctx.l.gist.content_notice))
+        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.clean_content), ctx.l.gist.content_notice))
 
     async def build_gist_embed(self, ctx: commands.Context, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         ctx.fmt.set_prefix('gist')
@@ -99,15 +98,9 @@ class Gist(commands.Cog):
         created_at: str = ctx.fmt('created_at',
                                   data['login'],
                                   data['url'],
-                                  format_date(datetime.datetime.strptime(gist['createdAt'],
-                                                                         '%Y-%m-%dT%H:%M:%SZ').date(),
-                                                                         'medium',
-                                                                         locale=ctx.l.meta.name)) + '\n'
+                                  f'<t:{int(datetime.datetime.strptime(gist["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
 
-        updated_at: str = ctx.fmt('updated_at', format_date(datetime.datetime.strptime(gist['updatedAt'],
-                                                                                       '%Y-%m-%dT%H:%M:%SZ').date(),
-                                                                                       'medium',
-                                                                                       locale=ctx.l.meta.name)) + '\n'
+        updated_at: str = ctx.fmt('updated_at', f'<t:{int(datetime.datetime.strptime(gist["updatedAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
 
         stargazers = ctx.fmt('stargazers plural', gist['stargazerCount'], f"{gist['url']}/stargazers") if gist[
                                                                                                    'stargazerCount'] != 1 else ctx.fmt('stargazers singular', f"{gist['url']}/stargazers")

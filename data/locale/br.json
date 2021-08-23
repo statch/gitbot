@@ -1,611 +1,634 @@
-{
-  "meta": {
-    "name": "br",
-    "full_name": "portuguese brazilian",
-    "localized_name": "portuguese",
-    "flag": ":flag_br:"
-  },
-  "errors": {
-    "missing_required_argument": "Você não usou todos os argumentos como deveria, **use** `git --help` **para mais informações.**",
-    "command_on_cooldown": "**Calma, você está em tempo de espera!** Por avor, tente novamente em {0}s",
-    "max_concurrency_reached": "Este comando está com uma alta demanda! **Tente novamente em alguns instantes!**",
-    "bot_missing_permissions": "**Eu não tenho uma permissão para fazer isso! ** Eu preciso de {0}",
-    "missing_permissions": "**Você não tem permissão para utilizar este comando! ** Você precisa de {0}",
-    "no_private_message": "Este comando dó pode ser utilizado **DENTRO DO SERVIDOR!**"
-  },
-  "argument_placeholders": {
-    "user": "username",
-    "org": "organization",
-    "repo": "repo",
-    "issue_number": "issue number",
-    "pr_number": "pr number",
-    "state": "state",
-    "license": "license",
-    "link": "link",
-    "lang": "language"
-  },
-  "events": {
-    "mention": ":tada: **Oi, eu sou o GitBot.**\nMeu prefixo é `git`\nDigite `git --help` para uma lista com todos os meu comandos."
-  },
-  "generic": {
-    "nonexistent": {
-      "user": {
-        "base": "Este usuário **não existe!**",
-        "qa": "Você não tem um acesso rápido à usuário configurado! **Digite** `git config` **para configurar-lo.**",
-        "qa_changed": "O usuário que você havia salvo teve o nome mudado ou deletado. Por favor **adicione-o novamente** usando `git --config user`"
-      },
-      "repo": {
-        "base": "Este repositório **não existe!**",
-        "qa": "Você não tem um acesso rápido à repo configurado! **Digite** `git config` **para configurar-lo.**",
-        "qa_changed": "O repo que você havia salvo teve o nome mudado ou deletado. Por favor **adicione-o novamente** usando `git --config repo`",
-        "saved_repo_unavailable": "Você utilizou um comando que havia uma repositório armazenado, mas agora está indisponível. **Por favor adicione-o novamente.**",
-        "no_pulls_with_state": "Não há nenhum **{0} pull requests** neste repo!",
-        "no_issues_with_state": "Não há nenhum **{0} issues** neste repo!",
-        "no_pulls_with_state_qa": "No seu repo salvo não há nenhum **{0} pull requests!**",
-        "no_issues_with_state_qa": "No seu repo salvo não há nenhum **{0} issues!**"
-      },
-      "org": {
-        "base": "Esta organização **não existe!**",
-        "qa": "Você não tem um acesso rápido à organização configurado! **Digite** `git config` **para realizar-la.**",
-        "qa_changed": "A organização que você havia salvo teve o nome mudado ou deletado. Por favor **readicione-o** usando `git --config org`"
-      },
-      "repos": {
-        "user": "Este usuário não possui nenhum **repo público!**",
-        "org": "Esta organização não possui nenhum **repo público!**"
-      },
-      "gist": "Este usuário não possui nenhuma **gist pública!**",
-      "path": "Este caminho (path) **não existe!**",
-      "user_or_org": "Esta organização **não existe!**",
-      "pr_number": "Esta pull request com este número **não existe!**",
-      "issue_number": "Esta issue com este número **não existe!**",
-      "qa": "**Você não possui nenhum dado em seu acesso rápido!** Use `git config` para configurar-lo."
+    {
+    "meta": {
+        "name": "br",
+        "full_name": "portuguese brazilian",
+        "localized_name": "portuguese",
+        "flag": ":flag_br:"
     },
-    "issue": {
-      "invalid_state": "`{0}` não é um **estado válido de issue!** (Tente `open` ou `closed`)"
-    },
-    "pr": {
-      "invalid_state": "`{0}` não é um **estado válido de pull request!** (Tente `open`, `closed` ou `merged`)"
-    },
-    "invalid_index": "{0} não é um número válido **da lista!**",
-    "unspecified": "**Há algo de errado,** por favor, reporte este erro no servidor de suporte do bot."
-  },
-  "glossary": {
-    "github_repo_term": "repository",
-    "gitlab_repo_term": "project",
-    "website": "website"
-  },
-  "privacy_policy": {
-    "title": "Politica de privacidade",
-    "what": {
-      "title": "O que é armazenado?",
-      "body": "Os únicos dados que são armazenados são: UserID e o acesso rápido à usuário, repos e orgs."
-    },
-    "use": {
-      "title": "E como os dados são usados?",
-      "body": "É usado para fornecer armazenamento para seus usuários, repos e organizações salvos, seu UserID é essencial para o Bot saber quais dados são seus."
-    },
-    "access": {
-      "title": "Que tem acesso aos dados?",
-      "body": "Apenas o desenvolvedor do Bot tem acesso, mais ninguém. Seus dados não são visualizados ou acessados ​​de nenhuma forma, a menos que seja necessário para fornecer o serviço."
-    },
-    "deletion": {
-      "title": "Como posso excluir esses dados armazenados?",
-      "body": "Você pode fazer isso facilmente usando o comando `git config -delete`!"
-    },
-    "author": {
-      "title": "Quem escreveu isso e isso pode ser alterado?",
-      "body": "Esta política de privacidade foi escrita por [wulf] (https://dsc.bio/wulf), o desenvolvedor do Bot,; e traduzida por [strattegia_] (dsc.bio/strattegia); e sim, tudo isso está sujeito a alterações no futuro."
-    }
-  },
-  "uptime": "**Estive online por:**\n{0}",
-  "invite": {
-    "server": "Support Server",
-    "invite_verb": "Convite",
-    "tagline": "Convide-me para o seu servidor!"
-  },
-  "ping": "**Meu ping é:**\n**{0}** milliseconds",
-  "vote": "Vote no GitBot!",
-  "stats": {
-    "title": "Bot Status",
-    "body": "Estatísticas gerais sobre o funcionamento do bot.",
-    "system": "Uso do sistema:",
-    "people": {
-      "title": "Pessoa",
-      "body": "Estou em **{0}** servers,\ne há **{1}** usuários."
-    },
-    "code": {
-      "title": "Code",
-      "body": "Tenho **{0}** linhas de código,\nrodando em **{1}**"
-    }
-  },
-  "license": {
-    "error": "Não consegui encontrar uma licença que corresponda ao nome que você forneceu!",
-    "description": "Descrição",
-    "implementation": "Implementação",
-    "conditions": "Condições",
-    "limitations": "Limitações",
-    "permissions": "Permissões",
-    "none": "Nenhuma"
-  },
-  "info": {
-    "no_info": "Não consegui obter nenhuma informação sobre o link que você forneceu!"
-  },
-  "lines": {
-    "more_than_25": "Eu não posso mostrar **mais de 25 linhas**, desculpas!",
-    "no_content": "** Não há nenhum conteúdo ** nessas linhas!",
-    "private_or_inaccessible": "Isso {0} é ** privado ou de outra forma inacessível. **",
-    "nonexistent": "Isso {0} **não existe!**",
-    "no_lines_mentioned": "O link deve ser um URL do GitHub ou GitLab!"
-  },
-  "user": {
-    "repos": {
-      "no_public": "Este usuário não possui nenhum **repo público!**",
-      "more": "Veja {0} mais no GitHub.",
-      "owner": "{0} repos."
-    },
-    "info": {
-      "glossary": ["Bio", "Info", "Links", "Website"],
-      "title": "Perfil: {0}",
-      "joined_at": "No GitHub desde {0}",
-      "company": "Trabalhou {0}",
-      "no_company": "Não faz parte de uma compania",
-      "orgs": {
-        "plural": "Pertence à {0} organizações",
-        "singular": "Pertece à uma organização",
-        "no_orgs": "Não pertence à nenhuma organização"
-      },
-      "followers": {
-        "plural": "Tem [{0} seguidores]({1})",
-        "singular": "Tem apenas [um seguidor]({0})",
-        "no_followers": "Não possui seguidores"
-      },
-      "linking_word": "e",
-      "following": {
-        "plural": "Segue [{0} usuários]({1})",
-        "singular": "Segue apenas [uma pessoa]({0})",
-        "no_following": "Ainda não segue nenhuma pessoa."
-      },
-      "repos": {
-        "plural": "Possui um total de [{0} repositórios]({1})",
-        "singular": "Possui apenas [um repositório]({0})",
-        "no_repos": "Ainda não há nenhum repositório"
-      },
-      "contributions": "{0} contribuições neste ano, {0} hoje"
-    }
-  },
-  "org": {
-    "repos": {
-      "owner": "{0} repos",
-      "more": "Veja {0} mais no Github"
-    },
-    "info": {
-      "glossary": ["Description", "Info", "Links", "Website"],
-      "title": "Perfil: {0}",
-      "created_at": "Criado em {0}",
-      "members": "Possui [{0} membros públicos]({1})",
-      "one_members": "Possui apenas [um membro público]({0})",
-      "repos": {
-        "plural": "Possui um total de [{0} repositórios]({1})",
-        "singular": "Possui apenas [um repositório]({0})",
-        "no_repos": "Ainda não há repositórios"
-      },
-      "location": "Baseado em {0}"
-    }
-  },
-  "repo": {
-    "info": {
-      "glossary": ["Description", "Info", "Links", "Topics", "Homepage"],
-      "created_at": "Criado em {0}",
-      "issues": {
-        "plural": "Possui [{0} open issues]({1})",
-        "singular": "Possui apenas [um open issue]({0})",
-        "no_issues": "Ainda não possui open issues"
-      },
-      "forks": {
-        "plural": "Foi bifurcado [{0} vezes]({1})",
-        "singular": "Foi bifurcado apenas [uma vez]({0})",
-        "no_forks": "Nenhum repositório foi bifurcado ainda."
-      },
-      "languages": {
-        "main": "Escrito principalmente por {0}",
-        "with_num": "Escrito em {0} linguagens, principalmente {1}"
-      },
-      "watchers": {
-        "plural": "Há [{0} observadores]({1})",
-        "singular": "Há apenas [um observador]({0})",
-        "no_watchers": "Não há observadores"
-      },
-      "linking_word": "e",
-      "stargazers": {
-        "plural": "[{0} stargazers]({1})",
-        "singular": "[Um stargazer]({0})",
-        "no_stargazers": "Nenhum stargazers"
-      },
-      "fork_notice": "Este repo é uma bifurcação de {0}",
-      "license": "Licensiado sob {0}"
-    },
-    "files": {
-      "view_more": "Veja {0} mais no GitHub"
-    },
-    "download": {
-      "wait": "Me dê uns segundos enquanto eu baixo este arquivo...",
-      "file_too_big": "Este arquivo é muito grande, **por favor, baixe diretamente daqui:**\n{0}",
-      "done": "Aqui está o código-fonte: **{0}!**"
-    },
-    "issues": {
-      "title": "Último {0} issues em {1}",
-      "footer_tip": "Você pode inspecionar rapidamente um específico issue da lista digitando seu número!\nVocê pode digitar 'cancel' para sair."
-    },
-    "pulls": {
-      "title": "Último {0} pull requests em {1}",
-      "footer_tip": "Você pode inspecionar rapidamente um PR da lista digitando seu número!\nVocê pode digitar 'cancel' para sair."
-    }
-  },
-  "gist": {
-    "glossary": ["Contents", "Info"],
-    "title": "Gists: {0}",
-    "created_at": "Criado por [{0}]({1}) em {2}",
-    "updated_at": "Última atualização em {0}",
-    "stargazers": {
-      "plural": "Possui [{0} stargazers]({1})",
-      "singular": "Possui apenas [um stargazer]{0}",
-      "no_stargazers": "Não há stargazers"
-    },
-    "linking_word": "e",
-    "comments": {
-      "plural": "[{0} comentários]({1})",
-      "singular": "[um comentário]({0})",
-      "no_comments": "sem comentários"
-    },
-    "no_list": "Você não pode ver a lista de gist porque que há apenas um gist.",
-    "footer": "Últimos dez gists de {0}.\nPara inspecionar um gist específico, simplesmente envie seu número neste canal.",
-    "index_error": "Por favor, escolha um número **entre 1 e {0}**",
-    "content_notice": "O conteúdo é uma prévia do primeiro arquivo do gist",
-    "timeout": {
-      "title": "Tempo esgotado",
-      "tip": "Para escolher uma opção, basta enviar um número da próxima vez!"
-    }
-  },
-  "issue": {
-    "glossary": ["Body", "Info", "Labels"],
-    "stored_no_number": "Se você quer acessar as issues dos seus repos armazenadas, por favor informe um **número da issue!**",
-    "second_argument_number": "O segundo argumento deve ser um **número** da issue!",
-    "created_at": "Criado por {0} em {1}",
-    "closed_at": "Fechado em {0}",
-    "comments": {
-      "plural": "Possui {0} comentários",
-      "singular": "possui um comentário",
-      "no_comments": "Não há comentários"
-    },
-    "linking_word": "e",
-    "assignees": {
-      "plural": "{0} cessionários",
-      "singular": "um cessionário",
-      "no_assignees": "nenhum cessionário"
-    },
-    "participants": {
-      "plural": "{0} pessoas que participaram dessa issue",
-      "singular": "Um pessoa participou nessa issue"
-    }
-  },
-  "pr": {
-    "glossary": ["Info", "Participants", "Assignees", "Reviewers", "Labels"],
-    "stored_no_number": "Se você quer acessar as repos das PRs armazenadas, por favor passe um **número da pull request!**",
-    "second_argument_number": "O segundo argumento deve ser um **número** da pull request!",
-    "created_at": "Criado por {0} em {1}",
-    "closed_at": "Fechado em {0}",
-    "comments": {
-      "plural": "Há {0} comentários",
-      "singular": "Há um comentário",
-      "no_comments": "Não há comentários"
-    },
-    "linking_word_1": "e",
-    "reviews": {
-      "plural": "{0} reviews",
-      "singular": "uma review",
-      "no_reviews": "nenhuma review"
-    },
-    "files": {
-      "plural": "[{0} arquivos]({1}) foram alterados",
-      "singular": "[Um arquivo]({0}) foi alterado"
-    },
-    "linking_word_2": "em",
-    "commits": {
-      "plural": "{0} commits",
-      "singular": "um commit"
-    },
-    "additions": {
-      "plural": "Atualizado com {0} additions",
-      "singular": "Atualizado com uma addition",
-      "no_additions": "Atualizado sem additions"
-    },
-    "linking_word_3": "e",
-    "deletions": {
-      "plural": "{0} exclusões",
-      "singular": "uma exclusão",
-      "no_deletions": "nenhuma exclusão"
-    },
-    "more_items": "e {0} mais",
-    "fork": "Esta pull request veio de uma fork.",
-    "no_participants": "Sem partcipantes",
-    "no_assignees": "Sem assignees",
-    "no_reviewers": "Sem rewiewers"
-  },
-  "loc": {
-    "file_too_big": "Não consigo processar este repositório porque ele é ** muito grande! **",
-    "title": "Linhas de código em {0}",
-    "description": "Um total de ** {0} ** linhas em ** {1} ** arquivos.",
-    "stats": {
-      "code": "Code",
-      "blank": "Blank",
-      "comments": "Comments",
-      "detailed": "Detailed"
-    },
-    "footer": "Este comando é alimentado pela CLOC CLI tool."
-  },
-  "commits": {
-    "dm_title": "Webhook URL",
-    "dm_failed": "** Não posso enviar uma DM **, então não podemos prosseguir. Processo abortado, webhook excluído.",
-    "description": "Para configurar feeds de commit, você deve adicionar um webhook ao repo de sua escolha.\nPara fazer isso, ** siga as instruções passo a passo abaixo. **",
-    "instructions": [
-      "Navegue até seu repo e abra as configurações",
-      "Selecione `Webhooks` à esquerda",
-      "Clique em `Adicionar webhook`",
-      "Cole a URL que você acabou de receber em suas DMs como `Payload URL`",
-      "Altere `Content type` para` application / json`",
-      "Selecione `enviar-me tudo`",
-      "Clique em `Adicionar webhook`"
-    ],
-    "footer": "E é isso! Agora você receberá uma notificação sempre que houver um novo commit!",
-    "webhook_failed": "** Falha na criação do webhook. ** Tente verificar minhas permissões!",
-    "do_not_share_warning": "** Não compartilhe o URL do webhook **"
-  },
-  "config": {
-    "default": {
-      "brief_1": "**Nesta seção, você pode configurar vários aspectos de sua experiência **",
-      "title": "**Acesso rápido**",
-      "brief_2": "Esses comandos permitem que você salve um usuário, repo ou organização para obter com um comando curto.",
-      "commands": {
-        "user": "Acesse um usuário salvo com `git user`",
-        "org": "Acesse uma organização salva com `git org`",
-        "repo": "Acesse um repositório salvo com `git repo`",
-        "locale": "Mude o idioma do bot",
-        "feed": "Inscreva-se para receber coisas novas do nosso repositório"
-      },
-      "deletion": "**Você pode excluir os dados armazenados digitando** `git config --delete`",
-      "footer": "Para ver o que você salvou, use git config --show",
-      "embed_title": "GitBot Config"
-    },
-    "show": {
-      "title": "Configs do seu GitBot",
-      "qa": {
-        "heading": "**Acesso rápido:**",
-        "list": {
-          "user": "User: {0}",
-          "org": "Organização: {0}",
-          "repo": "Repo: {0}"
+    "errors": {
+        "missing_required_argument": "Você não usou todos os argumentos como deveria, **use** `git --help` **para mais informações.**",
+        "command_on_cooldown": "**Calma, você está em tempo de espera!** Por avor, tente novamente em {0}s",
+        "max_concurrency_reached": "Este comando está com uma alta demanda! **Tente novamente em alguns instantes!**",
+        "bot_missing_permissions": "**Eu não tenho uma permissão para fazer isso! ** Eu preciso de {0}",
+        "missing_permissions": "**Você não tem permissão para utilizar este comando! ** Você precisa de {0}",
+        "no_private_message": "Este comando dó pode ser utilizado **DENTRO DO SERVIDOR!**",
+        "command_not_found": {
+            "title": "Este comando não existe!",
+            "description": "O **comando mais parecido com este** é: {0}",
+            "footer": "Se você acredita que isso seja um erro, contate o nosso suporte!"
         }
-      },
-      "guild": {
-        "heading": "**Configurações do server:**",
-        "list": {
-          "feed": "Release Feed:"
-        }
-      },
-      "accessibility": {
-        "heading": "**Acessibilidade:**",
-        "list": {
-          "locale": "Linguagem: {0}"
-        }
-      },
-      "item_not_set": "Não setado",
-      "item_not_configured": "Não configurado"
     },
-    "feed": {
-      "cancelled": "Liberar configuração do canal de feed **cancelada**",
-      "no_arg": "Por favor, passe um repositório que você deseja seguir!",
-      "invalid_channel": "**Este não é um canal válido!** Tente novamente ou digite `cancel` para sair.",
-      "already_logged": "Os lançamentos deste repo ** já estão sendo registrados! **",
-      "success": "Novos **{0}** lançamentos agora serão registrados.",
-      "embeds": {
-        "start": {
-          "title": "Liberar configuração de canal de feed",
-          "description": "Parece que você ainda não tem um canal Release Feed configurado.\n **Vamos configurar um agora, certo?** \n\nSimplesmente especifique o canal em que deseja receber as atualizações, digitando seu nome ou menção , ou digite `create` para o bot criar o canal para você.",
-          "footer": "Você pode digitar 'cancel' para sair a qualquer momento."
-        },
-        "success": {
-          "title": "Canal de feed de liberação configurado!",
-          "description": "Agora você pode adicionar repos cujas novas atualizações devem ser registradas {0} usando `git config feed {{repo}}`. Cada vez que houver um novo lançamento, uma incorporação aparecerá com algumas informações e alterações.",
-          "footer": "{0} foi adicionado :)"
-        },
-        "limit_reached": {
-          "title": "Limite de repositório de feed de liberação atingido!",
-          "description": "Este server atingiu o ** limite de 3 repositórios de feed de lançamento. **Você pode remover um repositório adicionado anteriormente digitando `git config -delete feed`",
-          "footer": "Você precisa da permissão 'Gerenciar canais' para fazer isso."
-        },
-        "timeout": {
-          "title": "Tempo esgotado",
-          "footer": "Basta enviar o nome / menção de um canal da próxima vez!"
-        }
-      }
+    "argument_placeholders": {
+        "user": "username",
+        "org": "organization",
+        "repo": "repo",
+        "issue_number": "issue number",
+        "pr_number": "pr number",
+        "state": "state",
+        "license": "license",
+        "link": "link",
+        "lang": "language",
+        "link_or_codeblock": "link or codeblock"
     },
-    "qa_set": {
-      "user": "Usuário de acesso rápido definido para **{0}**",
-      "org": "Organização de acesso rápido definida para **{0}**",
-      "repo": "Repo de acesso rápido definido como **{0}**"
+    "events": {
+        "mention": ":tada: **Oi, eu sou o GitBot.**\nMeu prefixo é `git`\nDigite `git --help` para uma lista com todos os meu comandos."
     },
-    "locale": {
-      "success": "Idioma do bot definido como **{0}**.",
-      "failure": "`{0}` não é um **idioma compatível e válido!**",
-      "match_confirmation_embed": {
-        "title": "Confirme o idioma",
-        "description": "Seu idioma solicitado não corresponde a nenhum dos disponíveis por completo, mas estava **muito próximo de `{0}`**. Você quis dizer escolher aquele?",
-        "footer": "Reaja com um emoji apropriado para escolher uma opção!"
-      },
-      "timeout_embed": {
-        "title": "Tempo esgotado!",
-        "footer": "Basta escolher uma opção da próxima vez!"
-      },
-      "title": "Bot Linguagem",
-      "description": "Aqui você pode alterar o idioma do Bot. \nSimplesmente digite {0} \nTodas as traduções são fornecidas por nossa [comunidade](https://github.com/statch/gitbot/tree/main/data/locale)",
-      "cancelled": "Alteração de idioma ** cancelada. **"
-    },
-    "delete": {
-      "default": {
-        "title": "Excluir dados de acesso rápido",
-        "description": "** Você pode excluir os dados de acesso rápido armazenados executando os seguintes comandos: **",
-        "commands": {
-          "user": "exclua o usuário de acesso rápido",
-          "org": "exclua a organização de acesso rápido",
-          "repo": "exclua o repositório de acesso rápido",
-          "feed": "ver opções relacionadas à exclusão de dados de feed de lançamento",
-          "all": "exclua todos os seus dados de acesso rápido"
-        }
-      },
-      "feed": {
-        "no_channel": "Você não tem um canal de feed de lançamento configurado!",
-        "nothing_deleted": "Você não tem um feed de lançamento configurado, portanto ** nada foi excluído. **",
-        "default": {
-          "title": "Excluir dados de feed de lançamento",
-          "description": "** Você pode excluir dados de feed de lançamento armazenados executando os seguintes comandos: **",
-          "commands": {
-            "repo": "cancelar a assinatura de um repo específico",
-            "all": "cancelar a assinatura de todos os repos",
-            "total": "cancele a inscrição em todos os lançamentos e exclua o webhook de feed"
-          }
+    "generic": {
+        "nonexistent": {
+        "user": {
+            "base": "Este usuário **não existe!**",
+            "qa": "Você não tem um acesso rápido à usuário configurado! **Digite** `git config` **para configurar-lo.**",
+            "qa_changed": "O usuário que você havia salvo teve o nome mudado ou deletado. Por favor **adicione-o novamente** usando `git --config user`"
         },
         "repo": {
-          "success": "`{0}` as versões ** não serão mais registradas. **",
-          "not_logged": "Os lançamentos desse repo ** não estão registrados no momento! **"
-        },
-        "all": {
-          "success": "Todos os feeds de lançamento foram ** fechados com sucesso. **"
-        },
-        "total": {
-          "success": "O canal de feed de lançamento foi ** fechado com sucesso. **"
-        }
-      },
-      "user": {
-        "success": "Salvo ** usuário excluído. **",
-        "not_saved": "Você não tem um usuário salvo!"
-      },
-      "org": {
-        "success": "**Organização salva excluída. **",
-        "not_saved": "Você não tem uma organização salva!"
-      },
-      "repo": {
-        "success": "Salvo ** repo excluído. **",
-        "not_saved": "Você não tem um repositório salvo!"
-      },
-      "locale": "O idioma do bot foi redefinido para ** Inglês **.",
-      "all": {
-        "success": "Todos os seus dados armazenados foram ** excluídos com sucesso. **",
-        "not_saved": "Parece que ** você não tem nada armazenado! **"
-      }
-    }
-  },
-  "help": {
-    "alias_note": "Você pode encontrar uma lista de Aliases usando o comando git --aliases",
-    "default": {
-      "title": "Help",
-      "description": "Nesta seção, você encontrará informações e o uso dos meus comandos.\n**Você pode acessar partes específicas digitando:**",
-      "sections": {
-        "github": "para buscar informações do GitHub",
-        "info": "para comandos que fornecem informações sobre o próprio bot",
-        "config": "para armazenar suas organizações, repositórios, usuários e feeds preferidos",
-        "utility": "para outros comandos úteis"
-      },
-      "support_server_note": "** Se você tiver algum problema, **[** entre no servidor de suporte! **](https://discord.gg/3e5fwpA)",
-      "footer": "Você pode encontrar uma lista de aliases usando o comando git --aliases"
-    },
-    "github": {
-      "title": "GitHub Help",
-      "description": "**Palavras entre chaves simbolizam argumentos que o comando requer**",
-      "commands": {
-        "user": {
-          "info": "obtenha informações de um usuário",
-          "repos": "ver os repositórios de um usuário"
+            "base": "Este repositório **não existe!**",
+            "qa": "Você não tem um acesso rápido à repo configurado! **Digite** `git config` **para configurar-lo.**",
+            "qa_changed": "O repo que você havia salvo teve o nome mudado ou deletado. Por favor **adicione-o novamente** usando `git --config repo`",
+            "saved_repo_unavailable": "Você utilizou um comando que havia uma repositório armazenado, mas agora está indisponível. **Por favor adicione-o novamente.**",
+            "no_pulls_with_state": "Não há nenhum **{0} pull requests** neste repo!",
+            "no_issues_with_state": "Não há nenhum **{0} issues** neste repo!",
+            "no_pulls_with_state_qa": "No seu repo salvo não há nenhum **{0} pull requests!**",
+            "no_issues_with_state_qa": "No seu repo salvo não há nenhum **{0} issues!**"
         },
         "org": {
-          "info": "obtenha informações sobre uma organização",
-          "repos": "ver os repositórios de uma organização"
+            "base": "Esta organização **não existe!**",
+            "qa": "Você não tem um acesso rápido à organização configurado! **Digite** `git config` **para realizar-la.**",
+            "qa_changed": "A organização que você havia salvo teve o nome mudado ou deletado. Por favor **readicione-o** usando `git --config org`"
         },
-        "repo_argument_note": "** Importante! ** Os comandos de repo que se seguem requerem a sintaxe exata de `owner / repo-name` no lugar do argumento` {repo} `, ex. `statch / gitbot`",
+        "repos": {
+            "user": "Este usuário não possui nenhum **repo público!**",
+            "org": "Esta organização não possui nenhum **repo público!**"
+        },
+        "gist": "Este usuário não possui nenhuma **gist pública!**",
+        "path": "Este caminho (path) **não existe!**",
+        "user_or_org": "Esta organização **não existe!**",
+        "pr_number": "Esta pull request com este número **não existe!**",
+        "issue_number": "Esta issue com este número **não existe!**",
+        "qa": "**Você não possui nenhum dado em seu acesso rápido!** Use `git config` para configurar-lo.",
+        "locale": "Este local não existe!"
+        },
+        "issue": {
+        "invalid_state": "`{0}` não é um **estado válido de issue!** (Tente `open` ou `closed`)"
+        },
+        "pr": {
+        "invalid_state": "`{0}` não é um **estado válido de pull request!** (Tente `open`, `closed` ou `merged`)"
+        },
+        "invalid_index": "{0} não é um número válido **da lista!**",
+        "unspecified": "**Há algo de errado,** por favor, reporte este erro no servidor de suporte do bot."
+    },
+    "glossary": {
+        "github_repo_term": "repository",
+        "gitlab_repo_term": "project",
+        "website": "website"
+    },
+    "privacy_policy": {
+        "title": "Politica de privacidade",
+        "what": {
+        "title": "O que é armazenado?",
+        "body": "Os únicos dados que são armazenados são: UserID e o acesso rápido à usuário, repos e orgs."
+        },
+        "use": {
+        "title": "E como os dados são usados?",
+        "body": "É usado para fornecer armazenamento para seus usuários, repos e organizações salvos, seu UserID é essencial para o Bot saber quais dados são seus."
+        },
+        "access": {
+        "title": "Que tem acesso aos dados?",
+        "body": "Apenas o desenvolvedor do Bot tem acesso, mais ninguém. Seus dados não são visualizados ou acessados ​​de nenhuma forma, a menos que seja necessário para fornecer o serviço."
+        },
+        "deletion": {
+        "title": "Como posso excluir esses dados armazenados?",
+        "body": "Você pode fazer isso facilmente usando o comando `git config -delete`!"
+        },
+        "author": {
+        "title": "Quem escreveu isso e isso pode ser alterado?",
+        "body": "Esta política de privacidade foi escrita por [wulf] (https://dsc.bio/wulf), o desenvolvedor do Bot,; e traduzida por [strattegia_] (dsc.bio/strattegia); e sim, tudo isso está sujeito a alterações no futuro."
+        }
+    },
+    "uptime": "**Estive online por:**\n{0}",
+    "invite": {
+        "server": "Support Server",
+        "invite_verb": "Convite",
+        "tagline": "Convide-me para o seu servidor!"
+    },
+    "ping": "**Meu ping é:**\n**{0}** milliseconds",
+    "vote": "Vote no GitBot!",
+    "stats": {
+        "title": "Bot Status",
+        "body": "Estatísticas gerais sobre o funcionamento do bot.",
+        "system": "Uso do sistema:",
+        "people": {
+        "title": "Pessoa",
+        "body": "Estou em **{0}** servers,\ne há **{1}** usuários."
+        },
+        "code": {
+        "title": "Code",
+        "body": "Tenho **{0}** linhas de código,\nrodando em **{1}**"
+        }
+    },
+    "license": {
+        "error": "Não consegui encontrar uma licença que corresponda ao nome que você forneceu!",
+        "description": "Descrição",
+        "implementation": "Implementação",
+        "conditions": "Condições",
+        "limitations": "Limitações",
+        "permissions": "Permissões",
+        "none": "Nenhuma"
+    },
+    "info": {
+        "no_info": "Não consegui obter nenhuma informação sobre o link que você forneceu!"
+    },
+    "snippets": {
+        "length_limit_exceeded": "Eu não consigo mostrar **mais que {0} linhas**, perdão!",
+        "no_content": "**Não há conteúdo** nessas linhas!",
+        "private_or_inaccessible": "Isto {0} é **privado ou de outra maneira inacessível.**",
+        "nonexistent": "Isso {0} **não existe!**",
+        "no_lines_mentioned": "O link tem que ser um GitHub ou GitLab URL **mencionando linhas!**"
+    },
+    "user": {
+        "repos": {
+        "no_public": "Este usuário não possui nenhum **repo público!**",
+        "more": "Veja {0} mais no GitHub.",
+        "owner": "{0} repos."
+        },
+        "info": {
+        "glossary": ["Bio", "Info", "Links", "Website"],
+        "title": "Perfil: {0}",
+        "joined_at": "No GitHub desde {0}",
+        "company": "Trabalhou {0}",
+        "no_company": "Não faz parte de uma compania",
+        "orgs": {
+            "plural": "Pertence à {0} organizações",
+            "singular": "Pertece à uma organização",
+            "no_orgs": "Não pertence à nenhuma organização"
+        },
+        "followers": {
+            "plural": "Tem [{0} seguidores]({1})",
+            "singular": "Tem apenas [um seguidor]({0})",
+            "no_followers": "Não possui seguidores"
+        },
+        "linking_word": "e",
+        "following": {
+            "plural": "Segue [{0} usuários]({1})",
+            "singular": "Segue apenas [uma pessoa]({0})",
+            "no_following": "Ainda não segue nenhuma pessoa."
+        },
+        "repos": {
+            "plural": "Possui um total de [{0} repositórios]({1})",
+            "singular": "Possui apenas [um repositório]({0})",
+            "no_repos": "Ainda não há nenhum repositório"
+        },
+        "contributions": "{0} contribuições neste ano, {1} hoje"
+        }
+    },
+    "org": {
+        "repos": {
+        "owner": "{0} repos",
+        "more": "Veja {0} mais no Github"
+        },
+        "info": {
+        "glossary": ["Description", "Info", "Links", "Website"],
+        "title": "Perfil: {0}",
+        "created_at": "Criado em {0}",
+        "members": "Possui [{0} membros públicos]({1})",
+        "one_member": "Possui apenas [um membro público]({0})",
+        "repos": {
+            "plural": "Possui um total de [{0} repositórios]({1})",
+            "singular": "Possui apenas [um repositório]({0})",
+            "no_repos": "Ainda não há repositórios"
+        },
+        "location": "Baseado em {0}"
+        }
+    },
+    "repo": {
+        "info": {
+        "glossary": ["Description", "Info", "Links", "Topics", "Homepage"],
+        "created_at": "Criado em {0}",
+        "issues": {
+            "plural": "Possui [{0} open issues]({1})",
+            "singular": "Possui apenas [um open issue]({0})",
+            "no_issues": "Ainda não possui open issues"
+        },
+        "forks": {
+            "plural": "Foi bifurcado [{0} vezes]({1})",
+            "singular": "Foi bifurcado apenas [uma vez]({0})",
+            "no_forks": "Nenhum repositório foi bifurcado ainda."
+        },
+        "languages": {
+            "main": "Escrito principalmente por {0}",
+            "with_num": "Escrito em {0} linguagens, principalmente {1}"
+        },
+        "watchers": {
+            "plural": "Há [{0} observadores]({1})",
+            "singular": "Há apenas [um observador]({0})",
+            "no_watchers": "Não há observadores"
+        },
+        "linking_word": "e",
+        "stargazers": {
+            "plural": "[{0} stargazers]({1})",
+            "singular": "[Um stargazer]({0})",
+            "no_stargazers": "Nenhum stargazers"
+        },
+        "fork_notice": "Este repo é uma bifurcação de {0}",
+        "license": "Licensiado sob {0}"
+        },
+        "files": {
+        "view_more": "Veja {0} mais no GitHub"
+        },
+        "download": {
+        "wait": "Me dê uns segundos enquanto eu baixo este arquivo...",
+        "file_too_big": "Este arquivo é muito grande, **por favor, baixe diretamente daqui:**\n{0}",
+        "done": "Aqui está o código-fonte: **{0}!**"
+        },
+        "issues": {
+        "title": "Último {0} issues em {1}",
+        "footer_tip": "Você pode inspecionar rapidamente um específico issue da lista digitando seu número!\nVocê pode digitar 'cancel' para sair."
+        },
+        "pulls": {
+        "title": "Último {0} pull requests em {1}",
+        "footer_tip": "Você pode inspecionar rapidamente um PR da lista digitando seu número!\nVocê pode digitar 'cancel' para sair."
+        }
+    },
+    "gist": {
+        "glossary": ["Contents", "Info"],
+        "title": "Gists: {0}",
+        "created_at": "Criado por [{0}]({1}) em {2}",
+        "updated_at": "Última atualização em {0}",
+        "stargazers": {
+        "plural": "Possui [{0} stargazers]({1})",
+        "singular": "Possui apenas [um stargazer]{0}",
+        "no_stargazers": "Não há stargazers"
+        },
+        "linking_word": "e",
+        "comments": {
+        "plural": "[{0} comentários]({1})",
+        "singular": "[um comentário]({0})",
+        "no_comments": "sem comentários"
+        },
+        "no_list": "Você não pode ver a lista de gist porque que há apenas um gist.",
+        "footer": "Últimos dez gists de {0}.\nPara inspecionar um gist específico, simplesmente envie seu número neste canal.",
+        "index_error": "Por favor, escolha um número **entre 1 e {0}**",
+        "content_notice": "O conteúdo é uma prévia do primeiro arquivo do gist",
+        "timeout": {
+        "title": "Tempo esgotado",
+        "tip": "Para escolher uma opção, basta enviar um número da próxima vez!"
+        }
+    },
+    "issue": {
+        "glossary": ["Body", "Info", "Labels"],
+        "stored_no_number": "Se você quer acessar as issues dos seus repos armazenadas, por favor informe um **número da issue!**",
+        "second_argument_number": "O segundo argumento deve ser um **número** da issue!",
+        "created_at": "Criado por {0} em {1}",
+        "closed_at": "Fechado em {0}",
+        "comments": {
+        "plural": "Possui {0} comentários",
+        "singular": "possui um comentário",
+        "no_comments": "Não há comentários"
+        },
+        "linking_word": "e",
+        "assignees": {
+        "plural": "{0} cessionários",
+        "singular": "um cessionário",
+        "no_assignees": "nenhum cessionário"
+        },
+        "participants": {
+        "plural": "{0} pessoas que participaram dessa issue",
+        "singular": "Um pessoa participou nessa issue"
+        }
+    },
+    "pr": {
+        "glossary": ["Info", "Participants", "Assignees", "Reviewers", "Labels"],
+        "stored_no_number": "Se você quer acessar as repos das PRs armazenadas, por favor passe um **número da pull request!**",
+        "second_argument_number": "O segundo argumento deve ser um **número** da pull request!",
+        "created_at": "Criado por {0} em {1}",
+        "closed_at": "Fechado em {0}",
+        "comments": {
+        "plural": "Há {0} comentários",
+        "singular": "Há um comentário",
+        "no_comments": "Não há comentários"
+        },
+        "linking_word_1": "e",
+        "reviews": {
+        "plural": "{0} reviews",
+        "singular": "uma review",
+        "no_reviews": "nenhuma review"
+        },
+        "files": {
+        "plural": "[{0} arquivos]({1}) foram alterados",
+        "singular": "[Um arquivo]({0}) foi alterado"
+        },
+        "linking_word_2": "em",
+        "commits": {
+        "plural": "{0} commits",
+        "singular": "um commit"
+        },
+        "additions": {
+        "plural": "Atualizado com {0} additions",
+        "singular": "Atualizado com uma addition",
+        "no_additions": "Atualizado sem additions"
+        },
+        "linking_word_3": "e",
+        "deletions": {
+        "plural": "{0} exclusões",
+        "singular": "uma exclusão",
+        "no_deletions": "nenhuma exclusão"
+        },
+        "more_items": "e {0} mais",
+        "fork": "Esta pull request veio de uma fork.",
+        "no_participants": "Sem partcipantes",
+        "no_assignees": "Sem assignees",
+        "no_reviewers": "Sem rewiewers"
+    },
+    "loc": {
+        "file_too_big": "Não consigo processar este repositório porque ele é ** muito grande! **",
+        "title": "Linhas de código em {0}",
+        "description": "Um total de ** {0} ** linhas em ** {1} ** arquivos.",
+        "stats": {
+        "code": "Code",
+        "blank": "Blank",
+        "comments": "Comments",
+        "detailed": "Detailed"
+        },
+        "footer": "Este comando é alimentado pela CLOC CLI tool."
+    },
+    "commits": {
+        "dm_title": "Webhook URL",
+        "dm_failed": "** Não posso enviar uma DM **, então não podemos prosseguir. Processo abortado, webhook excluído.",
+        "description": "Para configurar feeds de commit, você deve adicionar um webhook ao repo de sua escolha.\nPara fazer isso, ** siga as instruções passo a passo abaixo. **",
+        "instructions": [
+        "Navegue até seu repo e abra as configurações",
+        "Selecione `Webhooks` à esquerda",
+        "Clique em `Adicionar webhook`",
+        "Cole a URL que você acabou de receber em suas DMs como `Payload URL`",
+        "Altere `Content type` para` application / json`",
+        "Selecione `enviar-me tudo`",
+        "Clique em `Adicionar webhook`"
+        ],
+        "footer": "E é isso! Agora você receberá uma notificação sempre que houver um novo commit!",
+        "webhook_failed": "** Falha na criação do webhook. ** Tente verificar minhas permissões!",
+        "do_not_share_warning": "** Não compartilhe o URL do webhook **"
+    },
+    "config": {
+        "default": {
+        "brief_1": "**Nesta seção, você pode configurar vários aspectos de sua experiência **",
+        "title": "**Acesso rápido**",
+        "brief_2": "Esses comandos permitem que você salve um usuário, repo ou organização para obter com um comando curto.",
+        "commands": {
+            "user": "Acesse um usuário salvo com `git user`",
+            "org": "Acesse uma organização salva com `git org`",
+            "repo": "Acesse um repositório salvo com `git repo`",
+            "locale": "Mude o idioma do bot",
+            "feed": "Inscreva-se para receber coisas novas do nosso repositório"
+        },
+        "deletion": "**Você pode excluir os dados armazenados digitando** `git config --delete`",
+        "footer": "Para ver o que você salvou, use git config --show",
+        "embed_title": "GitBot Config"
+        },
+        "show": {
+        "title": "Configs do seu GitBot",
+        "qa": {
+            "heading": "**Acesso rápido:**",
+            "list": {
+            "user": "User: {0}",
+            "org": "Organização: {0}",
+            "repo": "Repo: {0}"
+            }
+        },
+        "guild": {
+            "heading": "**Configurações do server:**",
+            "list": {
+            "feed": "Release Feed:"
+            }
+        },
+        "accessibility": {
+            "heading": "**Acessibilidade:**",
+            "list": {
+            "locale": "Linguagem: {0}"
+            }
+        },
+        "item_not_set": "Não setado",
+        "item_not_configured": "Não configurado"
+        },
+        "feed": {
+        "cancelled": "Liberar configuração do canal de feed **cancelada**",
+        "no_arg": "Por favor, passe um repositório que você deseja seguir!",
+        "invalid_channel": "**Este não é um canal válido!** Tente novamente ou digite `cancel` para sair.",
+        "already_logged": "Os lançamentos deste repo ** já estão sendo registrados! **",
+        "success": "Novos **{0}** lançamentos agora serão registrados.",
+        "embeds": {
+            "start": {
+            "title": "Liberar configuração de canal de feed",
+            "description": "Parece que você ainda não tem um canal Release Feed configurado.\n **Vamos configurar um agora, certo?** \n\nSimplesmente especifique o canal em que deseja receber as atualizações, digitando seu nome ou menção , ou digite `create` para o bot criar o canal para você.",
+            "footer": "Você pode digitar 'cancel' para sair a qualquer momento."
+            },
+            "success": {
+            "title": "Canal de feed de liberação configurado!",
+            "description": "Agora você pode adicionar repos cujas novas atualizações devem ser registradas {0} usando `git config feed {{repo}}`. Cada vez que houver um novo lançamento, uma incorporação aparecerá com algumas informações e alterações.",
+            "footer": "{0} foi adicionado :)"
+            },
+            "limit_reached": {
+            "title": "Limite de repositório de feed de liberação atingido!",
+            "description": "Este server atingiu o ** limite de 3 repositórios de feed de lançamento. **Você pode remover um repositório adicionado anteriormente digitando `git config -delete feed`",
+            "footer": "Você precisa da permissão 'Gerenciar canais' para fazer isso."
+            },
+            "timeout": {
+            "title": "Tempo esgotado",
+            "footer": "Basta enviar o nome / menção de um canal da próxima vez!"
+            }
+        }
+        },
+        "qa_set": {
+        "user": "Usuário de acesso rápido definido para **{0}**",
+        "org": "Organização de acesso rápido definida para **{0}**",
+        "repo": "Repo de acesso rápido definido como **{0}**"
+        },
+        "locale": {
+        "success": "Idioma do bot definido como **{0}**.",
+        "failure": "`{0}` não é um **idioma compatível e válido!**",
+        "match_confirmation_embed": {
+            "title": "Confirme o idioma",
+            "description": "Seu idioma solicitado não corresponde a nenhum dos disponíveis por completo, mas estava **muito próximo de `{0}`**. Você quis dizer escolher aquele?",
+            "footer": "Reaja com um emoji apropriado para escolher uma opção!"
+        },
+        "timeout_embed": {
+            "title": "Tempo esgotado!",
+            "footer": "Basta escolher uma opção da próxima vez!"
+        },
+        "title": "Bot Linguagem",
+        "description": "Aqui você pode alterar o idioma do Bot. \nSimplesmente digite {0} \nTodas as traduções são fornecidas por nossa [comunidade](https://github.com/statch/gitbot/tree/main/data/locale)",
+        "cancelled": "Alteração de idioma ** cancelada. **"
+        },
+        "delete": {
+        "default": {
+            "title": "Excluir dados de acesso rápido",
+            "description": "** Você pode excluir os dados de acesso rápido armazenados executando os seguintes comandos: **",
+            "commands": {
+            "user": "exclua o usuário de acesso rápido",
+            "org": "exclua a organização de acesso rápido",
+            "repo": "exclua o repositório de acesso rápido",
+            "feed": "ver opções relacionadas à exclusão de dados de feed de lançamento",
+            "all": "exclua todos os seus dados de acesso rápido"
+            }
+        },
+        "feed": {
+            "no_channel": "Você não tem um canal de feed de lançamento configurado!",
+            "nothing_deleted": "Você não tem um feed de lançamento configurado, portanto ** nada foi excluído. **",
+            "default": {
+            "title": "Excluir dados de feed de lançamento",
+            "description": "** Você pode excluir dados de feed de lançamento armazenados executando os seguintes comandos: **",
+            "commands": {
+                "repo": "cancelar a assinatura de um repo específico",
+                "all": "cancelar a assinatura de todos os repos",
+                "total": "cancele a inscrição em todos os lançamentos e exclua o webhook de feed"
+            }
+            },
+            "repo": {
+            "success": "`{0}` as versões ** não serão mais registradas. **",
+            "not_logged": "Os lançamentos desse repo ** não estão registrados no momento! **"
+            },
+            "all": {
+            "success": "Todos os feeds de lançamento foram ** fechados com sucesso. **"
+            },
+            "total": {
+            "success": "O canal de feed de lançamento foi ** fechado com sucesso. **"
+            }
+        },
+        "user": {
+            "success": "Salvo ** usuário excluído. **",
+            "not_saved": "Você não tem um usuário salvo!"
+        },
+        "org": {
+            "success": "**Organização salva excluída. **",
+            "not_saved": "Você não tem uma organização salva!"
+        },
         "repo": {
-          "info": "obtenha informações sobre um repositório",
-          "files": "obtenha a estrutura de arquivo de um repo",
-          "issues": "obtenha 10 issues mais recentes de um repo (o padrão é OPEN). Se nenhum repositório for passado, o armazenado é usado",
-          "pulls": "idêntico ao anterior, exceto por pull requests"
+            "success": "Salvo ** repo excluído. **",
+            "not_saved": "Você não tem um repositório salvo!"
         },
-        "gist": "veja um usuário do gists",
-        "issue": "obtenha informações detalhadas de uma issue",
-        "pr": "obtenha informações detalhadas de uma pull request"
-      }
+        "locale": "O idioma do bot foi redefinido para ** Inglês **.",
+        "all": {
+            "success": "Todos os seus dados armazenados foram ** excluídos com sucesso. **",
+            "not_saved": "Parece que ** você não tem nada armazenado! **"
+        }
+        }
     },
-    "info": {
-      "title": "Info Help",
-      "description": "Esses comandos não têm vínculos com o GitHub e se concentram no próprio Bot.",
-      "commands": {
-        "aliases": "obtenha uma lista de aliases de comando",
-        "privacy": "a política de privacidade do bot",
-        "vote": "vote no bot!",
-        "stats": "algumas estatísticas sobre o bot",
-        "uptime": "veja a última vez em que o bot foi resetado",
-        "ping": "veja a latência do bot"
-      }
+    "help": {
+        "alias_note": "Você pode encontrar uma lista de Aliases usando o comando git --aliases",
+        "default": {
+        "title": "Help",
+        "description": "Nesta seção, você encontrará informações e o uso dos meus comandos.\n**Você pode acessar partes específicas digitando:**",
+        "sections": {
+            "github": "para buscar informações do GitHub",
+            "info": "para comandos que fornecem informações sobre o próprio bot",
+            "config": "para armazenar suas organizações, repositórios, usuários e feeds preferidos",
+            "utility": "para outros comandos úteis"
+        },
+        "support_server_note": "** Se você tiver algum problema, **[** entre no servidor de suporte! **](https://discord.gg/3e5fwpA)",
+        "footer": "Você pode encontrar uma lista de aliases usando o comando git --aliases"
+        },
+        "github": {
+        "title": "GitHub Help",
+        "description": "**Palavras entre chaves simbolizam argumentos que o comando requer**",
+        "commands": {
+            "user": {
+            "info": "obtenha informações de um usuário",
+            "repos": "ver os repositórios de um usuário"
+            },
+            "org": {
+            "info": "obtenha informações sobre uma organização",
+            "repos": "ver os repositórios de uma organização"
+            },
+            "repo_argument_note": "** Importante! ** Os comandos de repo que se seguem requerem a sintaxe exata de `owner / repo-name` no lugar do argumento` {repo} `, ex. `statch / gitbot`",
+            "repo": {
+            "info": "obtenha informações sobre um repositório",
+            "files": "obtenha a estrutura de arquivo de um repo",
+            "issues": "obtenha 10 issues mais recentes de um repo (o padrão é OPEN). Se nenhum repositório for passado, o armazenado é usado",
+            "pulls": "idêntico ao anterior, exceto por pull requests"
+            },
+            "gist": "veja um usuário do gists",
+            "issue": "obtenha informações detalhadas de uma issue",
+            "pr": "obtenha informações detalhadas de uma pull request"
+        }
+        },
+        "info": {
+        "title": "Info Help",
+        "description": "Esses comandos não têm vínculos com o GitHub e se concentram no próprio Bot.",
+        "commands": {
+            "aliases": "obtenha uma lista de aliases de comando",
+            "privacy": "a política de privacidade do bot",
+            "vote": "vote no bot!",
+            "stats": "algumas estatísticas sobre o bot",
+            "uptime": "veja a última vez em que o bot foi resetado",
+            "ping": "veja a latência do bot"
+        }
+        },
+        "config": {
+        "title": "Config Help",
+        "description": "** Esses comandos afetam o comportamento do Bot. **",
+        "commands": {
+            "default": "obtenha informações detalhadas sobre suas opções",
+            "show": "mostra suas configurações atuais"
+        }
+        },
+        "utility": {
+        "title": "Utility Help",
+        "description": "Esses comandos permitem que você busque vários dados relacionados ao Git e GitHub.",
+        "commands": {
+            "commits": "configura rapidamente feeds de commit no canal atual",
+            "loc": "obtenha linhas de contagem de código de um repositório com detalhes",
+            "license": "obtenha informações sobre uma licença",
+            "snippet": "gere uma linda imagem das linhas mencionadas em um GitHub ou GitLab link ou um codeblock",
+            "snippet_raw": "consiga as linhas mencionadas em um gitHub ou GitLab link",
+            "info": "inspecione automaticamente um link e obtenha informações sobre ele"
+        }
+        }
     },
-    "config": {
-      "title": "Config Help",
-      "description": "** Esses comandos afetam o comportamento do Bot. **",
-      "commands": {
-        "default": "obtenha informações detalhadas sobre suas opções",
-        "show": "mostra suas configurações atuais"
-      }
+    "aliases": {
+        "default": {
+        "title": "Aliases",
+        "description": "Nesta seção, você encontrará atalhos para meus comandos\n** Você pode acessar partes específicas digitando: **",
+        "sections": {
+            "github": "para aliases de comando do GitHub",
+            "info": "para outros aliases",
+            "config": "para aliases de comando de configuração",
+            "utility": "para aliases de comando de utilitário"
+        },
+        "footer": "Você pode encontrar o uso desses comandos digitando git --help"
+        },
+        "github": {
+        "title": "GitHub Aliases",
+        "argument_omitted": "Alguns comandos assumem a variante `info` se for omitida:",
+        "generic_aliases": "Também existem aliases genéricos:",
+        "footer": "Você pode encontrar o uso desses comandos digitando git --help github"
+        },
+        "info": {
+        "title": "Info Aliases",
+        "description": "Abreviações para comandos não vinculados ao próprio GitHub",
+        "footer": "Você pode encontrar o uso desses comandos digitando git --help info"
+        },
+        "config": {
+        "title": "Config Aliases",
+        "description": "Atalhos para comandos usados ​​para armazenar suas organizações, repositórios, usuários e feeds preferidos",
+        "footer": "Você pode encontrar o uso desses comandos digitando git --help config"
+        },
+        "utility": {
+        "title": "Utility Aliases",
+        "description": "**Atalhos para comandos usados ​​para buscar dados relacionados ao Git e GitHub **",
+        "footer": "Você pode encontrar o uso desses comandos digitando git --help utility"
+        }
     },
-    "utility": {
-      "title": "Utility Help",
-      "description": "Esses comandos permitem que você busque vários dados relacionados ao Git e GitHub.",
-      "commands": {
-        "commits": "configura rapidamente feeds de commit no canal atual",
-        "loc": "obtenha linhas de contagem de código de um repositório com detalhes",
-        "license": "obtenha informações sobre uma licença",
-        "lines": "obtenha as linhas mencionadas em um link GitHub ou GitLab",
-        "info": "inspecione automaticamente um link e obtenha informações sobre ele"
-      }
+    "dev": {
+        "default": {
+        "title": "Comandos de desenvolvimento do GitBot",
+        "description": "Os comandos deste grupo devem ser usados pelos **mantenedores do GitBot** e **contribuintes** para o repositório do GitHub.",
+        "footer": "Se você quiser contribuir sozinho, clique no link no título deste incorporar(embed's title).",
+        "commands": {
+            "missing_locales": "obter uma lista de keys faltantes (não traduzidas) para um local"
+        }
+        },
+        "missing_locales": {
+        "no_master_locale": "Não há keys faltando para o local {0} pode ser encontrado porque é o Local Master.",
+        "no_missing_keys": "Este local não tem nenhuma key faltando! :tada:",
+        "title": "Keys faltando em `{0}`"
+        }
     }
-  },
-  "aliases": {
-    "default": {
-      "title": "Aliases",
-      "description": "Nesta seção, você encontrará atalhos para meus comandos\n** Você pode acessar partes específicas digitando: **",
-      "sections": {
-        "github": "para aliases de comando do GitHub",
-        "info": "para outros aliases",
-        "config": "para aliases de comando de configuração",
-        "utility": "para aliases de comando de utilitário"
-      },
-      "footer": "Você pode encontrar o uso desses comandos digitando git --help"
-    },
-    "github": {
-      "title": "GitHub Aliases",
-      "argument_omitted": "Alguns comandos assumem a variante `info` se for omitida:",
-      "generic_aliases": "Também existem aliases genéricos:",
-      "footer": "Você pode encontrar o uso desses comandos digitando git --help github"
-    },
-    "info": {
-      "title": "Info Aliases",
-      "description": "Abreviações para comandos não vinculados ao próprio GitHub",
-      "footer": "Você pode encontrar o uso desses comandos digitando git --help info"
-    },
-    "config": {
-      "title": "Config Aliases",
-      "description": "Atalhos para comandos usados ​​para armazenar suas organizações, repositórios, usuários e feeds preferidos",
-      "footer": "Você pode encontrar o uso desses comandos digitando git --help config"
-    },
-    "utility": {
-      "title": "Utility Aliases",
-      "description": "**Atalhos para comandos usados ​​para buscar dados relacionados ao Git e GitHub **",
-      "footer": "Você pode encontrar o uso desses comandos digitando git --help utility"
-    }
-  }
-}
+}  

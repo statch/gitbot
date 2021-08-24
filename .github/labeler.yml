@@ -1,11 +1,8 @@
 website:
-  - docs/*
-  - docs/**
-core:
-  - core/*
-  - core/**
-  - core/***
+  - docs/**/*
 cogs:
-  - cogs/*
+  - cogs/**/*
 root:
   - ./*
+locale:
+  - data/locale/**/*

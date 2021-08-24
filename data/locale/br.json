@@ -11,7 +11,12 @@
     "max_concurrency_reached": "Este comando está com uma alta demanda! **Tente novamente em alguns instantes!**",
     "bot_missing_permissions": "**Eu não tenho uma permissão para fazer isso! ** Eu preciso de {0}",
     "missing_permissions": "**Você não tem permissão para utilizar este comando! ** Você precisa de {0}",
-    "no_private_message": "Este comando dó pode ser utilizado **DENTRO DO SERVIDOR!**"
+    "no_private_message": "Este comando dó pode ser utilizado **DENTRO DO SERVIDOR!**",
+    "command_not_found": {
+      "title": "Este comando não existe!",
+      "description": "O **comando mais parecido com este** é: {0}",
+      "footer": "Se você acredita que isso seja um erro, contate o nosso suporte!"
+    }
   },
   "argument_placeholders": {
     "user": "username",
@@ -22,7 +27,8 @@
     "state": "state",
     "license": "license",
     "link": "link",
-    "lang": "language"
+    "lang": "language",
+    "link_or_codeblock": "link or codeblock"
   },
   "events": {
     "mention": ":tada: **Oi, eu sou o GitBot.**\nMeu prefixo é `git`\nDigite `git --help` para uma lista com todos os meu comandos."
@@ -58,7 +64,8 @@
       "user_or_org": "Esta organização **não existe!**",
       "pr_number": "Esta pull request com este número **não existe!**",
       "issue_number": "Esta issue com este número **não existe!**",
-      "qa": "**Você não possui nenhum dado em seu acesso rápido!** Use `git config` para configurar-lo."
+      "qa": "**Você não possui nenhum dado em seu acesso rápido!** Use `git config` para configurar-lo.",
+      "locale": "Este local não existe!"
     },
     "issue": {
       "invalid_state": "`{0}` não é um **estado válido de issue!** (Tente `open` ou `closed`)"
@@ -130,12 +137,12 @@
   "info": {
     "no_info": "Não consegui obter nenhuma informação sobre o link que você forneceu!"
   },
-  "lines": {
-    "more_than_25": "Eu não posso mostrar **mais de 25 linhas**, desculpas!",
-    "no_content": "** Não há nenhum conteúdo ** nessas linhas!",
-    "private_or_inaccessible": "Isso {0} é ** privado ou de outra forma inacessível. **",
+  "snippets": {
+    "length_limit_exceeded": "Eu não consigo mostrar **mais que {0} linhas**, perdão!",
+    "no_content": "**Não há conteúdo** nessas linhas!",
+    "private_or_inaccessible": "Isto {0} é **privado ou de outra maneira inacessível.**",
     "nonexistent": "Isso {0} **não existe!**",
-    "no_lines_mentioned": "O link deve ser um URL do GitHub ou GitLab!"
+    "no_lines_mentioned": "O link tem que ser um GitHub ou GitLab URL **mencionando linhas!**"
   },
   "user": {
     "repos": {
@@ -144,7 +151,12 @@
       "owner": "{0} repos."
     },
     "info": {
-      "glossary": ["Bio", "Info", "Links", "Website"],
+      "glossary": [
+        "Bio",
+        "Info",
+        "Links",
+        "Website"
+      ],
       "title": "Perfil: {0}",
       "joined_at": "No GitHub desde {0}",
       "company": "Trabalhou {0}",
@@ -179,7 +191,12 @@
       "more": "Veja {0} mais no Github"
     },
     "info": {
-      "glossary": ["Description", "Info", "Links", "Website"],
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Website"
+      ],
       "title": "Perfil: {0}",
       "created_at": "Criado em {0}",
       "members": "Possui [{0} membros públicos]({1})",
@@ -194,7 +211,13 @@
   },
   "repo": {
     "info": {
-      "glossary": ["Description", "Info", "Links", "Topics", "Homepage"],
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Topics",
+        "Homepage"
+      ],
       "created_at": "Criado em {0}",
       "issues": {
         "plural": "Possui [{0} open issues]({1})",
@@ -242,7 +265,10 @@
     }
   },
   "gist": {
-    "glossary": ["Contents", "Info"],
+    "glossary": [
+      "Contents",
+      "Info"
+    ],
     "title": "Gists: {0}",
     "created_at": "Criado por [{0}]({1}) em {2}",
     "updated_at": "Última atualização em {0}",
@@ -267,7 +293,11 @@
     }
   },
   "issue": {
-    "glossary": ["Body", "Info", "Labels"],
+    "glossary": [
+      "Body",
+      "Info",
+      "Labels"
+    ],
     "stored_no_number": "Se você quer acessar as issues dos seus repos armazenadas, por favor informe um **número da issue!**",
     "second_argument_number": "O segundo argumento deve ser um **número** da issue!",
     "created_at": "Criado por {0} em {1}",
@@ -289,7 +319,13 @@
     }
   },
   "pr": {
-    "glossary": ["Info", "Participants", "Assignees", "Reviewers", "Labels"],
+    "glossary": [
+      "Info",
+      "Participants",
+      "Assignees",
+      "Reviewers",
+      "Labels"
+    ],
     "stored_no_number": "Se você quer acessar as repos das PRs armazenadas, por favor passe um **número da pull request!**",
     "second_argument_number": "O segundo argumento deve ser um **número** da pull request!",
     "created_at": "Criado por {0} em {1}",
@@ -569,7 +605,8 @@
         "commits": "configura rapidamente feeds de commit no canal atual",
         "loc": "obtenha linhas de contagem de código de um repositório com detalhes",
         "license": "obtenha informações sobre uma licença",
-        "lines": "obtenha as linhas mencionadas em um link GitHub ou GitLab",
+        "snippet": "gere uma linda imagem das linhas mencionadas em um GitHub ou GitLab link ou um codeblock",
+        "snippet_raw": "consiga as linhas mencionadas em um gitHub ou GitLab link",
         "info": "inspecione automaticamente um link e obtenha informações sobre ele"
       }
     }
@@ -606,6 +643,21 @@
       "title": "Utility Aliases",
       "description": "**Atalhos para comandos usados ​​para buscar dados relacionados ao Git e GitHub **",
       "footer": "Você pode encontrar o uso desses comandos digitando git --help utility"
+    }
+  },
+  "dev": {
+    "default": {
+      "title": "Comandos de desenvolvimento do GitBot",
+      "description": "Os comandos deste grupo devem ser usados pelos **mantenedores do GitBot** e **contribuintes** para o repositório do GitHub.",
+      "footer": "Se você quiser contribuir sozinho, clique no link no título deste incorporar(embed's title).",
+      "commands": {
+        "missing_locales": "obter uma lista de keys faltantes (não traduzidas) para um local"
+      }
+    },
+    "missing_locales": {
+      "no_master_locale": "Não há keys faltando para o local {0} pode ser encontrado porque é o Local Master.",
+      "no_missing_keys": "Este local não tem nenhuma key faltando! :tada:",
+      "title": "Keys faltando em `{0}`"
     }
   }
 }

@@ -1,13 +1,14 @@
 from discord.ext import commands
 from lib.globs import Mgr
 from discord import Embed
+from lib.utils.decorators import gitbot_command
 
 
 class License(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='--license', aliases=['license', '-license'])
+    @gitbot_command(name='license')
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def license_command(self, ctx: commands.Context, *, license_: str) -> None:
         license_: dict = Mgr.correlate_license(license_)

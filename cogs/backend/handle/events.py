@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from lib.globs import Mgr
+from bot import PRODUCTION
 
 
 async def guild_text_channels(guild: discord.Guild):
@@ -55,8 +56,9 @@ class Events(commands.Cog):
 
         print(f"Joined guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds")
 
-        channel = await self.bot.fetch_channel(775042132054376448)  # Logging the join
-        await channel.send(embed=embed_l)
+        if PRODUCTION:
+            channel = await self.bot.fetch_channel(775042132054376448)  # Logging the join
+            await channel.send(embed=embed_l)
 
         if receiver is not None:  # Sending the join message
             await receiver.send(embed=embed)

@@ -4,7 +4,7 @@ from os import getenv
 
 
 class TopGG(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.token: str = getenv("TOPGG")
         self.dblpy: dbl.DBLClient = dbl.DBLClient(self.bot, self.token, autopost=True)

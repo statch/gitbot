@@ -9,10 +9,11 @@ import os.path
 from colorama import Style, Fore
 from motor.motor_asyncio import AsyncIOMotorClient
 from discord.ext import commands
-from lib.typehints import DictSequence, AnyDict, Identifiable
+from lib.typehints import DictSequence, AnyDict, Identity
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
 from lib.utils import regex as r
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
+from lib.utils.decorators import normalize_identity
+from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple, Dict
 from fuzzywuzzy import fuzz
 
 
@@ -33,8 +34,8 @@ class Manager:
         self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'lines'),
-                                (r.GITLAB_LINES_RE, 'lines'),
+        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'snippet'),
+                                (r.GITLAB_LINES_RE, 'snippet'),
                                 (r.ISSUE_RE, 'issue'),
                                 (r.PR_RE, 'pr'),
                                 (r.REPO_RE, 'repo'),
@@ -43,11 +44,27 @@ class Manager:
                                    'user_org': None,
                                    'issue': self.git.get_issue,
                                    'pr': self.git.get_pull_request,
-                                   'lines': 'lines'}
+                                   'snippet': 'snippet'}
         self.locale_cache: dict = {}
-        setattr(self.locale, 'master', self.l.en)
+        setattr(self.locale, 'master', getattr(self.l, self.locale.master))
         setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
+        self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
+
+    def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
+        """
+        Iterate through an iterable of :class:`str` and return the item that resembles to_match the most.
+
+        :param to_match: The :class:`str` to pair with a match
+        :param iterable: The iterable to search for matches
+        :return: The closest match
+        """
+
+        best = 0, None
+        for i in iterable:
+            if (m := fuzz.token_set_ratio(str(i), to_match)) > best[0]:
+                best = m, str(i)
+        return best[1]
 
     def log(self,
             message: str,
@@ -65,7 +82,57 @@ class Manager:
         :param message_color: The color of the message
         """
 
-        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}')
+        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}{Style.RESET_ALL}')
+
+    def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
+        """
+        Run an operation on an object if bool(object) == True
+
+        :param obj: The object to run the operation on
+        :param op: The operation to run if object is True
+        :param args: Optional arguments for op
+        :param kwargs: Optional keyword arguments for op
+        :return: The result of the operation or the unchanged object
+        """
+
+        return op(obj, *args, **kwargs) if obj else obj
+
+    def dict_full_path(self,
+                       dict_: AnyDict,
+                       key: str,
+                       value: Optional[Any] = None) -> Optional[Tuple[str, ...]]:
+        """
+        Get the full path of a dictionary key in the form of a tuple.
+        The value is an optional parameter that can be used to determine which key's path to return if many are present.
+
+        :param dict_: The dictionary to which the key belongs
+        :param key: The key to get the full path to
+        :param value: The optional value for determining if a key is the right one
+        :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
+        """
+
+        if hasattr(dict_, 'actual'):
+            dict_: dict = dict_.actual
+
+        def _recursive(__prev: tuple = ()) -> Optional[Tuple[str, ...]]:
+            reduced: dict = self.get_nested_key(dict_, __prev)
+            for k, v in reduced.items():
+                if k == key and (value is None or (value is not None and v == value)):
+                    return *__prev, key
+                if isinstance(v, dict):
+                    if ret := _recursive((*__prev, k)):
+                        return ret
+        return _recursive()
+
+    def strip_codeblock(self, codeblock: str) -> str:
+        """
+        Extract code from the codeblock while retaining indentation.
+
+        :param codeblock: The codeblock to strip
+        :return: The code extracted from the codeblock
+        """
+
+        return re.sub(r'^.*?\n', '\n', codeblock.strip('`')).rstrip().lstrip('\n')
 
     async def unzip_file(self, zip_path: str, output_dir: str) -> None:
         """
@@ -123,7 +190,8 @@ class Manager:
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
         if all(req in perms + overwrites for req in [("send_messages", True),
                                                      ("read_messages", True),
-                                                     ("read_message_history", True)]) or ("administrator", True) in perms:
+                                                     ("read_message_history", True)]) \
+                or ("administrator", True) in perms:
             return True
         return False
 
@@ -141,7 +209,7 @@ class Manager:
                 match: Union[str, tuple] = match[0]
                 action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
                 if isinstance(action, str):
-                    return GitCommandData(link, 'lines', link)
+                    return GitCommandData(link, 'snippet', link)
                 if isinstance(match, tuple) and action:
                     match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
                     obj: Union[dict, str] = await action(match[0], int(match[1]))
@@ -229,15 +297,15 @@ class Manager:
 
         return functools.partial(self.error, ctx)
 
-    async def get_locale(self, __id: Identifiable) -> DictProxy:
+    @normalize_identity
+    async def get_locale(self, _id: Identity) -> DictProxy:
         """
-        Get the locale associated with a user, defaults to English
+        Get the locale associated with a user, defaults to the master locale
 
-        :param __id: The user object/ID to get the locale for
+        :param _id: The user object/ID to get the locale for
         :return: The locale associated with the user
         """
 
-        _id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
         locale: str = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id, None):
             locale: str = cached
@@ -285,6 +353,20 @@ class Manager:
                 if self.get_nested_key(d, key) == value:
                     return d
 
+    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], DictProxy, bool]]:
+        """
+        Get keys missing from a locale in comparison to the master locale
+
+        :param locale: Any meta attribute of the locale
+        :return: The missing keys for the locale and the confidence of the attribute match
+        """
+
+        locale_data: Optional[Tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
+        if locale_data:
+            missing: list = list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
+            missing.sort(key=lambda path: len(path) * sum(map(len, path)))
+            return missing, locale_data[0], locale_data[1]
+
     def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
         """
         Get a locale from a potentially malformed attribute.
@@ -314,11 +396,15 @@ class Manager:
             for k, v in ref.items():
                 if k not in node:
                     if locale:
-                        self.log(f'missing key {k} patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                        self.log(f'missing key "{k}" patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                        self._missing_locale_keys[dict_.meta.name].append(self.dict_full_path(ref_.actual, k, v))
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
-                    node[k] = recursively_fix(v, ref[k])
+                    try:
+                        node[k] = recursively_fix(v, ref[k])
+                    except KeyError:
+                        pass
             return node
 
         return recursively_fix(dict_, ref_)

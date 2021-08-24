@@ -81,7 +81,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
         await handle_none(ctx, 'pull request', stored, lstate)
         return
 
-    pr_strings: List[str] = [await make_string(repo, pr, 'pulls') for pr in prs]
+    pr_strings: List[str] = [await make_string(repo, pr, 'pull') for pr in prs]
 
     embed: discord.Embed = discord.Embed(
         color=0xefefef,

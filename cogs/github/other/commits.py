@@ -1,13 +1,14 @@
 import discord
 from discord.ext import commands
 from lib.globs import Mgr
+from lib.utils.decorators import gitbot_command
 
 
 class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='commits', aliases=['-commits', '--commits', 'commit', '-commit', '--commit'])
+    @gitbot_command(name='commits', aliases=['commit', 'logs', 'logging', 'log'])
     @commands.cooldown(3, 60, commands.BucketType.guild)
     @commands.bot_has_permissions(manage_webhooks=True)
     @commands.has_permissions(manage_webhooks=True)
@@ -17,7 +18,7 @@ class Commits(commands.Cog):
         try:
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Commits',
                                                                         reason=f'GitHub Commits setup by {ctx.author}')
-        except discord.errors.HTTPException:
+        except (discord.errors.HTTPException, discord.errors.Forbidden):
             await ctx.err(ctx.l.commits.webhook_failed)
             return
         embed: discord.Embed = discord.Embed(

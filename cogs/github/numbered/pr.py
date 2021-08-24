@@ -4,6 +4,8 @@ from typing import Optional, Union
 from lib.globs import Git, Mgr
 from babel.dates import format_date
 from discord.ext import commands
+from lib.utils.decorators import normalize_repository
+from lib.utils.decorators import gitbot_command
 
 PR_STATES: dict = {
     "open": Mgr.e.pr_open,
@@ -16,8 +18,9 @@ class PullRequest(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='pr', aliases=['pull', '-pr', '--pr', '--pullrequest', '-pull'])
+    @gitbot_command(name='pr', aliases=['pull', 'pull-request', 'pullrequest'])
     @commands.cooldown(10, 30, commands.BucketType.user)
+    @normalize_repository
     async def pull_request_command(self, ctx: commands.Context, repo: str, pr_number: Optional[str] = None):
         ctx.fmt.set_prefix('pr')
         if hasattr(ctx, 'data'):

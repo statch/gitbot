@@ -8,13 +8,16 @@ import discord
 from discord.ext import commands
 from typing import Optional, Any, Union
 from lib.globs import Git, Mgr
+from lib.utils.decorators import gitbot_command
+
+_25MB_BYTES: int = int(25 * (1024 ** 2))
 
 
 class LinesOfCode(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='loc', aliases=['-loc', '--loc'])
+    @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
     async def lines_of_code_command(self, ctx: commands.Context, repo: str) -> None:
@@ -50,14 +53,13 @@ class LinesOfCode(commands.Cog):
         try:
             if not os.path.exists('./tmp'):
                 os.mkdir('./tmp')
-            files: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
+            files: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo, size_threshold=_25MB_BYTES)
             if not files:
                 return None
             async with aiofiles.open(tmp_zip_path, 'wb') as fp:
                 await fp.write(files)
             await Mgr.unzip_file(tmp_zip_path, tmp_dir_path)
-            output: Any = subprocess.check_output(['perl', 'cloc.pl', '--json', tmp_dir_path])
-            output: dict = json.loads(output)
+            output: dict = json.loads(subprocess.check_output(['/bin/perl', 'cloc.pl', '--json', tmp_dir_path]))
         except subprocess.CalledProcessError:
             pass
         else:

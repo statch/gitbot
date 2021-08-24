@@ -2,11 +2,12 @@ import discord
 import datetime
 import re
 import io
-from .list_plugin import *
+from .list_plugin import issue_list, pull_request_list
 from babel.dates import format_date
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
+from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MD_EMOJI_RE
 
 
@@ -14,7 +15,8 @@ class Repo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.group(name='repo', aliases=['r'], invoke_without_command=True)
+    @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
+    @normalize_repository
     async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
         info_command: commands.Command = self.bot.get_command(f'repo --info')
         if not repo:
@@ -27,8 +29,9 @@ class Repo(commands.Cog):
         else:
             await ctx.invoke(info_command, repo=repo)
 
-    @repo_command_group.command(name='--info', aliases=['-i', 'info', 'i'])
+    @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
+    @normalize_repository
     async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
@@ -120,7 +123,7 @@ class Repo(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
-    @repo_command_group.command(name='--files', aliases=['-f', 'files', '-files', '-s', '-src', '-fs', 'fs'])
+    @repo_command_group.command(name='files', aliases=['src', 'fs'])
     async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
@@ -155,9 +158,10 @@ class Repo(commands.Cog):
             embed.set_footer(text=ctx.fmt('view_more', len(src) - 15))
         await ctx.send(embed=embed)
 
-    @repo_command_group.command(name='--download', aliases=['-download', 'download', '-dl'])
+    @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
+    @normalize_repository
     async def download_command(self, ctx: commands.Context, repo: str) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
@@ -176,13 +180,15 @@ class Repo(commands.Cog):
             await msg.edit(
                 content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
-    @repo_command_group.command(name='issues', aliases=['-issues', '--issues'])
+    @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)
+    @normalize_repository
     async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
 
-    @repo_command_group.command(name='pulls', aliases=['-pulls', '--pulls', 'prs', '-prs', '--prs'])
+    @repo_command_group.command(name='pulls', aliases=['prs', 'pull', 'pr'])
     @commands.cooldown(5, 40, commands.BucketType.user)
+    @normalize_repository
     async def pull_request_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
 

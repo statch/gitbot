@@ -11,7 +11,12 @@
     "max_concurrency_reached": "This command is experiencing exceptional traffic. **Please try again in a few seconds.**",
     "bot_missing_permissions": "**I am missing permissions required to do this!** I need {0}",
     "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
-    "no_private_message": "This command can only be used **inside a server!**"
+    "no_private_message": "This command can only be used **inside a server!**",
+    "command_not_found": {
+      "title": "This command doesn't exist!",
+      "description": "The **closest existing command** is: {0}",
+      "footer": "If you believe this is an error, please contact support."
+    }
   },
   "argument_placeholders": {
     "user": "username",
@@ -22,7 +27,8 @@
     "state": "state",
     "license": "license",
     "link": "link",
-    "lang": "language"
+    "lang": "language",
+    "link_or_codeblock": "link or codeblock"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -58,7 +64,8 @@
       "user_or_org": "This user or organization **doesn't exist!**",
       "pr_number": "A pull request with this number **doesn't exist!**",
       "issue_number": "An issue with this number **doesn't exist!**",
-      "qa": "**You don't have any quick access data configured!** Use `git config` to do it"
+      "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
+      "locale": "This locale doesn't exist!"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -130,8 +137,8 @@
   "info": {
     "no_info": "I couldn't fetch any info regarding the link you provided!"
   },
-  "lines": {
-    "more_than_25": "I cannot show **more than 25 lines**, sorry!",
+  "snippets": {
+    "length_limit_exceeded": "I cannot show **more than {0} lines**, sorry!",
     "no_content": "There **isn't any content** on these lines!",
     "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
     "nonexistent": "That {0} **doesn't exist!**",
@@ -170,7 +177,7 @@
         "singular": "Has only [one repository]({0})",
         "no_repos": "Has no repositories, yet"
       },
-      "contributions": "{0} contributions this year, {0} today"
+      "contributions": "{0} contributions this year, {1} today"
     }
   },
   "org": {
@@ -183,7 +190,7 @@
       "title": "{0}'s Profile",
       "created_at": "Created on {0}",
       "members": "Has [{0} public members]({1})",
-      "one_members": "Has only [one public member]({0})",
+      "one_member": "Has only [one public member]({0})",
       "repos": {
         "plural": "Has a total of [{0} repositories]({1})",
         "singular": "Has only [one repository]({0})",
@@ -504,6 +511,10 @@
       }
     }
   },
+  "support": {
+    "title": "GitBot Support Server",
+    "description": "If you have any problems, feel free to join the [support server.](https://discord.gg/3e5fwpA)"
+  },
   "help": {
     "alias_note": "You can find a list of aliases by using the git --aliases command",
     "default": {
@@ -569,7 +580,8 @@
         "commits": "quickly set up commit feeds in the current channel",
         "loc": "get lines of code count of a repository with details",
         "license": "get info about a license",
-        "lines": "get the lines mentioned in a GitHub or GitLab link",
+        "snippet": "generate a beautiful image of the lines mentioned in a GitHub or GitLab link or a codeblock",
+        "snippet_raw": "get the lines mentioned in a GitHub or GitLab link",
         "info": "automatically inspect a link and get info on it"
       }
     }
@@ -606,6 +618,21 @@
       "title": "Utility Aliases",
       "description": "**Shorthands for commands used to fetch data related to Git and GitHub**",
       "footer": "You can find usage of these commands by typing git --help utility"
+    }
+  },
+  "dev": {
+    "default": {
+      "title": "GitBot Development Commands",
+      "description": "Commands in this group are meant to be used by **GitBot's maintainers** and **contributors** to its GitHub repository.",
+      "footer": "If you'd like to contribute yourself, click the link in this embed's title.",
+      "commands": {
+        "missing_locales": "get a list of missing (non-translated) keys for a locale"
+      }
+    },
+    "missing_locales": {
+      "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
+      "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
+      "title": "Missing keys in `{0}`"
     }
   }
 }

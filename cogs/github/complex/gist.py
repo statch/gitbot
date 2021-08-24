@@ -5,6 +5,7 @@ from babel.dates import format_date
 from discord.ext import commands
 from lib.globs import Git, Mgr
 from typing import Optional, Tuple, Union
+from lib.utils.decorators import gitbot_command
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
                            'cpp', 'html', 'php', 'json', 'xml', 'yml',
@@ -15,7 +16,7 @@ class Gist(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='gist', aliases=['-gist', '--gist', 'gists', '-gists', '--gists'])
+    @gitbot_command(name='gist', aliases=['gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self, ctx: commands.Context, user: str, ind: Optional[Union[int, str]] = None) -> None:
         ctx.fmt.set_prefix('gist')

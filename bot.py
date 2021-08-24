@@ -1,14 +1,15 @@
 import os.path
 import discord
 import logging
-import platform
-import requests
 from lib.globs import Mgr
 from discord.ext import commands
-from dotenv import load_dotenv
-from lib.utils.decorators import dev_only
-
-load_dotenv()
+from lib.utils.decorators import restricted
+try:
+    from dotenv import load_dotenv
+    Mgr.log("Found .env file, loading environment variables from it.")
+    load_dotenv(override=True)
+except ModuleNotFoundError:
+    pass
 
 PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
 NO_TYPING_COMMANDS: list = os.getenv('NO_TYPING_COMMANDS').split()
@@ -33,7 +34,7 @@ logger: logging.Logger = logging.getLogger('main')
 
 extensions: list = [
     'cogs.backend.tasks.misc',
-    'cogs.backend.dev.debug',
+    'cogs.backend.debug.debug',
     'cogs.github.base.user',
     'cogs.github.base.org',
     'cogs.github.base.repo.repo',
@@ -41,11 +42,12 @@ extensions: list = [
     'cogs.github.numbered.issue',
     'cogs.github.complex.gist',
     'cogs.github.other.commits',
-    'cogs.github.other.lines',
+    'cogs.github.other.snippets.snippets',
     'cogs.github.other.info',
     'cogs.github.other.license',
     'cogs.github.other.loc',
     'cogs.github.complex.workers.release_feed',
+    'cogs.ecosystem.dev',
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',
@@ -83,19 +85,19 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
 
 
 @bot.command(name='reload')
-@dev_only()
+@restricted()
 async def reload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
 @bot.command(name='load')
-@dev_only()
+@restricted()
 async def load_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
 @bot.command(name='unload')
-@dev_only()
+@restricted()
 async def unload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
 
@@ -121,18 +123,3 @@ async def before_invoke(ctx: commands.Context) -> None:
 async def on_ready() -> None:
     logger.info(f'The bot is ready.')
     logger.info(f'discord.py version: {discord.__version__}\n')
-
-
-def prepare_cloc() -> None:
-    if not os.path.exists('cloc.pl'):
-        res: requests.Response = requests.get('https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
-        with open('cloc.pl', 'wb') as fp:
-            fp.write(res.content)
-
-
-if __name__ == '__main__':
-    logger.info(f'Running on {platform.system()} {platform.release()}')
-    if not os.path.exists('./tmp'):
-        os.mkdir('tmp')
-    prepare_cloc()
-    bot.run(os.getenv('BOT_TOKEN'))

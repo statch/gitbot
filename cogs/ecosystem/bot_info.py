@@ -6,6 +6,7 @@ import psutil
 from discord.ext import commands
 from lib.globs import Mgr
 from os.path import isfile, isdir, join
+from lib.utils.decorators import gitbot_command
 
 
 pid: int = os.getpid()
@@ -32,7 +33,7 @@ class BotInfo(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='uptime', aliases=['--uptime', '-uptime', 'up', '--up', '-up'])
+    @gitbot_command(name='uptime', aliases=['up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def uptime_command(self, ctx: commands.Context) -> None:
         now: datetime.datetime = datetime.datetime.utcnow()
@@ -52,7 +53,7 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name='ping', aliases=['--ping', '-ping'])
+    @gitbot_command(name='ping')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def ping_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -61,7 +62,7 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name='privacy', aliases=["policy", '--privacy', '-privacy', '-policy', '--policy'])
+    @gitbot_command(name='privacy', aliases=['policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def privacy_policy(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -80,7 +81,17 @@ class BotInfo(commands.Cog):
                         value=ctx.l.privacy_policy.author.body)
         await ctx.send(embed=embed)
 
-    @commands.command(name='invite', aliases=['--invite', '-invite'])
+    @gitbot_command(name='support')
+    @commands.cooldown(15, 30, commands.BucketType.member)
+    async def support_command(self, ctx: commands.Context) -> None:
+        embed: discord.Embed = discord.Embed(
+            color=0xefefef,
+            description=ctx.l.support.description
+        )
+        embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.support.title)
+        await ctx.send(embed=embed)
+
+    @gitbot_command(name='invite')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def invite_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -92,7 +103,7 @@ class BotInfo(commands.Cog):
         embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.invite.tagline)
         await ctx.send(embed=embed)
 
-    @commands.command(name='vote', aliases=['--vote', '-vote'])
+    @gitbot_command(name='vote')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def vote_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(
@@ -103,7 +114,7 @@ class BotInfo(commands.Cog):
         embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command(name='stats', aliases=['--stats', '-stats'])
+    @gitbot_command(name='stats')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def stats_command(self, ctx: commands.Context) -> None:
         embed: discord.Embed = discord.Embed(color=0xefefef)

@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorCollection
-from discord.ext import commands
 from typing import Optional
-from lib.typehints import Identifiable
+from lib.utils.decorators import normalize_identity
+from lib.typehints import Identity
 
 
 class UserCollection(AsyncIOMotorCollection):
@@ -24,37 +24,37 @@ class UserCollection(AsyncIOMotorCollection):
         self._mgr = mgr
         super().__init__(collection.database, collection.name)
 
-    async def delitem(self,  __id: Identifiable, field: str) -> bool:
-        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
-        query: dict = await self.find_one({"_id": __id})
+    @normalize_identity
+    async def delitem(self, _id: Identity, field: str) -> bool:
+        query: dict = await self.find_one({"_id": _id})
         if query is not None and field in query:
             await self.update_one(query, {"$unset": {field: ""}})
             del query[field]
             if len(query) == 1:
-                await self.find_one_and_delete({"_id": __id})
+                await self.find_one_and_delete({"_id": _id})
             return True
         return False
 
-    async def getitem(self, __id: Identifiable, item: str) -> Optional[str]:
-        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
-        query: dict = await self.find_one({'_id': __id})
+    @normalize_identity
+    async def getitem(self, _id: Identity, item: str) -> Optional[str]:
+        query: dict = await self.find_one({'_id': _id})
         if query and item in query:
             return query[item]
         return None
 
-    async def setitem(self,  __id: Identifiable, item: str, value: str) -> bool:
-        __id: int = __id if not isinstance(__id, commands.Context) else __id.author.id
+    @normalize_identity
+    async def setitem(self, _id: Identity, item: str, value: str) -> bool:
         valid: bool = True
         if item in ('user', 'repo', 'org'):
             valid: bool = await ({'user': self._git.get_user, 'repo': self._git.get_repo, 'org': self._git.get_org}[item])(value) is not None
         elif item == 'locale':
             valid: bool = any([l_['name'] == value for l_ in self._mgr.locale.languages])
         if valid:
-            query = await self.find_one({"_id": __id})
+            query = await self.find_one({"_id": _id})
             if query is not None:
                 await self.update_one(query, {"$set": {item: value}})
             else:
-                await self.insert_one({"_id": __id, item: value})
+                await self.insert_one({"_id": _id, item: value})
             return True
         return False
 

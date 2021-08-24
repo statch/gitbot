@@ -36,12 +36,12 @@ class Config(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_show_command(self, ctx: commands.Context) -> None:
         ctx.fmt.set_prefix('config show')
-        query: dict = await Mgr.db.users.find_one({"_id": int(ctx.author.id)})
+        query: dict = await Mgr.db.users.find_one({"_id": ctx.author.id}) or {}
         if not isinstance(ctx.channel, discord.DMChannel):
             release: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         else:
             release = None
-        if query is None and release is None or release and len(release) == 1 and query is None:
+        if not query and release is None or ((release and len(release) == 1) and not query):
             await ctx.err(ctx.l.generic.nonexistent.qa)
             return
         lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')

@@ -52,7 +52,7 @@ class Config(commands.Cog):
         guild: Optional[dict] = None
         if not isinstance(ctx.channel, discord.DMChannel):
             guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
-        if query is None and guild is None or guild and len(guild) == 1 and query is None:
+        if not query and guild is None or ((guild and len(guild) == 1) and not query):
             await ctx.err(ctx.l.generic.nonexistent.qa)
             return
         lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')

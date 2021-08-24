@@ -29,7 +29,8 @@
     "link": "link",
     "lang": "language",
     "link_or_codeblock": "link or codeblock",
-    "package": "package"
+    "package": "package",
+    "channel": "channel"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -67,7 +68,8 @@
       "issue_number": "An issue with this number **doesn't exist!**",
       "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
       "locale": "This locale doesn't exist!",
-      "python_package": "A Python Package with this name doesn't exist on PyPI!"
+      "python_package": "A Python Package with this name doesn't exist on PyPI!",
+      "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -398,7 +400,7 @@
       "guild": {
         "heading": "**Server Settings:**",
         "list": {
-          "feed": "Release Feed:"
+          "feed": "Release Feeds:"
         }
       },
       "accessibility": {
@@ -408,34 +410,68 @@
         }
       },
       "item_not_set": "Not set",
-      "item_not_configured": "Not configured"
+      "item_not_configured": "Not configured",
+      "footer": "To view release feed repos, type {0}"
+    },
+    "show_feed": {
+      "title": "This server's release feeds",
+      "footer": "You can add a feed with {0}",
+      "no_repos": "No repos"
+    },
+    "carbon": {
+      "default": {
+
+      },
+      "codeblock": {
+        "true": "Automatic Carbon codeblock conversion **turned ON.**",
+        "false": "Automatic Carbon codeblock conversion **turned OFF.**"
+      },
+      "link": {
+        "true": "Automatic Carbon link conversion **turned ON.**",
+        "false": "Automatic Carbon link conversion **turned OFF.**"
+      }
     },
     "feed": {
-      "cancelled": "Release Feed channel setup **cancelled.**",
+      "no_perms": "**I am missing required permissions in that channel!**\nI need `manage webhooks` and `manage channel`",
       "no_arg": "Please pass in a repository which you wish to follow!",
-      "invalid_channel": "**That is not a valid channel!** Try again, or type `cancel` to quit.",
       "already_logged": "This repo's releases are **already being logged!**",
       "success": "New **{0}** releases will now be logged.",
-      "embeds": {
-        "start": {
-          "title": "Release Feed channel configuration",
-          "description": "It appears that you don't have a Release Feed channel configured yet.\n**Let's configure one now, shall we?**\n\nSimply specify the channel you want to receive the updates in below by typing its name or mention, or type `create` for the bot to make the channel for you.",
-          "footer": "You can type cancel to quit at any point."
+      "default": {
+        "title": "Repository Release Feeds",
+        "description": "Commands in this group allow you to get notified about new releases of a repository in designated channels.\n\n**To add a release feed channel:**\n{emoji_square}{0}\n**To add a repo to a channel:**\n{emoji_square}{1}"
+      },
+      "channel": {
+        "already_taken": "This channel is already configured as a Release Feed!",
+        "invalid_channel": "**That is not a valid channel!** Try again.",
+        "success_embed": {
+          "title": "Success!",
+          "description": "{0} has been **added as a release feed.**\nUse {1} to add a repo to the new feed.",
+          "footer": "You can delete it with {0}"
         },
-        "success": {
-          "title": "Release Feed channel configured!",
-          "description": "You can now add repos whose new updates should be logged in {0} by using `git config feed {{repo}}`. Each time there is a new release, an embed will show up with some info and changes.",
-          "footer": "{0} has already been added :)"
-        },
-        "limit_reached": {
-          "title": "Release Feed repo limit reached!",
-          "description": "This guild has reached the **limit of 3 release feed repos.** You can remove a previously added repo by typing `git config -delete feed`",
+        "channel_limit_reached_embed": {
+          "title": "Release Feed Channel limit reached!",
+          "description": "This guild has reached the **limit of 5 release feed channels.** You can remove a previously added channel by typing `git config delete feed channel`",
           "footer": "You need the Manage Channels permission to do that."
-        },
-        "timeout": {
-          "title": "Timed Out",
-          "footer": "Simply send a channel name/mention next time!"
         }
+      },
+      "repo": {
+        "channel_list_embed": {
+          "title": "Pick a Release Feed:",
+          "footer": "To pick one, simply send its number/mention below!"
+        },
+        "timeout_embed": {
+          "title": "Timed Out",
+          "footer": "Simply send a channel number/mention next time!"
+        },
+        "channel_at_limit_embed": {
+          "title": "Release feed repo limit reached!",
+          "description": "Sorry, {0} is at the 10 repo limit.\n**You can try:**\n{emoji_square} adding {1} to a different release feed\n{emoji_square} deleting another repo to make space",
+          "footer": "Type {0} to delete a repo from this feed"
+        },
+        "invalid_channel": "{0} is not a valid **channel number/mention** from the list! Send another one, or type `cancel` to exit.",
+        "success": "New {0} releases will now be logged in {1}!",
+        "cancelled": "Adding a repo to the release feed **cancelled.**",
+        "already_logged": "{0} releases are **already being logged** in {1}!"
       }
     },
     "qa_set": {

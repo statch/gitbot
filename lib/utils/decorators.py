@@ -2,7 +2,7 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Union, Any, Coroutine, List
+from typing import Callable, Union, Any, Coroutine
 from lib.utils import regex
 
 
@@ -33,10 +33,10 @@ def _inject_aliases(name: str, **attrs) -> dict:
     def gen_aliases(_name: str) -> tuple:
         return _name, f'-{_name}', f'--{_name}', f'—{_name}', f'——{_name}'
 
-    aliases: List[str] = attrs.get('aliases') or []
-    to_add: List[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))
+    aliases: list[str] = attrs.get('aliases') or []
+    to_add: list[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))
     aliases.extend([*to_add, *(gen_aliases(name)[1:])])
-    attrs['aliases']: List[str] = list(set(aliases))
+    attrs['aliases']: list[str] = list(set(aliases))
     return attrs
 
 
@@ -53,7 +53,7 @@ def restricted() -> commands.Command:
 
 def normalize_argument(func: Union[Callable, Coroutine],
                        target: str,
-                       normalizing_func: Callable,
+                       normalizing_func: Callable[[Any], Any],
                        /,
                        *args,
                        **kwargs) -> Union[Callable, Coroutine]:
@@ -82,22 +82,25 @@ def normalize_argument(func: Union[Callable, Coroutine],
     return func(*args, **kwargs)
 
 
-def normalize_identity(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+def normalize_identity(context_resource: str = 'author') -> Union[Callable, Coroutine]:
     """
     Normalize the _id argument to be an instance of :class:`int`
     (instead of potential :class:`str` or :class:`discord.ext.commands.Context`
 
-    :param func: The function to wrap with this decorator
+    :param context_resource: The middle attribute to get the ID attribute of in case of Context as _id
     :return: The function with the _id argument normalized
     """
 
-    def wrapper(*args: tuple, **kwargs: dict) -> Any:
-        def normalize_id(_id: Union[int, str, commands.Context]) -> int:
-            return int(_id) if not isinstance(_id, commands.Context) else _id.author.id
+    def decorator(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+        def wrapper(*args: tuple, **kwargs: dict) -> Any:
+            def normalize_id(_id: Union[int, str, commands.Context]) -> int:
+                return int(_id) if not isinstance(_id, commands.Context) else getattr(_id, context_resource).id
 
-        return normalize_argument(func, '_id', normalize_id, *args, **kwargs)
+            return normalize_argument(func, '_id', normalize_id, *args, **kwargs)
 
-    return wrapper
+        return wrapper
+
+    return decorator
 
 
 def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
@@ -115,9 +118,9 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
             if not repo:
                 return repo
             repo: str = repo.strip()
-            match: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.GITHUB_REPO_URL, repo)
-            if match:
-                return f'{match[0][0]}/{match[0][1]}'
+            match_: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.REPO_RE, repo)
+            if match_:
+                return f'{match_[0][0]}/{match_[0][1]}'
             return repo
 
         return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)

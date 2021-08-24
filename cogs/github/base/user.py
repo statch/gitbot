@@ -74,7 +74,7 @@ class User(commands.Cog):
             contrib: str = ""
 
         joined_at: str = ctx.fmt('joined_at',
-                                  f'<t:{int(datetime.datetime.strptime(u["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+                                 f'<t:{int(datetime.datetime.strptime(u["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
 
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)

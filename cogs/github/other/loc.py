@@ -6,9 +6,10 @@ import shutil
 import subprocess
 import discord
 from discord.ext import commands
-from typing import Optional, Any, Union
+from typing import Optional, Union
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_command
+from lib.typehints import Repository
 
 _25MB_BYTES: int = int(25 * (1024 ** 2))
 
@@ -17,10 +18,17 @@ class LinesOfCode(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
+    @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'])
+    @commands.cooldown(3, 60, commands.BucketType.user)
+    @commands.max_concurrency(10)
+    async def lines_of_code_command_nocache(self, ctx: commands.Context, repo: Repository) -> None:
+        ctx.__nocache__ = True
+        await ctx.invoke(self.lines_of_code_command, repo=repo)
+
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    async def lines_of_code_command(self, ctx: commands.Context, repo: str) -> None:
+    async def lines_of_code_command(self, ctx: commands.Context, repo: Repository) -> None:
         ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
@@ -47,7 +55,9 @@ class LinesOfCode(commands.Cog):
         embed.set_footer(text=ctx.l.loc.footer)
         await ctx.send(embed=embed)
 
-    async def process_repo(self, ctx: commands.Context, repo: str) -> Optional[dict]:
+    async def process_repo(self, ctx: commands.Context, repo: Repository) -> Optional[dict]:
+        if (not ctx.__nocache__) and (cached := Mgr.loc_cache.get(repo := repo.lower())):
+            return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'
         tmp_dir_path: str = tmp_zip_path[:-4]
         try:
@@ -63,6 +73,7 @@ class LinesOfCode(commands.Cog):
         except subprocess.CalledProcessError:
             pass
         else:
+            Mgr.loc_cache[repo] = output
             return output
         finally:
             try:

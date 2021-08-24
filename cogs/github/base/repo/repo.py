@@ -2,12 +2,13 @@ import discord
 import datetime
 import re
 import io
-from .list_plugin import issue_list, pull_request_list
+from .list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MD_EMOJI_RE
+from lib.typehints import Repository as RepoType
 
 
 class Repo(commands.Cog):
@@ -16,7 +17,7 @@ class Repo(commands.Cog):
 
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
-    async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
+    async def repo_command_group(self, ctx: commands.Context, repo: Optional[RepoType] = None) -> None:
         if not repo:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if stored:
@@ -30,7 +31,7 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @normalize_repository
-    async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
+    async def repo_info_command(self, ctx: commands.Context, repo: RepoType) -> None:
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')
@@ -84,7 +85,7 @@ class Repo(commands.Cog):
             forked = ctx.fmt('fork_notice', f"[{r['parent']['nameWithOwner']}]({r['parent']['url']})") + '\n'
 
         created_at = ctx.fmt('created_at',
-                                  f'<t:{int(datetime.datetime.strptime(r["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+                             f'<t:{int(datetime.datetime.strptime(r["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
 
         languages = ""
         if lang := r['primaryLanguage']:
@@ -159,7 +160,7 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
-    async def download_command(self, ctx: commands.Context, repo: str) -> None:
+    async def download_command(self, ctx: commands.Context, repo: RepoType) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
@@ -172,7 +173,7 @@ class Repo(commands.Cog):
         file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
             await ctx.send(file=file)
-            await msg.edit(content=f'{Mgr.e.github}  {ctx.fmt("done", repo)}')
+            await msg.edit(content=f'{Mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
                 content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
@@ -180,13 +181,19 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
-    async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    async def issue_list_command(self,
+                                 ctx: commands.Context,
+                                 repo: Optional[RepoType] = None,
+                                 state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
 
     @repo_command_group.command(name='pulls', aliases=['prs', 'pull', 'pr'])
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
-    async def pull_request_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    async def pull_request_list_command(self,
+                                        ctx: commands.Context,
+                                        repo: Optional[RepoType] = None,
+                                        state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
 
 

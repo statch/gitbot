@@ -1,0 +1,12 @@
+{
+  "discord": {
+    "blurple": "#5865F2",
+    "green": "#57F287",
+    "yellow": "#FEE75C",
+    "fuchsia": "#EB459E",
+    "red": "#ED4245",
+    "white": "#FFFFFF",
+    "black": "#000000"
+  },
+  "cyan":"#5CEFFF"
+}

@@ -1,0 +1,67 @@
+from typing import Any, NoReturn, Union, Optional
+from ..caches.base_cache import BaseCache
+
+__all__: tuple = (
+    'TypedCache',
+    'CacheSchema',
+    'CacheValidationError',
+    'CacheSchemaLikeType'
+)
+
+
+class CacheValidationError(Exception):
+    """
+    Informative error message when an action's types don't match the schema ones.
+    """
+
+    pass
+
+
+class CacheSchema:
+    """
+    Schema structure to validate __setitem__ for :class:`Cache`
+    """
+
+    def __init__(self, key: Union[type, tuple[type, ...]], value: Union[type, tuple[type, ...]]):
+        self.key: Union[type, tuple[type, ...]] = key
+        self.value: Union[type, tuple[type, ...]] = value
+
+    def _raise(self, got: Any, /, __expected: Union[type, tuple[type, ...]], __value_name: str) -> NoReturn:
+        """
+        Raise :class:`CacheValidationError` when the action's types don't match the schema ones.
+
+        :param got: The argument that was received
+        :param __expected: The argument expected (self.key/value)
+        :param __value_name: The name of the value (cache key, cache value)
+        :raise CacheValidationError: When the action's types don't match the schema ones
+        """
+
+        raise CacheValidationError(f'Expected type \'{__expected.__name__}\' for {__value_name},'
+                                   f' got: \'{got.__class__.__name__}\' ({repr(got)})')
+
+    def __call__(self, key: Any, value: Any) -> None:
+        if not isinstance(key, self.key):
+            self._raise(key, self.key, 'cache key')
+        elif not isinstance(value, self.value):
+            self._raise(value, self.value, 'cache value')
+
+
+CacheSchemaLikeType = Union[CacheSchema, tuple[Union[type, tuple[type, ...]], Union[type, tuple[type, ...]]]]
+
+
+class TypedCache(BaseCache):
+    """
+    A simple cache structure that validates __setitem__ actions with a predefined :class:`CacheSchema`.
+
+    :param schema: The schema to use for validation
+    :param maxsize: The max number of keys to hold in the cache, delete the oldest one upon setting a new one if full
+    :param max_age: The time to store cache keys for in seconds
+    """
+
+    def __init__(self, schema: CacheSchemaLikeType, maxsize: int = 128, max_age: Optional[int] = None):
+        self.schema: CacheSchema = schema if isinstance(schema, CacheSchema) else CacheSchema(schema[0], schema[1])
+        super().__init__(maxsize=maxsize, max_age=max_age)
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        self.schema(key, value)
+        super().__setitem__(key, value)

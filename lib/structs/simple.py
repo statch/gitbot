@@ -5,5 +5,5 @@ __all__: tuple = (
     'GhProfileData'
 )
 
-GitCommandData = namedtuple('GitCommandData', 'data type args')
+GitCommandData = namedtuple('GitCommandData', 'command kwargs')
 GhProfileData = namedtuple('GhProfileData', 'all_time month fortnight week day hour')

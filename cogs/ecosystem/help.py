@@ -60,7 +60,6 @@ class Help(commands.Cog):
                        f'`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}',
                        f'`git snippet {{{ctx.l.argument_placeholders.link_or_codeblock}}}` - {ctx.l.help.utility.commands.snippet}',
                        f'`git snippet --raw {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.snippet_raw}',
-                       f'`git info {{{ctx.l.argument_placeholders.link}}}` - {ctx.l.help.utility.commands.info}',
                        f'`git pypi` - {ctx.l.help.utility.commands.pypi}']
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.help.utility.title}',

@@ -2,7 +2,8 @@ import os
 import platform
 import requests
 import sentry_sdk
-from bot import bot, PRODUCTION, logger
+from lib.globs import Mgr
+from bot import bot, logger
 
 
 def prepare_cloc() -> None:
@@ -13,7 +14,7 @@ def prepare_cloc() -> None:
 
 
 def prepare_sentry() -> None:
-    if PRODUCTION and (dsn := os.environ.get('SENTRY_DSN')):
+    if Mgr.env.production and (dsn := Mgr.env.get('sentry_dsn')):
         sentry_sdk.init(
             dsn=dsn,
             traces_sample_rate=0.5
@@ -30,4 +31,4 @@ def prepare() -> None:
 
 if __name__ == '__main__':
     prepare()
-    bot.run(os.getenv('BOT_TOKEN'))
+    bot.run(Mgr.env.bot_token)

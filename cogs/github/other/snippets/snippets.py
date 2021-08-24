@@ -1,15 +1,12 @@
 import re
 import discord
-from operator import getitem
-from .snippet_tools import handle_url, gen_carbon_inmemory
+from .snippet_tools import handle_url, gen_carbon_inmemory  # noqa
 from aiohttp import ClientSession
 from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr
+from typing import Optional
 from lib.utils.decorators import gitbot_group
-
-RAW_CODEBLOCK_LEN_THRESHOLD: int = 25
-CARBON_LEN_THRESHOLD: int = 50
 
 
 class Snippets(commands.Cog):
@@ -22,19 +19,22 @@ class Snippets(commands.Cog):
     async def snippet_command_group(self, ctx: commands.Context, *, link_or_codeblock: str) -> None:
         ctx.fmt.set_prefix('snippets')
         if ctx.invoked_subcommand is None:
-            is_codeblock: bool = bool(re.findall(regex.CODEBLOCK_RE, link_or_codeblock))
-            if is_codeblock:
-                if len(link_or_codeblock.splitlines()) > CARBON_LEN_THRESHOLD:
-                    await ctx.err(ctx.fmt('length_limit_exceeded', CARBON_LEN_THRESHOLD))
+            codeblock: Optional[str] = Mgr.extract_content_from_codeblock(link_or_codeblock)
+            if codeblock:
+                if len(codeblock.splitlines()) > Mgr.env.carbon_len_threshold:
+                    await ctx.err(ctx.fmt('length_limit_exceeded', Mgr.env.carbon_len_threshold))
                     return
                 msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
+
                 await ctx.send(
-                    file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(link_or_codeblock)))
+                    file=discord.File(filename='snippet.png',
+                                      fp=await gen_carbon_inmemory(codeblock)))
                 await msg.delete()
-            elif bool(Mgr.opt(re.findall(regex.GITHUB_LINES_RE, link_or_codeblock) or re.findall(regex.GITLAB_LINES_RE, link_or_codeblock), getitem, 0)):
+            elif bool(re.search(regex.GITHUB_LINES_RE, link_or_codeblock) or
+                      re.search(regex.GITLAB_LINES_RE, link_or_codeblock)):
                 msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
                 text, err = await handle_url(ctx, link_or_codeblock,
-                                             max_line_count=CARBON_LEN_THRESHOLD, wrap_in_codeblock=False)
+                                             max_line_count=Mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
                 img = await gen_carbon_inmemory(text)
                 await msg.delete()
                 if text:

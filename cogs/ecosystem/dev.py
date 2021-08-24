@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from typing import Optional, Tuple, List
+from typing import Optional
 from lib.globs import Mgr
 from lib.utils.decorators import gitbot_group
 
@@ -32,7 +32,7 @@ class Dev(commands.Cog):
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: commands.Context, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
-        locale_data: Optional[Tuple[List[Tuple[str, ...]], dict, bool]] = Mgr.get_missing_keys_for_locale(locale_)
+        locale_data: Optional[tuple[list[tuple[str, ...]], dict, bool]] = Mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
             await ctx.err(ctx.l.generic.nonexistent.locale)
         elif not locale_data[0]:
@@ -44,7 +44,7 @@ class Dev(commands.Cog):
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])
             meta, _ = Mgr.get_locale_meta_by_attribute(locale_)
-            missing: List[Tuple[str, ...]] = locale_data[0]
+            missing: list[tuple[str, ...]] = locale_data[0]
             embed: discord.Embed = discord.Embed(
                 color=0x0384fc,
                 title=ctx.fmt('title', meta['name']),

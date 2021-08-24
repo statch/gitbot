@@ -9,9 +9,9 @@ from lib.globs import Mgr, Carbon
 
 
 async def handle_url(ctx: commands.Context, url: str, **kwargs) -> tuple:
-    match: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_RE, url) or re.findall(regex.GITLAB_LINES_RE, url), getitem, 0)
-    if match:
-        return await get_text_from_url_and_data(ctx, await compile_url(match), match, **kwargs)
+    match_: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_RE, url) or re.findall(regex.GITLAB_LINES_RE, url), getitem, 0)
+    if match_:
+        return await get_text_from_url_and_data(ctx, await compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
 
 
@@ -46,7 +46,7 @@ async def get_text_from_url_and_data(ctx: commands.Context,
         lines.append(f'{line}\n')
 
     text: str = ''.join(lines)
-    return f"```{extension}\n{text}\n```" if wrap_in_codeblock else text, None
+    return f"```{extension}\n{text.rstrip()}\n```" if wrap_in_codeblock else text.rstrip(), None
 
 
 async def _compile_github_link(data: tuple) -> str:

@@ -4,6 +4,7 @@ from typing import Optional, Union
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository
 from discord.ext import commands
+from lib.typehints import Repository
 
 
 class Issue(commands.Cog):
@@ -13,7 +14,7 @@ class Issue(commands.Cog):
     @commands.command(name='issue', aliases=['-issue', 'i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
-    async def issue_command(self, ctx: commands.Context, repo: str, issue_number: str = None) -> None:
+    async def issue_command(self, ctx: commands.Context, repo: Repository, issue_number: str = None) -> None:
         ctx.fmt.set_prefix('issue')
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')

@@ -1,59 +1,165 @@
-import json
 import re
 import os
-import functools
-import operator
+import ast
+import json
+import dotenv
 import discord
 import zipfile
 import os.path
 import hashlib
 import aiohttp
-from colorama import Style, Fore
-from motor.motor_asyncio import AsyncIOMotorClient
-from discord.ext import commands
-from lib.typehints import DictSequence, AnyDict, Identity
-from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
-from lib.utils import regex as r
-from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple
+import operator
+import functools
+import dotenv.parser
+from sys import getsizeof
+from itertools import chain
 from fuzzywuzzy import fuzz
+from collections import deque
+from lib.utils import regex as r
+from colorama import Style, Fore
+from discord.ext import commands
 from urllib.parse import quote_plus
+from motor.motor_asyncio import AsyncIOMotorClient
+from lib.utils.decorators import normalize_identity
+from typing import Optional, Union, Callable, Any, Reversible, Iterable, Iterator
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion
+from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection, TypedCache, SelfHashingCache, CacheSchema
 
 
 class Manager:
     """
     A class containing database, locale and utility functions
 
-    Parameters
-    ----------
-    github: :class:`core.net.github.api.GitHubAPI`
-        The GitHub API instance to use
+    :param github: The GitHubAPI instance to use
+    :type github: :class:`lib.net.github.api.GitHubAPI`
     """
 
     def __init__(self, github):
         self.git = github
+        self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
+                                         if not self._set_env_directive(k, v)})
+        self._env_directives: DictProxy = DictProxy()
+        self._prepare_env()
         self.ses: aiohttp.ClientSession = self.git.ses
-        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
+        self.db: AsyncIOMotorClient = getattr(AsyncIOMotorClient(self.env.db_connection),
+                                              'store' if self.env.production else 'test')
         self.e: DictProxy = self.load_json('emoji')
-        self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
+        self.l: DirProxy = self.readdir('data/locale/', '.json', exclude='index.json')
+        self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
+                                                                            and v.startswith('#')) else int(v[1:], 16))
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'snippet'),
-                                (r.GITLAB_LINES_RE, 'snippet'),
-                                (r.ISSUE_RE, 'issue'),
-                                (r.PR_RE, 'pr'),
-                                (r.REPO_RE, 'repo'),
-                                (r.USER_ORG_RE, 'user_org'))
-        self.type_to_func: dict = {'repo': self.git.get_repo,
-                                   'user_org': None,
-                                   'issue': self.git.get_issue,
-                                   'pr': self.git.get_pull_request,
-                                   'snippet': 'snippet'}
-        self.locale_cache: dict = {}
-        setattr(self.locale, 'master', getattr(self.l, self.locale.master))
-        setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
+        self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60*60)
+        self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
+        self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60*30)
+        self.locale.master = getattr(self.l, str(self.locale.master))
+        self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
+        self.__preprocess_locale_emojis()
+
+    def _eval_bool_literal_safe(self, literal: str) -> Union[str, bool]:
+        """
+        Safely convert a string literal to a boolean, or return the string
+
+        :param literal: The literal to convert
+        :return: The converted literal or the literal itself if it's not a boolean
+        """
+
+        if (literal_ := literal.lower()) == 'true':
+            return True
+        elif literal_ == 'false':
+            return False
+        return literal
+
+    def _set_env_directive(self, name: str, value: Union[str, bool, int, list, dict], overwrite: bool = True) -> bool:
+        """
+        Optionally add an environment directive (behavior config for environment loading)
+
+        :param name: The name of the env binding
+        :param value: The value of the env binding
+        :param overwrite: Whether to overwrite an existing directive
+        :return: Whether or not the directive was added or not
+        """
+
+        if isinstance(value, str):
+            value: Union[str, bool] = self._eval_bool_literal_safe(value)
+
+        if (directive := name.lower()).startswith('directive_'):
+            if (directive := directive.replace('directive_', '')) not in \
+                    self._env_directives or (directive in self._env_directives and overwrite):
+                self._env_directives[directive] = value
+                self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                return True
+        return False
+
+    def _prepare_env(self) -> None:
+        """
+        Private function meant to be called at the time of instantiating this class,
+        loads .env with defaults from data/env_defaults.json
+        """
+
+        with open('data/env_defaults.json', 'r') as fp:
+            env_defaults: dict = json.loads(fp.read())
+            for k, v in env_defaults.items():
+                if not self._set_env_directive(k, v) and k not in self.env:
+                    self.env[k] = v
+        self.load_dotenv()
+
+    def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
+        """
+        Handle an environment key->value binding.
+
+        :param binding: The binding to handle
+        """
+
+        if not self._set_env_directive(binding.key, binding.value):
+            try:
+                if self._env_directives.get('eval_literal'):
+                    if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
+                        self.env[binding.key] = parsed
+                    else:
+                        self.env[binding.key] = (parsed := self.parse_literal(binding.value))
+                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}',
+                             f'core-{Fore.LIGHTYELLOW_EX}env')
+                else:
+                    self.env[binding.key] = binding.value
+                    self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                return
+            except (ValueError, SyntaxError):
+                self.env[binding.key] = binding.value
+                self.log(f'Loaded as \'str\': {binding.key}',
+                         f'core-{Fore.LIGHTYELLOW_EX}env')
+
+    def load_dotenv(self) -> None:
+        """
+        Load the .env file (if it exists) into self.env.
+        This method's capabilities are largely extended compared to plain dotenv:
+            - Directives ("DIRECTIVE_{X}") that modify the behavior of the parser
+            - Defaults are loaded from env_defaults.json first, so that .env values take precedence
+            - With the "eval_literal" directive active, binding values are parsed with AST during runtime
+        """
+
+        dotenv_path: str = dotenv.find_dotenv()
+        if dotenv_path:
+            self.log('Found .env file, loading environment variables listed inside of it.',
+                     f'core-{Fore.LIGHTYELLOW_EX}env')
+            with open(dotenv_path, 'r') as fp:
+                parsed: Iterator[dotenv.parser.Binding] = dotenv.parser.parse_stream(fp)
+                for binding in parsed:
+                    self._handle_env_binding(binding)
+
+    def parse_literal(self, literal: str) -> Union[str, bytes, int, set, dict, tuple, list, bool, float, None]:
+        """
+        Parse a literal into a Python object
+
+        :param literal: The literal to parse
+        :raises ValueError, SyntaxError: If the value is malformed, then ValueError or SyntaxError is raised
+        :return: The parsed literal (an object)
+        """
+
+        return ast.literal_eval(literal)
 
     def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
         """
@@ -64,11 +170,21 @@ class Manager:
         :return: The closest match
         """
 
-        best = 0, None
+        best = 0, ''
         for i in iterable:
-            if (m := fuzz.token_set_ratio(str(i), to_match)) > best[0]:
-                best = m, str(i)
+            if (m := fuzz.token_set_ratio(i := str(i), to_match)) > best[0]:
+                best = m, i
         return best[1]
+
+    def pascal_to_snake_case(self, string: str) -> str:
+        """
+        Convert a PascalCase string to snake_case
+
+        :param string: The string to convert
+        :return: The converted string
+        """
+
+        return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
 
     def log(self,
             message: str,
@@ -86,7 +202,51 @@ class Manager:
         :param message_color: The color of the message
         """
 
-        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}{Style.RESET_ALL}')
+        print(
+            f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
+            f'{Style.RESET_ALL}')
+
+    def sizeof(self, object_: object, handlers: Optional[dict] = None, verbose: bool = False) -> int:
+        """
+        Return the approximate memory footprint of an object and all of its contents.
+
+        Automatically finds the contents of the following builtin containers and
+        their subclasses: :class:`tuple`, :class:`list`, :class:`deque`, :class:`dict`,
+        :class:`set` and :class:`frozenset`. To search other containers, add handlers to iterate over their contents:
+
+        handlers = {SomeContainerClass: iter,
+                    OtherContainerClass: OtherContainerClass.get_elements}
+        """
+
+        if handlers is None:
+            handlers: dict = {}
+
+        all_handlers: dict = {tuple: iter, list: iter,
+                              deque: iter, dict: lambda d: chain.from_iterable(d.items()),
+                              set: iter, frozenset: iter}
+        all_handlers.update(handlers)
+        seen: set = set()
+
+        def _sizeof(_object: object) -> int:
+            if id(_object) in seen:
+                return 0
+            seen.add(id(_object))
+            size: int = getsizeof(_object, getsizeof(0))
+
+            if verbose:
+                self.log(message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
+                         category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTRED_EX}s{Style.RESET_ALL}]')
+
+            for type_, handler in all_handlers.items():
+                if isinstance(_object, type_):
+                    size += sum(map(_sizeof, handler(_object)))
+                    break
+            return size
+
+        final_size: int = _sizeof(object_)
+        if verbose:
+            self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
+                     category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
 
     def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
         """
@@ -104,7 +264,7 @@ class Manager:
     def dict_full_path(self,
                        dict_: AnyDict,
                        key: str,
-                       value: Optional[Any] = None) -> Optional[Tuple[str, ...]]:
+                       value: Optional[Any] = None) -> Optional[tuple[str, ...]]:
         """
         Get the full path of a dictionary key in the form of a tuple.
         The value is an optional parameter that can be used to determine which key's path to return if many are present.
@@ -118,7 +278,7 @@ class Manager:
         if hasattr(dict_, 'actual'):
             dict_: dict = dict_.actual
 
-        def _recursive(__prev: tuple = ()) -> Optional[Tuple[str, ...]]:
+        def _recursive(__prev: tuple = ()) -> Optional[tuple[str, ...]]:
             reduced: dict = self.get_nested_key(dict_, __prev)
             for k, v in reduced.items():
                 if k == key and (value is None or (value is not None and v == value)):
@@ -126,9 +286,10 @@ class Manager:
                 if isinstance(v, dict):
                     if ret := _recursive((*__prev, k)):
                         return ret
+
         return _recursive()
 
-    def strip_codeblock(self, codeblock: str) -> str:
+    def extract_content_from_codeblock(self, codeblock: str) -> Optional[str]:
         """
         Extract code from the codeblock while retaining indentation.
 
@@ -136,7 +297,10 @@ class Manager:
         :return: The code extracted from the codeblock
         """
 
-        return re.sub(r'^.*?\n', '\n', codeblock.strip('`')).rstrip().lstrip('\n')
+        match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
+                            re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
+        if match_:
+            return match_.group('content').rstrip('\n')
 
     async def unzip_file(self, zip_path: str, output_dir: str) -> None:
         """
@@ -167,18 +331,33 @@ class Manager:
                 return i
         return None
 
-    def load_json(self, name: str) -> DictProxy:
+    def load_json(self,
+                  name: str,
+                  apply_func: Optional[Callable[[str, Union[list, str, int, bool]], Any]] = None) -> DictProxy:
         """
         Load a JSON file from the data dir
 
         :param name: The name of the JSON file
+        :param apply_func: The function to apply to all dictionary k->v tuples except when isinstance(v, dict),
+               then apply recursion until an actionable value (Union[list, str, int, bool]) is found in the node
         :return: The loaded JSON wrapped in DictProxy
         """
 
         to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
-        return DictProxy(data)
+        proxy: DictProxy = DictProxy(data)
+
+        if apply_func:
+            def _recursive(node: AnyDict) -> None:
+                for k, v in node.items():
+                    if isinstance(v, (dict, DictProxy)):
+                        _recursive(v)
+                    else:
+                        node[k] = apply_func(k, v)
+
+            _recursive(proxy)
+        return proxy
 
     async def verify_send_perms(self, channel: discord.TextChannel) -> bool:
         """
@@ -199,34 +378,31 @@ class Manager:
             return True
         return False
 
-    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
+    async def get_link_reference(self,
+                                 ctx: commands.Context) -> Optional[Union[GitCommandData, tuple[GitCommandData, ...]]]:
         """
-        Get the command data required for invocation from a link
+        Get the command data required for invocation from a context
 
-        :param link: The link to exchange for command data
+        :param ctx: The context to search for links, and then optionally exchange for command data
         :return: The command data requested
         """
 
-        for pattern in self.patterns:
-            match: list = re.findall(pattern[0], link)
-            if match:
-                match: Union[str, tuple] = match[0]
-                action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
-                if isinstance(action, str):
-                    return GitCommandData(link, 'snippet', link)
-                if isinstance(match, tuple) and action:
-                    match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
-                    obj: Union[dict, str] = await action(match[0], int(match[1]))
-                    if isinstance(obj, str):
-                        return obj, pattern[1]
-                    return GitCommandData(obj, pattern[1], match)
-                if not action:
-                    if (obj := await self.git.get_user((m := match))) is None:
-                        obj: Optional[dict] = await self.git.get_org(m)
-                        return GitCommandData(obj, 'org', m) if obj is not None else 'no-user-or-org'
-                    return GitCommandData(obj, 'user', m)
-                repo = await action(match)
-                return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
+        combos: tuple[tuple[re.Pattern, Union[tuple, str]], ...] = ((r.PR_RE, 'pr'),
+                                                                    (r.ISSUE_RE, 'issue'),
+                                                                    (r.PULLS_PLAIN_RE, 'repo pulls'),
+                                                                    (r.ISSUES_PLAIN_RE, 'repo issues'),
+                                                                    (r.REPO_RE, 'repo info'),
+                                                                    (r.USER_ORG_RE, ('user info', 'org info')))
+        for pattern, command_name in combos:
+            if match := pattern.search(ctx.message.content):
+                if isinstance(command_name, str):
+                    command: commands.Command = ctx.bot.get_command(command_name)
+                    kwargs: dict = dict(zip(dict(command.clean_params).keys(), match.groups()))
+                else:
+                    command: tuple[commands.Command, ...] = tuple(ctx.bot.get_command(name) for name in command_name)
+                    kwargs: tuple[dict, ...] = tuple(dict(zip(dict(cmd.clean_params).keys(),
+                                                              match.groups())) for cmd in command)
+                return GitCommandData(command, kwargs)
 
     async def get_most_common(self, items: Union[list, tuple]) -> Any:
         """
@@ -257,7 +433,8 @@ class Manager:
                                  url: str,
                                  code: int = 200,
                                  method: str = 'GET',
-                                 alt: Optional[Any] = None) -> Any:
+                                 alt: Any = None,
+                                 **kwargs) -> Any:
         """
         Ensure that an HTTP request returned a particular status, if not, return the alt parameter
 
@@ -268,11 +445,11 @@ class Manager:
         :return: The URL if the statuses match, or the alt parameter if not
         """
 
-        if (await self.ses.request(method=method, url=url)).status == code:
+        if (await self.ses.request(method=method, url=url, **kwargs)).status == code:
             return url
         return alt
 
-    async def validate_number(self, number: str, items: List[AnyDict]) -> Optional[dict]:
+    async def validate_index(self, number: str, items: list[AnyDict]) -> Optional[dict]:
         """
         Validate an index against a list of indexed dicts
 
@@ -300,9 +477,9 @@ class Manager:
         """
 
         if seq:
-            return type(seq)(reversed(seq))
+            return type(seq)(reversed(seq))  # noqa
 
-    async def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None) -> DirProxy:
+    def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None, **kwargs) -> Optional[DirProxy]:
         """
         Read a directory and return a file-mapping object
 
@@ -312,30 +489,73 @@ class Manager:
         """
 
         if os.path.isdir(path):
-            return DirProxy(path=path, ext=ext)
+            return DirProxy(path=path, ext=ext, **kwargs)
 
-    async def error(self, ctx: commands.Context, msg: str, **kwargs) -> None:
+    async def enrich_context(self, ctx: commands.Context) -> commands.Context:
         """
-        Context.send() with an emoji slapped in front ;-;
+        Bind useful attributes to the passed context object
+
+        :param ctx: The context object to bind additional attributes to
+        :return: The context object (With new attributes bound)
+        """
+
+        ctx.__nocache__ = False
+        ctx.err = functools.partial(self.send_error, ctx)
+        ctx.success = functools.partial(self.send_success, ctx)
+        ctx.fmt = self.fmt(ctx)
+        ctx.l = await self.get_locale(ctx)  # noqa
+        return ctx
+
+    async def send_error(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
+        """
+        Context.send() with an emoji slapped in front ;-; (!)
 
         :param ctx: The command invocation context
         :param msg: The message content
         :param kwargs: ctx.send keyword arguments
         """
 
-        await ctx.send(f'{self.e.err}  {msg}', **kwargs)
+        return await ctx.send(f'{self.e.err}  {msg}', **kwargs)
 
-    def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
+    async def send_success(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
         """
-        Manager.error with the Context parameter removed
+        Context.send() with an emoji slapped in front ;-; (checkmark)
 
         :param ctx: The command invocation context
-        :return: A partial version of Manager.error bindable to Context
+        :param msg: The message content
+        :param kwargs: ctx.send keyword arguments
+        """
+        return await ctx.send(f'{self.e.checkmark}  {msg}', **kwargs)
+
+    @normalize_identity(context_resource='guild')
+    async def get_autoconv_config(self,
+                                  _id: Identity,
+                                  did_exist: bool = False) -> Union[AutomaticConversion,
+                                                                    tuple[AutomaticConversion, bool]]:
+        """
+        Get the configured permission for automatic conversion from messages (links, snippets, etc.)
+
+        :param _id: The guild ID to get the permission value for
+        :param did_exist: If to return whether if the guild document existed, or if the value is default
+        :return: The permission value, by default env[AUTOCONV_DEFAULT]
         """
 
-        return functools.partial(self.error, ctx)
+        _did_exist: bool = False
 
-    @normalize_identity
+        if cached := self.autoconv_cache.get(_id):
+            _did_exist: bool = True
+            permission: AutomaticConversion = cached
+        else:
+            stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
+            if stored:
+                permission: AutomaticConversion = stored.get('autoconv', self.env.autoconv_default)
+                _did_exist: bool = True
+            else:
+                permission: AutomaticConversion = self.env.autoconv_default
+            self.autoconv_cache[_id] = permission
+        return permission if not did_exist else (permission, _did_exist)
+
+    @normalize_identity()
     async def get_locale(self, _id: Identity) -> DictProxy:
         """
         Get the locale associated with a user, defaults to the master locale
@@ -357,16 +577,16 @@ class Manager:
         except AttributeError:
             return self.locale.master
 
-    def get_nested_key(self, dict_: AnyDict, key_: Union[Iterable[str], str]) -> Any:
+    def get_nested_key(self, dict_: AnyDict, key: Union[Iterable[str], str]) -> Any:
         """
         Get a nested dictionary key
 
         :param dict_: The dictionary to get the key from
-        :param key_: The key to get
+        :param key: The key to get
         :return: The value associated with the key
         """
 
-        return functools.reduce(operator.getitem, key_ if not isinstance(key_, str) else key_.split(), dict_)
+        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
 
     def get_by_key_from_sequence(self,
                                  seq: DictSequence,
@@ -391,7 +611,7 @@ class Manager:
                 if self.get_nested_key(d, key) == value:
                     return d
 
-    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], DictProxy, bool]]:
+    def get_missing_keys_for_locale(self, locale: str) -> Optional[tuple[list[str], DictProxy, bool]]:
         """
         Get keys missing from a locale in comparison to the master locale
 
@@ -399,13 +619,14 @@ class Manager:
         :return: The missing keys for the locale and the confidence of the attribute match
         """
 
-        locale_data: Optional[Tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
+        locale_data: Optional[tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
         if locale_data:
-            missing: list = list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
+            missing: list = list(
+                set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
             missing.sort(key=lambda path: len(path) * sum(map(len, path)))
             return missing, locale_data[0], locale_data[1]
 
-    def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
+    def get_locale_meta_by_attribute(self, attribute: str) -> Optional[tuple[DictProxy, bool]]:
         """
         Get a locale from a potentially malformed attribute.
         If there isn't a match above 80, returns None
@@ -416,9 +637,9 @@ class Manager:
 
         for locale in self.locale.languages:
             for k, v in locale.items():
-                match: int = fuzz.token_set_ratio(attribute, v)
-                if v == attribute or match > 80:
-                    return locale, match == 100
+                match_: int = fuzz.token_set_ratio(attribute, v)
+                if v == attribute or match_ > 80:
+                    return locale, match_ == 100
 
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
         """
@@ -434,8 +655,9 @@ class Manager:
             for k, v in ref.items():
                 if k not in node:
                     if locale:
-                        self.log(f'missing key "{k}" patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
-                        self._missing_locale_keys[dict_.meta.name].append(self.dict_full_path(ref_.actual, k, v))
+                        self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
+                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
+                                 f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
@@ -456,6 +678,34 @@ class Manager:
             if locale != self.locale.master and 'meta' in locale:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master, locale=True))
 
+    def _replace_emoji(self, match_: re.Match, default: str = '**[?]**') -> str:
+        """
+        Generate a replacement string from a match object's emoji_name variable with a Manager emoji
+
+        :param match_: The match to generate the replacement for
+        :return: The replacement string
+        """
+
+        if group := match_.group('emoji_name'):
+            return self.e.get(group, default)
+        return match_.string
+
+    def __preprocess_locale_emojis(self):
+        """
+        Preprocess locales by replacing {emoji_[x]} with self.e.[x] (Emoji formatting)
+        """
+
+        def _preprocess(node: AnyDict) -> None:
+            for k, v in node.items():
+                if isinstance(v, (DictProxy, dict)):
+                    _preprocess(v)
+                elif isinstance(v, str):
+                    if '{emoji_' in v:
+                        node[k] = r.LOCALE_EMOJI.sub(self._replace_emoji, v)
+
+        for locale in self.l:
+            _preprocess(locale)
+
     def fmt(self, ctx: commands.Context) -> object:
         """
         Instantiate a new Formatter object. Meant for binding to Context.
@@ -471,10 +721,10 @@ class Manager:
                 self.ctx: commands.Context = ctx_
                 self.prefix: str = ''
 
-            def __call__(self, resource: Union[tuple, str, list], /, *args) -> str:
+            def __call__(self, resource: Union[tuple, str, list], /, *args, **kwargs) -> str:
                 resource: str = self.prefix + resource if not resource.startswith(self.prefix) else resource
                 try:
-                    return self_.get_nested_key(self.ctx.l, resource).format(*args)
+                    return self_.get_nested_key(self.ctx.l, resource).format(*args, **kwargs)
                 except IndexError:
                     return self_.get_nested_key(self_.locale.master, resource).format(*args)
 

@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 from typing import Optional, Iterable, List, Union
 from lib.globs import Git, Mgr
+from lib.typehints import Repository
 
 __all__: tuple = (
     'issue_list',
@@ -10,7 +11,7 @@ __all__: tuple = (
 )
 
 
-async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+async def issue_list(ctx: commands.Context, repo: Optional[Repository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo issues')
     if (lstate := state.lower()) not in ('open', 'closed'):
         await ctx.err(ctx.l.generic.issue.invalid_state.format(lstate))
@@ -30,7 +31,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
         await handle_none(ctx, 'issue', stored, lstate)
         return
 
-    issue_strings: List[str] = [await make_string(repo, i, 'issues') for i in issues]
+    issue_strings: list[str] = [await make_string(repo, i, 'issues') for i in issues]
 
     embed: discord.Embed = discord.Embed(
         color=0xefefef,
@@ -50,7 +51,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
                                                           m.author.id == ctx.author.id, timeout=30)
             if msg.content.lower() == 'cancel':
                 return
-            if not (issue := await Mgr.validate_number(num := msg.content, issues)):
+            if not (issue := await Mgr.validate_index(num := msg.content, issues)):
                 await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
@@ -61,7 +62,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
             return
 
 
-async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+async def pull_request_list(ctx: commands.Context, repo: Optional[Repository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo pulls')
     if (lstate := state.lower()) not in ('open', 'closed', 'merged'):
         await ctx.err(ctx.l.generic.pr.invalid_state.format(lstate))
@@ -81,7 +82,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
         await handle_none(ctx, 'pull request', stored, lstate)
         return
 
-    pr_strings: List[str] = [await make_string(repo, pr, 'pull') for pr in prs]
+    pr_strings: list[str] = [await make_string(repo, pr, 'pull') for pr in prs]
 
     embed: discord.Embed = discord.Embed(
         color=0xefefef,
@@ -101,7 +102,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
                                                           m.author.id == ctx.author.id, timeout=30)
             if msg.content.lower() == 'cancel':
                 return
-            if not (pr := await Mgr.validate_number(num := msg.content, prs)):
+            if not (pr := await Mgr.validate_index(num := msg.content, prs)):
                 await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
@@ -133,7 +134,7 @@ async def handle_none(ctx: commands.Context, item: str, stored: bool, state: str
     return
 
 
-async def make_string(repo: str, item: dict, path: str) -> str:
+async def make_string(repo: Repository, item: dict, path: str) -> str:
     url: str = f'https://github.com/{repo}/{path}/{item["number"]}/'
     return f'[`#{item["number"]}`]({url}) **|** [' \
            f'{item["title"] if len(item["title"]) < 70 else item["title"][:67] + "..."}]({url})'

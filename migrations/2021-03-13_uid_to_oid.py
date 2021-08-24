@@ -20,6 +20,6 @@ for u in db.find():
         ops.append(DeleteOne({'user_id': uid}))
         ops.append(InsertOne(dict(_id=uid, **u)))
 
-print("Writing " + str(len(ops) >> 1))
+print("Writing " + str(len(ops)))
 db.bulk_write(ops, ordered=False)
 print("Updated " + str(len(ops) >> 1))

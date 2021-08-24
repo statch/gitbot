@@ -3,7 +3,7 @@ import datetime
 import asyncio
 from discord.ext import commands
 from lib.globs import Git, Mgr
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 from lib.utils.decorators import gitbot_command
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
@@ -51,7 +51,7 @@ class Gist(commands.Cog):
 
         base_msg: discord.Message = await ctx.send(embed=embed)
 
-        def validate_index(index: Union[int, str]) -> Tuple[bool, Optional[str]]:
+        def validate_index(index: Union[int, str]) -> tuple[bool, Optional[str]]:
             if not str(index).isnumeric() or int(index) > len(gist_strings):
                 return False, ctx.fmt('index_error', len(gist_strings))
             return True, None
@@ -83,7 +83,7 @@ class Gist(commands.Cog):
                 timeout_embed.set_footer(text=ctx.l.gist.timeout.tip)
                 await base_msg.edit(embed=timeout_embed)
                 return
-        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.clean_content), ctx.l.gist.content_notice))
+        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.content), ctx.l.gist.content_notice))
 
     async def build_gist_embed(self, ctx: commands.Context, data: dict, index: int, footer: Optional[str] = None) -> discord.Embed:
         ctx.fmt.set_prefix('gist')

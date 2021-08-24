@@ -4,16 +4,9 @@ import logging
 from lib.globs import Mgr
 from discord.ext import commands
 from lib.utils.decorators import restricted
-try:
-    from dotenv import load_dotenv
-    Mgr.log("Found .env file, loading environment variables from it.")
-    load_dotenv(override=True)
-except ModuleNotFoundError:
-    pass
 
-PRODUCTION: bool = bool(int(os.getenv('PRODUCTION')))
-NO_TYPING_COMMANDS: list = os.getenv('NO_TYPING_COMMANDS').split()
-PREFIX: str = str(os.getenv('PREFIX'))
+NO_TYPING_COMMANDS: list = Mgr.env.no_typing_commands
+PREFIX: str = Mgr.env.prefix
 
 intents: discord.Intents = discord.Intents(
     messages=True,
@@ -51,12 +44,12 @@ extensions: list = [
     'cogs.ecosystem.help',
     'cogs.ecosystem.config',
     'cogs.ecosystem.bot_info',
-    'cogs.backend.handle.errors',
-    'cogs.backend.handle.events',
+    'cogs.backend.handle.errors.errors',
+    'cogs.backend.handle.events.events',
     'cogs.python.pypi'
 ]
 
-if PRODUCTION:
+if Mgr.env.production:
     extensions.extend([f'cogs.botlists.major.{file[:-3]}' for file in os.listdir('cogs/botlists/major')])
     extensions.extend([f'cogs.botlists.minor.{file[:-3]}' for file in os.listdir('cogs/botlists/minor')])
 
@@ -105,9 +98,7 @@ async def unload_command(ctx: commands.Context, cog: str) -> None:
 
 @bot.check
 async def global_check(ctx: commands.Context) -> bool:
-    setattr(ctx, 'l', await Mgr.get_locale(ctx))
-    setattr(ctx, 'fmt', Mgr.fmt(ctx))
-    setattr(ctx, 'err', Mgr.error_ctx_bindable(ctx))
+    await Mgr.enrich_context(ctx)
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False
 

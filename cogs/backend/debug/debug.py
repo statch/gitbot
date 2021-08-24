@@ -36,9 +36,9 @@ class Debug(commands.Cog):
         }
         if (e := cor.get(event)) is not None:
             self.bot.dispatch(event, e)
-            await ctx.send(f'{Mgr.e.github} Dispatched event `{event}`')
+            await ctx.success(f'Dispatched event `{event}`')
         else:
-            await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
+            await ctx.err(f'Failed to dispatch event `{event}`')
 
     @restricted()
     @gitbot_command(name='ratelimit', aliases=['rate'])
@@ -90,6 +90,7 @@ class Debug(commands.Cog):
                 'commands': commands,
                 'ctx': ctx,
                 'Git': Git,
+                'Mgr': Mgr,
                 '__import__': __import__
             }
             exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used

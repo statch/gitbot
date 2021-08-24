@@ -4,6 +4,7 @@ from typing import Optional, Union
 from lib.globs import Git, Mgr
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
+from lib.typehints import Organization
 
 
 class Org(commands.Cog):
@@ -11,7 +12,7 @@ class Org(commands.Cog):
         self.bot: commands.Bot = bot
 
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
-    async def org_command_group(self, ctx: commands.Context, org: Optional[str] = None) -> None:
+    async def org_command_group(self, ctx: commands.Context, org: Optional[Organization] = None) -> None:
         if not org:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'org')
             if stored:
@@ -24,7 +25,7 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='info', aliases=['i'])
-    async def org_info_command(self, ctx: commands.Context, organization: str) -> None:
+    async def org_info_command(self, ctx: commands.Context, organization: Organization) -> None:
         ctx.fmt.set_prefix('org info')
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
@@ -83,7 +84,7 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='repos', aliases=['r'])
-    async def org_repos_command(self, ctx: commands.Context, org: str) -> None:
+    async def org_repos_command(self, ctx: commands.Context, org: Organization) -> None:
         ctx.fmt.set_prefix('org repos')
         o: Union[dict, None] = await Git.get_org(org)
         repos: list = [x for x in await Git.get_org_repos(org)]

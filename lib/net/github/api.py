@@ -1,17 +1,34 @@
 import aiohttp
 import asyncio
+import functools
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional
+from typing import Union, Optional, Callable, Coroutine, Any
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
-from lib.structs import DirProxy, GhProfileData
+from lib.structs import DirProxy, GhProfileData, TypedCache, CacheSchema
 from lib.utils.decorators import normalize_repository
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
+github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=600)
+
+
+def github_cached(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+    @functools.wraps(func)
+    async def wrapper(*args: tuple, **kwargs: dict) -> Any:
+        # actually 2nd cause we're working with methods
+        first_arg_or_arbitrary_kwarg = args[1] if args else next(iter(kwargs))
+        if cached := github_object_cache.get(first_arg_or_arbitrary_kwarg):
+            return cached
+        result: Any = await func(*args, **kwargs)
+        if isinstance(result, (dict, list)):
+            github_object_cache[first_arg_or_arbitrary_kwarg] = result
+        return result
+
+    return wrapper
 
 
 class GitHubAPI:
@@ -38,7 +55,7 @@ class GitHubAPI:
     def __token(self) -> str:
         return next(self.tokens)
 
-    async def ghprofile_stats(self, name: str) -> Union[GhProfileData, None]:
+    async def ghprofile_stats(self, name: str) -> Optional[GhProfileData]:
         if '/' in name or '&' in name:
             return None
         res = await (await self.ses.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
@@ -47,7 +64,7 @@ class GitHubAPI:
             return None
         return GhProfileData(*[int(v) for v in period.values()])
 
-    async def get_ratelimit(self) -> tuple:
+    async def get_ratelimit(self) -> tuple[tuple[dict, ...], int]:
         results: list = []
         for token in self.__tokens:
             data = await (await self.ses.get(f'https://api.github.com/rate_limit',
@@ -55,19 +72,22 @@ class GitHubAPI:
             results.append(data)
         return tuple(results), len(self.__tokens)
 
+    @github_cached
     async def get_user_repos(self, user: str) -> Optional[list]:
         try:
             return list([x for x in await self.gh.getitem(f'/users/{user}/repos') if x['private'] is False])
         except BadRequest:
             return None
 
+    @github_cached
     async def get_org(self, org: str) -> Optional[dict]:
         try:
             return await self.gh.getitem(f'/orgs/{org}')
         except BadRequest:
             return None
 
-    async def get_org_repos(self, org: str) -> Union[List[dict], list]:
+    @github_cached
+    async def get_org_repos(self, org: str) -> Union[list[dict], list]:
         try:
             res = list([x for x in await self.gh.getitem(f'/orgs/{org}/repos') if x['private'] is False])
             return res
@@ -75,7 +95,7 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
+    async def get_repo_files(self, repo: str) -> Union[list[dict], list]:
         if repo.count('/') != 1:
             return []
         try:
@@ -94,18 +114,21 @@ class GitHubAPI:
         except BadRequest:
             return []
 
-    async def get_user_orgs(self, user: str) -> Union[List[dict], list]:
+    @github_cached
+    async def get_user_orgs(self, user: str) -> Union[list[dict], list]:
         try:
             return list(await self.gh.getitem(f'/users/{user}/orgs'))
         except BadRequest:
             return []
 
-    async def get_org_members(self, org: str) -> Union[List[dict], list]:
+    @github_cached
+    async def get_org_members(self, org: str) -> Union[list[dict], list]:
         try:
             return list(await self.gh.getitem(f'/orgs/{org}/members'))
         except BadRequest:
             return []
 
+    @github_cached
     async def get_user_gists(self, user: str):
         try:
             data = await self.gh.graphql(self._queries.user_gists, **{'Login': user})
@@ -114,6 +137,7 @@ class GitHubAPI:
 
         return data['user']
 
+    @github_cached
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
             return dict(await self.gh.getitem(f'/gists/{gist_id}'))
@@ -157,6 +181,7 @@ class GitHubAPI:
         return data
 
     @normalize_repository
+    @github_cached
     async def get_repo(self, repo: str) -> Optional[dict]:
         split: list = repo.split('/')
         if len(split) == 2:
@@ -212,7 +237,7 @@ class GitHubAPI:
     async def get_last_pull_requests_by_state(self,
                                               repo: str,
                                               last: int = 10,
-                                              state: str = 'OPEN') -> Optional[List[dict]]:
+                                              state: str = 'OPEN') -> Optional[list[dict]]:
         if repo.count('/') != 1:
             return None
 
@@ -267,7 +292,7 @@ class GitHubAPI:
         return data
 
     @normalize_repository
-    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[List[dict]]:
+    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[list[dict]]:
         if repo.count('/') != 1:
             return None
         split: list = repo.split('/')
@@ -283,6 +308,7 @@ class GitHubAPI:
             return None
         return data['repository']['issues']['nodes']
 
+    @github_cached
     async def get_user(self, user: str):
         try:
             data = await self.gh.graphql(self._queries.user, **{'Login': user,

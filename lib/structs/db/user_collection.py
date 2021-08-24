@@ -24,7 +24,7 @@ class UserCollection(AsyncIOMotorCollection):
         self._mgr = mgr
         super().__init__(collection.database, collection.name)
 
-    @normalize_identity
+    @normalize_identity()
     async def delitem(self, _id: Identity, field: str) -> bool:
         query: dict = await self.find_one({"_id": _id})
         if query is not None and field in query:
@@ -35,14 +35,14 @@ class UserCollection(AsyncIOMotorCollection):
             return True
         return False
 
-    @normalize_identity
+    @normalize_identity()
     async def getitem(self, _id: Identity, item: str) -> Optional[str]:
         query: dict = await self.find_one({'_id': _id})
         if query and item in query:
             return query[item]
         return None
 
-    @normalize_identity
+    @normalize_identity()
     async def setitem(self, _id: Identity, item: str, value: str) -> bool:
         valid: bool = True
         if item in ('user', 'repo', 'org'):

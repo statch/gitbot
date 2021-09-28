@@ -14,5 +14,5 @@ Babel==2.9.1
 colorama==0.4.4
 requests==2.26.0
 py-carbon
-sentry-sdk==1.4.1
+sentry-sdk==1.4.2
 aiofiles==0.7.0

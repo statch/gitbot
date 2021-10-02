@@ -1,14 +1,14 @@
+import discord
 from typing import Union
 from discord.ext import commands
-from lib.structs.dicts.case_insensitive_dict import CaseInsensitiveDict
-from lib.structs import DictProxy, DirProxy
+from lib.structs import DictProxy, DirProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict
 from lib.typehints.db.guild.guild import GitBotGuild
 from lib.typehints.db.guild.release_feed import ReleaseFeedRepo, ReleaseFeedItem, ReleaseFeed, TagNameUpdateData
 from lib.typehints.db.guild.autoconv import AutomaticConversion
-from lib.typehints.generic import (Repository, GuildID,
+from lib.typehints.generic import (GitHubRepository, GuildID,
                                    TagName, GitHubUser,
-                                   Organization, PyPIProject,
-                                   HashDigest, MessageAttachmentURL)
+                                   GitHubOrganization, PyPIProject,
+                                   Hash, MessageAttachmentURL)
 
 __all__: tuple = (
     'DictSequence',
@@ -17,19 +17,21 @@ __all__: tuple = (
     'ReleaseFeedRepo',
     'ReleaseFeedItem',
     'ReleaseFeed',
-    'Repository',
+    'GitHubRepository',
     'GuildID',
     'GitBotGuild',
     'TagName',
     'TagNameUpdateData',
     'GitHubUser',
-    'Organization',
+    'GitHubOrganization',
     'PyPIProject',
     'AutomaticConversion',
-    'HashDigest',
-    'MessageAttachmentURL'
+    'Hash',
+    'MessageAttachmentURL',
+    'EmbedLike'
 )
 
-AnyDict = Union[dict, DictProxy, CaseInsensitiveDict]
+AnyDict = Union[dict, DictProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict]
 DictSequence = Union[tuple[AnyDict], list[AnyDict], DirProxy]
 Identity = Union[int, str, commands.Context]
+EmbedLike = Union[discord.Embed, 'lib.structs.discord.gitbot_embed.GitBotEmbed']

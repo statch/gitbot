@@ -4,12 +4,12 @@ import json
 import aiofiles
 import shutil
 import subprocess
-import discord
 from discord.ext import commands
 from typing import Optional, Union
+from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_command
-from lib.typehints import Repository
+from lib.typehints import GitHubRepository
 
 _25MB_BYTES: int = int(25 * (1024 ** 2))
 
@@ -21,14 +21,14 @@ class LinesOfCode(commands.Cog):
     @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'])
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    async def lines_of_code_command_nocache(self, ctx: commands.Context, repo: Repository) -> None:
+    async def lines_of_code_command_nocache(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.__nocache__ = True
         await ctx.invoke(self.lines_of_code_command, repo=repo)
 
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    async def lines_of_code_command(self, ctx: commands.Context, repo: Repository) -> None:
+    async def lines_of_code_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
@@ -39,7 +39,7 @@ class LinesOfCode(commands.Cog):
             await ctx.err(ctx.l.loc.file_too_big)
             return
         title: str = ctx.fmt('title', repo)
-        embed: discord.Embed = discord.Embed(
+        embed: GitBotEmbed = GitBotEmbed(
             color=0x00a6ff,
             title=title,
             url=r['url'],
@@ -50,12 +50,12 @@ class LinesOfCode(commands.Cog):
                          + f'**{ctx.l.loc.stats.blank}:** {processed["SUM"]["blank"]}\n'
                          + f'**{ctx.l.loc.stats.comments}:** {processed["SUM"]["comment"]}\n'
                          + f'**{ctx.l.loc.stats.detailed}:**\n'
-                         + await self.prepare_result_sheet(processed))
+                         + await self.prepare_result_sheet(processed)),
+            footer=ctx.l.loc.footer
         )
-        embed.set_footer(text=ctx.l.loc.footer)
         await ctx.send(embed=embed)
 
-    async def process_repo(self, ctx: commands.Context, repo: Repository) -> Optional[dict]:
+    async def process_repo(self, ctx: commands.Context, repo: GitHubRepository) -> Optional[dict]:
         if (not ctx.__nocache__) and (cached := Mgr.loc_cache.get(repo := repo.lower())):
             return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'

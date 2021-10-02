@@ -1,6 +1,7 @@
 import discord
 from lib.globs import Mgr
 from discord.ext import commands
+from lib.structs import GitBotEmbed
 from lib.utils.decorators import gitbot_group
 
 
@@ -18,12 +19,12 @@ class Help(commands.Cog):
                            f'`git help config` {ctx.l.help.default.sections.config}',
                            f'`git help utility` {ctx.l.help.default.sections.utility}',
                            f'\n{ctx.l.help.default.support_server_note}']
-            embed = discord.Embed(
+            embed: GitBotEmbed = GitBotEmbed(
                 title=f'{Mgr.e.err}  {ctx.l.help.default.title}',
-                color=0xefefef,
-                description='\n'.join(lines)
+                color=Mgr.c.rounded,
+                description='\n'.join(lines),
+                footer=ctx.l.help.default.footer
             )
-            embed.set_footer(text=ctx.l.help.default.footer)
             await ctx.send(embed=embed)
 
     @help_command.command(name='github')
@@ -45,7 +46,7 @@ class Help(commands.Cog):
 
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.help.github.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.help.alias_note)
@@ -55,7 +56,7 @@ class Help(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def utlity_help(self, ctx: commands.Context) -> None:
         lines: list = [ctx.l.help.utility.description,
-                       f'`git commits` - {ctx.l.help.utility.commands.commits}',
+                       f'`git logs` - {ctx.l.help.utility.commands.logs}',
                        f'`git loc {{{ctx.l.argument_placeholders.repo}}}` - {ctx.l.help.utility.commands.loc}',
                        f'`git license {{{ctx.l.argument_placeholders.license}}}` - {ctx.l.help.utility.commands.license}',
                        f'`git snippet {{{ctx.l.argument_placeholders.link_or_codeblock}}}` - {ctx.l.help.utility.commands.snippet}',
@@ -63,7 +64,7 @@ class Help(commands.Cog):
                        f'`git pypi` - {ctx.l.help.utility.commands.pypi}']
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.help.utility.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.help.alias_note)
@@ -77,7 +78,7 @@ class Help(commands.Cog):
                        f'`git config -show` - {ctx.l.help.config.commands.show}']
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.help.config.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.help.alias_note)
@@ -96,7 +97,7 @@ class Help(commands.Cog):
 
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.help.info.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.help.alias_note)
@@ -113,7 +114,7 @@ class Help(commands.Cog):
                            f'`git aliases utility` - {ctx.l.aliases.default.sections.utility}']
             embed = discord.Embed(
                 title=f'{Mgr.e.err}  {ctx.l.aliases.default.title}',
-                color=0xefefef,
+                color=Mgr.c.rounded,
                 description='\n'.join(lines)
             )
             embed.set_footer(text=ctx.l.aliases.default.footer)
@@ -132,7 +133,7 @@ class Help(commands.Cog):
                        f'`git issue` {Mgr.e.arrow} `git i`']
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.aliases.github.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.aliases.github.footer)
@@ -144,12 +145,11 @@ class Help(commands.Cog):
         lines: list = [
             ctx.l.aliases.utility.description,
             f'`git pypi download` {Mgr.e.arrow} `git pypi dl`'
-            f'`git repo download` {Mgr.e.arrow} `git repo dl`',
-            f'`git commits` {Mgr.e.arrow} `git logging`'
+            f'`git repo download` {Mgr.e.arrow} `git repo dl`'
         ]
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.aliases.utility.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.aliases.utility.footer)
@@ -169,7 +169,7 @@ class Help(commands.Cog):
         ]
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.aliases.config.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.aliases.config.footer)
@@ -181,7 +181,7 @@ class Help(commands.Cog):
         lines: list = [ctx.l.aliases.info.description, f'`git uptime` {Mgr.e.arrow} `git up`']
         embed = discord.Embed(
             title=f'{Mgr.e.err}  {ctx.l.aliases.info.title}',
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description='\n'.join(lines)
         )
         embed.set_footer(text=ctx.l.aliases.info.footer)

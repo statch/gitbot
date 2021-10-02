@@ -6,9 +6,12 @@ import dotenv
 import discord
 import zipfile
 import os.path
+import inspect
 import hashlib
 import aiohttp
+import certifi
 import operator
+import datetime
 import functools
 import dotenv.parser
 from sys import getsizeof
@@ -19,9 +22,9 @@ from lib.utils import regex as r
 from colorama import Style, Fore
 from discord.ext import commands
 from urllib.parse import quote_plus
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, Iterable, Iterator
+from typing import Optional, Union, Callable, Any, Reversible, Iterable
 from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion
 from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection, TypedCache, SelfHashingCache, CacheSchema
 
@@ -36,28 +39,40 @@ class Manager:
 
     def __init__(self, github):
         self.git = github
-        self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
-                                         if not self._set_env_directive(k, v)})
-        self._env_directives: DictProxy = DictProxy()
-        self._prepare_env()
         self.ses: aiohttp.ClientSession = self.git.ses
-        self.db: AsyncIOMotorClient = getattr(AsyncIOMotorClient(self.env.db_connection),
-                                              'store' if self.env.production else 'test')
+        self._prepare_env()
+        self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
+        self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
+        self._setup_db()
+        self.l: DirProxy = self.readdir('resources/locale/', '.json', exclude='index.json')
         self.e: DictProxy = self.load_json('emoji')
-        self.l: DirProxy = self.readdir('data/locale/', '.json', exclude='index.json')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
                                                                             and v.startswith('#')) else int(v[1:], 16))
+        self.i: DictProxy = self.load_json('images')
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60*60)
+        self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
         self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
         self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
-        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60*30)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 30)
         self.locale.master = getattr(self.l, str(self.locale.master))
         self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
+
+    def _setup_db(self) -> None:
+        """
+        Setup the database connection with ENV vars and a more predictable certificate location.
+        """
+
+        self._ca_cert: str = certifi.where()
+        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
+                                                                appname=self.bot_dev_name,
+                                                                tls=self.env.db_use_tls,
+                                                                tlsCAFile=self._ca_cert,
+                                                                tlsAllowInvalidCertificates=False)
+        self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
 
     def _eval_bool_literal_safe(self, literal: str) -> Union[str, bool]:
         """
@@ -88,8 +103,8 @@ class Manager:
 
         if (directive := name.lower()).startswith('directive_'):
             if (directive := directive.replace('directive_', '')) not in \
-                    self._env_directives or (directive in self._env_directives and overwrite):
-                self._env_directives[directive] = value
+                    self.env_directives or (directive in self.env_directives and overwrite):
+                self.env_directives[directive] = value
                 self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
                 return True
         return False
@@ -97,10 +112,14 @@ class Manager:
     def _prepare_env(self) -> None:
         """
         Private function meant to be called at the time of instantiating this class,
-        loads .env with defaults from data/env_defaults.json
+        loads .env with defaults from data/env_defaults.json into self.env.
         """
 
-        with open('data/env_defaults.json', 'r') as fp:
+        self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
+                                         if not self._set_env_directive(k, v)})
+        self.env_directives: DictProxy = DictProxy()
+
+        with open('resources/env_defaults.json', 'r') as fp:
             env_defaults: dict = json.loads(fp.read())
             for k, v in env_defaults.items():
                 if not self._set_env_directive(k, v) and k not in self.env:
@@ -116,21 +135,19 @@ class Manager:
 
         if not self._set_env_directive(binding.key, binding.value):
             try:
-                if self._env_directives.get('eval_literal'):
+                if self.env_directives.get('eval_literal'):
                     if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
                         self.env[binding.key] = parsed
                     else:
                         self.env[binding.key] = (parsed := self.parse_literal(binding.value))
-                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}',
-                             f'core-{Fore.LIGHTYELLOW_EX}env')
+                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
                 else:
                     self.env[binding.key] = binding.value
                     self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
                 return
             except (ValueError, SyntaxError):
                 self.env[binding.key] = binding.value
-                self.log(f'Loaded as \'str\': {binding.key}',
-                         f'core-{Fore.LIGHTYELLOW_EX}env')
+                self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
 
     def load_dotenv(self) -> None:
         """
@@ -146,8 +163,7 @@ class Manager:
             self.log('Found .env file, loading environment variables listed inside of it.',
                      f'core-{Fore.LIGHTYELLOW_EX}env')
             with open(dotenv_path, 'r') as fp:
-                parsed: Iterator[dotenv.parser.Binding] = dotenv.parser.parse_stream(fp)
-                for binding in parsed:
+                for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
 
     def parse_literal(self, literal: str) -> Union[str, bytes, int, set, dict, tuple, list, bool, float, None]:
@@ -186,6 +202,59 @@ class Manager:
 
         return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
 
+    def to_github_hyperlink(self, name: str) -> str:
+        """
+        Return f"[{name}](GITHUB_URL)"
+
+        :param name: The GitHub name to embed in the hyperlink
+        :return: The created hyperlink
+        """
+
+        return f'[{name}](https://github.com/{name.lower()})'
+
+    def truncate(self, string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
+        """
+        Append the ending to the cut string if len(string) exceeds length else return unchanged string.
+
+        .. note ::
+            The actual length of the **content** of the string equals length - len(ending) without full_word
+
+        :param string: The string to truncate
+        :param length: The desired length of the string
+        :param ending: The ending to append
+        :param full_word: Whether to cut in the middle of the last word ("pyth...")
+                          or to skip it entirely and append the ending
+        :return: The truncated (or unchanged) string
+        """
+
+        if len(string) > length:
+            if full_word:
+                string: str = string[:length - len(ending)]
+                return f"{string[:string.rindex(' ')]}{ending}".strip()
+            return string[:length - len(ending)] + ending
+        return string
+
+    def external_to_discord_timestamp(self, timestamp: str, ts_format: str) -> str:
+        """
+        Convert an external timestamp to the <t:timestamp> Discord format
+
+        :param timestamp: The timestamp
+        :param ts_format: The format of the timestamp
+        :return: The converted timestamp
+        """
+
+        return f'<t:{int(datetime.datetime.strptime(timestamp, ts_format).timestamp())}>'
+
+    def github_to_discord_timestamp(self, github_timestamp: str) -> str:
+        """
+        Convert a GitHub-formatted timestamp (%Y-%m-%dT%H:%M:%SZ) to the <t:timestamp> Discord format
+
+        :param github_timestamp: The GitHub timestamp to convert
+        :return: The converted timestamp
+        """
+
+        return self.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+
     def log(self,
             message: str,
             category: str = 'core',
@@ -205,6 +274,71 @@ class Manager:
         print(
             f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
             f'{Style.RESET_ALL}')
+
+    def get_last_call_from_callstack(self, frames_back: int = 2) -> str:
+        """
+        Get the name of a callable in the callstack.
+        If the encountered callable is a method, return the name in the "ClassName.method_name" format.
+
+        :param frames_back: The number of frames to go back and get the callable name from
+        :return: The callable name
+        """
+
+        frame = inspect.stack()[frames_back][0]
+        if 'self' in frame.f_locals:
+            return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
+        return frame.f_code.co_name
+
+    def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+        """
+        A special variant of :meth:`Manager.log` that sets the
+        category name as the name of the outer function (the caller)
+        and only fires if the ENV[PRODUCTION] value is False.
+
+        :param message: The message to log to the console
+        :param message_color: The optional message color override
+        """
+
+        if self.debug_mode:
+            self.log(message,
+                     f'debug-{Fore.LIGHTYELLOW_EX}{self.get_last_call_from_callstack()}{Style.RESET_ALL}',
+                     Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
+
+    _int_word_conv_map: dict = {
+        'zero': 0,
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9,
+    }
+
+    def wtoi(self,
+             word: str) -> Optional[int]:
+        """
+        Word to :class:`int`. I'm sorry.
+
+        :param word: The word to convert
+        :return: The converted word or None if invalid
+        """
+
+        return self._int_word_conv_map.get(word.casefold())
+
+    def itow(self, _int: int) -> Optional[str]:
+        """
+        :class:`int` to word. I'm sorry.
+
+        :param _int: The integer to convert
+        :return: The converted int or None if invalid
+        """
+
+        for k, v in self._int_word_conv_map.items():
+            if v == _int:
+                return k
 
     def sizeof(self, object_: object, handlers: Optional[dict] = None, verbose: bool = False) -> int:
         """
@@ -234,8 +368,9 @@ class Manager:
             size: int = getsizeof(_object, getsizeof(0))
 
             if verbose:
-                self.log(message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
-                         category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTRED_EX}s{Style.RESET_ALL}]')
+                self.log(
+                    message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
+                    category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTRED_EX}r{Style.RESET_ALL}]')
 
             for type_, handler in all_handlers.items():
                 if isinstance(_object, type_):
@@ -247,8 +382,9 @@ class Manager:
         if verbose:
             self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
                      category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
+        return final_size
 
-    def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
+    def opt(self, obj: Any, op: Union[Callable, str, int], /, *args, **kwargs) -> Any:
         """
         Run an operation on an object if bool(object) == True
 
@@ -258,6 +394,9 @@ class Manager:
         :param kwargs: Optional keyword arguments for op
         :return: The result of the operation or the unchanged object
         """
+
+        if isinstance(op, (int, str)):
+            return obj[op] if obj else obj
 
         return op(obj, *args, **kwargs) if obj else obj
 
@@ -300,7 +439,9 @@ class Manager:
         match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
                             re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
         if match_:
+            self.debug('Matched codeblock')
             return match_.group('content').rstrip('\n')
+        self.debug("Couldn't match codeblock")
 
     async def unzip_file(self, zip_path: str, output_dir: str) -> None:
         """
@@ -311,8 +452,10 @@ class Manager:
         """
 
         if not os.path.exists(output_dir):
+            self.debug(f'Creating output directory "{output_dir}"')
             os.mkdir(output_dir)
         with zipfile.ZipFile(zip_path, 'r') as _zip:
+            self.debug(f'Extracting zip archive "{zip_path}"')
             _zip.extractall(output_dir)
 
     def correlate_license(self, to_match: str) -> Optional[DictProxy]:
@@ -328,7 +471,9 @@ class Manager:
             match1 = fuzz.token_set_ratio(to_match, i['key'])
             match2 = fuzz.token_set_ratio(to_match, i['spdx_id'])
             if any([match > 80, match1 > 80, match2 > 80]):
+                self.debug(f'Matched license "{i["name"]}" with confidence >80 from "{to_match}"')
                 return i
+        self.debug(f'No matching license found for "{to_match}"')
         return None
 
     def load_json(self,
@@ -343,12 +488,14 @@ class Manager:
         :return: The loaded JSON wrapped in DictProxy
         """
 
-        to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+        to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
             data: Union[dict, list] = json.load(fp)
         proxy: DictProxy = DictProxy(data)
 
         if apply_func:
+            self.debug(f'Applying func {apply_func.__name__}')
+
             def _recursive(node: AnyDict) -> None:
                 for k, v in node.items():
                     if isinstance(v, (dict, DictProxy)):
@@ -397,12 +544,13 @@ class Manager:
             if match := pattern.search(ctx.message.content):
                 if isinstance(command_name, str):
                     command: commands.Command = ctx.bot.get_command(command_name)
-                    kwargs: dict = dict(zip(dict(command.clean_params).keys(), match.groups()))
+                    kwargs: dict = dict(zip(command.clean_params.keys(), match.groups()))
                 else:
                     command: tuple[commands.Command, ...] = tuple(ctx.bot.get_command(name) for name in command_name)
-                    kwargs: tuple[dict, ...] = tuple(dict(zip(dict(cmd.clean_params).keys(),
+                    kwargs: tuple[dict, ...] = tuple(dict(zip(cmd.clean_params.keys(),
                                                               match.groups())) for cmd in command)
                 return GitCommandData(command, kwargs)
+        self.debug(f'No match found for "{ctx.message.content}"')
 
     async def get_most_common(self, items: Union[list, tuple]) -> Any:
         """
@@ -464,9 +612,9 @@ class Manager:
             number: int = int(number)
         except (TypeError, ValueError):
             return None
-        matched = [i for i in items if i['number'] == number]
+        matched = self.opt([i for i in items if i['number'] == number], 0)
         if matched:
-            return matched[0]
+            return matched
 
     async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
         """
@@ -478,6 +626,7 @@ class Manager:
 
         if seq:
             return type(seq)(reversed(seq))  # noqa
+        self.debug('Sequence is None')
 
     def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None, **kwargs) -> Optional[DirProxy]:
         """
@@ -490,6 +639,7 @@ class Manager:
 
         if os.path.isdir(path):
             return DirProxy(path=path, ext=ext, **kwargs)
+        self.debug(f'Not a directory: "{path}"')
 
     async def enrich_context(self, ctx: commands.Context) -> commands.Context:
         """
@@ -500,6 +650,7 @@ class Manager:
         """
 
         ctx.__nocache__ = False
+        ctx.__autoinvoked__ = False
         ctx.err = functools.partial(self.send_error, ctx)
         ctx.success = functools.partial(self.send_success, ctx)
         ctx.fmt = self.fmt(ctx)
@@ -525,6 +676,7 @@ class Manager:
         :param msg: The message content
         :param kwargs: ctx.send keyword arguments
         """
+
         return await ctx.send(f'{self.e.checkmark}  {msg}', **kwargs)
 
     @normalize_identity(context_resource='guild')
@@ -545,6 +697,7 @@ class Manager:
         if cached := self.autoconv_cache.get(_id):
             _did_exist: bool = True
             permission: AutomaticConversion = cached
+            self.debug(f'Returning cached value for identity "{_id}"')
         else:
             stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
             if stored:
@@ -565,14 +718,14 @@ class Manager:
         """
 
         locale: str = self.locale.master.meta.name
-        if cached := self.locale_cache.get(_id, None):
+        if cached := self.locale_cache.get(_id):
             locale: str = cached
+            self.debug(f'Returning cached value for identity "{_id}"')
         else:
-            stored: Optional[str] = await self.db.users.getitem(_id, 'locale')
-            if stored:
+            if stored := await self.db.users.getitem(_id, 'locale'):
                 locale: str = stored
-                self.locale_cache[_id] = locale
         try:
+            self.locale_cache[_id] = locale
             return getattr(self.l, locale)
         except AttributeError:
             return self.locale.master
@@ -591,25 +744,84 @@ class Manager:
     def get_by_key_from_sequence(self,
                                  seq: DictSequence,
                                  key: str,
-                                 value: Any) -> Optional[AnyDict]:
+                                 value: Any,
+                                 multiple: bool = False) -> Optional[Union[AnyDict, list[AnyDict]]]:
         """
         Get a dictionary from an iterable, where d[key] == value
 
         :param seq: The sequence of dicts
         :param key: The key to check
         :param value: The wanted value
+        :param multiple: Whether to search for multiple valid dicts, time complexity is always O(n) with this flag
         :return: The dictionary with the matching value, if any
         """
 
+        matching: list = []
         if len((_key := key.split())) > 1:
             key: list = _key
         for d in seq:
             if isinstance(key, str):
                 if key in d and d[key] == value:
-                    return d
+                    if not multiple:
+                        return d
+                    matching.append(d)
             else:
                 if self.get_nested_key(d, key) == value:
-                    return d
+                    if not multiple:
+                        return d
+                    matching.append(d)
+        return matching
+
+    def get_remaining_keys(self, dict_: dict, keys: Iterable[str]) -> list[str]:
+        return [k for k in dict_.keys() if k not in keys]
+
+    def regex_get(self, dict_: dict, pattern: Union[re.Pattern, str], default: Any = None) -> Any:
+        compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
+                             else lambda k_: pattern in k_)
+        for k, v in dict_.items():
+            if compare(k):
+                return v
+        return default
+
+    def populate_localized_generic_number_map(self,
+                                              resource: dict,
+                                              fmt_str: Optional[str] = None,
+                                              **values: int) -> Union[dict[str, str], str]:
+        populated: dict[str, str] = {}
+        for rk, rv in resource.items():
+            for vn, v in values.items():
+                if isinstance(rv, dict):
+                    if rk == vn:
+                        res: str = resource[rk]['plural'].format(v)
+                        if v < 2:
+                            res: str = resource[rk]['singular'] if v == 1 else self.regex_get(resource[rk], 'no_')
+                        populated[rk] = res
+                else:
+                    populated[rk] = rv
+        return fmt_str.format(**populated) if fmt_str else populated
+
+    def gen_separator_line(self, length: Any) -> str:
+        """
+        Generate a separator line with the provided length or the __len__ of the object passed
+
+        :param length: The length of the separator line
+        :return: The separator line
+        """
+
+        return '⎯' * (length if isinstance(length, int) else len(length))
+
+    def option_display_list_format(self, options: Union[dict[str, str], list[str]]) -> str:
+        """
+        Utility method to construct a string representation of a numbered list from :class:`dict` or :class:`list`
+
+        :param options: The options to build the list from
+        :return: The created list string
+        """
+
+        if isinstance(options, dict):
+            return '\n'.join([f"{self.e[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"  # noqa
+                              for i, kv in enumerate(options.items())])
+        return '\n'.join([f"{self.e[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])  # noqa
 
     def get_missing_keys_for_locale(self, locale: str) -> Optional[tuple[list[str], DictProxy, bool]]:
         """
@@ -722,7 +934,12 @@ class Manager:
                 self.prefix: str = ''
 
             def __call__(self, resource: Union[tuple, str, list], /, *args, **kwargs) -> str:
-                resource: str = self.prefix + resource if not resource.startswith(self.prefix) else resource
+                skip_prefix: bool = False
+                if resource.startswith('!'):  # skip-prefix behavior if the resource has a preceding exclamation mark
+                    skip_prefix: bool = True
+                    resource: str = resource[1:]
+                resource: str = ((self.prefix if not skip_prefix else '') + resource
+                                 if not resource.startswith(self.prefix) else resource)
                 try:
                     return self_.get_nested_key(self.ctx.l, resource).format(*args, **kwargs)
                 except IndexError:
@@ -730,5 +947,7 @@ class Manager:
 
             def set_prefix(self, prefix: str) -> None:
                 self.prefix: str = prefix.strip() + ' '
+                self_.debug(f'Locale formatting prefix set to \'{self.prefix.strip()}\' in '
+                            f'\'{self_.get_last_call_from_callstack(frames_back=2)}\'')
 
         return _Formatter(ctx)

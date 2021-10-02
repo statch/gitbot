@@ -34,9 +34,9 @@ extensions: list = [
     'cogs.github.numbered.pr',
     'cogs.github.numbered.issue',
     'cogs.github.complex.gist',
-    'cogs.github.other.commits',
+    'cogs.github.other.logs',
+    'cogs.github.numbered.commits',
     'cogs.github.other.snippets.snippets',
-    'cogs.github.other.info',
     'cogs.github.other.license',
     'cogs.github.other.loc',
     'cogs.github.complex.workers.release_feed',
@@ -66,16 +66,16 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
                 getattr(bot, f'{op}_extension')(ext)
                 done += 1
         except commands.ExtensionError as e:
-            await ctx.send(f'**Exception during batch-{op}ing:**\n```{e}```')
+            await ctx.err(f'**Exception during batch-{op}ing:**\n```{e}```')
         else:
-            await ctx.send(f'All extensions **successfully {op}ed.** ({done})')
+            await ctx.success(f'All extensions **successfully {op}ed.** ({done})')
     else:
         try:
             getattr(bot, f'{op}_extension')(cog)
         except commands.ExtensionError as e:
-            await ctx.send(f'**Exception while {op}ing** `{cog}`**:**\n```{e}```')
+            await ctx.err(f'**Exception while {op}ing** `{cog}`**:**\n```{e}```')
         else:
-            await ctx.send(f'**Successfully {op}ed** `{cog}`.')
+            await ctx.success(f'**Successfully {op}ed** `{cog}`.')
 
 
 @bot.command(name='reload')

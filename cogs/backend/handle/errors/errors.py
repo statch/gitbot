@@ -1,6 +1,6 @@
 from discord.ext import commands
 from lib.globs import Mgr
-from .error_tools import respond_to_command_doesnt_exist, log_error_in_discord, is_error_case  # noqa
+from .error_tools import respond_to_command_doesnt_exist, log_error_in_discord,  is_error_case  # noqa
 
 
 class Errors(commands.Cog):
@@ -29,11 +29,12 @@ class Errors(commands.Cog):
             await respond_to_command_doesnt_exist(ctx, error)
             if Mgr.env.production:
                 await log_error_in_discord(ctx, error)
-        elif not Mgr.env.production:
+        elif not Mgr.env.production and not ctx.__autoinvoked__:
             raise error
         else:
-            await log_error_in_discord(ctx, error)
-            print(error)
+            if not ctx.__autoinvoked__:
+                await log_error_in_discord(ctx, error)
+                print(error)
 
 
 def setup(bot: commands.Bot) -> None:

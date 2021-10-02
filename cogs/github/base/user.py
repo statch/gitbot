@@ -4,6 +4,7 @@ from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_group
+from lib.typehints import GitHubUser
 
 
 class User(commands.Cog):
@@ -24,7 +25,7 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='info', aliases=['i'])
-    async def user_info_command(self, ctx: commands.Context, user: str) -> None:
+    async def user_info_command(self, ctx: commands.Context, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
@@ -39,7 +40,7 @@ class User(commands.Cog):
             return None
 
         embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=ctx.fmt('title', user) if user[0].isupper() else ctx.fmt('title', user.lower()),
             url=u['url']
         )
@@ -73,8 +74,7 @@ class User(commands.Cog):
         else:
             contrib: str = ""
 
-        joined_at: str = ctx.fmt('joined_at',
-                                 f'<t:{int(datetime.datetime.strptime(u["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+        joined_at: str = ctx.fmt('joined_at', Mgr.github_to_discord_timestamp(u['createdAt'])) + '\n'
 
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
@@ -97,7 +97,7 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='repos', aliases=['r'])
-    async def user_repos_command(self, ctx: commands.Context, user: str) -> None:
+    async def user_repos_command(self, ctx: commands.Context, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user repos')
         u: Union[dict, None] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
@@ -112,7 +112,7 @@ class User(commands.Cog):
             title=title,
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
-            color=0xefefef,
+            color=Mgr.c.rounded,
             url=f"https://github.com/{user}"
         )
         if (c := len(repos)) > 15:

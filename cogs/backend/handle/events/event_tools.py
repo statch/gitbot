@@ -1,4 +1,3 @@
-import asyncio
 import functools
 import discord
 from discord.ext import commands
@@ -6,6 +5,8 @@ from lib.globs import Mgr
 from lib.utils import regex
 from cogs.github.other.snippets.snippet_tools import handle_url, gen_carbon_inmemory
 from typing import Optional
+from lib.typehints import AutomaticConversion
+from lib.structs import GitBotEmbed
 
 
 def set_handler_ctx_attributes(ctx: commands.Context) -> commands.Context:
@@ -14,29 +15,38 @@ def set_handler_ctx_attributes(ctx: commands.Context) -> commands.Context:
     return ctx
 
 
-@commands.command('snippet-no-error')
+@commands.command('snippet-no-error', hidden=True)
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(6, wait=True)
 async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Message]:
     codeblock: Optional[str] = None
-    if ctx.message.content not in Mgr.carbon_attachment_cache:
-        if ((await Mgr.get_autoconv_config(ctx))['link'] and (regex.GITHUB_LINES_RE.search(ctx.message.content)
-                                                              or regex.GITLAB_LINES_RE.search(ctx.message.content))):
+    config: AutomaticConversion = await Mgr.get_autoconv_config(ctx)
+    if (attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
+        Mgr.debug('Responding with cached asset URL')
+        return await ctx.reply(attachment_url, mention_author=False)
+    if regex.GITHUB_LINES_RE.search(ctx.message.content) or regex.GITLAB_LINES_RE.search(ctx.message.content):
+        Mgr.debug(f'Matched GitHub line URL: "{ctx.message.content}" in MID "{ctx.message.id}"')
+        if (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and config['codeblock']:
+            Mgr.debug(f'Converting MID {ctx.message.id} into carbon snippet...')
+            codeblock: str = result
+        if config['gh_lines'] == 2:
+            Mgr.debug(f'Converting MID {ctx.message.id} into carbon snippet...')
             codeblock: Optional[str] = (await handle_url(ctx,
                                                          ctx.message.content,
                                                          max_line_count=Mgr.env.carbon_len_threshold,
                                                          wrap_in_codeblock=False))[0]
-        elif (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and \
-                (await Mgr.get_autoconv_config(ctx))['codeblock']:
-            codeblock: str = result
+        elif (await Mgr.get_autoconv_config(ctx))['gh_lines'] == 1:
+            codeblock: Optional[str] = (await handle_url(ctx,
+                                                         ctx.message.content))[0]
+            if codeblock:
+                Mgr.debug(f'Converting MID {ctx.message.id} into codeblock...')
+                return await ctx.send(codeblock)
         if codeblock and len(codeblock.splitlines()) < Mgr.env.carbon_len_threshold:
             reply: discord.Message = await ctx.reply(file=discord.File(filename='snippet.png',
                                                                        fp=await gen_carbon_inmemory(codeblock)),
                                                      mention_author=False)
             Mgr.carbon_attachment_cache[ctx.message.content] = reply.attachments[0].url
             return reply
-    elif attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content):
-        return await ctx.reply(attachment_url, mention_author=False)
 
 
 async def handle_codeblock_message(ctx: commands.Context) -> Optional[discord.Message]:
@@ -44,16 +54,18 @@ async def handle_codeblock_message(ctx: commands.Context) -> Optional[discord.Me
     return await ctx.invoke(silent_snippet_command)
 
 
-@commands.command('resolve-url-no-error')
+@commands.command('resolve-url-no-error', hidden=True)
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(10, wait=True)
 async def resolve_url_command(ctx: commands.Context) -> Optional[discord.Message]:
-    if cmd_data := await Mgr.get_link_reference(ctx):
+    if (await Mgr.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await Mgr.get_link_reference(ctx)):
+        ctx.__autoinvoked__ = True
         if isinstance(cmd_data.command, commands.Command):
             return await ctx.invoke(cmd_data.command, **cmd_data.kwargs)
         else:
             nonce: int = id(ctx)
             for command, kwargs in zip(cmd_data.command, cmd_data.kwargs):
+                Mgr.debug(f'Running output checks with nonce: {nonce} for command "{str(command)}"')
                 ctx.send = functools.partial(ctx.send, nonce=nonce)
                 await ctx.invoke(command, **kwargs)
                 try:
@@ -64,7 +76,7 @@ async def resolve_url_command(ctx: commands.Context) -> Optional[discord.Message
                     if message.nonce == nonce:
                         return message
                     continue
-                except asyncio.TimeoutError:
+                except Exception: # noqa - we really don't care
                     continue
 
 
@@ -87,18 +99,16 @@ async def build_guild_embed(bot: commands.Bot, guild: discord.Guild, state: bool
         title: str = f'{Mgr.e.failure}  Removed from a guild.'
         color: int = 0xda4353
 
-    embed: discord.Embed = discord.Embed(
+    embed: GitBotEmbed = GitBotEmbed(
         title=title,
         color=color,
+        footer=f"Now in {len(bot.guilds)} guilds",
+        thumbnail=guild.icon_url
     )
-    owner = await bot.fetch_user(guild.owner_id)
     embed.add_field(name='Name', value=str(guild))
     embed.add_field(name='Members', value=str(guild.member_count))
     embed.add_field(name='ID', value=f"`{str(guild.id)}`")
-    embed.add_field(name='Owner', value=str(owner))
+    embed.add_field(name='Owner', value=str(await bot.fetch_user(guild.owner_id)))
     embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
     embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
-    embed.set_footer(text=f"Now in {len(bot.guilds)} guilds")
-    embed.set_thumbnail(url=guild.icon_url)
-
     return embed

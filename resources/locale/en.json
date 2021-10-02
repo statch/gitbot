@@ -69,7 +69,8 @@
       "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
       "locale": "This locale doesn't exist!",
       "python_package": "A Python Package with this name doesn't exist on PyPI!",
-      "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)"
+      "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
+      "commit": "A commit with this OID **doesn't exist** in {0}!"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -78,7 +79,10 @@
       "invalid_state": "`{0}` is not a **valid pull request state!** (Try `open`, `closed` or `merged`)"
     },
     "invalid_index": "{0} is not a valid number **from the list!**",
-    "unspecified": "**Something went wrong,** please report this in the support server."
+    "unspecified": "**Something went wrong,** please report this in the support server.",
+    "inactive": "The command timed out - this message is no longer active!",
+    "completed": "The command has been completed - this message is no longer active",
+    "failure": "The command didn't finish - this message is no longer active"
   },
   "glossary": {
     "github_repo_term": "repository",
@@ -255,7 +259,7 @@
   "gist": {
     "glossary": ["Contents", "Info"],
     "title": "{0}'s gists",
-    "created_at": "Created by [{0}]({1}) on {2}",
+    "created_at": "Created by {0} on {1}",
     "updated_at": "Last updated on {0}",
     "stargazers": {
       "plural": "Has [{0} stargazers]({1})",
@@ -354,10 +358,67 @@
     },
     "footer": "This command is powered by the CLOC CLI tool."
   },
-  "commits": {
+  "commit": {
+    "fields": {
+      "info": {
+        "name": "Info",
+        "pushed_at": "Pushed by {0} on {1}",
+        "committed_at": "Committed by {0} on {1}",
+        "signature": {
+          "valid": {
+            "github": "Signed with a valid signature issued by GitHub",
+            "user": "Signed with a valid signature by {0}"
+          },
+          "invalid": "Signed with an invalid signature"
+        },
+        "committed_via_web": "This commit was made via the web interface",
+        "checks": {
+          "completed": {
+            "singular": "One check completed",
+            "plural": "{0} checks completed",
+            "no_completed_checks": "no checks completed"
+          },
+          "linking_word": "and",
+          "queued": {
+            "singular": "one queued",
+            "plural": "{0} queued",
+            "no_queued_checks": "no checks queued"
+          },
+          "in_progress": {
+            "singular": "one check in progress",
+            "plural": "{0} checks in progress",
+            "no_in_progress_checks": "no checks in progress"
+          }
+        }
+      },
+      "changes": {
+        "name": "Changes",
+        "files": {
+          "plural": "{0} files changed with:",
+          "singular": "One file changed with:"
+        },
+        "additions": {
+          "plural": "{0} additions",
+          "singular": "one addition",
+          "no_additions": "no additions"
+        },
+        "deletions": {
+          "plural": "{0} deletions",
+          "singular": "one deletion",
+          "no_deletions": "no deletions"
+        }
+      },
+      "message": {
+        "name": "Commit message",
+        "empty": "No additional description provided"
+      },
+      "oid": "Full Git OID"
+    }
+  },
+  "logs": {
     "dm_title": "Webhook URL",
     "dm_failed": "**I can't send you a DM**, so we can't proceed. Process aborted, webhook deleted.",
-    "description": "To configure commit feeds, you have to add a webhook to your repo of choice.\nTo do that, **follow the step-by-step instructions below.**",
+    "description": "To configure repo logs, you have to add a webhook to your repo of choice.\nTo do that, **follow the step-by-step instructions below.**",
     "instructions": [
       "Navigate to your repo and open the settings",
       "Select `Webhooks` on the left",
@@ -367,7 +428,7 @@
       "Select `send me everything`",
       "Click `Add webhook`"
     ],
-    "footer": "And that's it! You will now receive a notification whenever there's a new commit!",
+    "footer": "And that's it! You will now receive a notification whenever there's a new event!",
     "webhook_failed": "**Webhook creation failed.** Try verifying my permissions!",
     "do_not_share_warning": "**Do not share the webhook URL**"
   },
@@ -388,47 +449,74 @@
       "embed_title": "GitBot Config"
     },
     "show": {
-      "title": "Your GitBot Config",
-      "qa": {
-        "heading": "**Quick Access:**",
-        "list": {
-          "user": "User: {0}",
-          "org": "Organization: {0}",
-          "repo": "Repo: {0}"
-        }
-      },
-      "guild": {
-        "heading": "**Server Settings:**",
-        "list": {
-          "feed": "Release Feeds:"
-        }
-      },
-      "accessibility": {
-        "heading": "**Accessibility:**",
-        "list": {
-          "locale": "Language: {0}"
-        }
+      "base": {
+        "title": "Your GitBot Config",
+        "qa": {
+          "heading": "**Quick Access:**",
+          "list": {
+            "user": "User: {0}",
+            "org": "Organization: {0}",
+            "repo": "Repo: {0}"
+          }
+        },
+        "guild": {
+          "heading": "**Server Settings:**",
+          "list": {
+            "feed": "Release Feeds:"
+          }
+        },
+        "accessibility": {
+          "heading": "**Accessibility:**",
+          "list": {
+            "locale": "Language: {0}"
+          }
       },
       "item_not_set": "Not set",
       "item_not_configured": "Not configured",
       "footer": "To view release feed repos, type {0}"
+      },
+      "feed": {
+        "title": "This server's release feeds",
+        "footer": "You can add a feed with {0}",
+        "no_repos": "No repos"
+      }
     },
-    "show_feed": {
-      "title": "This server's release feeds",
-      "footer": "You can add a feed with {0}",
-      "no_repos": "No repos"
-    },
-    "carbon": {
+    "autoconv": {
       "default": {
 
       },
-      "codeblock": {
-        "true": "Automatic Carbon codeblock conversion **turned ON.**",
-        "false": "Automatic Carbon codeblock conversion **turned OFF.**"
+      "toggles": {
+        "gh_url": {
+          "true": "Automatic GitHub link conversion **turned ON**",
+          "false": "Automatic GitHub link conversion **turned OFF**"
+        },
+        "codeblock": {
+          "true": "Automatic codeblock carbon conversion **turned ON**",
+          "false": "Automatic codeblock carbon conversion **turned OFF**"
+        }
       },
-      "link": {
-        "true": "Automatic Carbon link conversion **turned ON.**",
-        "false": "Automatic Carbon link conversion **turned OFF.**"
+      "gh_lines": {
+        "embed": {
+          "title": "GitHub Line link conversion",
+          "description": "You can set what you want to happen when a GitHub line link is sent in the chat by simply responding with a number corresponding to the option you want to choose!",
+          "options": {
+            "off": "No automatic response",
+            "codeblock": "Convert GitHub line links into plaintext codeblocks",
+            "carbon": "Convert line links into [Carbon](https://carbon.now.sh/) images"
+          },
+          "footer": "You can type \"cancel\" to quit"
+        },
+        "timeout_embed": {
+          "title": "Timed Out",
+          "footer": "Simply send the option number next time!"
+        },
+        "results": {
+          "0": "Automatic GitHub line link conversion **turned OFF!**",
+          "1": "GitHub line links will now automatically be converted **into codeblocks!**",
+          "2": "GitHub line links will now automatically be converted **into Carbon images!**"
+        },
+        "cancelled": "GitHub line link conversion setting change **cancelled!**",
+        "invalid_response": "**That's not a valid setting!** Try again by sending a number!"
       }
     },
     "feed": {
@@ -438,7 +526,7 @@
       "success": "New **{0}** releases will now be logged.",
       "default": {
         "title": "Repository Release Feeds",
-        "description": "Commands in this group allow you to get notified about new releases of a repository in designated channels.\n\n**To add a release feed channel:**\n{emoji_square}{0}\n**To add a repo to a channel:**\n{emoji_square}{1}"
+        "description": "Commands in this group allow you to get notified about new releases of a repository in designated channels.\n**To add a release feed channel:**\n{emoji_square}{0}\n**To add a repo to a channel:**\n{emoji_square}{1}"
       },
       "channel": {
         "already_taken": "This channel is already configured as a Release Feed!",
@@ -520,8 +608,12 @@
           }
         },
         "repo": {
-          "success": "`{0}` releases will **no longer be logged.**",
-          "not_logged": "That repo's releases are **not currently logged!**"
+          "not_present_in_feed": "This repo **isn't being logged** in any of your release feeds!",
+          "embed": {
+            "title": "Release feeds with {0} present",
+            "description": "Respond with the **channel name/number(s)** to delete {0} from.",
+            "footer": "You can type 'cancel' to quit"
+          }
         },
         "all": {
           "success": "All release feeds were **closed successfully.**"
@@ -615,7 +707,7 @@
       "title": "Utility Help",
       "description": "These commands let you fetch various data related to Git and GitHub.",
       "commands": {
-        "commits": "quickly set up commit feeds in the current channel",
+        "logs": "quickly set up a GitHub event feed in the current channel",
         "loc": "get lines of code count of a repository with details",
         "license": "get info about a license",
         "snippet": "generate a beautiful image of the lines mentioned in a GitHub or GitLab link or a codeblock",

@@ -1,4 +1,4 @@
-from typing import Any, NoReturn, Union, Optional
+from typing import Any, NoReturn, Union, Optional, Literal
 from ..caches.base_cache import BaseCache
 
 __all__: tuple = (
@@ -19,24 +19,31 @@ class CacheValidationError(Exception):
 
 class CacheSchema:
     """
-    Schema structure to validate __setitem__ for :class:`Cache`
+    Schema structure to validate __setitem__ for :class:`TypedCache`
+
+    :param key: The type of the keys to accept
+    :param value: The type of the values to accept
     """
 
     def __init__(self, key: Union[type, tuple[type, ...]], value: Union[type, tuple[type, ...]]):
         self.key: Union[type, tuple[type, ...]] = key
         self.value: Union[type, tuple[type, ...]] = value
 
-    def _raise(self, got: Any, /, __expected: Union[type, tuple[type, ...]], __value_name: str) -> NoReturn:
+    def _raise(self,
+               got: Any,
+               expected: Union[type, tuple[type, ...]],
+               /,
+               value_name: Literal['cache key', 'cache value']) -> NoReturn:
         """
         Raise :class:`CacheValidationError` when the action's types don't match the schema ones.
 
         :param got: The argument that was received
-        :param __expected: The argument expected (self.key/value)
-        :param __value_name: The name of the value (cache key, cache value)
+        :param expected: The argument expected (self.key/value)
+        :param value_name: The name of the value (cache key, cache value)
         :raise CacheValidationError: When the action's types don't match the schema ones
         """
 
-        raise CacheValidationError(f'Expected type \'{__expected.__name__}\' for {__value_name},'
+        raise CacheValidationError(f'Expected type \'{expected.__name__}\' for {value_name},'
                                    f' got: \'{got.__class__.__name__}\' ({repr(got)})')
 
     def __call__(self, key: Any, value: Any) -> None:

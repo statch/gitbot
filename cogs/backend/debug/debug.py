@@ -2,9 +2,9 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from lib.utils.decorators import restricted
+from lib.utils.decorators import restricted, gitbot_command
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_command
+from lib.structs import GitBotEmbed
 
 
 def insert_returns(body):
@@ -45,8 +45,7 @@ class Debug(commands.Cog):
     async def ratelimit_command(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
-        embed = discord.Embed(
-            color=0xefefef,
+        embed: GitBotEmbed = GitBotEmbed(
             title=f'{Mgr.e.err}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]

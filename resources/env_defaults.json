@@ -4,9 +4,20 @@
   "production": false,
   "test_guild_ids": [],
   "no_typing_commands": [],
+  "run_release_feed_worker": true,
+  "db_use_tls": true,
   "autoconv_default": {
     "codeblock": false,
     "gh_url":  false,
     "gh_lines": 0
-  }
+  },
+  "hidden_commands": [
+    "dev",
+    "dev missing-locales",
+    "eval",
+    "dispatch",
+    "load",
+    "unload",
+    "reload"
+  ]
 }

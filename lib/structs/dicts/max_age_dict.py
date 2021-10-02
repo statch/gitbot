@@ -35,7 +35,7 @@ class MaxAgeDict(dict):
 
     def age(self, key: Any, default: Any = 0) -> Any:
         if ts := self._age_map.get(key):
-            return abs(ts - int(time()))
+            return int(time()) - ts
         return default
 
     def __setitem__(self, key: Any, value: Any) -> None:

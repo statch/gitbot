@@ -2,8 +2,9 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Union, Any, Coroutine
+from typing import Callable, Union, Any, Optional
 from lib.utils import regex
+from lib.typehints import GitHubRepository
 
 
 class _GitBotCommandGroup(commands.Group):
@@ -11,7 +12,7 @@ class _GitBotCommandGroup(commands.Group):
         super().__init__(func, **attrs)
 
     def command(self, *args, **kwargs) -> Callable:
-        def decorator(func: Coroutine) -> commands.Command:
+        def decorator(func: Callable) -> commands.Command:
             kwargs.setdefault('parent', self)
             result: commands.Command = gitbot_command(*args, **kwargs)(func)
             self.add_command(result)
@@ -20,7 +21,7 @@ class _GitBotCommandGroup(commands.Group):
         return decorator
 
     def group(self, *args, **kwargs) -> Callable:
-        def decorator(func: Coroutine) -> commands.Command:
+        def decorator(func: Callable) -> commands.Command:
             kwargs.setdefault('parent', self)
             result: commands.Command = gitbot_group(*args, **kwargs)(func)
             self.add_command(result)
@@ -51,12 +52,35 @@ def restricted() -> commands.Command:
     return commands.check(pred)
 
 
-def normalize_argument(func: Union[Callable, Coroutine],
+def validate_github_name(param_name: Optional[str] = None, default: Any = None):
+    """
+    Validate a specific function argument against a regex that matches valid GitHub user-or-org names
+
+    :param param_name: The parameter name of the argument to validate
+    :param default: The default value to return if
+                    the match doesn't succeed (the default return of the decorated function)
+    :return: The function with the argument validated or the default return
+    """
+
+    def decorator(func: Callable):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            arg: str = (kwargs[param_name] if param_name in kwargs
+                        else args[list(inspect.getfullargspec(func).args).index(param_name)])
+            if regex.GITHUB_NAME_RE.match(arg):
+                return await func(*args, **kwargs)
+            return default
+        return wrapper
+
+    return decorator
+
+
+def normalize_argument(func: Callable,
                        target: str,
                        normalizing_func: Callable[[Any], Any],
                        /,
                        *args,
-                       **kwargs) -> Union[Callable, Coroutine]:
+                       **kwargs) -> Callable:
     """
     Normalize an argument in a function call.
     Mainly meant to be used inside decorators.
@@ -82,7 +106,7 @@ def normalize_argument(func: Union[Callable, Coroutine],
     return func(*args, **kwargs)
 
 
-def normalize_identity(context_resource: str = 'author') -> Union[Callable, Coroutine]:
+def normalize_identity(context_resource: str = 'author') -> Callable:
     """
     Normalize the _id argument to be an instance of :class:`int`
     (instead of potential :class:`str` or :class:`discord.ext.commands.Context`
@@ -91,7 +115,7 @@ def normalize_identity(context_resource: str = 'author') -> Union[Callable, Coro
     :return: The function with the _id argument normalized
     """
 
-    def decorator(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+    def decorator(func: Callable) -> Callable:
         def wrapper(*args: tuple, **kwargs: dict) -> Any:
             def normalize_id(_id: Union[int, str, commands.Context]) -> int:
                 return int(_id) if not isinstance(_id, commands.Context) else getattr(_id, context_resource).id
@@ -103,7 +127,7 @@ def normalize_identity(context_resource: str = 'author') -> Union[Callable, Coro
     return decorator
 
 
-def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Coroutine]:
+def normalize_repository(func: Callable) -> Callable:
     """
     Normalize the repo argument to be in the owner/repo-name format if possible.
     It's important to place this UNDER discord-specific decorators in commands.
@@ -114,7 +138,7 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
 
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
-        def normalize_repo(repo: str) -> str:
+        def normalize_repo(repo: GitHubRepository) -> str:
             if not repo:
                 return repo
             repo: str = repo.strip()
@@ -123,7 +147,7 @@ def normalize_repository(func: Union[Callable, Coroutine]) -> Union[Callable, Co
                 return f'{match_[0][0]}/{match_[0][1]}'
             return repo
 
-        return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)
+        return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)  # noqa
 
     return wrapper
 

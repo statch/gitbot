@@ -1,23 +1,23 @@
 from typing import NewType
 
 __all__: tuple = (
-    'Repository',
+    'GitHubRepository',
+    'GitHubUser',
+    'GitHubOrganization',
     'GuildID',
     'TagName',
-    'GitHubUser',
-    'Organization',
     'UserID',
     'PyPIProject',
-    'HashDigest',
+    'Hash',
     'MessageAttachmentURL'
 )
 
-Repository = NewType('Repository', str)
+GitHubRepository = NewType('GitHubRepository', str)
 GitHubUser = NewType('GitHubUser', str)
-Organization = NewType('Organization', str)
+GitHubOrganization = NewType('GitHubOrganization', str)
 GuildID = NewType('GuildID', int)
 TagName = NewType('TagName', str)
 UserID = NewType('UserID', int)
 PyPIProject = NewType('PyPIProject', str)
-HashDigest = NewType('HashDigest', bytes)
+Hash = NewType('Hash', int)
 MessageAttachmentURL = NewType('MessageAttachmentURL', str)

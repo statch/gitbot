@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Mgr
+from lib.structs import GitBotEmbed
 from lib.utils.decorators import gitbot_group
 
 
@@ -17,22 +18,22 @@ class Dev(commands.Cog):
             commands_: list = [
                 f'`git dev --missing-locales` - {ctx.l.dev.default.commands.missing_locales}'
             ]
-            embed: discord.Embed = discord.Embed(
+            embed: GitBotEmbed = GitBotEmbed(
                 color=0x0384fc,
                 title=ctx.l.dev.default.title,
                 url='https://github.com/statch/gitbot',
                 description=(ctx.l.dev.default.description
                              + f'\n{"⎯" * (len(ctx.l.dev.default.title) * 2)}\n'
-                             + '\n'.join(commands_))
+                             + '\n'.join(commands_)),
+                footer=ctx.l.dev.default.footer
             )
-            embed.set_footer(text=ctx.l.dev.default.footer)
             await ctx.send(embed=embed)
 
     @dev_command_group.command('missing-locales')
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: commands.Context, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
-        locale_data: Optional[tuple[list[tuple[str, ...]], dict, bool]] = Mgr.get_missing_keys_for_locale(locale_)
+        locale_data: Optional[tuple[list[str]], dict, bool] = Mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
             await ctx.err(ctx.l.generic.nonexistent.locale)
         elif not locale_data[0]:
@@ -44,8 +45,8 @@ class Dev(commands.Cog):
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])
             meta, _ = Mgr.get_locale_meta_by_attribute(locale_)
-            missing: list[tuple[str, ...]] = locale_data[0]
-            embed: discord.Embed = discord.Embed(
+            missing: list[tuple[str]] = locale_data[0]
+            embed: GitBotEmbed = GitBotEmbed(
                 color=0x0384fc,
                 title=ctx.fmt('title', meta['name']),
                 url=f'https://github.com/statch/gitbot/blob/main/data/locale/{meta["name"]}.json',

@@ -1,4 +1,3 @@
-import asyncio
 import discord
 import datetime
 from motor.motor_asyncio import AsyncIOMotorCursor
@@ -13,15 +12,15 @@ from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo, GitBotGuild, TagName
 class ReleaseFeedWorker(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.release_feed_worker.start()
+        if Mgr.env.run_release_feed_worker:
+            self.release_feed_worker.start()
 
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:
-        if not Mgr.env.production:
-            query: AsyncIOMotorCursor = Mgr.db.guilds.find({'_id': {'$in': Mgr.env.test_guild_ids}})
-        else:
-            query: AsyncIOMotorCursor = Mgr.db.guilds.find({})
+        Mgr.debug('Starting worker cycle')
+        query: AsyncIOMotorCursor = Mgr.db.guilds.find({})
         async for guild in query:
+            Mgr.debug(f'Handling GID {guild["_id"]}')
             guild: GitBotGuild
             changed: bool = False
             update: list = []
@@ -33,10 +32,16 @@ class ReleaseFeedWorker(commands.Cog):
                             await self.handle_feed_repo(guild, repo, rfi, res)
                             changed: bool = True
                             update.append(TagNameUpdateData(rfi, repo, t))
+                            Mgr.debug(f'New release found for repo "{repo["name"]}" (tag: {repo["tag"]})'
+                                      f' in GID {guild["_id"]}')
+                        else:
+                            Mgr.debug(f'No new release for repo "{repo["name"]}" (tag: {repo["tag"]})'
+                                      f' in GID {guild["_id"]}')
                     else:
+                        Mgr.debug(f'Missing repo detected in GID {guild["_id"]} ("{repo["name"]}")')
                         await self.handle_missing_feed_repo(guild, rfi, repo)
-                await asyncio.sleep(1)
             if changed:
+                Mgr.debug(f'Changes detected in GID {guild["_id"]}')
                 await self.update_tag_names_with_data(guild, update)
 
     async def handle_feed_repo(self,

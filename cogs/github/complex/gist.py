@@ -1,10 +1,10 @@
 import discord
-import datetime
 import asyncio
 from discord.ext import commands
 from lib.globs import Git, Mgr
 from typing import Optional, Union
 from lib.utils.decorators import gitbot_command
+from lib.typehints import GitHubUser
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
                            'cpp', 'html', 'php', 'json', 'xml', 'yml',
@@ -17,7 +17,10 @@ class Gist(commands.Cog):
 
     @gitbot_command(name='gist', aliases=['gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
-    async def gist_command(self, ctx: commands.Context, user: str, ind: Optional[Union[int, str]] = None) -> None:
+    async def gist_command(self,
+                           ctx: commands.Context,
+                           user: GitHubUser,
+                           ind: Optional[Union[int, str]] = None) -> None:
         ctx.fmt.set_prefix('gist')
         data: dict = await Git.get_user_gists(user)
         if not data:
@@ -41,7 +44,7 @@ class Gist(commands.Cog):
                               enumerate(data['gists']['nodes'])]
 
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=ctx.fmt('title', user),
             description='\n'.join(gist_strings),
             url=data['url']
@@ -96,11 +99,10 @@ class Gist(commands.Cog):
         first_file: dict = gist['files'][0]
 
         created_at: str = ctx.fmt('created_at',
-                                  data['login'],
-                                  data['url'],
-                                  f'<t:{int(datetime.datetime.strptime(gist["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+                                  Mgr.to_github_hyperlink(data['login']),
+                                  Mgr.github_to_discord_timestamp(gist['createdAt'])) + '\n'
 
-        updated_at: str = ctx.fmt('updated_at', f'<t:{int(datetime.datetime.strptime(gist["updatedAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+        updated_at: str = ctx.fmt('updated_at', Mgr.github_to_discord_timestamp(gist['updatedAt'])) + '\n'
 
         stargazers = ctx.fmt('stargazers plural', gist['stargazerCount'], f"{gist['url']}/stargazers") if gist[
                                                                                                    'stargazerCount'] != 1 else ctx.fmt('stargazers singular', f"{gist['url']}/stargazers")
@@ -125,11 +127,11 @@ class Gist(commands.Cog):
         extensions: list = [f['extension'] for f in files]
         most_common: Optional[str] = await Mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
-            return 0xefefef
+            return Mgr.c.rounded
         for file in files:
             if all([file['extension'] == most_common, file['language'], file['language']['color']]):
                 return int(file['language']['color'][1:], 16)
-        return 0xefefef
+        return Mgr.c.rounded
 
     def extension(self, ext: str) -> str:
         ext: str = ext[1:]

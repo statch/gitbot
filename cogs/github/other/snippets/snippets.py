@@ -26,20 +26,16 @@ class Snippets(commands.Cog):
                     return
                 msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
 
-                await ctx.send(
-                    file=discord.File(filename='snippet.png',
-                                      fp=await gen_carbon_inmemory(codeblock)))
+                await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(codeblock)))
                 await msg.delete()
             elif bool(re.search(regex.GITHUB_LINES_RE, link_or_codeblock) or
                       re.search(regex.GITLAB_LINES_RE, link_or_codeblock)):
                 msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
                 text, err = await handle_url(ctx, link_or_codeblock,
                                              max_line_count=Mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
-                img = await gen_carbon_inmemory(text)
                 await msg.delete()
                 if text:
-                    await ctx.send(
-                        file=discord.File(filename='snippet.png', fp=img))
+                    await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(text)))
                 else:
                     await ctx.err(err)
             else:

@@ -1,6 +1,6 @@
 from discord.ext import commands
 from lib.globs import Mgr
-from discord import Embed
+from lib.structs import GitBotEmbed
 from lib.utils.decorators import gitbot_command
 
 
@@ -13,10 +13,9 @@ class License(commands.Cog):
     async def license_command(self, ctx: commands.Context, *, license_: str) -> None:
         license_: dict = Mgr.correlate_license(license_)
         if license_ is None:
-            await ctx.err(ctx.l.license.error)
-            return
-        embed = Embed(
-            color=0xefefef,
+            return await ctx.err(ctx.l.license.error)
+        embed: GitBotEmbed = GitBotEmbed(
+            color=Mgr.c.rounded,
             title=license_["name"],
             url=license_["html_url"]
         )

@@ -8,5 +8,9 @@
     "white": "#FFFFFF",
     "black": "#000000"
   },
-  "cyan":"#5CEFFF"
+  "cyan":"#5CEFFF",
+  "rounded": "#2F3136",
+  "languages": {
+    "python": "#3572A5"
+  }
 }

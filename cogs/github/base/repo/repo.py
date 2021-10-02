@@ -8,7 +8,7 @@ from typing import Union, Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MD_EMOJI_RE
-from lib.typehints import Repository as RepoType
+from lib.typehints import GitHubRepository
 
 
 class Repo(commands.Cog):
@@ -17,7 +17,7 @@ class Repo(commands.Cog):
 
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
-    async def repo_command_group(self, ctx: commands.Context, repo: Optional[RepoType] = None) -> None:
+    async def repo_command_group(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None) -> None:
         if not repo:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if stored:
@@ -31,12 +31,12 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @normalize_repository
-    async def repo_info_command(self, ctx: commands.Context, repo: RepoType) -> None:
+    async def repo_info_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')
         else:
-            r: Union[dict, None] = await Git.get_repo(str(repo))
+            r: Union[dict, None] = await Git.get_repo(repo)
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'repo')
@@ -46,7 +46,7 @@ class Repo(commands.Cog):
             return None
 
         embed = discord.Embed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else 0xefefef,
+            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else Mgr.c.rounded,
             title=repo,
             url=r['url']
         )
@@ -84,8 +84,7 @@ class Repo(commands.Cog):
         if 'isFork' in r and r['isFork'] is True:
             forked = ctx.fmt('fork_notice', f"[{r['parent']['nameWithOwner']}]({r['parent']['url']})") + '\n'
 
-        created_at = ctx.fmt('created_at',
-                             f'<t:{int(datetime.datetime.strptime(r["createdAt"], "%Y-%m-%dT%H:%M:%SZ").timestamp())}>') + '\n'
+        created_at = ctx.fmt('created_at', Mgr.github_to_discord_timestamp(r['createdAt'])) + '\n'
 
         languages = ""
         if lang := r['primaryLanguage']:
@@ -122,14 +121,14 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
-    async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
+    async def repo_files_command(self, ctx: commands.Context, repo_or_path: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
-            repo = "/".join(repo_or_path.split("/", 2)[:2])
-            file = repo_or_path[len(repo):]
-            src = await Git.get_tree_file(repo, file)
-            is_tree = True
+            repo: GitHubRepository = "/".join(repo_or_path.split("/", 2)[:2])  # noqa
+            file: str = repo_or_path[len(repo):]
+            src: list = await Git.get_tree_file(repo, file)
+            is_tree: bool = True
         else:
             src = await Git.get_repo_files(repo_or_path)
         if not src:
@@ -138,16 +137,16 @@ class Repo(commands.Cog):
             else:
                 await ctx.err(ctx.l.generic.nonexistent.repo.base)
             return
-        files: list = [f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f[
-                                                                          'type'] == 'file' else f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})"
-                       for f in src[:15]]
+        files: list = sorted([f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f['type'] == 'file' else
+                              f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})" for f in src[:15]],
+                             key=lambda fs: 'file' in fs)
         if is_tree:
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
             link: str = f"https://github.com/{repo_or_path}"
         embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=f"{repo_or_path}" if len(repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
             description='\n'.join(files),
             url=link
@@ -160,7 +159,7 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
-    async def download_command(self, ctx: commands.Context, repo: RepoType) -> None:
+    async def download_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
@@ -183,7 +182,7 @@ class Repo(commands.Cog):
     @normalize_repository
     async def issue_list_command(self,
                                  ctx: commands.Context,
-                                 repo: Optional[RepoType] = None,
+                                 repo: Optional[GitHubRepository] = None,
                                  state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
 
@@ -192,7 +191,7 @@ class Repo(commands.Cog):
     @normalize_repository
     async def pull_request_list_command(self,
                                         ctx: commands.Context,
-                                        repo: Optional[RepoType] = None,
+                                        repo: Optional[GitHubRepository] = None,
                                         state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
 

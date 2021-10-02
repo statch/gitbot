@@ -1,0 +1,37 @@
+query($Name: String!, $Owner: String!, $First: Int!) {
+  repository(name: $Name, owner: $Owner) {
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          history(first: $First) {
+            nodes {
+              url
+              pushedDate
+              abbreviatedOid
+              changedFiles
+              messageBody
+              messageHeadline
+              additions
+              deletions
+              committedViaWeb
+              status {
+                state
+              }
+              signature {
+                isValid
+              }
+              committer {
+                name
+                user {
+                  login
+                  url
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

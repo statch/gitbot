@@ -12,6 +12,8 @@ _________________
 - Pull request and issue inspection
 - Exploring a user's gists
 - Viewing lines of code mentioned in a link
+- PyPI project stats
+- Easily accessible commit inspection
 - Automatic link-to-info command
 - And much, much more!
 

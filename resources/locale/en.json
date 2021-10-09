@@ -609,10 +609,19 @@
         },
         "repo": {
           "not_present_in_feed": "This repo **isn't being logged** in any of your release feeds!",
-          "embed": {
-            "title": "Release feeds with {0} present",
-            "description": "Respond with the **channel name/number(s)** to delete {0} from.",
-            "footer": "You can type 'cancel' to quit"
+          "multiple": {
+            "embed": {
+              "title": "Release feeds with {0} present",
+              "description": "Respond with the **channel name/number(s)** to delete {0} from.",
+              "footer": "You can type 'cancel' to quit"
+            }
+          },
+          "single": {
+            "embed": {
+              "title": "Deleting {0} from a release feed",
+              "description": "Do you really want to remove {0} from {1}?"
+            },
+            "cancelled": "Nothing changed, {0} releases are **still being logged.**"
           }
         },
         "all": {

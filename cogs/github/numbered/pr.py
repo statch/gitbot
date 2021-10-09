@@ -64,22 +64,18 @@ class PullRequest(commands.Cog):
             embed.add_field(name=':notepad_spiral: Body:',
                             value=f"```{Mgr.truncate(pr['bodyText'], 387, full_word=True)}```",
                             inline=False)
-
         user: str = ctx.fmt('created_at',
                             Mgr.to_github_hyperlink(pr['author']['login']),
                             Mgr.github_to_discord_timestamp(pr['createdAt']))
-
         if pr['closed']:
             closed: str = '\n' + ctx.fmt('closed_at', Mgr.github_to_discord_timestamp(pr['closedAt'])) + '\n'
         else:
             closed: str = '\n'
-
         comments_and_reviews: str = Mgr.populate_localized_generic_number_map(ctx.l.pr,
                                                                               '{comments} {linking_word_1}'
                                                                               ' {reviews}\n',
                                                                               comments=pr['comments']['totalCount'],
                                                                               reviews=pr['reviews']['totalCount'])
-
         commit_c: int = int(pr["commits"]["totalCount"])
         commits = f'[{ctx.fmt("commits plural", commit_c)}]({pr["url"]}/commits)'
         if commit_c == 1:
@@ -87,7 +83,6 @@ class PullRequest(commands.Cog):
         files_changed: str = f'{ctx.fmt("files plural", pr["changedFiles"], pr["url"] + "/files")} {ctx.l.pr.linking_word_2} {commits}\n'
         if pr["changedFiles"] == 1:
             files_changed: str = f'{ctx.fmt("files singular", pr["url"] + "/files")} {ctx.l.pr.linking_word_2} {commits}\n'
-
         additions_and_deletions: str = Mgr.populate_localized_generic_number_map(ctx.l.pr,
                                                                                  '{additions} {linking_word_3}'
                                                                                  ' {deletions}\n',
@@ -107,7 +102,6 @@ class PullRequest(commands.Cog):
                                   _extend(reviewer_strings[:3], ctx.fmt('more_items', len(reviewer_strings)-3)))
         participant_strings: list = (participant_strings if len(participant_strings) <= 3 else
                                      _extend(participant_strings[:3], ctx.fmt('more_items', len(participant_strings)-3)))
-
         cross_repo: str = ctx.l.pr.fork if pr['isCrossRepository'] else ''
         info: str = f'{user}{closed}{comments_and_reviews}{files_changed}{additions_and_deletions}{cross_repo}'
         embed.add_field(name=f':mag_right: {ctx.l.pr.glossary[0]}:', value=info, inline=False)
@@ -121,7 +115,6 @@ class PullRequest(commands.Cog):
         embed.add_field(name=f'{ctx.l.pr.glossary[3]}:',
                         value=''.join(reviewer_strings) if reviewer_strings else ctx.l.pr.no_reviewers,
                         inline=True)
-
         if pr['labels']:
             embed.add_field(name=f':label: {ctx.l.pr.glossary[4]}:', value=' '.join([f"`{lb}`" for lb in pr['labels']]), inline=False)
 

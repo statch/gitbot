@@ -24,9 +24,9 @@ class GitBotEmbed(discord.Embed):
     """
 
     def __init__(self,
-                 footer=discord.Embed.Empty,
-                 footer_icon_url=discord.Embed.Empty,
-                 thumbnail=discord.Embed.Empty,
+                 footer: str = discord.Embed.Empty,
+                 footer_icon_url: str = discord.Embed.Empty,
+                 thumbnail: str = discord.Embed.Empty,
                  **kwargs):
         kwargs.setdefault('color', 0x2F3136)
         super().__init__(**kwargs)
@@ -37,21 +37,22 @@ class GitBotEmbed(discord.Embed):
         return await ctx.send(embed=self, *args, **kwargs)
 
     async def edit_with_state(self, ctx: commands.Context, state: GitBotCommandState) -> None:
-        _embed: EmbedLike = ctx.message.embeds[0] if ctx.message.embeds else None
-        if _embed:
-            if state is GitBotCommandState.SUCCESS:
-                self._input_with_timeout_update(0x57F287,
-                                                '<:checkmark:770244084727283732>',
-                                                ctx.l.generic.completed,
-                                                _embed)
-            elif state is GitBotCommandState.FAILURE:
-                self._input_with_timeout_update(0xED4245,
-                                                '<:failure:770244076896256010>',
-                                                ctx.l.generic.failure,
-                                                _embed)
-            elif state is GitBotCommandState.TIMEOUT:
-                self._input_with_timeout_update(0xFEE75C, ':warning:', ctx.l.generic.inactive, _embed)
-            await ctx.message.edit(embed=_embed)
+        if ctx.author.id is ctx.guild.me.id:
+            _embed: EmbedLike = ctx.message.embeds[0] if ctx.message.embeds else None
+            if _embed:
+                if state is GitBotCommandState.SUCCESS:
+                    self._input_with_timeout_update(0x57F287,
+                                                    '<:checkmark:770244084727283732>',
+                                                    ctx.l.generic.completed,
+                                                    _embed)
+                elif state is GitBotCommandState.FAILURE:
+                    self._input_with_timeout_update(0xED4245,
+                                                    '<:failure:770244076896256010>',
+                                                    ctx.l.generic.failure,
+                                                    _embed)
+                elif state is GitBotCommandState.TIMEOUT:
+                    self._input_with_timeout_update(0xFEE75C, ':warning:', ctx.l.generic.inactive, _embed)
+                await ctx.message.edit(embed=_embed)
 
     def _input_with_timeout_update(self,
                                    color: int,
@@ -99,6 +100,12 @@ class GitBotEmbed(discord.Embed):
         if not init_message:
             init_message: discord.Message = await self.send(ctx)
 
+        new_ctx: commands.Context = await ctx.bot.get_context(init_message)
+        missing_slots: set = set(dir(ctx)) ^ set(dir(new_ctx))
+        for slot in missing_slots:
+            setattr(new_ctx, slot, getattr(ctx, slot))
+        ctx: commands.Context = new_ctx
+
         try:
             while True:
                 event_data = await ctx.bot.wait_for(event, check=timeout_check, timeout=timeout)
@@ -109,9 +116,27 @@ class GitBotEmbed(discord.Embed):
                 if state is GitBotCommandState.CONTINUE:
                     continue
                 await self.edit_with_state(ctx, state)
-                await init_message.edit(embed=self)
                 return event_data, return_args if return_args is None else return_args[0]
         except asyncio.TimeoutError:
             await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)  # noqa
-            await init_message.edit(embed=self)
         return None, None
+
+    async def confirmation(self, ctx: commands.Context, callback) -> bool:
+        initial_message: discord.Message = await self.send(ctx)
+        await initial_message.add_reaction('<:checkmark:770244084727283732>')
+        await initial_message.add_reaction('<:failure:770244076896256010>')
+        result: tuple[Optional[discord.Message], Optional[Union[tuple[Any, ...], Any]]] = await self.input_with_timeout(
+            ctx=ctx,
+            event='reaction_add',
+            timeout=30,
+            timeout_check=lambda r, m: all([r.custom_emoji,
+                                            r.emoji.id in (770244076896256010, 770244084727283732),
+                                            m.id == ctx.author.id,
+                                            r.message.id == initial_message.id]),
+            response_callback=callback,
+            init_message=initial_message
+        )
+        if (result and result[0] and isinstance(result[0][0], discord.Reaction)
+                and result[0][0].emoji.id == 770244084727283732):
+            return True
+        return False

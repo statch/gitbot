@@ -61,39 +61,29 @@ class Issue(commands.Cog):
             body = None
         if body:
             embed.add_field(name=f':notepad_spiral: {ctx.l.issue.glossary[0]}:', value=f"```{body}```", inline=False)
-
         user: str = ctx.fmt('created_at',
                             Mgr.to_github_hyperlink(issue['author']['login']),
                             Mgr.github_to_discord_timestamp(issue['createdAt']))
-
         closed: str = '\n'
         if issue['closed']:
             closed: str = '\n' + ctx.fmt('closed_at', Mgr.github_to_discord_timestamp(issue['closedAt'])) + '\n'
-
         assignees: str = ctx.fmt('assignees plural', issue['assigneeCount'])
         if issue['assigneeCount'] == 1:
             assignees: str = ctx.l.issue.assignees.singular
         elif issue['assigneeCount'] == 0:
             assignees: str = ctx.l.issue.assignees.no_assignees
-
         comments: str = ctx.fmt('comments plural', issue['commentCount'])
         if issue['commentCount'] == 1:
             comments: str = ctx.l.issue.comments.singular
         elif issue['commentCount'] == 0:
             comments: str = ctx.l.issue.comments.no_comments
-
         comments_and_assignees: str = f"{comments} {ctx.l.issue.linking_word} {assignees}"
-
         participants: str = f"\n{ctx.fmt('participants plural', issue['participantCount'])}" if \
             issue['participantCount'] != 1 else f"\n{ctx.l.issue.participants.singular}"
-
         info: str = f"{user}{closed}{comments_and_assignees}{participants}"
-
         embed.add_field(name=f':mag_right: {ctx.l.issue.glossary[1]}:', value=info, inline=False)
-
         if issue['labels']:
             embed.add_field(name=f':label: {ctx.l.issue.glossary[2]}:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
-
         embed.set_thumbnail(url=issue['author']['avatarUrl'])
         await ctx.send(embed=embed)
 

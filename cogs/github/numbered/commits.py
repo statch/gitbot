@@ -21,7 +21,7 @@ class Commits(commands.Cog):
         # TODO add this to the help command
         ctx.fmt.set_prefix('commit')
         is_stored: bool = False
-        if not ctx.data:
+        if not hasattr(ctx, 'data'):
             if repo and not oid and GIT_OBJECT_ID_RE.match(repo):
                 oid: str = repo
                 repo = None
@@ -76,15 +76,14 @@ class Commits(commands.Cog):
                         signature: str = ctx.fmt('fields info signature valid github') + '\n'
                 else:
                     signature: str = ctx.l.commit.fields.info.signature.invalid + '\n'
-            committed_via_web: str = (ctx.l.commit.fields.info.committed_via_web + '\n' if commit['committedViaWeb'] else '')
-
+            committed_via_web: str = (ctx.l.commit.fields.info.committed_via_web + '\n' if
+                                      commit['committedViaWeb'] else '')
             changes: str = Mgr.populate_localized_generic_number_map(ctx.l.commit.fields.changes,
                                                                      '```diff\n{files}\n+ '
                                                                      '{additions}\n- {deletions}```',
                                                                      files=commit['changedFiles'],
                                                                      additions=commit['additions'],
                                                                      deletions=commit['deletions'])
-
             checks: str = ''
             if commit['checkSuites']:
                 ctx.fmt.set_prefix('commit fields info checks')

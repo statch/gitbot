@@ -26,7 +26,10 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # no
 from lib.utils.decorators import normalize_identity
 from typing import Optional, Union, Callable, Any, Reversible, Iterable
 from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion
-from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection, TypedCache, SelfHashingCache, CacheSchema
+from lib.structs import (DirProxy, DictProxy,
+                         GitCommandData, UserCollection,
+                         TypedCache, SelfHashingCache,
+                         CacheSchema, ParsedRepositoryData)
 
 
 class Manager:
@@ -126,6 +129,18 @@ class Manager:
                     self.env[k] = v
         self.load_dotenv()
 
+    def parse_repo(self, repo: Optional[str]) -> Optional[Union[ParsedRepositoryData, str]]:
+        """
+        Parse a owner/name(/branch)? repo string into :class:`ParsedRepositoryData`
+
+        :param repo: The repo string
+        :return: The parsed repo or the repo argument unchanged
+        """
+
+        if repo and (match := r.REPOSITORY_INPUT_RE.match(repo)):
+            return ParsedRepositoryData(**match.groupdict())
+        return repo
+
     def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
         """
         Handle an environment key->value binding.
@@ -202,15 +217,17 @@ class Manager:
 
         return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
 
-    def to_github_hyperlink(self, name: str) -> str:
+    def to_github_hyperlink(self, name: str, codeblock: bool = False) -> str:
         """
         Return f"[{name}](GITHUB_URL)"
 
         :param name: The GitHub name to embed in the hyperlink
+        :param codeblock: Whether to wrap the hyperlink with backticks
         :return: The created hyperlink
         """
 
-        return f'[{name}](https://github.com/{name.lower()})'
+        return (f'[{name}](https://github.com/{name.lower()})' if not codeblock
+                else f'[`{name}`](https://github.com/{name.lower()})')
 
     def truncate(self, string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
         """
@@ -945,8 +962,12 @@ class Manager:
                 except IndexError:
                     return self_.get_nested_key(self_.locale.master, resource).format(*args)
 
-            def set_prefix(self, prefix: str) -> None:
-                self.prefix: str = prefix.strip() + ' '
+            def set_prefix(self, prefix: str, absolute: bool = True) -> None:
+                if prefix.startswith('+'):
+                    self_.debug(f'Prefix mode is append, stripping op sign in \'{prefix}\'')
+                    prefix: str = prefix[1:]
+                    absolute: bool = False
+                self.prefix: str = prefix.strip() + ' ' if absolute else self.prefix + prefix.strip() + ' '
                 self_.debug(f'Locale formatting prefix set to \'{self.prefix.strip()}\' in '
                             f'\'{self_.get_last_call_from_callstack(frames_back=2)}\'')
 

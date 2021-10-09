@@ -311,20 +311,9 @@ class Config(commands.Cog):
                         description=ctx.fmt('match_confirmation_embed description', l_[0]['localized_name']),
                         footer=ctx.l.config.locale.match_confirmation_embed.footer
                     )
-                    initial_message: discord.Message = await match_confirmation_embed.send(ctx)
-                    await initial_message.add_reaction(Mgr.e.checkmark)
-                    await initial_message.add_reaction(Mgr.e.failure)
-                    await match_confirmation_embed.input_with_timeout(
-                        ctx=ctx,
-                        event='reaction_add',
-                        timeout=30,
-                        timeout_check=lambda r, m: all([r.custom_emoji,
-                                                        r.emoji.id in (770244076896256010, 770244084727283732),
-                                                        m.id == ctx.author.id,
-                                                        r.message.id == initial_message.id]),
-                        response_callback=_callback,
-                        init_message=initial_message
-                    )
+                    confirmation_result: bool = await match_confirmation_embed.confirmation(ctx, _callback)
+                    if not confirmation_result:
+                        return
                 await Mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
                 setattr(ctx, 'l', await Mgr.get_locale(ctx))
                 Mgr.locale_cache[ctx.author.id] = l_[0]['name']
@@ -503,19 +492,34 @@ class Config(commands.Cog):
         if not present_in:
             return await ctx.err(ctx.l.config.delete.feed.repo.not_present_in_feed)
         elif (_len := len(present_in)) > 1:
+            ctx.fmt.set_prefix('+multiple')
             options: str = Mgr.option_display_list_format([f'<#{rfi["cid"]}>' for rfi in present_in])
             embed: GitBotEmbed = GitBotEmbed(
-                color=Mgr.c.rounded,
+                color=Mgr.c.cyan,
                 title=ctx.fmt('embed title', f'`{repo.lower()}`'),
                 url=repo_obj['url'],
                 description=(ctx.fmt('embed description', f'`{repo}`')
                              + '\n' + Mgr.gen_separator_line(20) + '\n'
                              + options),
-                footer=ctx.l.config.delete.feed.repo.embed.footer
+                footer=ctx.l.config.delete.feed.repo.multiple.embed.footer
             )
             await ctx.send(embed=embed)
         else:
-            pass
+            ctx.fmt.set_prefix('+single')
+            embed: GitBotEmbed = GitBotEmbed(
+                color=Mgr.c.cyan,
+                title=ctx.fmt('embed title', f'`{repo.lower()}`'),
+                description=ctx.fmt('embed description',
+                                    Mgr.to_github_hyperlink(repo, codeblock=True),
+                                    f'<#{present_in[0]["cid"]}>')
+            )
+
+            async def _callback(_, event):
+                if event[0].emoji.id == 770244076896256010:
+                    await ctx.send(f'{Mgr.e.github}  {ctx.fmt("cancelled", f"`{repo}`")}')
+                    return GitBotCommandState.FAILURE
+                return GitBotCommandState.SUCCESS
+            await embed.confirmation(ctx, _callback)
 
     @delete_field_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)

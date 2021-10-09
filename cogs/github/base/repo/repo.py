@@ -1,5 +1,4 @@
 import discord
-import datetime
 import re
 import io
 from .list_plugin import issue_list, pull_request_list  # noqa
@@ -9,6 +8,7 @@ from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MD_EMOJI_RE
 from lib.typehints import GitHubRepository
+from lib.structs import GitBotEmbed
 
 
 class Repo(commands.Cog):
@@ -45,13 +45,12 @@ class Repo(commands.Cog):
                 await ctx.err(ctx.l.generic.nonexistent.repo.base)
             return None
 
-        embed = discord.Embed(
+        embed: GitBotEmbed = GitBotEmbed(
             color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else Mgr.c.rounded,
             title=repo,
-            url=r['url']
+            url=r['url'],
+            thumbnail=r['owner']['avatarUrl']
         )
-
-        embed.set_thumbnail(url=r['owner']['avatarUrl'])
 
         watch: int = r['watchers']['totalCount']
         star: int = r['stargazers']['totalCount']

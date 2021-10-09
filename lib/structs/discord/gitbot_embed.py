@@ -47,14 +47,14 @@ class GitBotEmbed(discord.Embed):
             if _embed:
                 if state is GitBotCommandState.SUCCESS:
                     self._input_with_timeout_update(0x57F287,
-                        '<:checkmark:770244084727283732>',
-                        ctx.l.generic.completed,
-                        _embed)
+                                                    '<:checkmark:770244084727283732>',
+                                                    ctx.l.generic.completed,
+                                                    _embed)
                 elif state is GitBotCommandState.FAILURE:
                     self._input_with_timeout_update(0xED4245,
-                        '<:failure:770244076896256010>',
-                        ctx.l.generic.failure,
-                        _embed)
+                                                    '<:failure:770244076896256010>',
+                                                    ctx.l.generic.failure,
+                                                    _embed)
                 elif state is GitBotCommandState.TIMEOUT:
                     self._input_with_timeout_update(0xFEE75C, ':warning:', ctx.l.generic.inactive, _embed)
                 await ctx.message.edit(embed=_embed)

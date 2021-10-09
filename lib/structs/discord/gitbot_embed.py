@@ -17,6 +17,11 @@ class GitBotCommandState(enum.Enum):
     TIMEOUT: int = 3
 
 
+GitBotEmbedResponseCallback = Callable[..., Awaitable[Union[tuple[GitBotCommandState,
+                                                                  Optional[Union[tuple[Any, ...], Any]]],
+                                                            GitBotCommandState]]]
+
+
 class GitBotEmbed(discord.Embed):
     """
     A subclass of :class:`discord.Embed` with added GitBot™ functionality.
@@ -42,14 +47,14 @@ class GitBotEmbed(discord.Embed):
             if _embed:
                 if state is GitBotCommandState.SUCCESS:
                     self._input_with_timeout_update(0x57F287,
-                                                    '<:checkmark:770244084727283732>',
-                                                    ctx.l.generic.completed,
-                                                    _embed)
+                        '<:checkmark:770244084727283732>',
+                        ctx.l.generic.completed,
+                        _embed)
                 elif state is GitBotCommandState.FAILURE:
                     self._input_with_timeout_update(0xED4245,
-                                                    '<:failure:770244076896256010>',
-                                                    ctx.l.generic.failure,
-                                                    _embed)
+                        '<:failure:770244076896256010>',
+                        ctx.l.generic.failure,
+                        _embed)
                 elif state is GitBotCommandState.TIMEOUT:
                     self._input_with_timeout_update(0xFEE75C, ':warning:', ctx.l.generic.inactive, _embed)
                 await ctx.message.edit(embed=_embed)
@@ -69,10 +74,7 @@ class GitBotEmbed(discord.Embed):
                                  event: str,
                                  timeout: int,
                                  timeout_check: Callable[[Any], bool],
-                                 response_callback: Callable[..., Awaitable[Union[tuple[GitBotCommandState,
-                                                                                        Optional[Union[tuple[Any, ...],
-                                                                                                       Any]]],
-                                                                                  GitBotCommandState]]],
+                                 response_callback: GitBotEmbedResponseCallback,
                                  init_message: Optional[discord.Message] = None,
                                  *args,
                                  **kwargs) -> tuple[Optional[discord.Message], Optional[Union[tuple[Any, ...], Any]]]:
@@ -121,7 +123,7 @@ class GitBotEmbed(discord.Embed):
             await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)  # noqa
         return None, None
 
-    async def confirmation(self, ctx: commands.Context, callback) -> bool:
+    async def confirmation(self, ctx: commands.Context, callback: GitBotEmbedResponseCallback) -> bool:
         initial_message: discord.Message = await self.send(ctx)
         await initial_message.add_reaction('<:checkmark:770244084727283732>')
         await initial_message.add_reaction('<:failure:770244076896256010>')
@@ -137,6 +139,6 @@ class GitBotEmbed(discord.Embed):
             init_message=initial_message
         )
         if (result and result[0] and isinstance(result[0][0], discord.Reaction)
-                and result[0][0].emoji.id == 770244084727283732):
+                and result[0][0].custom_emoji and result[0][0].emoji.id == 770244084727283732):
             return True
         return False

@@ -71,5 +71,6 @@ class Events(commands.Cog):
                     if await handler(ctx):
                         break
 
+
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Events(bot))

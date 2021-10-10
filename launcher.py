@@ -22,6 +22,11 @@ def prepare_sentry() -> None:
 
 
 def prepare() -> None:
+    if os.name != 'nt':
+        logger.info('Installing uvloop...')
+        __import__('uvloop').install()
+    else:
+        logger.info('Skipping uvloop install...')
     logger.info(f'Running on {platform.system()} {platform.release()}')
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
@@ -31,8 +36,4 @@ def prepare() -> None:
 
 if __name__ == '__main__':
     prepare()
-    if os.name != 'nt':
-        logger.info('Installing uvloop...')
-        __import__('uvloop').install()
-    logger.info('Running on Windows - skipping uvloop')
     bot.run(Mgr.env.bot_token)

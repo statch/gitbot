@@ -9,7 +9,8 @@ __all__: tuple = (
     'UserID',
     'PyPIProject',
     'Hash',
-    'MessageAttachmentURL'
+    'MessageAttachmentURL',
+    'LocaleName'
 )
 
 GitHubRepository = NewType('GitHubRepository', str)
@@ -21,3 +22,4 @@ UserID = NewType('UserID', int)
 PyPIProject = NewType('PyPIProject', str)
 Hash = NewType('Hash', int)
 MessageAttachmentURL = NewType('MessageAttachmentURL', str)
+LocaleName = NewType('LocaleName', str)

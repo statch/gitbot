@@ -19,3 +19,4 @@ GITLAB_LINES_RE: re.Pattern = re.compile(
 GITHUB_NAME_RE: re.Pattern = re.compile(r'^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$', re.IGNORECASE)
 GIT_OBJECT_ID_RE: re.Pattern = re.compile(r'\b([a-f0-9]{40})\b')
 REPOSITORY_INPUT_RE: re.Pattern = re.compile(r'(?P<slashname>(?P<owner>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})/(?P<name>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}))/?(?P<branch>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})?')  # noqa
+CHANNEL_NAME_RE: re.Pattern = re.compile(r'<#(?P<id>\d{18})>')

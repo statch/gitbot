@@ -614,14 +614,22 @@
               "title": "Release feeds with {0} present",
               "description": "Respond with the **channel name/number(s)** to delete {0} from.",
               "footer": "You can type 'cancel' to quit"
-            }
+            },
+            "cancelled": "Repo deletion **cancelled!**",
+            "success": {
+              "title": "Release feeds updated!",
+              "description": "{0} **has been removed** from the following feeds:",
+              "optional_footer": "Only {0} feeds have been updated, because some were invalid"
+            },
+            "no_feeds_mentioned": "You didn't mention any **existing feeds or their numbers!** Try again, or quit by typing `cancel`"
           },
           "single": {
             "embed": {
               "title": "Deleting {0} from a release feed",
               "description": "Do you really want to remove {0} from {1}?"
             },
-            "cancelled": "Nothing changed, {0} releases are **still being logged.**"
+            "cancelled": "Nothing changed, {0} releases are **still being logged.**",
+            "success": "{0} releases will no longer be logged in {1}"
           }
         },
         "all": {

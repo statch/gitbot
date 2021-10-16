@@ -5,9 +5,11 @@ from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitHubUser, GitBotGuild,
                            ReleaseFeedItem, ReleaseFeed,
-                           ReleaseFeedRepo, AutomaticConversion)
+                           ReleaseFeedRepo, AutomaticConversion,
+                           GitBotUser)
 from typing import Optional, Literal, Union
 from lib.structs import GitBotEmbed, GitBotCommandState
+from lib.utils.regex import CHANNEL_NAME_RE
 
 
 class Config(commands.Cog):
@@ -50,30 +52,31 @@ class Config(commands.Cog):
             item += Mgr.e.square + ' ' + f'<#{rfi["cid"]}>\n' + \
                     ('\n'.join([f'⠀⠀- [`{rfr["name"]}`](https://github.com/{rfr["name"]})'
                                 for rfr in rfi['repos']]) if rfi['repos']
-                     else f'⠀⠀- {ctx.l.config.show_feed.no_repos}') + '\n'
+                     else f'⠀⠀- {ctx.l.config.show.feed.no_repos}') + '\n'
         return item
 
     @config_command_group.group(name='show', aliases=['s'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_show_command_group(self, ctx: commands.Context) -> None:
+        # TODO display autoconv opts
         if ctx.invoked_subcommand is None:
             ctx.fmt.set_prefix('config show base')
-            query: dict = await Mgr.db.users.find_one({'_id': ctx.author.id}) or {}
-            guild: Optional[dict] = None
+            user: GitBotUser = await Mgr.db.users.find_one({'_id': ctx.author.id}) or {}
+            guild: Optional[GitBotGuild] = None
             if not isinstance(ctx.channel, discord.DMChannel):
-                guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
-            if not query and guild is None or ((guild and len(guild) == 1) and not query):
+                guild: Optional[GitBotGuild] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
+            if not user and guild is None or ((guild and len(guild) == 1) and not user):
                 await ctx.err(ctx.l.generic.nonexistent.qa)
                 return
             lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
-            user: str = ctx.fmt('qa list user', (f'[`{query["user"]}`](https://github.com/{query["user"]})'
-                                                 if 'user' in query else f'`{ctx.l.config.show.base.item_not_set}`'))
-            org: str = ctx.fmt('qa list org', (f'[`{query["org"]}`](https://github.com/{query["org"]})'
-                                               if 'org' in query else f'`{ctx.l.config.show.base.item_not_set}`'))
-            repo: str = ctx.fmt('qa list repo', (f'[`{query["repo"]}`](https://github.com/{query["repo"]})'
-                                                 if 'repo' in query else f'`{ctx.l.config.show.base.item_not_set}`'))
+            user_str: str = ctx.fmt('qa list user', (f'[`{user["user"]}`](https://github.com/{user["user"]})'
+                                                     if 'user' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
+            org: str = ctx.fmt('qa list org', (f'[`{user["org"]}`](https://github.com/{user["org"]})'
+                                               if 'org' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
+            repo: str = ctx.fmt('qa list repo', (f'[`{user["repo"]}`](https://github.com/{user["repo"]})'
+                                                 if 'repo' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
             accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
-            qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user, org, repo])
+            qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
             guild_str: str = ''
             if not isinstance(ctx.channel, discord.DMChannel):
                 feed: str = ctx.l.config.show.base.guild.list.feed + '\n' + '\n'.join([f'{Mgr.e.square} <#{rfi["cid"]}>'
@@ -100,14 +103,12 @@ class Config(commands.Cog):
         ctx.fmt.set_prefix('config show feed')
         guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild and 'feed' in guild:
-            embed = discord.Embed(
+            embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.discord.blurple,
                 title=f"{Mgr.e.github}  {ctx.l.config.show.feed.title}",
-                description=self.construct_release_feed_list(ctx, guild['feed'])
-            )
-            embed.set_footer(
-                text=ctx.fmt('footer', f'git config feed channel {{{ctx.l.argument_placeholders.channel}}}'))
-            await ctx.send(embed=embed)
+                description=self.construct_release_feed_list(ctx, guild['feed']),
+                footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.argument_placeholders.channel}}}'))
+            await embed.send(ctx)
         else:
             await ctx.err(ctx.l.generic.nonexistent.release_feed)
 
@@ -301,7 +302,7 @@ class Config(commands.Cog):
                 if not l_[1]:  # If it's not an exact match
                     async def _callback(_, event):
                         if event[0].emoji.id == 770244076896256010:
-                            await ctx.send(f'{Mgr.e.github}  {ctx.l.config.locale.cancelled}')
+                            await ctx.info(ctx.l.config.locale.cancelled)
                             return GitBotCommandState.FAILURE
                         return GitBotCommandState.SUCCESS
 
@@ -475,12 +476,7 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_repo_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
-        # TODO Validate repo, check against RFIs. if present in more than one,
-        # display a list and ask from which one(s!!) to delete (or from all), if present in only one,
-        # ask for confirmation while mentioning the RFI channel name, then delete
         ctx.fmt.set_prefix('config delete feed repo')
-        if not (repo_obj := await Git.get_repo(repo := repo.lower())):
-            return await ctx.err(ctx.l.generic.nonexistent.repo.base)
         guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
         feed: ReleaseFeed = guild.get('feed', [])
         if not guild or not feed:
@@ -497,13 +493,54 @@ class Config(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.cyan,
                 title=ctx.fmt('embed title', f'`{repo.lower()}`'),
-                url=repo_obj['url'],
+                url=f'https://github.com/{repo.lower()}',
                 description=(ctx.fmt('embed description', f'`{repo}`')
                              + '\n' + Mgr.gen_separator_line(20) + '\n'
                              + options),
                 footer=ctx.l.config.delete.feed.repo.multiple.embed.footer
             )
-            await ctx.send(embed=embed)
+
+            def _parse(res: discord.Message) -> list[int]:
+                numbers: list[int] = Mgr.get_numbers_in_range(res.content, len(present_in))
+                channel_ids: list[int] = [int(g) for g in CHANNEL_NAME_RE.findall(res.content)]
+                for n in numbers:
+                    channel_ids.append(present_in[n-1]['cid'])
+                return channel_ids
+
+            async def _callback(_, res: discord.Message) -> tuple[int, Optional[list[int]]]:
+                if res.content.lower() in ('quit', 'cancel'):
+                    await ctx.err(ctx.l.config.delete.feed.repo.multiple.cancelled)
+                    return GitBotCommandState.FAILURE, None
+                found: list[int] = _parse(res)
+                if found:
+                    return GitBotCommandState.SUCCESS, found
+                await ctx.err(ctx.l.config.delete.feed.repo.multiple.no_feeds_mentioned)
+                return GitBotCommandState.CONTINUE, []
+
+            response, to_delete = await embed.input_with_timeout(
+                ctx=ctx,
+                event='message',
+                timeout=30,
+                timeout_check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id,
+                response_callback=_callback,
+            )
+
+            if to_delete:
+                ctx.fmt.set_prefix('+success')
+                to_delete = Mgr.get_by_key_from_sequence(present_in, 'cid', to_delete, multiple=True, unpack=True)
+                ud: dict = {f'feed.{guild["feed"].index(to_delete[n])}.repos':
+                            Mgr.get_by_key_from_sequence(rf['repos'],
+                                                         'name', repo.lower()) for n, rf in enumerate(to_delete)}
+                await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': ud})
+                result_embed: GitBotEmbed = GitBotEmbed(
+                    color=Mgr.c.discord.green,
+                    title=ctx.l.config.delete.feed.repo.multiple.success.title,
+                    description=(ctx.fmt('description', Mgr.to_github_hyperlink(repo.lower(), codeblock=True)) + '\n' +
+                                 '\n'.join(f'{Mgr.e.square} <#{rfi_["cid"]}>' for rfi_ in to_delete))
+                )
+                if len(present_in) != len(to_delete):
+                    result_embed.set_footer(text=ctx.fmt('optional_footer', len(to_delete)))
+                await result_embed.send(ctx)
         else:
             ctx.fmt.set_prefix('+single')
             embed: GitBotEmbed = GitBotEmbed(
@@ -516,10 +553,15 @@ class Config(commands.Cog):
 
             async def _callback(_, event):
                 if event[0].emoji.id == 770244076896256010:
-                    await ctx.send(f'{Mgr.e.github}  {ctx.fmt("cancelled", f"`{repo}`")}')
+                    await ctx.info(ctx.fmt('cancelled', f'`{repo}`'))
                     return GitBotCommandState.FAILURE
                 return GitBotCommandState.SUCCESS
-            await embed.confirmation(ctx, _callback)
+            delete: bool = await embed.confirmation(ctx, _callback)
+            if delete:
+                rfr: ReleaseFeedRepo = Mgr.get_by_key_from_sequence(present_in[0]['repos'], 'name', repo.lower())
+                await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
+                                               {'$pull': {f'feed.{guild["feed"].index(present_in[0])}.repos': rfr}})
+                await ctx.success(ctx.fmt('success', f'`{repo.lower()}`', f'<#{present_in[0]["cid"]}>'))
 
     @delete_field_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)

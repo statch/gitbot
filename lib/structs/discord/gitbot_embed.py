@@ -38,10 +38,11 @@ class GitBotEmbed(discord.Embed):
         self.set_footer(text=footer, icon_url=footer_icon_url)
         self.set_thumbnail(url=thumbnail)
 
+
     async def send(self, ctx: commands.Context, *args, **kwargs) -> discord.Message:
         return await ctx.send(embed=self, *args, **kwargs)
 
-    async def edit_with_state(self, ctx: commands.Context, state: GitBotCommandState) -> None:
+    async def edit_with_state(self, ctx: commands.Context, state: int) -> None:
         if ctx.author.id is ctx.guild.me.id:
             _embed: EmbedLike = ctx.message.embeds[0] if ctx.message.embeds else None
             if _embed:
@@ -76,6 +77,8 @@ class GitBotEmbed(discord.Embed):
                                  timeout_check: Callable[[Any], bool],
                                  response_callback: GitBotEmbedResponseCallback,
                                  init_message: Optional[discord.Message] = None,
+                                 with_antispam: bool = True,
+                                 antispam_threshold: int = 5,
                                  *args,
                                  **kwargs) -> tuple[Optional[discord.Message], Optional[Union[tuple[Any, ...], Any]]]:
         """
@@ -96,6 +99,9 @@ class GitBotEmbed(discord.Embed):
         :param timeout_check: The check for the timeout, typically author and channel wide
         :param response_callback: The aforesaid callback
         :param init_message: An existing message to use as the initial one instead of sending a new one
+        :param with_antispam: Whether to accept only a certain amount of GitBotCommandState.CONTINUEs
+                              before a GitBotCommandState.FAILURE is returned
+        :param antispam_threshold: The amount of permitted CONTINUE states
         :return: Optional message and optional callback returns
         """
 
@@ -107,6 +113,7 @@ class GitBotEmbed(discord.Embed):
         for slot in missing_slots:
             setattr(new_ctx, slot, getattr(ctx, slot))
         ctx: commands.Context = new_ctx
+        antispam: int = 0
 
         try:
             while True:
@@ -115,12 +122,15 @@ class GitBotEmbed(discord.Embed):
                 state: GitBotCommandState = (callback_result if not isinstance(callback_result, tuple)
                                              else callback_result[0])
                 return_args = None if not isinstance(callback_result, tuple) else callback_result[1:]
+                if antispam >= antispam_threshold-1 and with_antispam:
+                    state: int = GitBotCommandState.FAILURE
                 if state is GitBotCommandState.CONTINUE:
+                    antispam += 1
                     continue
                 await self.edit_with_state(ctx, state)
                 return event_data, return_args if return_args is None else return_args[0]
         except asyncio.TimeoutError:
-            await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)  # noqa
+            await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)
         return None, None
 
     async def confirmation(self, ctx: commands.Context, callback: GitBotEmbedResponseCallback) -> bool:

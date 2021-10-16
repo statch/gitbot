@@ -1,14 +1,16 @@
 import discord
 from typing import Union
 from discord.ext import commands
-from lib.structs import DictProxy, DirProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict
+from lib.typehints.db.user import GitBotUser
 from lib.typehints.db.guild.guild import GitBotGuild
+from lib.structs import DictProxy, DirProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict
 from lib.typehints.db.guild.release_feed import ReleaseFeedRepo, ReleaseFeedItem, ReleaseFeed, TagNameUpdateData
 from lib.typehints.db.guild.autoconv import AutomaticConversion
 from lib.typehints.generic import (GitHubRepository, GuildID,
                                    TagName, GitHubUser,
                                    GitHubOrganization, PyPIProject,
-                                   Hash, MessageAttachmentURL)
+                                   Hash, MessageAttachmentURL,
+                                   LocaleName)
 
 __all__: tuple = (
     'DictSequence',
@@ -28,7 +30,9 @@ __all__: tuple = (
     'AutomaticConversion',
     'Hash',
     'MessageAttachmentURL',
-    'EmbedLike'
+    'EmbedLike',
+    'GitBotUser',
+    'LocaleName'
 )
 
 AnyDict = Union[dict, DictProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict]

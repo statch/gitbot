@@ -25,7 +25,7 @@ from urllib.parse import quote_plus
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from lib.utils.decorators import normalize_identity
 from typing import Optional, Union, Callable, Any, Reversible, Iterable
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
@@ -271,6 +271,11 @@ class Manager:
         """
 
         return self.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+
+    _number_re: re.Pattern = re.compile(r'\d+')
+
+    def get_numbers_in_range(self, string: str, max_: int = 10) -> list[int]:
+        return [int(m) for m in self._number_re.findall(string) if int(m) <= max_]
 
     def log(self,
             message: str,
@@ -668,6 +673,7 @@ class Manager:
 
         ctx.__nocache__ = False
         ctx.__autoinvoked__ = False
+        ctx.info = functools.partial(self.send_info, ctx)
         ctx.err = functools.partial(self.send_error, ctx)
         ctx.success = functools.partial(self.send_success, ctx)
         ctx.fmt = self.fmt(ctx)
@@ -695,6 +701,17 @@ class Manager:
         """
 
         return await ctx.send(f'{self.e.checkmark}  {msg}', **kwargs)
+
+    async def send_info(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
+        """
+        Context.send() with an emoji slapped in front ;-; (github)
+
+        :param ctx: The command invocation context
+        :param msg: The message content
+        :param kwargs: ctx.send keyword arguments
+        """
+
+        return await ctx.send(f'{self.e.github}  {msg}', **kwargs)
 
     @normalize_identity(context_resource='guild')
     async def get_autoconv_config(self,
@@ -734,9 +751,9 @@ class Manager:
         :return: The locale associated with the user
         """
 
-        locale: str = self.locale.master.meta.name
+        locale: LocaleName = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id):
-            locale: str = cached
+            locale: LocaleName = cached
             self.debug(f'Returning cached value for identity "{_id}"')
         else:
             if stored := await self.db.users.getitem(_id, 'locale'):
@@ -762,7 +779,8 @@ class Manager:
                                  seq: DictSequence,
                                  key: str,
                                  value: Any,
-                                 multiple: bool = False) -> Optional[Union[AnyDict, list[AnyDict]]]:
+                                 multiple: bool = False,
+                                 unpack: bool = False) -> Optional[Union[AnyDict, list[AnyDict]]]:
         """
         Get a dictionary from an iterable, where d[key] == value
 
@@ -778,12 +796,12 @@ class Manager:
             key: list = _key
         for d in seq:
             if isinstance(key, str):
-                if key in d and d[key] == value:
+                if (key in d) and (d[key] == value) if not unpack else (d[key] in value):
                     if not multiple:
                         return d
                     matching.append(d)
             else:
-                if self.get_nested_key(d, key) == value:
+                if (self.get_nested_key(d, key) == value) if not unpack else (self.get_nested_key(d, key) in value):
                     if not multiple:
                         return d
                     matching.append(d)

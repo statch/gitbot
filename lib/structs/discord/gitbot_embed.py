@@ -38,7 +38,6 @@ class GitBotEmbed(discord.Embed):
         self.set_footer(text=footer, icon_url=footer_icon_url)
         self.set_thumbnail(url=thumbnail)
 
-
     async def send(self, ctx: commands.Context, *args, **kwargs) -> discord.Message:
         return await ctx.send(embed=self, *args, **kwargs)
 

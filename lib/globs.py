@@ -1,9 +1,9 @@
 from os import getenv
 from dotenv import load_dotenv
-from lib.net.github.api import GitHubAPI
+from api.github import GitHubAPI
+from api.carbonara import Carbon as _Carbon
+from api.pypi import PyPIAPI
 from lib.manager import Manager
-from lib.net.carbonara import Carbon as _Carbon
-from lib.net.pypi import PyPIAPI
 
 __all__: tuple = ('Git', 'Mgr', 'Carbon', 'PyPI')
 

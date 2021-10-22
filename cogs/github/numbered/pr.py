@@ -71,7 +71,7 @@ class PullRequest(commands.Cog):
             closed: str = '\n' + ctx.fmt('closed_at', Mgr.github_to_discord_timestamp(pr['closedAt'])) + '\n'
         else:
             closed: str = '\n'
-        comments_and_reviews: str = Mgr.populate_localized_generic_number_map(ctx.l.pr,
+        comments_and_reviews: str = Mgr.populate_generic_numbered_resource(ctx.l.pr,
                                                                               '{comments} {linking_word_1}'
                                                                               ' {reviews}\n',
                                                                               comments=pr['comments']['totalCount'],
@@ -83,7 +83,7 @@ class PullRequest(commands.Cog):
         files_changed: str = f'{ctx.fmt("files plural", pr["changedFiles"], pr["url"] + "/files")} {ctx.l.pr.linking_word_2} {commits}\n'
         if pr["changedFiles"] == 1:
             files_changed: str = f'{ctx.fmt("files singular", pr["url"] + "/files")} {ctx.l.pr.linking_word_2} {commits}\n'
-        additions_and_deletions: str = Mgr.populate_localized_generic_number_map(ctx.l.pr,
+        additions_and_deletions: str = Mgr.populate_generic_numbered_resource(ctx.l.pr,
                                                                                  '{additions} {linking_word_3}'
                                                                                  ' {deletions}\n',
                                                                                  additions=pr['additions'],

@@ -274,7 +274,7 @@ class Manager:
 
     _number_re: re.Pattern = re.compile(r'\d+')
 
-    def get_numbers_in_range(self, string: str, max_: int = 10) -> list[int]:
+    def get_numbers_in_range_in_str(self, string: str, max_: int = 10) -> list[int]:
         return [int(m) for m in self._number_re.findall(string) if int(m) <= max_]
 
     def log(self,
@@ -818,10 +818,10 @@ class Manager:
                 return v
         return default
 
-    def populate_localized_generic_number_map(self,
-                                              resource: dict,
-                                              fmt_str: Optional[str] = None,
-                                              **values: int) -> Union[dict[str, str], str]:
+    def populate_generic_numbered_resource(self,
+                                           resource: dict,
+                                           fmt_str: Optional[str] = None,
+                                           **values: int) -> Union[dict[str, str], str]:
         populated: dict[str, str] = {}
         for rk, rv in resource.items():
             for vn, v in values.items():

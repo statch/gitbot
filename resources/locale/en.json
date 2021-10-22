@@ -84,6 +84,21 @@
     "completed": "The command has been completed - this message is no longer active",
     "failure": "The command didn't finish - this message is no longer active"
   },
+  "enum": {
+    "generic": {
+      "switch": {
+        "true": "On",
+        "false": "Off"
+      }
+    },
+    "autoconv": {
+      "gh_lines": {
+        "0": "Off",
+        "1": "Plaintext",
+        "2": "Carbon Image"
+      }
+    }
+  },
   "glossary": {
     "github_repo_term": "repository",
     "gitlab_repo_term": "project",
@@ -462,7 +477,13 @@
         "guild": {
           "heading": "**Server Settings:**",
           "list": {
-            "feed": "Release Feeds:"
+            "feed": "Release Feeds:",
+            "autoconv": {
+              "heading": "Automatic Conversions:",
+              "gh_lines": "GitHub line link conversion: {0}",
+              "gh_url": "GitHub URL resolving: {0}",
+              "codeblock": "Carbon code blocks: {0}"
+            }
           }
         },
         "accessibility": {
@@ -637,6 +658,9 @@
         },
         "total": {
           "success": "The release feed channel has been **closed successfully.**"
+        },
+        "channel": {
+          "not_a_feed": "{0} is **not configured as a release feed!**"
         }
       },
       "user": {

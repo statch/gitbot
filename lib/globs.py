@@ -9,7 +9,7 @@ __all__: tuple = ('Git', 'Mgr', 'Carbon', 'PyPI')
 
 load_dotenv()
 
-Git: GitHubAPI = GitHubAPI((getenv('GITHUB_MAIN'), getenv('GITHUB_SECONDARY')), 'itsmewulf')
+Git: GitHubAPI = GitHubAPI((getenv('GITHUB_MAIN'), getenv('GITHUB_SECONDARY')), 'gitbot')
 Mgr: Manager = Manager(Git)
 Carbon: _Carbon = _Carbon(Git.ses)
 PyPI: PyPIAPI = PyPIAPI(Git.ses)

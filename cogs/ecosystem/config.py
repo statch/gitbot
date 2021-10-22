@@ -58,7 +58,6 @@ class Config(commands.Cog):
     @config_command_group.group(name='show', aliases=['s'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_show_command_group(self, ctx: commands.Context) -> None:
-        # TODO display autoconv opts
         if ctx.invoked_subcommand is None:
             ctx.fmt.set_prefix('config show base')
             user: GitBotUser = await Mgr.db.users.find_one({'_id': ctx.author.id}) or {}
@@ -83,7 +82,17 @@ class Config(commands.Cog):
                                                                                        for rfi in guild['feed']]) \
                     if (guild and guild.get('feed')) else f'{ctx.l.config.show.base.guild.list.feed}' \
                                                           f' `{ctx.l.config.show.base.item_not_configured}`'
-                guild_str: str = ctx.l.config.show.base.guild.heading + '\n' + '\n'.join([feed])
+                ctx.fmt.set_prefix('+guild list autoconv')
+                ac: AutomaticConversion = {k: (v if k not in (_ac := guild.get('autoconv', {}))
+                                           else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
+                codeblock: str = ctx.fmt('codeblock',
+                                         f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
+                lines: str = ctx.fmt('gh_lines',
+                                     f'`{ctx.l.enum.autoconv.gh_lines[str(ac["gh_lines"])]}`')
+                url: str = ctx.fmt('gh_url', f'`{ctx.l.enum.generic.switch[str(ac["gh_url"])]}`')
+                autoconv: str = (ctx.l.config.show.base.guild.list.autoconv.heading + '\n'
+                                 + '\n'.join([f'{Mgr.e.square} {aci}' for aci in [codeblock, url, lines]]))
+                guild_str: str = ctx.l.config.show.base.guild.heading + '\n' + '\n'.join([autoconv, feed])
             shortest_heading_len: int = min(map(len, [ctx.l.config.show.base.accessibility.heading,
                                                       ctx.l.config.show.base.guild.heading,
                                                       ctx.l.config.show.base.qa.heading]))
@@ -93,7 +102,8 @@ class Config(commands.Cog):
                 title=f"{Mgr.e.github}  {ctx.l.config.show.base.title}",
                 description=f"{accessibility}{linebreak}{qa}{linebreak if guild_str else ''}{guild_str}"
             )
-            embed.set_footer(text=ctx.fmt('footer', 'git config show feed'))
+            if guild:
+                embed.set_footer(text=ctx.fmt('!config show base footer', 'git config show feed'))
             await ctx.send(embed=embed)
 
     @config_show_command_group.command(name='feed', aliases=['f'])
@@ -462,14 +472,21 @@ class Config(commands.Cog):
             # TODO Document two commands defined below
             pass
 
+    async def _feed_prerequisites(self, ctx: commands.Context) -> tuple[GitBotGuild, ReleaseFeed]:
+        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
+        feed: ReleaseFeed = guild.get('feed', [])
+        return guild, feed
+
     @delete_feed_group.command('channel')
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_channel_command(self, ctx: commands.Context, channel=None) -> None:
-        # TODO Parse and validate channel against DB record -> if correct send a confirmation challenge,
-        # if not (or None) display list + handle list input -> set channel
-        pass
+        ctx.fmt.set_prefix('config delete feed channel')
+        guild, feed = await self._feed_prerequisites(ctx)
+        if channel:
+            channel: discord.TextChannel = await commands.TextChannelConverter().convert(ctx, channel)
+        # TODO finish this
 
     @delete_feed_group.command('repo')
     @commands.guild_only()
@@ -477,8 +494,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_repo_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('config delete feed repo')
-        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
-        feed: ReleaseFeed = guild.get('feed', [])
+        guild, feed = await self._feed_prerequisites(ctx)
         if not guild or not feed:
             return await ctx.err(ctx.l.generic.nonexistent.release_feed)
         present_in: list[ReleaseFeedItem] = []
@@ -501,7 +517,7 @@ class Config(commands.Cog):
             )
 
             def _parse(res: discord.Message) -> list[int]:
-                numbers: list[int] = Mgr.get_numbers_in_range(res.content, len(present_in))
+                numbers: list[int] = Mgr.get_numbers_in_range_in_str(res.content, len(present_in))
                 channel_ids: list[int] = [int(g) for g in CHANNEL_NAME_RE.findall(res.content)]
                 for n in numbers:
                     channel_ids.append(present_in[n-1]['cid'])

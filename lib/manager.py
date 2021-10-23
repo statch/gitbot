@@ -137,7 +137,7 @@ class Manager:
         :return: The parsed repo or the repo argument unchanged
         """
 
-        if repo and (match := r.REPOSITORY_INPUT_RE.match(repo)):
+        if repo and (match := r.REPOSITORY_NAME_RE.match(repo)):
             return ParsedRepositoryData(**match.groupdict())
         return repo
 
@@ -556,13 +556,13 @@ class Manager:
         :return: The command data requested
         """
 
-        combos: tuple[tuple[re.Pattern, Union[tuple, str]], ...] = ((r.PR_RE, 'pr'),
-                                                                    (r.ISSUE_RE, 'issue'),
-                                                                    (r.PULLS_PLAIN_RE, 'repo pulls'),
-                                                                    (r.ISSUES_PLAIN_RE, 'repo issues'),
-                                                                    (r.COMMIT_URL_RE, 'commit'),
-                                                                    (r.REPO_RE, 'repo info'),
-                                                                    (r.USER_ORG_RE, ('user info', 'org info')))
+        combos: tuple[tuple[re.Pattern, Union[tuple, str]], ...] = ((r.GITHUB_PULL_REQUEST_URL_RE, 'pr'),
+                                                                    (r.GITHUB_ISSUE_URL_RE, 'issue'),
+                                                                    (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
+                                                                    (r.GITHUB_ISSUES_PLAIN_URL_RE, 'repo issues'),
+                                                                    (r.GITHUB_COMMIT_URL_RE, 'commit'),
+                                                                    (r.GITHUB_REPO_URL_RE, 'repo info'),
+                                                                    (r.GITHUB_USER_ORG_URL_RE, ('user info', 'org info')))
         for pattern, command_name in combos:
             if match := pattern.search(ctx.message.content):
                 if isinstance(command_name, str):
@@ -949,7 +949,7 @@ class Manager:
                     _preprocess(v)
                 elif isinstance(v, str):
                     if '{emoji_' in v:
-                        node[k] = r.LOCALE_EMOJI.sub(self._replace_emoji, v)
+                        node[k] = r.LOCALE_EMOJI_TEMPLATE_RE.sub(self._replace_emoji, v)
 
         for locale in self.l:
             _preprocess(locale)

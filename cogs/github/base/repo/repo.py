@@ -6,7 +6,7 @@ from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
-from lib.utils.regex import MD_EMOJI_RE
+from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
 
@@ -58,7 +58,7 @@ class Repo(commands.Cog):
 
         if r['description'] is not None and len(r['description']) != 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.repo.info.glossary[0]}:",
-                            value=f"```{re.sub(MD_EMOJI_RE, '', r['description']).strip()}```")
+                            value=f"```{re.sub(MARKDOWN_EMOJI_RE, '', r['description']).strip()}```")
 
         watchers: str = ctx.fmt('watchers plural', watch, f"{r['url']}/watchers") if watch != 1 else ctx.fmt('watchers singular', f"{r['url']}/watchers")
         if watch == 0:

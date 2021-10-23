@@ -1,7 +1,7 @@
 import enum
 import discord
 import asyncio
-from lib.utils.regex import MD_EMOJI_RE
+from lib.utils.regex import MARKDOWN_EMOJI_RE
 from discord.ext import commands
 from typing import Callable, Optional, Awaitable, Any, Union
 from lib.typehints import EmbedLike
@@ -66,7 +66,7 @@ class GitBotEmbed(discord.Embed):
                                    to_edit: Optional[EmbedLike] = None) -> None:
         to_edit: EmbedLike = self if not to_edit else to_edit
         to_edit.colour = color
-        to_edit.title = f'{emoji_name}  ' + MD_EMOJI_RE.sub('', to_edit.title).strip()
+        to_edit.title = f'{emoji_name}  ' + MARKDOWN_EMOJI_RE.sub('', to_edit.title).strip()
         to_edit.set_footer(text=footer)
 
     async def input_with_timeout(self,

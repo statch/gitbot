@@ -9,7 +9,7 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitBotUser)
 from typing import Optional, Literal, Union
 from lib.structs import GitBotEmbed, GitBotCommandState
-from lib.utils.regex import CHANNEL_NAME_RE
+from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 
 
 class Config(commands.Cog):
@@ -518,7 +518,7 @@ class Config(commands.Cog):
 
             def _parse(res: discord.Message) -> list[int]:
                 numbers: list[int] = Mgr.get_numbers_in_range_in_str(res.content, len(present_in))
-                channel_ids: list[int] = [int(g) for g in CHANNEL_NAME_RE.findall(res.content)]
+                channel_ids: list[int] = [int(g) for g in DISCORD_CHANNEL_MENTION_RE.findall(res.content)]
                 for n in numbers:
                     channel_ids.append(present_in[n-1]['cid'])
                 return channel_ids

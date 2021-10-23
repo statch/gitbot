@@ -8,7 +8,7 @@ from lib.globs import Mgr, Carbon
 
 
 async def handle_url(ctx: commands.Context, url: str, **kwargs) -> tuple:
-    match_: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_RE, url) or re.findall(regex.GITLAB_LINES_RE, url), 0)
+    match_: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
     if match_:
         return await get_text_from_url_and_data(ctx, await compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned

@@ -24,7 +24,7 @@ async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Mess
     if (attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
         Mgr.debug('Responding with cached asset URL')
         return await ctx.reply(attachment_url, mention_author=False)
-    if regex.GITHUB_LINES_RE.search(ctx.message.content) or regex.GITLAB_LINES_RE.search(ctx.message.content):
+    if regex.GITHUB_LINES_URL_RE.search(ctx.message.content) or regex.GITLAB_LINES_URL_RE.search(ctx.message.content):
         Mgr.debug(f'Matched GitHub line URL: "{ctx.message.content}" in MID "{ctx.message.id}"')
         if (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and config['codeblock']:
             Mgr.debug(f'Converting MID {ctx.message.id} into carbon snippet...')

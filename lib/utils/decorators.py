@@ -142,7 +142,7 @@ def normalize_repository(func: Callable) -> Callable:
             if not repo:
                 return repo
             repo: str = repo.strip()
-            match_: list = re.findall(regex.GITHUB_REPO_GIT_URL, repo) or re.findall(regex.REPO_RE, repo)
+            match_: list = re.findall(regex.GITHUB_REPO_GIT_URL_RE, repo) or re.findall(regex.GITHUB_REPO_URL_RE, repo)
             if match_:
                 return f'{match_[0][0]}/{match_[0][1]}'
             return repo

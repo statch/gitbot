@@ -20,3 +20,4 @@ GITHUB_NAME_RE: re.Pattern = re.compile(r'^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}
 GIT_OBJECT_ID_RE: re.Pattern = re.compile(r'\b([a-f0-9]{40})\b')
 REPOSITORY_INPUT_RE: re.Pattern = re.compile(r'(?P<slashname>(?P<owner>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})/(?P<name>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}))/?(?P<branch>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})?')  # noqa
 CHANNEL_NAME_RE: re.Pattern = re.compile(r'<#(?P<id>\d{18})>')
+COMMIT_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/commit/(?P<oid>\b([a-f0-9]{40})\b)')

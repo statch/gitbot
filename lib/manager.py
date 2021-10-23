@@ -560,6 +560,7 @@ class Manager:
                                                                     (r.ISSUE_RE, 'issue'),
                                                                     (r.PULLS_PLAIN_RE, 'repo pulls'),
                                                                     (r.ISSUES_PLAIN_RE, 'repo issues'),
+                                                                    (r.COMMIT_URL_RE, 'commit'),
                                                                     (r.REPO_RE, 'repo info'),
                                                                     (r.USER_ORG_RE, ('user info', 'org info')))
         for pattern, command_name in combos:

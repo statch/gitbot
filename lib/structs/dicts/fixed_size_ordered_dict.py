@@ -16,14 +16,14 @@ class FixedSizeOrderedDict(OrderedDict):
 
     @property
     def full(self) -> bool:
-        return len(self) == self.maxsize
+        return len(self) >= self.maxsize
 
     @property
     def first(self) -> Any:
         return next(iter(self), None)
 
     def _pop(self) -> Any:
-        if len(self) > self.maxsize:
+        if self.full:
             return self.popitem(last=False)
 
     def __setitem__(self, key: Any, value: Any) -> Any:

@@ -395,7 +395,7 @@ class Config(commands.Cog):
                 if state.lower() in k:
                     return v
 
-    @config_autoconv_group.command('lines', aliases=['line', 'githublines', 'github-lines'])
+    @config_autoconv_group.command('lines', aliases=['line', 'githublines', 'github-lines', 'gh-lines'])
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_channels=True)
@@ -615,6 +615,8 @@ class Config(commands.Cog):
     @delete_field_group.command(name='all', aliases=['a'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_entire_record_command(self, ctx: commands.Context) -> None:
+        # This command's naming is confusing to users.
+        # It should either be removed or reworked to better reflect its effect on users' config values
         query: dict = await Mgr.db.users.find_one_and_delete({'_id': ctx.author.id})
         if not query:
             await ctx.err(ctx.l.config.delete.all.not_saved)

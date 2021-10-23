@@ -512,8 +512,8 @@
           "false": "Automatic GitHub link conversion **turned OFF**"
         },
         "codeblock": {
-          "true": "Automatic codeblock carbon conversion **turned ON**",
-          "false": "Automatic codeblock carbon conversion **turned OFF**"
+          "true": "Automatic codeblock Carbon conversion **turned ON**",
+          "false": "Automatic codeblock Carbon conversion **turned OFF**"
         }
       },
       "gh_lines": {

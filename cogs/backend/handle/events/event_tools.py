@@ -1,3 +1,4 @@
+import time
 import functools
 import discord
 from discord.ext import commands
@@ -27,10 +28,10 @@ async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Mess
     if regex.GITHUB_LINES_URL_RE.search(ctx.message.content) or regex.GITLAB_LINES_URL_RE.search(ctx.message.content):
         Mgr.debug(f'Matched GitHub line URL: "{ctx.message.content}" in MID "{ctx.message.id}"')
         if (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and config['codeblock']:
-            Mgr.debug(f'Converting MID {ctx.message.id} into carbon snippet...')
+            Mgr.debug(f'Converting codeblock in MID {ctx.message.id} into carbon snippet...')
             codeblock: str = result
         if config['gh_lines'] == 2:
-            Mgr.debug(f'Converting MID {ctx.message.id} into carbon snippet...')
+            Mgr.debug(f'Converting URL in MID {ctx.message.id} into carbon snippet...')
             codeblock: Optional[str] = (await handle_url(ctx,
                                                          ctx.message.content,
                                                          max_line_count=Mgr.env.carbon_len_threshold,
@@ -42,9 +43,11 @@ async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Mess
                 Mgr.debug(f'Converting MID {ctx.message.id} into codeblock...')
                 return await ctx.send(codeblock)
         if codeblock and len(codeblock.splitlines()) < Mgr.env.carbon_len_threshold:
+            start: float = time.time()
             reply: discord.Message = await ctx.reply(file=discord.File(filename='snippet.png',
                                                                        fp=await gen_carbon_inmemory(codeblock)),
                                                      mention_author=False)
+            Mgr.debug(f'Carbon asset generation elapsed: {time.time() - start}s')
             Mgr.carbon_attachment_cache[ctx.message.content] = reply.attachments[0].url
             return reply
 

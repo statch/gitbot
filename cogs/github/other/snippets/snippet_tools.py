@@ -19,10 +19,10 @@ async def get_text_from_url_and_data(ctx: commands.Context,
                                      data: tuple,
                                      max_line_count: int = 25,
                                      wrap_in_codeblock: bool = True) -> Optional[tuple]:
+    ctx.fmt.set_prefix('snippets')
     if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
             return None, ctx.fmt('length_limit_exceeded', max_line_count)
-
     res: ClientResponse = await Mgr.git.ses.get(url)
     content: str = await res.text(encoding='utf-8')
 

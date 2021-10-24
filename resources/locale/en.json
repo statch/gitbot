@@ -660,7 +660,19 @@
           "success": "The release feed channel has been **closed successfully.**"
         },
         "channel": {
-          "not_a_feed": "{0} is **not configured as a release feed!**"
+          "not_a_feed": "{0} is **not configured as a release feed!**",
+          "invalid_channel": "That's **not a valid channel!** Try again.",
+          "explicit": {
+            "confirmation": {
+              "embed": {
+                "title": "Are you sure?",
+                "description": "**Do you really want to remove {0} from your release feeds?**\n{1} repos' releases are logged there as of now; this is irreversible.",
+                "footer": "React with the appropriate emote to choose what to do."
+              },
+              "success": "All done. {0} **has been removed from your release feeds.**",
+              "cancelled": "**Action cancelled.** {0} wasn't deleted."
+            }
+          }
         }
       },
       "user": {

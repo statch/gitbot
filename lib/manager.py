@@ -789,6 +789,7 @@ class Manager:
         :param key: The key to check
         :param value: The wanted value
         :param multiple: Whether to search for multiple valid dicts, time complexity is always O(n) with this flag
+        :param unpack: Whether the comparison op should be __in__ or __eq__
         :return: The dictionary with the matching value, if any
         """
 
@@ -855,9 +856,9 @@ class Manager:
         """
 
         if isinstance(options, dict):
-            return '\n'.join([f"{self.e[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"  # noqa
+            return '\n'.join([f"{self.e[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"
                               for i, kv in enumerate(options.items())])
-        return '\n'.join([f"{self.e[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])  # noqa
+        return '\n'.join([f"{self.e[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])
 
     def get_missing_keys_for_locale(self, locale: str) -> Optional[tuple[list[str], DictProxy, bool]]:
         """

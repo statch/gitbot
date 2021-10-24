@@ -484,9 +484,38 @@ class Config(commands.Cog):
     async def delete_feed_channel_command(self, ctx: commands.Context, channel=None) -> None:
         ctx.fmt.set_prefix('config delete feed channel')
         guild, feed = await self._feed_prerequisites(ctx)
+        if not feed:
+            await ctx.err(ctx.l.generic.nonexistent.release_feed)
+            return
         if channel:
-            channel: discord.TextChannel = await commands.TextChannelConverter().convert(ctx, channel)
-        # TODO finish this
+            try:
+                channel: discord.TextChannel = await commands.TextChannelConverter().convert(ctx, channel)
+            except commands.BadArgument:
+                await ctx.err(ctx.l.config.delete.feed.channel.invalid_channel)
+                return
+            if channel:
+                rfi: ReleaseFeedItem = Mgr.get_by_key_from_sequence(feed, 'cid', channel.id)
+                if not rfi:
+                    await ctx.err(ctx.fmt('not_a_feed', channel.mention))
+                    return
+                ctx.fmt.set_prefix('+explicit confirmation')
+                embed: GitBotEmbed = GitBotEmbed(
+                    color=Mgr.c.cyan,
+                    title=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.title,
+                    description=ctx.fmt('embed description', channel.mention, f'`{len(rfi["repos"])}`'),
+                    footer=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.footer
+                )
+
+                async def _callback(_, event):
+                    if event[0].emoji.id == 770244076896256010:
+                        await ctx.info(ctx.fmt('cancelled', channel.mention))
+                        return GitBotCommandState.FAILURE
+                    return GitBotCommandState.SUCCESS
+
+                if await embed.confirmation(ctx, _callback):
+                    await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
+                    await ctx.success(ctx.fmt('success', channel.mention))
+                return
 
     @delete_feed_group.command('repo')
     @commands.guild_only()

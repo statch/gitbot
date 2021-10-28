@@ -1,8 +1,8 @@
 from os import getenv
 from dotenv import load_dotenv
-from api.github import GitHubAPI
-from api.carbonara import Carbon as _Carbon
-from api.pypi import PyPIAPI
+from lib.api.github import GitHubAPI
+from lib.api.carbonara import Carbon as _Carbon
+from lib.api.pypi import PyPIAPI
 from lib.manager import Manager
 
 __all__: tuple = ('Git', 'Mgr', 'Carbon', 'PyPI')

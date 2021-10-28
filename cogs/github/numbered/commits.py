@@ -151,10 +151,10 @@ class Commits(commands.Cog):
                 queued: int = len(Mgr.get_by_key_from_sequence(suites, 'status', 'QUEUED', multiple=True))
                 in_progress: int = len(Mgr.get_by_key_from_sequence(suites, 'status', 'IN_PROGRESS', multiple=True))
                 checks: str = Mgr.populate_generic_numbered_resource(ctx.l.commit.fields.info.checks,
-                                                                        '{completed}, {queued}; {in_progress}',
-                                                                        completed=completed,
-                                                                        queued=queued,
-                                                                        in_progress=in_progress)
+                                                                     '{completed}, {queued}; {in_progress}',
+                                                                     completed=completed,
+                                                                     queued=queued,
+                                                                     in_progress=in_progress)
             info: str = f'{commit_time}{signature}{committed_via_web}{checks}'
             embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info, inline=False)
             embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes, inline=False)

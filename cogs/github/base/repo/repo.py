@@ -159,6 +159,7 @@ class Repo(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
     async def download_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+        # TODO ability to download specific refs
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)

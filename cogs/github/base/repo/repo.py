@@ -159,7 +159,6 @@ class Repo(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
     async def download_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
-        # TODO ability to download specific refs
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
@@ -169,9 +168,8 @@ class Repo(commands.Cog):
             return await msg.edit(
                 content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
-        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
-            await ctx.send(file=file)
+            await ctx.send(file=discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj))
             await msg.edit(content=f'{Mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
@@ -194,6 +192,13 @@ class Repo(commands.Cog):
                                         repo: Optional[GitHubRepository] = None,
                                         state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
+
+    # signature from cogs.github.numbered.commits.Commits.commits
+    @repo_command_group.command(name='commits')
+    async def commit_list_command(self,
+                                  ctx: commands.Context,
+                                  repo: Optional[GitHubRepository] = None) -> None:
+        await ctx.invoke(self.bot.get_command('commits'), repo=repo)
 
 
 def setup(bot: commands.Bot) -> None:

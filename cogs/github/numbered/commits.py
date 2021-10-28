@@ -1,6 +1,5 @@
-from typing import Optional, Union, Literal
-
 import discord
+from typing import Optional, Union, Literal
 from discord.ext import commands
 from lib.globs import Mgr, Git
 from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState

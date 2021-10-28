@@ -112,11 +112,6 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[GitHubReposito
             return
 
 
-async def commit_list(ctx: commands.Context, repo: GitHubRepository) -> None:
-    # TODO implement commit_list
-    pass
-
-
 async def handle_none(ctx: commands.Context, item: str, stored: bool, state: str) -> None:
     if item is None:
         if stored:

@@ -1,5 +1,4 @@
 import discord
-import datetime
 from discord.ext import commands
 from typing import Union, Optional
 from lib.globs import Git, Mgr

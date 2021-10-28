@@ -22,14 +22,14 @@ from lib.utils import regex as r
 from colorama import Style, Fore
 from discord.ext import commands
 from urllib.parse import quote_plus
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, Iterable
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
                          CacheSchema, ParsedRepositoryData)
+from typing import Optional, Union, Callable, Any, Reversible, Iterable
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 
 
 class Manager:
@@ -337,6 +337,7 @@ class Manager:
         'seven': 7,
         'eight': 8,
         'nine': 9,
+        'ten': 10
     }
 
     def wtoi(self,
@@ -847,18 +848,20 @@ class Manager:
 
         return '⎯' * (length if isinstance(length, int) else len(length))
 
-    def option_display_list_format(self, options: Union[dict[str, str], list[str]]) -> str:
+    def option_display_list_format(self, options: Union[dict[str, str], list[str]], style: str = 'pixel') -> str:
         """
         Utility method to construct a string representation of a numbered list from :class:`dict` or :class:`list`
 
         :param options: The options to build the list from
+        :param style: The style of digits to use (emoji.json["digits"][style])
         :return: The created list string
         """
 
+        resource: dict = self.e['digits'][style]
         if isinstance(options, dict):
-            return '\n'.join([f"{self.e[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"
+            return '\n'.join([f"{resource[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"
                               for i, kv in enumerate(options.items())])
-        return '\n'.join([f"{self.e[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])
+        return '\n'.join([f"{resource[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])
 
     def get_missing_keys_for_locale(self, locale: str) -> Optional[tuple[list[str], DictProxy, bool]]:
         """

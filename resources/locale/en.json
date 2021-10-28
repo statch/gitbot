@@ -22,6 +22,7 @@
     "user": "username",
     "org": "organization",
     "repo": "repo",
+    "repo_ref": "repo/ref",
     "issue_number": "issue number",
     "pr_number": "pr number",
     "state": "state",
@@ -70,7 +71,8 @@
       "locale": "This locale doesn't exist!",
       "python_package": "A Python Package with this name doesn't exist on PyPI!",
       "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
-      "commit": "A commit with this OID **doesn't exist** in {0}!"
+      "commit": "A commit with this OID **doesn't exist** in {0}!",
+      "ref": "A branch called {0} **doesn't exist** in {1}!"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -372,6 +374,13 @@
       "detailed": "Detailed"
     },
     "footer": "This command is powered by the CLOC CLI tool."
+  },
+  "commits": {
+    "embed": {
+      "title": "Latest commits in {0}",
+      "footer": "You can type 'cancel' to quit this dialog"
+    },
+    "no_match": "That's not a **valid number/OID from the list!** Try again!"
   },
   "commit": {
     "fields": {

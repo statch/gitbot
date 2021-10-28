@@ -1,15 +1,73 @@
 from typing import Optional, Union, Literal
+
+import discord
 from discord.ext import commands
 from lib.globs import Mgr, Git
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
-from lib.utils.regex import GIT_OBJECT_ID_RE
+from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
 
 
 class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+
+    @gitbot_command('commits')
+    @commands.cooldown(5, 40, commands.BucketType.user)
+    @normalize_repository
+    async def commits_command(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None):
+        _re_result = False
+        maybe_ref = ''
+        if repo and not (_re_result := REPOSITORY_NAME_RE.match(repo)):
+            maybe_ref: str = repo
+        if not repo or not _re_result:
+            repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
+            if not repo:
+                await Mgr.db.users.delitem(ctx, 'repo')
+                await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                return
+
+        parsed: ParsedRepositoryData = Mgr.parse_repo(repo)
+        if maybe_ref and not parsed.branch:
+            parsed.branch = maybe_ref
+        commits: list[dict] = await Git.get_latest_commits(parsed.slashname, parsed.branch)
+        if isinstance(commits, str):
+            if commits == 'ref':
+                return await ctx.err(ctx.fmt('generic nonexistent ref', f'`{parsed.branch}`', f'`{parsed.slashname}`'))
+            return await ctx.err(ctx.l.generic.nonexistent.repo.base)
+        embed: GitBotEmbed = GitBotEmbed(
+            title=Mgr.e.github + '  ' + ctx.fmt('commits embed title',
+                                                f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`'),
+            description=Mgr.option_display_list_format([f'[`{c["abbreviatedOid"]}`]({c["url"]}) '
+                                                        f'{Mgr.truncate(c["messageHeadline"], 53)}' for c in commits]),
+            url=(f'https://github.com/{parsed.slashname}/commits' if not parsed.branch
+                 else f'https://github.com/{parsed.slashname}/commits/{parsed.branch}'),
+            footer=ctx.l.commits.embed.footer
+        )
+
+        async def _callback(_, res: discord.Message) -> int:
+            if res.content.lower() in ('cancel', 'quit', 'exit'):
+                return GitBotCommandState.FAILURE
+            if oid_matched := Mgr.get_by_key_from_sequence(commits, 'abbreviatedOid', res.content):
+                ctx.data = oid_matched
+                return GitBotCommandState.SUCCESS
+            elif numbers := Mgr.get_numbers_in_range_in_str(res.content, len(commits)):
+                ctx.data = commits[numbers[0]-1 if numbers[0] != 0 else 0]
+                return GitBotCommandState.SUCCESS
+            await ctx.err(ctx.l.commits.no_match)
+            return GitBotCommandState.CONTINUE
+
+        await embed.input_with_timeout(
+            ctx=ctx,
+            event='message',
+            timeout=30,
+            timeout_check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id,
+            response_callback=_callback,
+            with_antispam=True
+        )
+        if hasattr(ctx, 'data'):
+            await ctx.invoke(self.commit_command, repo=None, oid=None)
 
     @gitbot_command('commit')
     @commands.cooldown(5, 40, commands.BucketType.user)
@@ -39,8 +97,9 @@ class Commits(commands.Cog):
             commit: dict = ctx.data
         if not commit:
             if commit is False:
-                if is_stored:
+                if is_stored and oid:
                     await ctx.err(await ctx.err(ctx.l.generic.nonexistent.repo.qa_changed))
+                    await Mgr.db.users.delitem(ctx, 'repo')
                 else:
                     await ctx.err(ctx.l.generic.nonexistent.repo.base)
             else:
@@ -79,11 +138,11 @@ class Commits(commands.Cog):
             committed_via_web: str = (ctx.l.commit.fields.info.committed_via_web + '\n' if
                                       commit['committedViaWeb'] else '')
             changes: str = Mgr.populate_generic_numbered_resource(ctx.l.commit.fields.changes,
-                                                                     '```diff\n{files}\n+ '
-                                                                     '{additions}\n- {deletions}```',
-                                                                     files=commit['changedFiles'],
-                                                                     additions=commit['additions'],
-                                                                     deletions=commit['deletions'])
+                                                                  '```diff\n{files}\n+ '
+                                                                  '{additions}\n- {deletions}```',
+                                                                  files=commit['changedFiles'],
+                                                                  additions=commit['additions'],
+                                                                  deletions=commit['deletions'])
             checks: str = ''
             if commit['checkSuites']:
                 ctx.fmt.set_prefix('commit fields info checks')

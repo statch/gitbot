@@ -181,6 +181,29 @@ class GitHubAPI:
             return data['repository']['object']
 
     @normalize_repository
+    async def get_latest_commits(self, repo: GitHubRepository, ref: Optional[str] = None) -> Union[list[dict], str]:
+        split: list = repo.split('/')
+        if len(split) == 2:
+            owner: str = split[0]
+            repository: str = split[1]
+            try:
+                key: str = 'defaultBranchRef'
+                if not ref:
+                    data = await self.gh.graphql(self.queries.latest_commits_from_default_ref,
+                                                 **{'Name': repository, 'Owner': owner, 'First': 10})
+                else:
+                    key: str = 'ref'
+                    data = await self.gh.graphql(self.queries.latest_commits_from_ref,
+                                                 **{'Name': repository, 'Owner': owner, 'RefName': ref, 'First': 10})
+            except QueryError as e:
+                if 'Repository' in str(e):
+                    return 'repo'
+                return 'ref'
+            if not data.get('repository', {}).get('ref'):
+                return 'ref'
+            return data['repository'][key]['target']['history']['nodes']
+
+    @normalize_repository
     async def get_repo_zip(self,
                            repo: GitHubRepository,
                            size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:

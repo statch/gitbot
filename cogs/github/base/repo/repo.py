@@ -195,6 +195,7 @@ class Repo(commands.Cog):
 
     # signature from cogs.github.numbered.commits.Commits.commits
     @repo_command_group.command(name='commits')
+    @commands.cooldown(5, 40, commands.BucketType.user)
     async def commit_list_command(self,
                                   ctx: commands.Context,
                                   repo: Optional[GitHubRepository] = None) -> None:

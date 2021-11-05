@@ -275,6 +275,14 @@ class Manager:
     _number_re: re.Pattern = re.compile(r'\d+')
 
     def get_numbers_in_range_in_str(self, string: str, max_: int = 10) -> list[int]:
+        """
+        Return a list of numbers from str that are < max_
+
+        :param string: The string to search for numbers
+        :param max_: The max_ number to include in the returned list
+        :return: The list of numbers
+        """
+
         return [int(m) for m in self._number_re.findall(string) if int(m) <= max_]
 
     def log(self,
@@ -866,7 +874,7 @@ class Manager:
         - `plural`: The plural formatting string (n > 1)
         - `singular`: The singular formatting string (n == 1)
         - `no_(...)`: The formatting string for n == 0
-        This function will populate a generic numbered resource, and return the formatted string if provided/
+        This function will populate a generic numbered resource, and return the formatted string if provided
 
         :param resource: The resource to populate
         :param fmt_str: The formatting string to use

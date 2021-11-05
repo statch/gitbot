@@ -15,7 +15,7 @@ class Snippets(commands.Cog):
         self.ses: ClientSession = ClientSession(loop=self.bot.loop)
 
     @gitbot_group(name='snippet', invoke_without_command=True)
-    @commands.cooldown(10, 30, commands.BucketType.user)
+    @commands.cooldown(3, 60, commands.BucketType.user)
     async def snippet_command_group(self, ctx: commands.Context, *, link_or_codeblock: str) -> None:
         ctx.fmt.set_prefix('snippets')
         if ctx.invoked_subcommand is None:
@@ -24,13 +24,13 @@ class Snippets(commands.Cog):
                 if len(codeblock.splitlines()) > Mgr.env.carbon_len_threshold:
                     await ctx.err(ctx.fmt('length_limit_exceeded', Mgr.env.carbon_len_threshold))
                     return
-                msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
+                msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
 
                 await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(codeblock)))
                 await msg.delete()
             elif bool(re.search(regex.GITHUB_LINES_URL_RE, link_or_codeblock) or
                       re.search(regex.GITLAB_LINES_URL_RE, link_or_codeblock)):
-                msg: discord.Message = await ctx.send(f'{Mgr.e.github}  Generating Carbon image...')
+                msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
                 text, err = await handle_url(ctx, link_or_codeblock,
                                              max_line_count=Mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
                 await msg.delete()
@@ -42,7 +42,7 @@ class Snippets(commands.Cog):
                 await ctx.err(ctx.l.snippets.no_lines_mentioned)
 
     @snippet_command_group.command(name='raw')
-    @commands.cooldown(10, 30, commands.BucketType.user)
+    @commands.cooldown(3, 30, commands.BucketType.user)
     async def raw_snippet_command(self, ctx: commands.Context, link: str) -> None:
         ctx.fmt.set_prefix('snippets')
         text, err = await handle_url(ctx, link)

@@ -167,7 +167,8 @@
     "no_content": "There **isn't any content** on these lines!",
     "private_or_inaccessible": "That {0} is **private or otherwise inaccessible.**",
     "nonexistent": "That {0} **doesn't exist!**",
-    "no_lines_mentioned": "The link has to be a GitHub or GitLab URL **mentioning lines!**"
+    "no_lines_mentioned": "The link has to be a GitHub or GitLab URL **mentioning lines!**",
+    "generating": "Generating Carbon image..."
   },
   "user": {
     "repos": {

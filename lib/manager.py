@@ -423,6 +423,24 @@ class Manager:
 
         return op(obj, *args, **kwargs) if obj else obj
 
+    def getopt(self, obj: Any, attr: Union[tuple[str, ...], str, list[str]]) -> Any:
+        """
+        Optional chaining for getting attributes
+
+        :param obj: The object to get the attribute from
+        :param attr: The attribute to get
+        :return: The attribute or None if it doesn't exist
+        """
+
+        if isinstance(attr, str):
+            attr: list[str] = attr.split('.')
+
+        for sub_attr in attr:
+            obj = getattr(obj, sub_attr, None)
+            if obj is None:
+                return
+        return obj
+
     def dict_full_path(self,
                        dict_: AnyDict,
                        key: str,
@@ -811,9 +829,26 @@ class Manager:
         return matching
 
     def get_remaining_keys(self, dict_: dict, keys: Iterable[str]) -> list[str]:
-        return [k for k in dict_.keys() if k not in keys]
+        """
+        Return list(set(dict.keys()) ^ set(keys))
+
+        :param dict_: The dictionary to get the remaining keys from
+        :param keys: The keys to perform the XOR operation with
+        :return: The remaining keys
+        """
+
+        return list(set(dict_.keys()) ^ set(keys))
 
     def regex_get(self, dict_: dict, pattern: Union[re.Pattern, str], default: Any = None) -> Any:
+        """
+        Kinda like dict.get, but with regex or __in__
+
+        :param dict_: The dictionary to get the value from
+        :param pattern: The pattern to match (The action will be __in__ if it's a string)
+        :param default: The default value to return if no match is found
+        :return: The value associated with the pattern, or the default value
+        """
+
         compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
                              else lambda k_: pattern in k_)
         for k, v in dict_.items():
@@ -825,6 +860,20 @@ class Manager:
                                            resource: dict,
                                            fmt_str: Optional[str] = None,
                                            **values: int) -> Union[dict[str, str], str]:
+        """
+        The GitBot locale is a bit special, as it has a lot of numbered resources.
+        Generic numbered resources are sub-dictionaries of locale values; they contain 3 or more keys:
+        - `plural`: The plural formatting string (n > 1)
+        - `singular`: The singular formatting string (n == 1)
+        - `no_(...)`: The formatting string for n == 0
+        This function will populate a generic numbered resource, and return the formatted string if provided/
+
+        :param resource: The resource to populate
+        :param fmt_str: The formatting string to use
+        :param values: The values to use for the formatting string
+        :return: The formatted string, or the resource
+        """
+
         populated: dict[str, str] = {}
         for rk, rv in resource.items():
             for vn, v in values.items():

@@ -69,7 +69,10 @@ class Events(commands.Cog):
                 handlers: tuple = (handle_codeblock_message, handle_link_message)
                 for handler in handlers:
                     if await handler(ctx):
-                        break
+                        return
+            if Mgr.getopt(message, 'reference.cached_message.author.id') == self.bot.user.id:
+                await message.add_reaction('👀')
+                return
 
 
 def setup(bot: commands.Bot) -> None:

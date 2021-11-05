@@ -7,7 +7,7 @@ from lib.utils import regex
 from lib.typehints import GitHubRepository
 
 
-class _GitBotCommandGroup(commands.Group):
+class GitBotCommandGroup(commands.Group):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
@@ -70,6 +70,7 @@ def validate_github_name(param_name: Optional[str] = None, default: Any = None):
             if regex.GITHUB_NAME_RE.match(arg):
                 return await func(*args, **kwargs)
             return default
+
         return wrapper
 
     return decorator
@@ -175,7 +176,7 @@ def gitbot_group(name: str, **attrs) -> Callable:
     :param attrs: Additional attributes
     """
 
-    def decorator(func) -> _GitBotCommandGroup:
-        return _GitBotCommandGroup(func, name=name, **_inject_aliases(name, **attrs))
+    def decorator(func) -> GitBotCommandGroup:
+        return GitBotCommandGroup(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator

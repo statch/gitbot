@@ -152,15 +152,21 @@ class Manager:
         Get a license matching the query.
 
         :param to_match: The query to search by
-        :return: The license matched or None if match is less than 80
+        :return: The best license matched or None if match is less than 80
         """
 
+        best: list[tuple[int, DictProxy]] = []
+
         for i in list(self.licenses):
-            match = fuzz.token_set_ratio(to_match, i['name'])
-            match1 = fuzz.token_set_ratio(to_match, i['key'])
-            match2 = fuzz.token_set_ratio(to_match, i['spdx_id'])
-            if any([match > 80, match1 > 80, match2 > 80]):
-                return i
+            match1: int = fuzz.token_set_ratio(to_match, i['name'])
+            match2: int = fuzz.token_set_ratio(to_match, i['key'])
+            match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
+            if any([match1 > 80, match2 > 80, match3 > 80]):
+                score: int = sum([match1, match2, match3])
+                best.append((score, i))
+        if best:
+            pick: tuple[int, DictProxy] = max(best, key=lambda s: s[0])
+            return pick[1]
         return None
 
     def load_json(self, name: str) -> DictProxy:

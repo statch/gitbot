@@ -22,3 +22,4 @@ kaleido==0.2.1
 certifi==2021.10.8
 uvloop==0.16.0; sys_platform == 'linux'
 recordclass==0.16.2
+pipe==1.6.0

@@ -1,6 +1,8 @@
 import discord
+from datetime import date
 from discord.ext import commands
 from lib.globs import Mgr
+from lib.structs import GitBotEmbed
 from .event_tools import build_guild_embed, handle_codeblock_message, handle_link_message  # noqa
 
 
@@ -20,35 +22,32 @@ class Events(commands.Cog):
             if await Mgr.verify_send_perms(channel):
                 receiver = channel
                 break
-        embed = discord.Embed(
+        embed: GitBotEmbed = GitBotEmbed(
             color=Mgr.c.rounded,
             description=f":tada: **Hi! I'm {self.bot.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git "
                         f"--help` to get started.\n\nIf you have any problems, [join the support server!]("
-                        f"https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**"
+                        f"https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**",
+            thumbnail=self.bot.user.avatar_url,
+            author_name=self.bot.user.name,
+            author_icon_url=self.bot.user.avatar_url,
+            footer=f'© 2020-{date.today().year} wulf, statch'
         )
-        embed.set_thumbnail(url=self.bot.user.avatar_url)
-        embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
-        embed.set_footer(text=f"© 2020 wulf, statch")
-
-        embed_l: discord.Embed = await build_guild_embed(self.bot, guild)
-
+        embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild)
         Mgr.log(f'Joined guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds', category='stats')
 
         if Mgr.env.production:
-            channel = await self.bot.fetch_channel(775042132054376448)  # Logging the join
-            await channel.send(embed=embed_l)
+            await embed_l.send(await self.bot.fetch_channel(775042132054376448))
 
         if receiver is not None:  # Sending the join message
-            await receiver.send(embed=embed)
+            await embed.send(receiver)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         await Mgr.db.guilds.find_one_and_delete({'_id': guild.id})
         del Mgr.autoconv_cache[guild.id]
-        embed_l: discord.Embed = await build_guild_embed(self.bot, guild, False)
-        channel = self.bot.get_channel(775042132054376448)
-        Mgr.log(f"Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds", category='stats')
-        await channel.send(embed=embed_l)
+        embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild, False)
+        Mgr.log(f'Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds', category='stats')
+        await embed_l.send(self.bot.get_channel(775042132054376448))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -58,13 +57,15 @@ class Events(commands.Cog):
         if await Mgr.verify_send_perms(message.channel) and ctx.command is None:
             await Mgr.enrich_context(ctx)
             if all([self.bot.user in message.mentions, message.reference is None]):
-                embed: discord.Embed = discord.Embed(
+                embed: GitBotEmbed = GitBotEmbed(
                     color=Mgr.c.rounded,
-                    description=ctx.l.events.mention
+                    description=ctx.l.events.mention,
+                    thumbnail=self.bot.user.avatar_url,
+                    author_name=self.bot.user.name,
+                    author_icon_url=self.bot.user.avatar_url,
+                    author_url='https://statch.tech/gitbot'
                 )
-                embed.set_thumbnail(url=self.bot.user.avatar_url)
-                embed.set_author(icon_url=self.bot.user.avatar_url, name=self.bot.user.name)
-                await message.channel.send(embed=embed)
+                await embed.send(message.channel)
             else:
                 handlers: tuple = (handle_codeblock_message, handle_link_message)
                 for handler in handlers:

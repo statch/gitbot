@@ -22,6 +22,7 @@ from lib.utils import regex as r
 from colorama import Style, Fore
 from discord.ext import commands
 from urllib.parse import quote_plus
+from pipe import traverse, where, select
 from lib.utils.decorators import normalize_identity
 from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
@@ -57,7 +58,7 @@ class Manager:
         self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
         self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
         self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
-        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 30)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 15)
         self.locale.master = getattr(self.l, str(self.locale.master))
         self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
@@ -251,6 +252,9 @@ class Manager:
             return string[:length - len(ending)] + ending
         return string
 
+    def flatten(self, iterable: Iterable) -> Iterable:
+        return list(iterable | traverse)
+
     def external_to_discord_timestamp(self, timestamp: str, ts_format: str) -> str:
         """
         Convert an external timestamp to the <t:timestamp> Discord format
@@ -283,7 +287,7 @@ class Manager:
         :return: The list of numbers
         """
 
-        return [int(m) for m in self._number_re.findall(string) if int(m) <= max_]
+        return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
 
     def log(self,
             message: str,
@@ -507,21 +511,28 @@ class Manager:
             self.debug(f'Extracting zip archive "{zip_path}"')
             _zip.extractall(output_dir)
 
-    def correlate_license(self, to_match: str) -> Optional[DictProxy]:
+    def get_license(self, to_match: str) -> Optional[DictProxy]:
         """
         Get a license matching the query.
 
         :param to_match: The query to search by
-        :return: The license matched or None if match is less than 80
+        :return: The best license matched or None if match is less than 80
         """
 
+        best: list[tuple[int, DictProxy]] = []
+
         for i in list(self.licenses):
-            match = fuzz.token_set_ratio(to_match, i['name'])
-            match1 = fuzz.token_set_ratio(to_match, i['key'])
-            match2 = fuzz.token_set_ratio(to_match, i['spdx_id'])
-            if any([match > 80, match1 > 80, match2 > 80]):
-                self.debug(f'Matched license "{i["name"]}" with confidence >80 from "{to_match}"')
-                return i
+            match1: int = fuzz.token_set_ratio(to_match, i['name'])
+            match2: int = fuzz.token_set_ratio(to_match, i['key'])
+            match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
+            if any([match1 > 80, match2 > 80, match3 > 80]):
+                score: int = sum([match1, match2, match3])
+                self.debug(f'Matched license "{i["name"]}" with one-attribute confidence >80 from "{to_match}"')
+                best.append((score, i))
+        if best:
+            pick: tuple[int, DictProxy] = max(best, key=lambda s: s[0])
+            self.debug(f'Found {len(best)} matching licenses, picking the best one with score {pick[0]}')
+            return pick[1]
         self.debug(f'No matching license found for "{to_match}"')
         return None
 
@@ -895,15 +906,16 @@ class Manager:
                     populated[rk] = rv
         return fmt_str.format(**populated) if fmt_str else populated
 
-    def gen_separator_line(self, length: Any) -> str:
+    def gen_separator_line(self, length: Any, char: str = '⎯') -> str:
         """
         Generate a separator line with the provided length or the __len__ of the object passed
 
         :param length: The length of the separator line
+        :param char: The character to use for the separator line
         :return: The separator line
         """
 
-        return '⎯' * (length if isinstance(length, int) else len(length))
+        return char * (length if isinstance(length, int) else len(length))
 
     def option_display_list_format(self, options: Union[dict[str, str], list[str]], style: str = 'pixel') -> str:
         """

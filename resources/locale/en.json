@@ -72,7 +72,8 @@
       "python_package": "A Python Package with this name doesn't exist on PyPI!",
       "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
       "commit": "A commit with this OID **doesn't exist** in {0}!",
-      "ref": "A branch called {0} **doesn't exist** in {1}!"
+      "ref": "A branch called {0} **doesn't exist** in {1}!",
+      "command": "**I couldn't find that command!** Re-check the spelling?"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -84,6 +85,7 @@
     "unspecified": "**Something went wrong,** please report this in the support server.",
     "inactive": "The command timed out - this message is no longer active!",
     "completed": "The command has been completed - this message is no longer active",
+    "closed": "This command has been closed - you can't interact with it anymore",
     "failure": "The command didn't finish - this message is no longer active"
   },
   "enum": {
@@ -102,9 +104,18 @@
     }
   },
   "glossary": {
+    "page": "Page",
+    "example": "Example",
+    "usage": "Usage",
+    "description": "Description",
+    "arguments": "Arguments",
+    "command": "Command",
     "github_repo_term": "repository",
     "gitlab_repo_term": "project",
     "website": "website"
+  },
+  "permissions": {
+    "manage_webhooks": "Manage Webhooks"
   },
   "privacy_policy": {
     "title": "Privacy Policy",
@@ -709,109 +720,25 @@
     "description": "If you have any problems, feel free to join the [support server.](https://discord.gg/3e5fwpA)"
   },
   "help": {
-    "alias_note": "You can find a list of aliases by using the git --aliases command",
+    "required_permissions": "Required Permissions",
     "default": {
-      "title": "Help",
-      "description": "In this section you'll find info and usage of my commands.\n**You can access specific parts by typing:**",
-      "sections": {
-        "github": "to fetch information from GitHub",
-        "info": "for commands that provide information about the bot itself",
-        "config": "to store your preferred orgs, repos, user and feeds",
-        "utility": "for other useful commands"
-      },
-      "support_server_note": "**If you have any problems,** [**join the support server!**](https://discord.gg/3e5fwpA)",
-      "footer": "You can find a list of aliases by using the git --aliases command"
+
     },
-    "github": {
-      "title": "GitHub Help",
-      "description": "**Words in curly braces symbolize arguments that the command requires**",
-      "commands": {
-        "user": {
-          "info": "get information about a user",
-          "repos": "view a user's repos"
-        },
-        "org": {
-          "info": "get info about an organization",
-          "repos": "view an organization's repos"
-        },
-        "repo_argument_note": "**Important!** Repo commands that follow, require the exact syntax of `owner/repo-name` in place of the `{repo}` argument, ex. `statch/gitbot`",
-        "repo": {
-          "info": "get info about a repository",
-          "files": "get a repo's file structure",
-          "issues": "get 10 latest issues from a repo (state defaults to OPEN). If no repo is passed, the stored one is used",
-          "pulls": "identical to the above, except for pull requests"
-        },
-        "gist": "view a user's gists",
-        "issue": "get detailed info on an issue",
-        "pr": "get detailed info on a pull request"
+    "commands": {
+      "commits": {
+        "brief": "Get latest commits from a GitHub repository.",
+        "usage": "commits [repo-with-branch]",
+        "example": "commits statch/gitbot"
       }
     },
-    "info": {
-      "title": "Info Help",
-      "description": "These commands have no ties to GitHub and focus on the Bot itself.",
-      "commands": {
-        "aliases": "get a list of command shorthands",
-        "privacy": "the Bot's privacy policy",
-        "vote": "vote for the Bot!",
-        "stats": "some stats regarding the Bot",
-        "uptime": "see the time since the last restart of the Bot",
-        "ping": "see the Bot's latency"
+    "argument_explainers": {
+      "repo_with_branch": {
+        "name": "repo-with-branch",
+        "content": "The repo and branch separated by a `/` character (ex. `statch/gitbot/v3`). If the branch is omitted, the default one is used (`statch/gitbot/main`)"
       }
     },
-    "config": {
-      "title": "Config Help",
-      "description": "**These commands affect the behavior of the Bot.**",
-      "commands": {
-        "default": "get detailed info on your options",
-        "show": "shows your current settings"
-      }
-    },
-    "utility": {
-      "title": "Utility Help",
-      "description": "These commands let you fetch various data related to Git and GitHub.",
-      "commands": {
-        "logs": "quickly set up a GitHub event feed in the current channel",
-        "loc": "get lines of code count of a repository with details",
-        "license": "get info about a license",
-        "snippet": "generate a beautiful image of the lines mentioned in a GitHub or GitLab link or a codeblock",
-        "snippet_raw": "get the lines mentioned in a GitHub or GitLab link",
-        "info": "automatically inspect a link and get info on it",
-        "pypi": "fetch PyPI information about Python packages"
-      }
-    }
-  },
-  "aliases": {
-    "default": {
-      "title": "Aliases",
-      "description": "In this section you'll find shorthands of my commands\n**You can access specific parts by typing:**",
-      "sections": {
-        "github": "for GitHub command aliases",
-        "info": "for other aliases",
-        "config": "for configuration command aliases",
-        "utility": "for utility command aliases"
-      },
-      "footer": "You can find usage of these commands by typing git --help"
-    },
-    "github": {
-      "title": "GitHub Aliases",
-      "argument_omitted": "Some commands default to their `info` variant if it's omitted:",
-      "generic_aliases": "There are generic aliases as well:",
-      "footer": "You can find usage of these commands by typing git --help github"
-    },
-    "info": {
-      "title": "Info Aliases",
-      "description": "Shorthands for commands not tied to GitHub itself",
-      "footer": "You can find usage of these commands by typing git --help info"
-    },
-    "config": {
-      "title": "Config Aliases",
-      "description": "Shorthands for commands used to store your preferred orgs, repos, users and feeds",
-      "footer": "You can find usage of these commands by typing git --help config"
-    },
-    "utility": {
-      "title": "Utility Aliases",
-      "description": "**Shorthands for commands used to fetch data related to Git and GitHub**",
-      "footer": "You can find usage of these commands by typing git --help utility"
+    "qa_disclaimers": {
+      "repo": "This command can be called without the repo argument if you have a repo saved!\nUse git config to check it out!"
     }
   },
   "dev": {

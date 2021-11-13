@@ -6,13 +6,22 @@ from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
+from lib.structs.discord.pages import EmbedPages
 
 
 class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @gitbot_command('commits')
+    @gitbot_command('test')
+    async def test(self, ctx: commands.Context):
+        embeds = [GitBotEmbed(title='test1', footer='BRUH'), GitBotEmbed(title='test2'), GitBotEmbed(title='test3', color=0xefefef)]
+        await EmbedPages(embeds).start(ctx)
+
+    @gitbot_command('commits',
+                    argument_explainers=('repo_with_branch',),
+                    qa_resource='repo'
+                    )
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def commits_command(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None):
@@ -75,7 +84,6 @@ class Commits(commands.Cog):
                              ctx: commands.Context,
                              repo: Optional[GitHubRepository] = None,
                              oid: Optional[str] = None):
-        # TODO add this to the help command
         ctx.fmt.set_prefix('commit')
         is_stored: bool = False
         if not hasattr(ctx, 'data'):

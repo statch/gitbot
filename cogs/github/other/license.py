@@ -11,25 +11,25 @@ class License(commands.Cog):
     @gitbot_command(name='license')
     @commands.cooldown(10, 20, commands.BucketType.user)
     async def license_command(self, ctx: commands.Context, *, license_: str) -> None:
-        license_: dict = Mgr.correlate_license(license_)
+        license_: dict = Mgr.get_license(license_)
         if license_ is None:
             return await ctx.err(ctx.l.license.error)
         embed: GitBotEmbed = GitBotEmbed(
             color=Mgr.c.rounded,
-            title=license_["name"],
-            url=license_["html_url"]
+            title=license_['name'],
+            url=license_['html_url']
         )
         embed.add_field(name=ctx.l.license.description, value=f'```{license_["description"]}```', inline=False)
         embed.add_field(name=ctx.l.license.implementation, value=f'```{license_["implementation"]}```', inline=False)
         embed.add_field(name=ctx.l.license.permissions,
-                        value="".join([f"{Mgr.e.circle_green}  {x}\n" for x in license_["permissions"]]) if len(
-                              license_["permissions"]) != 0 else ctx.l.license.none)
+                        value=''.join([f'{Mgr.e.circle_green}  {x}\n' for x in license_['permissions']]) if len(
+                              license_['permissions']) != 0 else ctx.l.license.none)
         embed.add_field(name=ctx.l.license.conditions,
-                        value="".join([f"{Mgr.e.circle_yellow}  {x}\n" for x in license_["conditions"]]) if len(
-                             license_["conditions"]) != 0 else ctx.l.license.none)
+                        value=''.join([f'{Mgr.e.circle_yellow}  {x}\n' for x in license_['conditions']]) if len(
+                             license_['conditions']) != 0 else ctx.l.license.none)
         embed.add_field(name=ctx.l.license.limitations,
-                        value="".join([f"{Mgr.e.circle_red}  {x}\n" for x in license_["limitations"]]) if len(
-                             license_["limitations"]) != 0 else ctx.l.license.none)
+                        value=''.join([f'{Mgr.e.circle_red}  {x}\n' for x in license_['limitations']]) if len(
+                             license_['limitations']) != 0 else ctx.l.license.none)
         await ctx.send(embed=embed)
 
 

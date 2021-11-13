@@ -1,7 +1,7 @@
 import discord
 from typing import Optional, Union
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository
+from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
 from lib.typehints import GitHubRepository
 
@@ -10,7 +10,7 @@ class Issue(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @commands.command(name='issue', aliases=['-issue', 'i'])
+    @gitbot_command(name='issue', aliases=['i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
     async def issue_command(self, ctx: commands.Context, repo: GitHubRepository, issue_number: str = None) -> None:

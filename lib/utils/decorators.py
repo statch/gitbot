@@ -7,6 +7,23 @@ from lib.utils import regex
 from lib.typehints import GitHubRepository
 
 
+class GitBotCommand(commands.Command):
+    def __init__(self,
+                 func: Callable,
+                 example: str = '',
+                 argument_explainers: tuple[str, ...] = (),
+                 required_permissions: tuple[str, ...] = (),
+                 qa_resource: Optional[str] = None,
+                 **kwargs):
+        super().__init__(func, **kwargs)
+        if not argument_explainers:
+            argument_explainers: tuple[str, ...] = ()
+        self.argument_explainers: tuple[str, ...] = argument_explainers
+        self.required_permissions: tuple[str, ...] = required_permissions
+        self.example: str = example
+        self.qa_resource: Optional[str] = qa_resource
+
+
 class GitBotCommandGroup(commands.Group):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
@@ -153,14 +170,19 @@ def normalize_repository(func: Callable) -> Callable:
     return wrapper
 
 
-def gitbot_command(name: str, cls=commands.Command, **attrs) -> Callable:
+def gitbot_command(name: str, cls=GitBotCommand, **attrs) -> Callable:
     """
     A command decorator that automatically injects "-" and "--" aliases.
 
+    :param argument_explainers: The argument explainers to be added to the command (either locale paths or literals)
+    :param required_permissions: The permissions required from the caller (locale paths)
+    :param example: The example to be added to the command ex. [awesome-command statch/gitbot]
     :param name: The command name
     :param cls: The command class
     :param attrs: Additional attributes
     """
+
+    attrs.update()
 
     def decorator(func) -> commands.Command:
         return cls(func, name=name, **_inject_aliases(name, **attrs))

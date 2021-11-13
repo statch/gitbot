@@ -15,6 +15,7 @@ class GitBotCommandState(enum.Enum):
     CONTINUE: int = 1
     SUCCESS: int = 2
     TIMEOUT: int = 3
+    CLOSED: int = 4
 
 
 GitBotEmbedResponseCallback = Callable[..., Awaitable[Union[tuple[GitBotCommandState,
@@ -32,14 +33,19 @@ class GitBotEmbed(discord.Embed):
                  footer: str = discord.Embed.Empty,
                  footer_icon_url: str = discord.Embed.Empty,
                  thumbnail: str = discord.Embed.Empty,
+                 author_name: str = '',
+                 author_url: str = discord.Embed.Empty,
+                 author_icon_url: str = discord.Embed.Empty,
                  **kwargs):
         kwargs.setdefault('color', 0x2F3136)
         super().__init__(**kwargs)
         self.set_footer(text=footer, icon_url=footer_icon_url)
         self.set_thumbnail(url=thumbnail)
+        if author_name:
+            self.set_author(name=author_name, url=author_url, icon_url=author_icon_url)
 
-    async def send(self, ctx: commands.Context, *args, **kwargs) -> discord.Message:
-        return await ctx.send(embed=self, *args, **kwargs)
+    async def send(self, messageable: discord.abc.Messageable, *args, **kwargs) -> discord.Message:
+        return await messageable.send(embed=self, *args, **kwargs)
 
     async def edit_with_state(self, ctx: commands.Context, state: int) -> None:
         if ctx.author.id is ctx.guild.me.id:

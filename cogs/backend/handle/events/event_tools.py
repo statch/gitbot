@@ -94,7 +94,7 @@ async def handle_link_message(ctx: commands.Context) -> Optional[discord.Message
     return await ctx.invoke(resolve_url_command)
 
 
-async def build_guild_embed(bot: commands.Bot, guild: discord.Guild, state: bool = True) -> discord.Embed:
+async def build_guild_embed(bot: commands.Bot, guild: discord.Guild, state: bool = True) -> GitBotEmbed:
     if state:
         title: str = f'{Mgr.e.checkmark}  Joined a new guild!'
         color: int = 0x33ba7c

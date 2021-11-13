@@ -11,6 +11,7 @@ from lib.typehints.generic import (GitHubRepository, GuildID,
                                    GitHubOrganization, PyPIProject,
                                    Hash, MessageAttachmentURL,
                                    LocaleName)
+from lib.typehints.locale.help import CommandHelp
 
 __all__: tuple = (
     'DictSequence',
@@ -32,7 +33,8 @@ __all__: tuple = (
     'MessageAttachmentURL',
     'EmbedLike',
     'GitBotUser',
-    'LocaleName'
+    'LocaleName',
+    'CommandHelp'
 )
 
 AnyDict = Union[dict, DictProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict]

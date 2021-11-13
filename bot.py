@@ -5,16 +5,13 @@ from lib.globs import Mgr
 from discord.ext import commands
 from lib.utils.decorators import restricted
 
-NO_TYPING_COMMANDS: list = Mgr.env.no_typing_commands
-PREFIX: str = Mgr.env.prefix
-
 intents: discord.Intents = discord.Intents(
     messages=True,
     guilds=True,
     guild_reactions=True
 )
 
-bot: commands.Bot = commands.Bot(command_prefix=f'{PREFIX} ', case_insensitive=True,
+bot: commands.Bot = commands.Bot(command_prefix=f'{Mgr.env.prefix} ', case_insensitive=True,
                                  intents=intents, help_command=None,
                                  guild_ready_timeout=1, status=discord.Status.online,
                                  description='Seamless GitHub-Discord integration.',
@@ -107,11 +104,15 @@ async def global_check(ctx: commands.Context) -> bool:
 
 @bot.before_invoke
 async def before_invoke(ctx: commands.Context) -> None:
-    if str(ctx.command) not in NO_TYPING_COMMANDS:
+    if str(ctx.command) not in Mgr.env.no_typing_commands:
         await ctx.channel.trigger_typing()
 
 
 @bot.event
 async def on_ready() -> None:
+    command: commands.Command
+    for command in bot.walk_commands():
+        if command in Mgr.env.hidden_commands:
+            command.hidden = True
     logger.info(f'The bot is ready.')
     logger.info(f'discord.py version: {discord.__version__}\n')

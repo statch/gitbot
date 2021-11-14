@@ -1,5 +1,5 @@
 from lib.typehints import Hash
-from typing import Any, Union, Optional
+from typing import Any, Optional
 from ..caches.base_cache import BaseCache
 
 
@@ -17,17 +17,17 @@ class SelfHashingCache(BaseCache):
     def __init__(self, maxsize: int = 128, max_age: Optional[int] = None):
         super().__init__(maxsize=maxsize, max_age=max_age)
 
-    def get(self, key: Union[str, Hash], default: Any = None) -> Any:
+    def get(self, key: str | Hash, default: Any = None) -> Any:
         ret: Any = super().get(key) or super().get(hash(key))
         return ret or default
 
     def __setitem__(self, key: str, value: Any):
         return super().__setitem__(hash(key), value)
 
-    def __getitem__(self, key: Union[str, Hash]) -> Any:
+    def __getitem__(self, key: str | Hash) -> Any:
         if ret := self.get(key):
             return ret
         raise KeyError(f'Key \'{key}\' (and its hash) doesn\'t exist in this cache')
 
-    def __contains__(self, key: Union[str, Hash]) -> bool:
+    def __contains__(self, key: str | Hash) -> bool:
         return self.get(key) is not None

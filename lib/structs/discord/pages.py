@@ -3,7 +3,7 @@ import asyncio
 from time import time
 from enum import Enum
 from discord.ext import commands
-from typing import Union, Optional, NoReturn
+from typing import Optional, NoReturn
 from lib.structs.discord.gitbot_embed import GitBotEmbed, GitBotCommandState
 from lib.globs import Mgr
 
@@ -31,10 +31,10 @@ class EmbedPages:
                      no matter if an action occurred or not it will close after this time.
     """
 
-    def __init__(self, pages: list[Union[GitBotEmbed, discord.Embed]], timeout: int = 75, lifespan: int = 300):
+    def __init__(self, pages: list[GitBotEmbed | discord.Embed], timeout: int = 75, lifespan: int = 300):
         self.lifespan: float = lifespan
         self.timeout: int = timeout
-        self.pages: list[Union[GitBotEmbed, discord.Embed]] = pages
+        self.pages: list[GitBotEmbed | discord.Embed] = pages
         self.current_page: int = 0
         self.start_time: Optional[float] = None
         self.last_action_time: Optional[float] = None
@@ -92,14 +92,14 @@ class EmbedPages:
         await self._add_controls()
         await self.__loop()
 
-    async def edit(self, state: Union[GitBotCommandState, int]) -> None:
+    async def edit(self, state: GitBotCommandState | int) -> None:
         """
         Edit the currently displayed embed with the given state
 
         :param state: The state to edit the embed with
         """
 
-        embed: Union[discord.Embed, GitBotEmbed] = self.message.embeds[0]
+        embed: discord.Embed | GitBotEmbed = self.message.embeds[0]
         if state is GitBotCommandState.CLOSED:
             embed.set_footer(text=f'{self.context.l.generic.closed} | {self.current_page_string}')
             embed.colour = Mgr.c.discord.red
@@ -120,7 +120,7 @@ class EmbedPages:
             self._action_time()
             await self.message.edit(embed=self.pages[self.current_page])
 
-    def _edit_embed_footer(self, embed: Union[discord.Embed, GitBotEmbed]) -> None:
+    def _edit_embed_footer(self, embed: discord.Embed | GitBotEmbed) -> None:
         if embed in self.pages:
             page_str: str = f'{self.context.l.glossary.page} {self.pages.index(embed) + 1}/{len(self.pages)}'
         else:
@@ -155,7 +155,7 @@ class EmbedPages:
         while True:
             if not self.should_die:
                 reaction: discord.Reaction
-                user: Union[discord.Member, discord.User]
+                user: discord.Member | discord.User
                 try:
                     Mgr.debug('Running reaction_add event waiter')
                     reaction, user = await self.bot.wait_for('reaction_add',

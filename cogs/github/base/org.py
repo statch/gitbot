@@ -1,5 +1,5 @@
 import discord
-from typing import Optional, Union
+from typing import Optional
 from lib.globs import Git, Mgr
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
@@ -84,7 +84,7 @@ class Org(commands.Cog):
     @org_command_group.command(name='repos', aliases=['r'])
     async def org_repos_command(self, ctx: commands.Context, org: GitHubOrganization) -> None:
         ctx.fmt.set_prefix('org repos')
-        o: Union[dict, None] = await Git.get_org(org)
+        o: Optional[dict] = await Git.get_org(org)
         repos: list = [x for x in await Git.get_org_repos(org)]
         if o is None:
             await ctx.err(ctx.l.generic.nonexistent.org.base)

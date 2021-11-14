@@ -2,7 +2,7 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Union, Any, Optional
+from typing import Callable, Any, Optional
 from lib.utils import regex
 from lib.typehints import GitHubRepository
 
@@ -135,7 +135,7 @@ def normalize_identity(context_resource: str = 'author') -> Callable:
 
     def decorator(func: Callable) -> Callable:
         def wrapper(*args: tuple, **kwargs: dict) -> Any:
-            def normalize_id(_id: Union[int, str, commands.Context]) -> int:
+            def normalize_id(_id: int | str | commands.Context) -> int:
                 return int(_id) if not isinstance(_id, commands.Context) else getattr(_id, context_resource).id
 
             return normalize_argument(func, '_id', normalize_id, *args, **kwargs)

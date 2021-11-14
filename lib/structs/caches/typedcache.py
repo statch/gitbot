@@ -1,4 +1,4 @@
-from typing import Any, NoReturn, Union, Optional, Literal
+from typing import Any, NoReturn, Optional, Literal
 from ..caches.base_cache import BaseCache
 
 __all__: tuple = (
@@ -25,13 +25,13 @@ class CacheSchema:
     :param value: The type of the values to accept
     """
 
-    def __init__(self, key: Union[type, tuple[type, ...]], value: Union[type, tuple[type, ...]]):
-        self.key: Union[type, tuple[type, ...]] = key
-        self.value: Union[type, tuple[type, ...]] = value
+    def __init__(self, key: type | tuple[type, ...], value: type | tuple[type, ...]):
+        self.key: type | tuple[type, ...] = key
+        self.value: type | tuple[type, ...] = value
 
     def _raise(self,
                got: Any,
-               expected: Union[type, tuple[type, ...]],
+               expected: type | tuple[type, ...],
                /,
                value_name: Literal['cache key', 'cache value']) -> NoReturn:
         """
@@ -53,7 +53,7 @@ class CacheSchema:
             self._raise(value, self.value, 'cache value')
 
 
-CacheSchemaLikeType = Union[CacheSchema, tuple[Union[type, tuple[type, ...]], Union[type, tuple[type, ...]]]]
+CacheSchemaLikeType = CacheSchema | tuple[type | tuple[type, ...] | type | tuple[type, ...]]
 
 
 class TypedCache(BaseCache):

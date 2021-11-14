@@ -7,7 +7,7 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedItem, ReleaseFeed,
                            ReleaseFeedRepo, AutomaticConversion,
                            GitBotUser)
-from typing import Optional, Literal, Union
+from typing import Optional, Literal
 from lib.structs import GitBotEmbed, GitBotCommandState
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 
@@ -316,13 +316,13 @@ class Config(commands.Cog):
                             return GitBotCommandState.FAILURE
                         return GitBotCommandState.SUCCESS
 
-                    match_confirmation_embed: GitBotEmbed = GitBotEmbed(
+                    _match_confirmation_embed: GitBotEmbed = GitBotEmbed(
                         color=0xff009b,
                         title=f'{Mgr.e.github}  {ctx.l.config.locale.match_confirmation_embed.title}',
                         description=ctx.fmt('match_confirmation_embed description', l_[0]['localized_name']),
                         footer=ctx.l.config.locale.match_confirmation_embed.footer
                     )
-                    confirmation_result: bool = await match_confirmation_embed.confirmation(ctx, _callback)
+                    confirmation_result: bool = await _match_confirmation_embed.confirmation(ctx, _callback)
                     if not confirmation_result:
                         return
                 await Mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
@@ -383,7 +383,7 @@ class Config(commands.Cog):
     async def config_autoconv_gh_url_command(self, ctx: commands.Context) -> None:
         await self.toggle_autoconv_item(ctx, 'gh_url')
 
-    def _validate_github_lines_conversion_state(self, state: Union[str, int]) -> Optional[int]:
+    def _validate_github_lines_conversion_state(self, state: str | int) -> Optional[int]:
         if state is not None:
             _int_state: Optional[int] = state if isinstance(state, int) else (int(state) if state.isnumeric() else None)
             if _int_state is not None:

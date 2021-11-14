@@ -1,5 +1,5 @@
 import discord
-from typing import Optional, Union
+from typing import Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
@@ -17,7 +17,7 @@ class Issue(commands.Cog):
         ctx.fmt.set_prefix('issue')
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
-            issue_number: Union[int, str] = issue['number']
+            issue_number: int | str = issue['number']
         else:
             if not issue_number:
                 if not repo.isnumeric():
@@ -33,7 +33,7 @@ class Issue(commands.Cog):
                     return
 
             try:
-                issue: Union[dict, str] = await Git.get_issue(repo, int(issue_number))
+                issue: dict | str = await Git.get_issue(repo, int(issue_number))
             except ValueError:
                 await ctx.err(ctx.l.issue.second_argument_number)
                 return

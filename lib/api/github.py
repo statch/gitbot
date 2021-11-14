@@ -3,7 +3,7 @@ import asyncio
 import functools
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, Optional, Callable, Any, Literal
+from typing import Optional, Callable, Any, Literal
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
@@ -152,7 +152,7 @@ class GitHubAPI:
             return None
 
     @normalize_repository
-    async def get_latest_commit(self, repo: GitHubRepository) -> Union[Optional[dict], Literal[False]]:
+    async def get_latest_commit(self, repo: GitHubRepository) -> Optional[dict] | Literal[False]:
         split: list = repo.split('/')
         if len(split) == 2:
             owner: str = split[0]
@@ -166,7 +166,7 @@ class GitHubAPI:
             return data['repository']['defaultBranchRef']['target']
 
     @normalize_repository
-    async def get_commit(self, repo: GitHubRepository, oid: str) -> Union[Optional[dict], Literal[False]]:
+    async def get_commit(self, repo: GitHubRepository, oid: str) -> Optional[dict] | Literal[False]:
         split: list = repo.split('/')
         if len(split) == 2:
             owner: str = split[0]
@@ -181,7 +181,7 @@ class GitHubAPI:
             return data['repository']['object']
 
     @normalize_repository
-    async def get_latest_commits(self, repo: GitHubRepository, ref: Optional[str] = None) -> Union[list[dict], str]:
+    async def get_latest_commits(self, repo: GitHubRepository, ref: Optional[str] = None) -> list[dict] | str:
         split: list = repo.split('/')
         if len(split) == 2:
             owner: str = split[0]
@@ -206,7 +206,7 @@ class GitHubAPI:
     @normalize_repository
     async def get_repo_zip(self,
                            repo: GitHubRepository,
-                           size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:
+                           size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[bool | bytes]:
         if '/' not in repo or repo.count('/') > 1:
             return None
         res = await self.ses.get(BASE_URL + f'/repos/{repo}/zipball',
@@ -263,7 +263,7 @@ class GitHubAPI:
     async def get_pull_request(self,
                                repo: GitHubRepository,
                                number: int,
-                               data: Optional[dict] = None) -> Union[dict, str]:
+                               data: Optional[dict] = None) -> dict | str:
         if not data:
             if repo.count('/') != 1:
                 return 'repo'
@@ -318,7 +318,7 @@ class GitHubAPI:
                         repo: GitHubRepository,
                         number: int,
                         data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
-                        had_keys_removed: bool = False) -> Union[dict, str]:
+                        had_keys_removed: bool = False) -> dict | str:
         if not data:
             if repo.count('/') != 1:
                 return 'repo'
@@ -329,8 +329,8 @@ class GitHubAPI:
 
             try:
                 data: dict = await self.gh.graphql(self.queries.issue, **{'Name': repository,
-                                                                           'Owner': owner,
-                                                                           'Number': number})
+                                                                          'Owner': owner,
+                                                                          'Number': number})
             except QueryError as e:
                 if 'number' in str(e):
                     return 'number'

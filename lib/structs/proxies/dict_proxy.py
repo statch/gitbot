@@ -1,4 +1,4 @@
-from typing import Union, Optional, Iterator, ItemsView, TypeVar
+from typing import Optional, Iterator, ItemsView, TypeVar
 from ..dicts.case_insensitive_dict import CaseInsensitiveDict
 
 
@@ -14,14 +14,14 @@ class DictProxy(CaseInsensitiveDict):
 
     Parameters
     ----------
-    data: :class:`Optional[:class:`Union[list[_VT]`, :class:`dict[_KT, _VT]`]]`
+    data: :class:`Optional[:class:`list[_VT]` | :class:`dict[_KT, _VT]`]
         The object to wrap with DictProxy.
     """
 
-    def __init__(self, data: Optional[Union[list, dict[_KT, _VT]]] = None, **kwargs):
+    def __init__(self, data: Optional[list | dict[_KT, _VT]] = None, **kwargs):
         if data is None:
             data: dict[_KT, _VT] = {}
-        self.__items: Union[list[_VT], dict[_KT, _VT]] = data
+        self.__items: list[_VT] | dict[_KT, _VT] = data
         if isinstance(data, dict):
             data.update(kwargs)
             super().__init__(data)
@@ -31,7 +31,7 @@ class DictProxy(CaseInsensitiveDict):
             self.__getitem__ = lambda i: self.__items[i]
 
     @property
-    def actual(self) -> Union[dict[_KT, _VT], list[_VT]]:
+    def actual(self) -> dict[_KT, _VT] | list[_VT]:
         return self.__items
 
     def items(self) -> ItemsView[_KT, _VT]:

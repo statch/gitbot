@@ -1,5 +1,5 @@
 import discord
-from typing import Optional, Union
+from typing import Optional
 from lib.globs import Git, Mgr
 from lib.typehints import GitHubRepository
 from discord.ext import commands
@@ -20,11 +20,14 @@ class PullRequest(commands.Cog):
     @gitbot_command(name='pr', aliases=['pull', 'pull-request', 'pullrequest'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
-    async def pull_request_command(self, ctx: commands.Context, repo: GitHubRepository, pr_number: Optional[str] = None):
+    async def pull_request_command(self,
+                                   ctx: commands.Context,
+                                   repo: GitHubRepository,
+                                   pr_number: Optional[str] = None):
         ctx.fmt.set_prefix('pr')
         if hasattr(ctx, 'data'):
             pr: dict = getattr(ctx, 'data')
-            pr_number: Union[str, int] = pr['number']
+            pr_number: str | int = pr['number']
         else:
             if not pr_number:
                 if not repo.isnumeric():
@@ -41,7 +44,7 @@ class PullRequest(commands.Cog):
                         return
 
             try:
-                pr: Union[dict, str] = await Git.get_pull_request(repo, int(pr_number))
+                pr: dict | str = await Git.get_pull_request(repo, int(pr_number))
             except ValueError:
                 await ctx.err(ctx.l.pr.second_argument_number)
                 return
@@ -72,10 +75,10 @@ class PullRequest(commands.Cog):
         else:
             closed: str = '\n'
         comments_and_reviews: str = Mgr.populate_generic_numbered_resource(ctx.l.pr,
-                                                                              '{comments} {linking_word_1}'
-                                                                              ' {reviews}\n',
-                                                                              comments=pr['comments']['totalCount'],
-                                                                              reviews=pr['reviews']['totalCount'])
+                                                                           '{comments} {linking_word_1}'
+                                                                           ' {reviews}\n',
+                                                                           comments=pr['comments']['totalCount'],
+                                                                           reviews=pr['reviews']['totalCount'])
         commit_c: int = int(pr["commits"]["totalCount"])
         commits = f'[{ctx.fmt("commits plural", commit_c)}]({pr["url"]}/commits)'
         if commit_c == 1:
@@ -84,10 +87,10 @@ class PullRequest(commands.Cog):
         if pr["changedFiles"] == 1:
             files_changed: str = f'{ctx.fmt("files singular", pr["url"] + "/files")} {ctx.l.pr.linking_word_2} {commits}\n'
         additions_and_deletions: str = Mgr.populate_generic_numbered_resource(ctx.l.pr,
-                                                                                 '{additions} {linking_word_3}'
-                                                                                 ' {deletions}\n',
-                                                                                 additions=pr['additions'],
-                                                                                 deletions=pr['deletions'])
+                                                                              '{additions} {linking_word_3}'
+                                                                              ' {deletions}\n',
+                                                                              additions=pr['additions'],
+                                                                              deletions=pr['deletions'])
         assignee_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['assignees']['users']]
         reviewer_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['reviewers']['users']]
         participant_strings = [f"- [{u[0]}]({u[1]})\n" for u in pr['participants']['users']]

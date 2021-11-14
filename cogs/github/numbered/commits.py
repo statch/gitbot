@@ -1,5 +1,5 @@
 import discord
-from typing import Optional, Union, Literal
+from typing import Optional, Literal
 from discord.ext import commands
 from lib.globs import Mgr, Git
 from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState
@@ -92,8 +92,8 @@ class Commits(commands.Cog):
                     await ctx.err(ctx.l.generic.nonexistent.repo.qa)
                     return
                 is_stored: bool = True
-            commit: Union[Optional[dict], Literal[False]] = (await Git.get_latest_commit(repo) if not oid
-                                                             else await Git.get_commit(repo, oid))
+            commit: Optional[dict] | Literal[False] = (await Git.get_latest_commit(repo) if not oid
+                                                       else await Git.get_commit(repo, oid))
         else:
             commit: dict = ctx.data
         if not commit:

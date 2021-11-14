@@ -1,6 +1,6 @@
 import discord
 import traceback
-from typing import Union, Optional
+from typing import Optional
 from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
@@ -59,7 +59,7 @@ async def log_error_in_discord(ctx: commands.Context, error: Exception) -> Optio
         return await channel.send(embed=embed)
 
 
-def closest_existing_command_from_error(bot: commands.Bot, error: Union[commands.CommandNotFound, str]) -> str:
+def closest_existing_command_from_error(bot: commands.Bot, error: commands.CommandNotFound | str) -> str:
     return str(Mgr.get_closest_match_from_iterable(
         (error := str(error))[error.index('"') + 1:error.rindex('"')],
         filter(lambda cmd: cmd not in Mgr.env.hidden_commands, map(str, bot.walk_commands()))))

@@ -3,7 +3,7 @@ import re
 import io
 from .list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
-from typing import Union, Optional
+from typing import Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
@@ -36,7 +36,7 @@ class Repo(commands.Cog):
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')
         else:
-            r: Union[dict, None] = await Git.get_repo(repo)
+            r: Optional[dict] = await Git.get_repo(repo)
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'repo')
@@ -161,7 +161,7 @@ class Repo(commands.Cog):
     async def download_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
-        src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
+        src_bytes: Optional[bytes | bool] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
             return await msg.edit(content=f"{Mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
         elif src_bytes is False:

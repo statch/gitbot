@@ -5,7 +5,7 @@ import aiofiles
 import shutil
 import subprocess
 from discord.ext import commands
-from typing import Optional, Union
+from typing import Optional
 from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_command
@@ -63,7 +63,7 @@ class LinesOfCode(commands.Cog):
         try:
             if not os.path.exists('./tmp'):
                 os.mkdir('./tmp')
-            files: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo, size_threshold=_25MB_BYTES)
+            files: Optional[bytes | bool] = await Git.get_repo_zip(repo, size_threshold=_25MB_BYTES)
             if not files:
                 return None
             async with aiofiles.open(tmp_zip_path, 'wb') as fp:

@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from discord.ext import commands
-from typing import Optional, Iterable, List, Union
+from typing import Optional, Iterable
 from lib.globs import Git, Mgr
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
@@ -27,7 +27,7 @@ async def issue_list(ctx: commands.Context, repo: Optional[GitHubRepository] = N
             await ctx.err(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    issues: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
+    issues: list | Iterable[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
     if not issues:
         await handle_none(ctx, 'issue', stored, lstate)
         return
@@ -77,7 +77,7 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[GitHubReposito
             await ctx.err(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    prs: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
+    prs: list | Iterable[dict] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
     if not prs:
         await handle_none(ctx, 'pull request', stored, lstate)
         return

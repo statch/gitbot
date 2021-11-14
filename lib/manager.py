@@ -28,7 +28,7 @@ from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
                          CacheSchema, ParsedRepositoryData)
-from typing import Optional, Union, Callable, Any, Reversible, Iterable
+from typing import Optional, Callable, Any, Reversible, Iterable, Type
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 
@@ -78,7 +78,7 @@ class Manager:
                                                                 tlsAllowInvalidCertificates=False)
         self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
 
-    def _eval_bool_literal_safe(self, literal: str) -> Union[str, bool]:
+    def _eval_bool_literal_safe(self, literal: str) -> str | bool:
         """
         Safely convert a string literal to a boolean, or return the string
 
@@ -92,7 +92,7 @@ class Manager:
             return False
         return literal
 
-    def _set_env_directive(self, name: str, value: Union[str, bool, int, list, dict], overwrite: bool = True) -> bool:
+    def _set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
         """
         Optionally add an environment directive (behavior config for environment loading)
 
@@ -103,7 +103,7 @@ class Manager:
         """
 
         if isinstance(value, str):
-            value: Union[str, bool] = self._eval_bool_literal_safe(value)
+            value: str | bool = self._eval_bool_literal_safe(value)
 
         if (directive := name.lower()).startswith('directive_'):
             if (directive := directive.replace('directive_', '')) not in \
@@ -130,7 +130,7 @@ class Manager:
                     self.env[k] = v
         self.load_dotenv()
 
-    def parse_repo(self, repo: Optional[str]) -> Optional[Union[ParsedRepositoryData, str]]:
+    def parse_repo(self, repo: Optional[str]) -> Optional[Type[ParsedRepositoryData] | str]:
         """
         Parse a owner/name(/branch)? repo string into :class:`ParsedRepositoryData`
 
@@ -182,7 +182,7 @@ class Manager:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
 
-    def parse_literal(self, literal: str) -> Union[str, bytes, int, set, dict, tuple, list, bool, float, None]:
+    def parse_literal(self, literal: str) -> str | bytes | int | set | dict | tuple | list | bool | float | None:
         """
         Parse a literal into a Python object
 
@@ -419,7 +419,7 @@ class Manager:
                      category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
         return final_size
 
-    def opt(self, obj: Any, op: Union[Callable, str, int], /, *args, **kwargs) -> Any:
+    def opt(self, obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
         """
         Run an operation on an object if bool(object) == True
 
@@ -435,7 +435,7 @@ class Manager:
 
         return op(obj, *args, **kwargs) if obj else obj
 
-    def getopt(self, obj: Any, attr: Union[tuple[str, ...], str, list[str]]) -> Any:
+    def getopt(self, obj: Any, attr: tuple[str, ...] | str | list[str]) -> Any:
         """
         Optional chaining for getting attributes
 
@@ -522,11 +522,11 @@ class Manager:
         best: list[tuple[int, DictProxy]] = []
 
         for i in list(self.licenses):
-            match1: int = fuzz.token_set_ratio(to_match, i['name'])
-            match2: int = fuzz.token_set_ratio(to_match, i['key'])
-            match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
-            if any([match1 > 80, match2 > 80, match3 > 80]):
-                score: int = sum([match1, match2, match3])
+            _match1: int = fuzz.token_set_ratio(to_match, i['name'])
+            _match2: int = fuzz.token_set_ratio(to_match, i['key'])
+            _match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
+            if any([_match1 > 80, _match2 > 80, _match3 > 80]):
+                score: int = sum([_match1, _match2, _match3])
                 self.debug(f'Matched license "{i["name"]}" with one-attribute confidence >80 from "{to_match}"')
                 best.append((score, i))
         if best:
@@ -538,19 +538,19 @@ class Manager:
 
     def load_json(self,
                   name: str,
-                  apply_func: Optional[Callable[[str, Union[list, str, int, bool]], Any]] = None) -> DictProxy:
+                  apply_func: Optional[Callable[[str, list | str | int | bool], Any]] = None) -> DictProxy:
         """
         Load a JSON file from the data dir
 
         :param name: The name of the JSON file
         :param apply_func: The function to apply to all dictionary k->v tuples except when isinstance(v, dict),
-               then apply recursion until an actionable value (Union[list, str, int, bool]) is found in the node
+               then apply recursion until an actionable value (list | str | int | bool) is found in the node
         :return: The loaded JSON wrapped in DictProxy
         """
 
         to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r') as fp:
-            data: Union[dict, list] = json.load(fp)
+            data: dict | list = json.load(fp)
         proxy: DictProxy = DictProxy(data)
 
         if apply_func:
@@ -586,7 +586,7 @@ class Manager:
         return False
 
     async def get_link_reference(self,
-                                 ctx: commands.Context) -> Optional[Union[GitCommandData, tuple[GitCommandData, ...]]]:
+                                 ctx: commands.Context) -> Optional[GitCommandData]:
         """
         Get the command data required for invocation from a context
 
@@ -594,13 +594,13 @@ class Manager:
         :return: The command data requested
         """
 
-        combos: tuple[tuple[re.Pattern, Union[tuple, str]], ...] = ((r.GITHUB_PULL_REQUEST_URL_RE, 'pr'),
-                                                                    (r.GITHUB_ISSUE_URL_RE, 'issue'),
-                                                                    (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
-                                                                    (r.GITHUB_ISSUES_PLAIN_URL_RE, 'repo issues'),
-                                                                    (r.GITHUB_COMMIT_URL_RE, 'commit'),
-                                                                    (r.GITHUB_REPO_URL_RE, 'repo info'),
-                                                                    (r.GITHUB_USER_ORG_URL_RE, ('user info', 'org info')))
+        combos: tuple[tuple[re.Pattern, tuple | str], ...] = ((r.GITHUB_PULL_REQUEST_URL_RE, 'pr'),
+                                                              (r.GITHUB_ISSUE_URL_RE, 'issue'),
+                                                              (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
+                                                              (r.GITHUB_ISSUES_PLAIN_URL_RE, 'repo issues'),
+                                                              (r.GITHUB_COMMIT_URL_RE, 'commit'),
+                                                              (r.GITHUB_REPO_URL_RE, 'repo info'),
+                                                              (r.GITHUB_USER_ORG_URL_RE, ('user info', 'org info')))
         for pattern, command_name in combos:
             if match := pattern.search(ctx.message.content):
                 if isinstance(command_name, str):
@@ -613,7 +613,7 @@ class Manager:
                 return GitCommandData(command, kwargs)
         self.debug(f'No match found for "{ctx.message.content}"')
 
-    async def get_most_common(self, items: Union[list, tuple]) -> Any:
+    async def get_most_common(self, items: list | tuple) -> Any:
         """
         Get the most common item from a list/tuple
 
@@ -689,7 +689,7 @@ class Manager:
             return type(seq)(reversed(seq))  # noqa
         self.debug('Sequence is None')
 
-    def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None, **kwargs) -> Optional[DirProxy]:
+    def readdir(self, path: str, ext: Optional[str | list | tuple] = None, **kwargs) -> Optional[DirProxy]:
         """
         Read a directory and return a file-mapping object
 
@@ -755,8 +755,8 @@ class Manager:
     @normalize_identity(context_resource='guild')
     async def get_autoconv_config(self,
                                   _id: Identity,
-                                  did_exist: bool = False) -> Union[AutomaticConversion,
-                                                                    tuple[AutomaticConversion, bool]]:
+                                  did_exist: bool = False) -> Type[AutomaticConversion] | tuple[AutomaticConversion,
+                                                                                                bool]:
         """
         Get the configured permission for automatic conversion from messages (links, snippets, etc.)
 
@@ -803,7 +803,7 @@ class Manager:
         except AttributeError:
             return self.locale.master
 
-    def get_nested_key(self, dict_: AnyDict, key: Union[Iterable[str], str]) -> Any:
+    def get_nested_key(self, dict_: AnyDict, key: Iterable[str] | str) -> Any:
         """
         Get a nested dictionary key
 
@@ -819,7 +819,7 @@ class Manager:
                                  key: str,
                                  value: Any,
                                  multiple: bool = False,
-                                 unpack: bool = False) -> Optional[Union[AnyDict, list[AnyDict]]]:
+                                 unpack: bool = False) -> Optional[AnyDict | list[AnyDict]]:
         """
         Get a dictionary from an iterable, where d[key] == value
 
@@ -858,7 +858,7 @@ class Manager:
 
         return list(set(dict_.keys()) ^ set(keys))
 
-    def regex_get(self, dict_: dict, pattern: Union[re.Pattern, str], default: Any = None) -> Any:
+    def regex_get(self, dict_: dict, pattern: re.Pattern | str, default: Any = None) -> Any:
         """
         Kinda like dict.get, but with regex or __in__
 
@@ -878,7 +878,7 @@ class Manager:
     def populate_generic_numbered_resource(self,
                                            resource: dict,
                                            fmt_str: Optional[str] = None,
-                                           **values: int) -> Union[dict[str, str], str]:
+                                           **values: int) -> dict[str, str] | str:
         """
         The GitBot locale is a bit special, as it has a lot of numbered resources.
         Generic numbered resources are sub-dictionaries of locale values; they contain 3 or more keys:
@@ -917,7 +917,7 @@ class Manager:
 
         return char * (length if isinstance(length, int) else len(length))
 
-    def option_display_list_format(self, options: Union[dict[str, str], list[str]], style: str = 'pixel') -> str:
+    def option_display_list_format(self, options: dict[str, str] | list[str], style: str = 'pixel') -> str:
         """
         Utility method to construct a string representation of a numbered list from :class:`dict` or :class:`list`
 
@@ -1042,7 +1042,7 @@ class Manager:
                 self.ctx: commands.Context = ctx_
                 self.prefix: str = ''
 
-            def __call__(self, resource: Union[tuple, str, list], /, *args, **kwargs) -> str:
+            def __call__(self, resource: tuple | str | list, /, *args, **kwargs) -> str:
                 skip_prefix: bool = False
                 if resource.startswith('!'):  # skip-prefix behavior if the resource has a preceding exclamation mark
                     skip_prefix: bool = True

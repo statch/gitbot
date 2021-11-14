@@ -3,7 +3,7 @@ import discord
 import asyncio
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from discord.ext import commands
-from typing import Callable, Optional, Awaitable, Any, Union
+from typing import Callable, Optional, Awaitable, Any
 from lib.typehints import EmbedLike
 
 __all__: tuple = ('GitBotEmbed', 'GitBotCommandState')
@@ -18,8 +18,7 @@ class GitBotCommandState(enum.Enum):
     CLOSED: int = 4
 
 
-GitBotEmbedResponseCallback = Callable[..., Awaitable[Union[tuple[GitBotCommandState,
-                                                                  Optional[Union[tuple[Any, ...], Any]]],
+GitBotEmbedResponseCallback = Callable[..., Awaitable[tuple[GitBotCommandState | Optional[tuple[Any, ...] | Any],
                                                             GitBotCommandState]]]
 
 
@@ -85,7 +84,7 @@ class GitBotEmbed(discord.Embed):
                                  with_antispam: bool = True,
                                  antispam_threshold: int = 5,
                                  *args,
-                                 **kwargs) -> tuple[Optional[discord.Message], Optional[Union[tuple[Any, ...], Any]]]:
+                                 **kwargs) -> tuple[Optional[discord.Message], Optional[tuple[Any, ...] | Any]]:
         """
         Run a simple timeout loop.
 
@@ -142,7 +141,7 @@ class GitBotEmbed(discord.Embed):
         initial_message: discord.Message = await self.send(ctx)
         await initial_message.add_reaction('<:checkmark:770244084727283732>')
         await initial_message.add_reaction('<:failure:770244076896256010>')
-        result: tuple[Optional[discord.Message], Optional[Union[tuple[Any, ...], Any]]] = await self.input_with_timeout(
+        result: tuple[Optional[discord.Message], Optional[tuple[Any, ...] | Any]] = await self.input_with_timeout(
             ctx=ctx,
             event='reaction_add',
             timeout=30,

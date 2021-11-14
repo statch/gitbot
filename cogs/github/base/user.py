@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from typing import Union, Optional
+from typing import Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
@@ -44,7 +44,7 @@ class User(commands.Cog):
             url=u['url']
         )
 
-        contrib_count: Union[tuple, None] = u['contributions']
+        contrib_count: Optional[tuple] = u['contributions']
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
@@ -98,7 +98,7 @@ class User(commands.Cog):
     @user_command_group.command(name='repos', aliases=['r'])
     async def user_repos_command(self, ctx: commands.Context, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user repos')
-        u: Union[dict, None] = await Git.get_user(user)
+        u: Optional[dict] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
             await ctx.err(ctx.l.generic.nonexistent.user.base)

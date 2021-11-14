@@ -6,17 +6,11 @@ from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
-from lib.structs.discord.pages import EmbedPages
 
 
 class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-
-    @gitbot_command('test')
-    async def test(self, ctx: commands.Context):
-        embeds = [GitBotEmbed(title='test1', footer='BRUH'), GitBotEmbed(title='test2'), GitBotEmbed(title='test3', color=0xefefef)]
-        await EmbedPages(embeds).start(ctx)
 
     @gitbot_command('commits',
                     argument_explainers=('repo_with_branch',),

@@ -2,26 +2,42 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Generator
 from lib.utils import regex
-from lib.typehints import GitHubRepository
+from lib.typehints import GitHubRepository, CommandHelp, ArgumentExplainer, LocaleName
 
 
 class GitBotCommand(commands.Command):
-    def __init__(self,
-                 func: Callable,
-                 example: str = '',
-                 argument_explainers: tuple[str, ...] = (),
-                 required_permissions: tuple[str, ...] = (),
-                 qa_resource: Optional[str] = None,
-                 **kwargs):
+    def __init__(self, func: Callable, **kwargs):
         super().__init__(func, **kwargs)
-        if not argument_explainers:
-            argument_explainers: tuple[str, ...] = ()
-        self.argument_explainers: tuple[str, ...] = argument_explainers
-        self.required_permissions: tuple[str, ...] = required_permissions
-        self.example: str = example
-        self.qa_resource: Optional[str] = qa_resource
+        self._cached_help_contents: dict[LocaleName, CommandHelp] = {}
+
+    @property
+    def fullname(self) -> str:
+        return self.name if not self.full_parent_name else f'{self.full_parent_name} {self.name}'
+
+    @property
+    def underscored_name(self) -> str:
+        return self.fullname.lower().replace(' ', '_')
+
+    def get_argument_explainers(self, ctx: commands.Context) -> Generator[ArgumentExplainer, None, None]:
+        for explainer in self.get_help_content(ctx)['argument_explainers']:
+            yield ctx.l.help.argument_explainers[explainer]
+
+    def get_qa_disclaimer(self, ctx: commands.Context) -> str:
+        return ctx.l.help.qa_disclaimers[self.get_help_content(ctx)['qa_resource']]
+
+    def get_permissions(self, ctx: commands.Context) -> Generator[str, None, None]:
+        for permission_resource_name in self.get_help_content(ctx)['required_permissions']:
+            yield ctx.l.permissions[permission_resource_name]
+
+    def get_help_content(self, ctx: commands.Context) -> CommandHelp:
+        if cached := self._cached_help_contents.get(ctx.l.meta.name):
+            return cached
+        help_: CommandHelp = ctx.l.help.commands[self.underscored_name]
+        help_.setdefault(self.fullname)
+        self._cached_help_contents[ctx.l.meta.name] = help_
+        return help_
 
 
 class GitBotCommandGroup(commands.Group):
@@ -174,9 +190,6 @@ def gitbot_command(name: str, cls=GitBotCommand, **attrs) -> Callable:
     """
     A command decorator that automatically injects "-" and "--" aliases.
 
-    :param argument_explainers: The argument explainers to be added to the command (either locale paths or literals)
-    :param required_permissions: The permissions required from the caller (locale paths)
-    :param example: The example to be added to the command ex. [awesome-command statch/gitbot]
     :param name: The command name
     :param cls: The command class
     :param attrs: Additional attributes

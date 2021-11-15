@@ -12,10 +12,7 @@ class Commits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @gitbot_command('commits',
-                    argument_explainers=('repo_with_branch',),
-                    qa_resource='repo'
-                    )
+    @gitbot_command('commits')
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def commits_command(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None):

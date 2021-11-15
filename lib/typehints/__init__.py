@@ -11,7 +11,7 @@ from lib.typehints.generic import (GitHubRepository, GuildID,
                                    GitHubOrganization, PyPIProject,
                                    Hash, MessageAttachmentURL,
                                    LocaleName)
-from lib.typehints.locale.help import CommandHelp
+from lib.typehints.locale.help import CommandHelp, ArgumentExplainer
 
 __all__: tuple = (
     'DictSequence',
@@ -34,7 +34,8 @@ __all__: tuple = (
     'EmbedLike',
     'GitBotUser',
     'LocaleName',
-    'CommandHelp'
+    'CommandHelp',
+    'ArgumentExplainer'
 )
 
 AnyDict = dict | DictProxy | CaseInsensitiveDict | MaxAgeDict | FixedSizeOrderedDict

@@ -6,12 +6,6 @@ from lib.globs import Mgr
 from lib.structs import GitBotEmbed
 
 
-def is_error_case(ctx: commands.Context, cls, error) -> bool:
-    if isinstance(error, cls) and not silenced(ctx, cls):
-        return True
-    return False
-
-
 def silenced(ctx: commands.Context, error) -> bool:
     return bool(getattr(ctx, f'__silence_{Mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
 

@@ -727,8 +727,12 @@
     "commands": {
       "commits": {
         "brief": "Get latest commits from a GitHub repository.",
+        "description": null,
         "usage": "commits [repo-with-branch]",
-        "example": "commits statch/gitbot"
+        "example": "commits statch/gitbot",
+        "argument_explainers": ["repo_with_branch"],
+        "qa_resource": "repo",
+        "required_permissions": []
       }
     },
     "argument_explainers": {

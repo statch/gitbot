@@ -31,10 +31,12 @@ class GitBotCommand(commands.Command):
         for permission_resource_name in self.get_help_content(ctx)['required_permissions']:
             yield ctx.l.permissions[permission_resource_name]
 
-    def get_help_content(self, ctx: commands.Context) -> CommandHelp:
+    def get_help_content(self, ctx: commands.Context) -> Optional[CommandHelp]:
         if cached := self._cached_help_contents.get(ctx.l.meta.name):
             return cached
-        help_: CommandHelp = ctx.l.help.commands[self.underscored_name]
+        help_: CommandHelp = ctx.l.help.commands.get(self.underscored_name)
+        if not help_:
+            return
         help_.setdefault(self.fullname)
         self._cached_help_contents[ctx.l.meta.name] = help_
         return help_
@@ -65,8 +67,10 @@ class GitBotCommandGroup(commands.Group, GitBotCommand):
 
         return decorator
 
-    def get_help_content(self, ctx: commands.Context, command_contents: bool = False) -> CommandGroupHelp:
+    def get_help_content(self, ctx: commands.Context, command_contents: bool = False) -> Optional[CommandGroupHelp]:
         help_: CommandHelp | CommandGroupHelp = super().get_help_content(ctx)
+        if not help_:
+            return
         help_.setdefault('commands', self.commands if not command_contents else [cmd.get_help_content(ctx)
                                                                                  for cmd in self.commands])
         return help_

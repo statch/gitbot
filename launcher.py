@@ -34,6 +34,10 @@ def prepare() -> None:
     prepare_sentry()
 
 
-if __name__ == '__main__':
+def run() -> None:
     prepare()
     bot.run(Mgr.env.bot_token)
+
+
+if __name__ == '__main__':
+    run()

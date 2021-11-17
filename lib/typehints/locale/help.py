@@ -1,5 +1,4 @@
-from typing import TypedDict
-from lib.utils.decorators import GitBotCommand
+from typing import TypedDict, Type
 
 
 class ArgumentExplainer(TypedDict):
@@ -25,4 +24,4 @@ class CommandGroupHelp(TypedDict):
     argument_explainers: list[str]
     qa_resource: str
     required_permissions: list[str]
-    commands: list[GitBotCommand | str]
+    commands: list[Type['lib.utils.decorators.GitBotCommand'] | str]  # noqa

@@ -4,7 +4,7 @@ import inspect
 from discord.ext import commands
 from typing import Callable, Any, Optional, Generator
 from lib.utils import regex
-from lib.typehints import GitHubRepository, CommandHelp, ArgumentExplainer, LocaleName
+from lib.typehints import GitHubRepository, CommandHelp, ArgumentExplainer, LocaleName, CommandGroupHelp
 
 
 class GitBotCommand(commands.Command):
@@ -24,8 +24,8 @@ class GitBotCommand(commands.Command):
         for explainer in self.get_help_content(ctx)['argument_explainers']:
             yield ctx.l.help.argument_explainers[explainer]
 
-    def get_qa_disclaimer(self, ctx: commands.Context) -> str:
-        return ctx.l.help.qa_disclaimers[self.get_help_content(ctx)['qa_resource']]
+    def get_qa_disclaimer(self, ctx: commands.Context) -> Optional[str]:
+        return ctx.l.help.qa_disclaimers.get(self.get_help_content(ctx)['qa_resource'])
 
     def get_permissions(self, ctx: commands.Context) -> Generator[str, None, None]:
         for permission_resource_name in self.get_help_content(ctx)['required_permissions']:
@@ -39,8 +39,11 @@ class GitBotCommand(commands.Command):
         self._cached_help_contents[ctx.l.meta.name] = help_
         return help_
 
+    def __str__(self) -> str:
+        return self.fullname
 
-class GitBotCommandGroup(commands.Group):
+
+class GitBotCommandGroup(commands.Group, GitBotCommand):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
@@ -61,6 +64,12 @@ class GitBotCommandGroup(commands.Group):
             return result
 
         return decorator
+
+    def get_help_content(self, ctx: commands.Context, command_contents: bool = False) -> CommandGroupHelp:
+        help_: CommandHelp | CommandGroupHelp = super().get_help_content(ctx)
+        help_.setdefault('commands', self.commands if not command_contents else [cmd.get_help_content(ctx)
+                                                                                 for cmd in self.commands])
+        return help_
 
 
 def _inject_aliases(name: str, **attrs) -> dict:
@@ -194,8 +203,6 @@ def gitbot_command(name: str, cls=GitBotCommand, **attrs) -> Callable:
     :param cls: The command class
     :param attrs: Additional attributes
     """
-
-    attrs.update()
 
     def decorator(func) -> commands.Command:
         return cls(func, name=name, **_inject_aliases(name, **attrs))

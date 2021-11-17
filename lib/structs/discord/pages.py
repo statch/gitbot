@@ -11,7 +11,7 @@ from lib.globs import Mgr
 class EmbedPagesControl(Enum):
     BACK = '◀'
     STOP = '⏹'
-    FORWARD = '▶'
+    NEXT = '▶'
 
 
 ACTIONS: set = {e.value for e in EmbedPagesControl}
@@ -170,14 +170,15 @@ class EmbedPages:
                     await self.edit(GitBotCommandState.TIMEOUT)
                     break
                 action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
-                if action is EmbedPagesControl.BACK:
-                    await self.previous_page()
-                elif action is EmbedPagesControl.FORWARD:
-                    await self.next_page()
-                elif action is EmbedPagesControl.STOP:
-                    await self.edit(GitBotCommandState.CLOSED)
-                    Mgr.debug('Stopping embed paginator loop - closed')
-                    break
+                match action:
+                    case EmbedPagesControl.BACK:
+                        await self.previous_page()
+                    case EmbedPagesControl.NEXT:
+                        await self.next_page()
+                    case EmbedPagesControl.STOP:
+                        await self.edit(GitBotCommandState.CLOSED)
+                        Mgr.debug('Stopping embed paginator loop - closed')
+                        break
                 Mgr.debug('Removing control reaction')
                 await reaction.message.remove_reaction(reaction.emoji, user)
                 await asyncio.sleep(0.555)

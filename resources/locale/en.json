@@ -73,7 +73,9 @@
       "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
       "commit": "A commit with this OID **doesn't exist** in {0}!",
       "ref": "A branch called {0} **doesn't exist** in {1}!",
-      "command": "**I couldn't find that command!** Re-check the spelling?"
+      "command": "**I couldn't find that command!** Re-check the spelling?",
+      "group": "**I couldn't find that command group!** Re-check the spelling?",
+      "command_or_group": "**I couldn't find that command/group!** Re-check the spelling?"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -110,6 +112,7 @@
     "description": "Description",
     "arguments": "Arguments",
     "command": "Command",
+    "command_group": "Command Group",
     "github_repo_term": "repository",
     "gitlab_repo_term": "project",
     "website": "website"
@@ -721,10 +724,29 @@
   },
   "help": {
     "required_permissions": "Required Permissions",
+    "commands_inside_group": "Commands inside this group",
     "default": {
 
     },
     "commands": {
+      "repo": {
+        "brief": "Get info about a GitHub repo.",
+        "description": "This command group provides many useful commands ranging from overall info and stats, to downloading and inspecting a repo's code.",
+        "usage": "repo [repo-or-subcommand]",
+        "example": null,
+        "argument_explainers": ["repo_or_subcommand"],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_download": {
+        "brief": "Download the code of a GitHub repo.\nThe max size is 8MB.",
+        "description": null,
+        "usage": "download <repo>",
+        "example": "download statch/gitbot",
+        "argument_explainers": ["repo"],
+        "qa_resource": null,
+        "required_permissions": []
+      },
       "commits": {
         "brief": "Get latest commits from a GitHub repository.",
         "description": null,
@@ -739,6 +761,14 @@
       "repo_with_branch": {
         "name": "repo-with-branch",
         "content": "The repo and branch separated by a `/` character (ex. `statch/gitbot/v3`). If the branch is omitted, the default one is used (`statch/gitbot/main`)"
+      },
+      "repo": {
+        "name": "repo",
+        "content": "The name of the repository in the `owner/name` format (ex. `statch/gitbot`)"
+      },
+      "repo_or_subcommand": {
+        "name": "repo-or-subcommand",
+        "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
       }
     },
     "qa_disclaimers": {

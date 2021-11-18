@@ -3,7 +3,7 @@ import discord
 import logging
 from lib.globs import Mgr
 from discord.ext import commands
-from lib.utils.decorators import restricted
+from lib.utils.decorators import restricted, gitbot_command
 
 intents: discord.Intents = discord.Intents(
     messages=True,
@@ -75,19 +75,19 @@ async def do_cog_op(ctx: commands.Context, cog: str, op: str) -> None:
             await ctx.success(f'**Successfully {op}ed** `{cog}`.')
 
 
-@bot.command(name='reload')
+@gitbot_command(name='reload', hidden=True)
 @restricted()
 async def reload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
-@bot.command(name='load')
+@gitbot_command(name='load', hidden=True)
 @restricted()
 async def load_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
-@bot.command(name='unload')
+@gitbot_command(name='unload', hidden=True)
 @restricted()
 async def unload_command(ctx: commands.Context, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
@@ -110,9 +110,5 @@ async def before_invoke(ctx: commands.Context) -> None:
 
 @bot.event
 async def on_ready() -> None:
-    command: commands.Command
-    for command in bot.walk_commands():
-        if command in Mgr.env.hidden_commands:
-            command.hidden = True
     logger.info(f'The bot is ready.')
     logger.info(f'discord.py version: {discord.__version__}\n')

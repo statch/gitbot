@@ -37,7 +37,8 @@ class GitBotCommand(commands.Command):
         help_: CommandHelp = ctx.l.help.commands.get(self.underscored_name)
         if not help_:
             return
-        help_.setdefault(self.fullname)
+        if not help_['usage']:
+            help_['usage'] = self.fullname
         self._cached_help_contents[ctx.l.meta.name] = help_
         return help_
 

@@ -42,6 +42,8 @@ class Manager:
     """
 
     def __init__(self, github):
+        self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
+        self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
         self.git = github
         self.ses: aiohttp.ClientSession = self.git.ses
         self._prepare_env()

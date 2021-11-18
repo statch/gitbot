@@ -2,10 +2,8 @@ import os
 import sys
 import click
 import subprocess
-
-APP_ROOT_DIR: str = (CLI_ROOT_DIR := os.path.dirname((os.path.abspath(__file__))))[:CLI_ROOT_DIR.rindex(os.sep)]
-PYTHON_COMMAND_LINE: str = (os.path.join(APP_ROOT_DIR, 'venv/Scripts/python.exe') if
-                            'venv' in os.listdir(APP_ROOT_DIR) else (sys.executable or 'python'))
+from .config import PYTHON_COMMAND_LINE, APP_ROOT_DIR
+from .scripts import run_help_helper
 
 
 @click.group()
@@ -48,3 +46,13 @@ def install():
         subprocess.call(f'{PYTHON_COMMAND_LINE} -m pip install --disable-pip-version-check -r {path}', shell=True)
     else:
         subprocess.call([PYTHON_COMMAND_LINE, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', path])
+
+
+@dev.command('help-helper',
+             help='Incredibly useful command with an even more incredibly hilarious name that displays prompts '
+                  'for each command that needs to have its help added into the default locale file. Before using this, '
+                  'use the "git dev export-commands json" command, so that the script has a command list to work with')
+@click.option('--debug', is_flag=True,
+              help='Does not actually update the locale files, useful for updating this command itself', default=False)
+def help_helper(debug: bool = False):
+    run_help_helper(debug=debug)

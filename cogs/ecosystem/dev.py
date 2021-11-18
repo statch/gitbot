@@ -1,15 +1,28 @@
+import io
+import json
+import discord
+from enum import Enum
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
-from lib.utils.decorators import gitbot_group
+from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup
+
+
+class ExportFileType(Enum):
+    """
+    Enum for the different export file types.
+    """
+
+    JSON = 'json'
+    TEXT = 'txt'
 
 
 class Dev(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @gitbot_group('dev')
+    @gitbot_group('dev', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def dev_command_group(self, ctx: commands.Context) -> None:
         ctx.fmt.set_prefix('dev default')
@@ -28,7 +41,7 @@ class Dev(commands.Cog):
             )
             await ctx.send(embed=embed)
 
-    @dev_command_group.command('missing-locales')
+    @dev_command_group.command('missing-locales', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: commands.Context, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
@@ -52,6 +65,37 @@ class Dev(commands.Cog):
                 description='\n'.join([f'{Mgr.e.square} {_gen_locale_path(path)}' for path in missing])
             )
             await ctx.send(embed=embed)
+
+    @dev_command_group.command('export-commands', hidden=True)
+    @commands.cooldown(1, 600, commands.BucketType.guild)
+    async def export_commands_command(self, ctx: commands.Context, format_: str = 'txt', direct: bool = False) -> None:
+        try:
+            format_: ExportFileType = ExportFileType(format_.lower())
+        except ValueError:
+            await ctx.err(ctx.fmt('invalid_format', ','.join([f'`{e.value}`' for e in ExportFileType])))
+            return
+        ctx.fmt.set_prefix('dev export_commands')
+        command: GitBotCommand | GitBotCommandGroup
+        commands_: list[str] = []
+        for command in self.bot.walk_commands():
+            if not command.hidden:
+                commands_.append(command.fullname)
+        match format_:
+            case ExportFileType.TEXT:
+                command_strings: str = '\n'.join(commands_)
+            case ExportFileType.JSON:
+                command_strings: str = json.dumps(commands_)
+            case _:
+                return
+        if ctx.author.id == 548803750634979340 and not direct:
+            with open(f'{Mgr.root_directory}/commands.{format_.value}', 'w+') as exportfile:
+                exportfile.write(command_strings)
+            await ctx.success(ctx.fmt('success_direct', len(commands_)))
+            self.export_commands_command.reset_cooldown(ctx)
+        else:
+            await ctx.success(ctx.fmt('success_download', len(commands_)),
+                              file=discord.File(fp=io.StringIO(command_strings),
+                                                filename=f'commands.{format_.value}'))
 
 
 def setup(bot: commands.Bot) -> None:

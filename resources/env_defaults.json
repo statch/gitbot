@@ -10,14 +10,5 @@
     "codeblock": false,
     "gh_url":  false,
     "gh_lines": 0
-  },
-  "hidden_commands": [
-    "dev",
-    "dev missing-locales",
-    "eval",
-    "dispatch",
-    "load",
-    "unload",
-    "reload"
-  ]
+  }
 }

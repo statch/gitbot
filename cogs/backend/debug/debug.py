@@ -25,7 +25,7 @@ class Debug(commands.Cog):
         self.bot: commands.Bot = bot
 
     @restricted()
-    @gitbot_command(name='dispatch', aliases=['event'])
+    @gitbot_command(name='dispatch', aliases=['event'], hidden=True)
     async def event_dispatch_command(self, ctx: commands.Context, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
         cor = {
@@ -41,7 +41,7 @@ class Debug(commands.Cog):
             await ctx.err(f'Failed to dispatch event `{event}`')
 
     @restricted()
-    @gitbot_command(name='ratelimit', aliases=['rate'])
+    @gitbot_command(name='ratelimit', aliases=['rate'], hidden=True)
     async def ratelimit_command(self, ctx: commands.Context) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
@@ -67,7 +67,7 @@ class Debug(commands.Cog):
 
     @commands.is_owner()
     @restricted()
-    @gitbot_command(name='eval')
+    @gitbot_command(name='eval', hidden=True)
     async def eval_command(self, ctx: commands.Context, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'

@@ -11,13 +11,13 @@ class Help(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    def _get_commands(self) -> Iterator[GitBotCommand]:
-        command: commands.Command
+    def _get_commands(self) -> Iterator[GitBotCommand | GitBotCommandGroup]:
+        command: GitBotCommand | GitBotCommandGroup
         for command in self.bot.walk_commands():
             if not command.hidden:
                 yield command
 
-    def _get_command(self, name: str) -> Optional[GitBotCommand]:
+    def _get_command(self, name: str) -> Optional[GitBotCommand | GitBotCommandGroup]:
         if name.startswith(self.bot.command_prefix):
             name: str = name.strip(self.bot.command_prefix)
         return self.bot.get_command(name)

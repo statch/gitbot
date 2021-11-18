@@ -191,7 +191,12 @@
       "owner": "{0}'s repos"
     },
     "info": {
-      "glossary": ["Bio", "Info", "Links", "Website"],
+      "glossary": [
+        "Bio",
+        "Info",
+        "Links",
+        "Website"
+      ],
       "title": "{0}'s Profile",
       "joined_at": "Joined GitHub on {0}",
       "company": "Works at {0}",
@@ -226,7 +231,12 @@
       "more": "View {0} more on Github"
     },
     "info": {
-      "glossary": ["Description", "Info", "Links", "Website"],
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Website"
+      ],
       "title": "{0}'s Profile",
       "created_at": "Created on {0}",
       "members": "Has [{0} public members]({1})",
@@ -241,7 +251,13 @@
   },
   "repo": {
     "info": {
-      "glossary": ["Description", "Info", "Links", "Topics", "Homepage"],
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Topics",
+        "Homepage"
+      ],
       "created_at": "Created on {0}",
       "issues": {
         "plural": "Has [{0} open issues]({1})",
@@ -289,7 +305,10 @@
     }
   },
   "gist": {
-    "glossary": ["Contents", "Info"],
+    "glossary": [
+      "Contents",
+      "Info"
+    ],
     "title": "{0}'s gists",
     "created_at": "Created by {0} on {1}",
     "updated_at": "Last updated on {0}",
@@ -314,7 +333,11 @@
     }
   },
   "issue": {
-    "glossary": ["Body", "Info", "Labels"],
+    "glossary": [
+      "Body",
+      "Info",
+      "Labels"
+    ],
     "stored_no_number": "If you want to access the stored repo's issues, please pass in an **issue number!**",
     "second_argument_number": "The second argument must be an issue **number!**",
     "created_at": "Created by {0} on {1}",
@@ -336,7 +359,13 @@
     }
   },
   "pr": {
-    "glossary": ["Info", "Participants", "Assignees", "Reviewers", "Labels"],
+    "glossary": [
+      "Info",
+      "Participants",
+      "Assignees",
+      "Reviewers",
+      "Labels"
+    ],
     "stored_no_number": "If you want to access the stored repo's PRs, please pass in a **pull request number!**",
     "second_argument_number": "The second argument must be a pull request **number!**",
     "created_at": "Created by {0} on {1}",
@@ -515,10 +544,10 @@
           "list": {
             "locale": "Language: {0}"
           }
-      },
-      "item_not_set": "Not set",
-      "item_not_configured": "Not configured",
-      "footer": "To view release feed repos, type {0}"
+        },
+        "item_not_set": "Not set",
+        "item_not_configured": "Not configured",
+        "footer": "To view release feed repos, type {0}"
       },
       "feed": {
         "title": "This server's release feeds",
@@ -527,9 +556,7 @@
       }
     },
     "autoconv": {
-      "default": {
-
-      },
+      "default": {},
       "toggles": {
         "gh_url": {
           "true": "Automatic GitHub link conversion **turned ON**",
@@ -725,16 +752,16 @@
   "help": {
     "required_permissions": "Required Permissions",
     "commands_inside_group": "Commands inside this group",
-    "default": {
-
-    },
+    "default": {},
     "commands": {
       "repo": {
         "brief": "Get info about a GitHub repo.",
         "description": "This command group provides many useful commands ranging from overall info and stats, to downloading and inspecting a repo's code.",
         "usage": "repo [repo-or-subcommand]",
         "example": null,
-        "argument_explainers": ["repo_or_subcommand"],
+        "argument_explainers": [
+          "repo_or_subcommand"
+        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -743,7 +770,9 @@
         "description": null,
         "usage": "download <repo>",
         "example": "download statch/gitbot",
-        "argument_explainers": ["repo"],
+        "argument_explainers": [
+          "repo"
+        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -752,7 +781,9 @@
         "description": null,
         "usage": "commits [repo-with-branch]",
         "example": "commits statch/gitbot",
-        "argument_explainers": ["repo_with_branch"],
+        "argument_explainers": [
+          "repo_with_branch"
+        ],
         "qa_resource": "repo",
         "required_permissions": []
       }
@@ -800,7 +831,14 @@
       }
     },
     "info": {
-      "glossary": ["Summary", "Info", "Links", "Homepage", "Documentation", "Bugtracker"],
+      "glossary": [
+        "Summary",
+        "Info",
+        "Links",
+        "Homepage",
+        "Documentation",
+        "Bugtracker"
+      ],
       "author": "Created by {0}",
       "first_upload": "First release uploaded at {0}",
       "requires_python": "Requires Python version {0}",
@@ -809,7 +847,10 @@
     "downloads": {
       "title": "{0} downloads over the last {1} days",
       "footer": "PyPi project statistics are provided by pypistats.org",
-      "glossary": ["Date", "Downloads"],
+      "glossary": [
+        "Date",
+        "Downloads"
+      ],
       "stats": {
         "yesterday": "Yesterday: **{0}**",
         "last_week": "Last Week: **{0}**",

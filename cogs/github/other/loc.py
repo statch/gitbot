@@ -18,7 +18,7 @@ class LinesOfCode(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
-    @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'])
+    @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'], hidden=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
     async def lines_of_code_command_nocache(self, ctx: commands.Context, repo: GitHubRepository) -> None:

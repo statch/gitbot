@@ -201,10 +201,10 @@ class Repo(commands.Cog):
                                   repo: Optional[GitHubRepository] = None) -> None:
         await ctx.invoke(self.bot.get_command('commits'), repo=repo)
 
-    # @repo_command_group.command(name='loc')
-    # @commands.cooldown(8, 60, commands.BucketType.default)
-    # async def loc_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
-    #     await ctx.invoke(self.bot.get_command('loc'), repo=repo)
+    @repo_command_group.command(name='loc')
+    @commands.cooldown(8, 60, commands.BucketType.default)
+    async def loc_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+        await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 
 
 def setup(bot: commands.Bot) -> None:

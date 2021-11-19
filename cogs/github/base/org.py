@@ -85,7 +85,7 @@ class Org(commands.Cog):
     async def org_repos_command(self, ctx: commands.Context, org: GitHubOrganization) -> None:
         ctx.fmt.set_prefix('org repos')
         o: Optional[dict] = await Git.get_org(org)
-        repos: list = [x for x in await Git.get_org_repos(org)]
+        repos: list = await Git.get_org_repos(org)
         if o is None:
             await ctx.err(ctx.l.generic.nonexistent.org.base)
             return

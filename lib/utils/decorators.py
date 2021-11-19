@@ -7,9 +7,6 @@ from lib.utils import regex
 
 
 class _GitBotCommandGroup(commands.Group):
-    def __init__(self, func, **attrs):
-        super().__init__(func, **attrs)
-
     def command(self, *args, **kwargs) -> Callable:
         def decorator(func: Coroutine) -> commands.Command:
             kwargs.setdefault('parent', self)

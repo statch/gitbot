@@ -67,6 +67,238 @@ class Manager:
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
 
+    @staticmethod
+    def parse_literal(literal: str) -> str | bytes | int | set | dict | tuple | list | bool | float | None:
+        """
+        Parse a literal into a Python object
+
+        :param literal: The literal to parse
+        :raises ValueError, SyntaxError: If the value is malformed, then ValueError or SyntaxError is raised
+        :return: The parsed literal (an object)
+        """
+
+        return ast.literal_eval(literal)
+
+    @staticmethod
+    def get_closest_match_from_iterable(to_match: str, iterable: Iterable[str]) -> str:
+        """
+        Iterate through an iterable of :class:`str` and return the item that resembles to_match the most.
+
+        :param to_match: The :class:`str` to pair with a match
+        :param iterable: The iterable to search for matches
+        :return: The closest match
+        """
+
+        best = 0, ''
+        for i in iterable:
+            if (m := fuzz.token_set_ratio(i := str(i), to_match)) > best[0]:
+                best = m, i
+        return best[1]
+
+    @staticmethod
+    def pascal_to_snake_case(string: str) -> str:
+        """
+        Convert a PascalCase string to snake_case
+
+        :param string: The string to convert
+        :return: The converted string
+        """
+
+        return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
+
+    @staticmethod
+    def to_github_hyperlink(name: str, codeblock: bool = False) -> str:
+        """
+        Return f"[{name}](GITHUB_URL)"
+
+        :param name: The GitHub name to embed in the hyperlink
+        :param codeblock: Whether to wrap the hyperlink with backticks
+        :return: The created hyperlink
+        """
+
+        return (f'[{name}](https://github.com/{name.lower()})' if not codeblock
+                else f'[`{name}`](https://github.com/{name.lower()})')
+
+    @staticmethod
+    def truncate(string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
+        """
+        Append the ending to the cut string if len(string) exceeds length else return unchanged string.
+
+        .. note ::
+            The actual length of the **content** of the string equals length - len(ending) without full_word
+
+        :param string: The string to truncate
+        :param length: The desired length of the string
+        :param ending: The ending to append
+        :param full_word: Whether to cut in the middle of the last word ("pyth...")
+                          or to skip it entirely and append the ending
+        :return: The truncated (or unchanged) string
+        """
+
+        if len(string) > length:
+            if full_word:
+                string: str = string[:length - len(ending)]
+                return f"{string[:string.rindex(' ')]}{ending}".strip()
+            return string[:length - len(ending)] + ending
+        return string
+
+    @staticmethod
+    def flatten(iterable: Iterable) -> Iterable:
+        return list(iterable | traverse)
+
+    @staticmethod
+    def external_to_discord_timestamp(timestamp: str, ts_format: str) -> str:
+        """
+        Convert an external timestamp to the <t:timestamp> Discord format
+
+        :param timestamp: The timestamp
+        :param ts_format: The format of the timestamp
+        :return: The converted timestamp
+        """
+
+        return f'<t:{int(datetime.datetime.strptime(timestamp, ts_format).timestamp())}>'
+
+    @staticmethod
+    def gen_separator_line(length: Any, char: str = '⎯') -> str:
+        """
+        Generate a separator line with the provided length or the __len__ of the object passed
+
+        :param length: The length of the separator line
+        :param char: The character to use for the separator line
+        :return: The separator line
+        """
+
+        return char * (length if isinstance(length, int) else len(length))
+
+    @staticmethod
+    def log(message: str,
+            category: str = 'core',
+            bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
+            category_color: Fore = Fore.MAGENTA,
+            message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+        """
+        Colorful logging function because why not.
+
+        :param message: The message to log
+        :param category: The text in brackets
+        :param bracket_color: The color of the brackets
+        :param category_color: The color of the text in the brackets
+        :param message_color: The color of the message
+        """
+
+        print(
+            f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
+            f'{Style.RESET_ALL}')
+
+    @staticmethod
+    def opt(obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
+        """
+        Run an operation on an object if bool(object) == True
+
+        :param obj: The object to run the operation on
+        :param op: The operation to run if object is True
+        :param args: Optional arguments for op
+        :param kwargs: Optional keyword arguments for op
+        :return: The result of the operation or the unchanged object
+        """
+
+        if isinstance(op, (int, str)):
+            return obj[op] if obj else obj
+
+        return op(obj, *args, **kwargs) if obj else obj
+
+    @staticmethod
+    def getopt(obj: Any, attr: tuple[str, ...] | str | list[str]) -> Any:
+        """
+        Optional chaining for getting attributes
+
+        :param obj: The object to get the attribute from
+        :param attr: The attribute to get
+        :return: The attribute or None if it doesn't exist
+        """
+
+        if isinstance(attr, str):
+            attr: list[str] = attr.split('.')
+
+        for sub_attr in attr:
+            obj = getattr(obj, sub_attr, None)
+            if obj is None:
+                return
+        return obj
+
+    @staticmethod
+    async def verify_send_perms(channel: discord.TextChannel) -> bool:
+        """
+        Check if the client can comfortably send a message to a channel
+
+        :param channel: The channel to check permissions for
+        :return: Whether the client can send a message or not
+        """
+
+        if isinstance(channel, discord.DMChannel):
+            return True
+        perms: list = list(iter(channel.permissions_for(channel.guild.me)))
+        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
+        if all(req in perms + overwrites for req in [("send_messages", True),
+                                                     ("read_messages", True),
+                                                     ("read_message_history", True)]) \
+                or ("administrator", True) in perms:
+            return True
+        return False
+
+    @staticmethod
+    async def get_most_common(items: list | tuple) -> Any:
+        """
+        Get the most common item from a list/tuple
+
+        :param items: The iterable to return the most common item of
+        :return: The most common item from the iterable
+        """
+
+        return max(set(items), key=items.count)
+
+    @staticmethod
+    def get_remaining_keys(dict_: dict, keys: Iterable[str]) -> list[str]:
+        """
+        Return list(set(dict.keys()) ^ set(keys))
+
+        :param dict_: The dictionary to get the remaining keys from
+        :param keys: The keys to perform the XOR operation with
+        :return: The remaining keys
+        """
+
+        return list(set(dict_.keys()) ^ set(keys))
+
+    @staticmethod
+    def regex_get(dict_: dict, pattern: re.Pattern | str, default: Any = None) -> Any:
+        """
+        Kinda like dict.get, but with regex or __in__
+
+        :param dict_: The dictionary to get the value from
+        :param pattern: The pattern to match (The action will be __in__ if it's a string)
+        :param default: The default value to return if no match is found
+        :return: The value associated with the pattern, or the default value
+        """
+
+        compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
+                             else lambda k_: pattern in k_)
+        for k, v in dict_.items():
+            if compare(k):
+                return v
+        return default
+
+    @staticmethod
+    def get_nested_key(dict_: AnyDict, key: Iterable[str] | str) -> Any:
+        """
+        Get a nested dictionary key
+
+        :param dict_: The dictionary to get the key from
+        :param key: The key to get
+        :return: The value associated with the key
+        """
+
+        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
+
     def _setup_db(self) -> None:
         """
         Setup the database connection with ENV vars and a more predictable certificate location.
@@ -184,90 +416,6 @@ class Manager:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
 
-    def parse_literal(self, literal: str) -> str | bytes | int | set | dict | tuple | list | bool | float | None:
-        """
-        Parse a literal into a Python object
-
-        :param literal: The literal to parse
-        :raises ValueError, SyntaxError: If the value is malformed, then ValueError or SyntaxError is raised
-        :return: The parsed literal (an object)
-        """
-
-        return ast.literal_eval(literal)
-
-    def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
-        """
-        Iterate through an iterable of :class:`str` and return the item that resembles to_match the most.
-
-        :param to_match: The :class:`str` to pair with a match
-        :param iterable: The iterable to search for matches
-        :return: The closest match
-        """
-
-        best = 0, ''
-        for i in iterable:
-            if (m := fuzz.token_set_ratio(i := str(i), to_match)) > best[0]:
-                best = m, i
-        return best[1]
-
-    def pascal_to_snake_case(self, string: str) -> str:
-        """
-        Convert a PascalCase string to snake_case
-
-        :param string: The string to convert
-        :return: The converted string
-        """
-
-        return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
-
-    def to_github_hyperlink(self, name: str, codeblock: bool = False) -> str:
-        """
-        Return f"[{name}](GITHUB_URL)"
-
-        :param name: The GitHub name to embed in the hyperlink
-        :param codeblock: Whether to wrap the hyperlink with backticks
-        :return: The created hyperlink
-        """
-
-        return (f'[{name}](https://github.com/{name.lower()})' if not codeblock
-                else f'[`{name}`](https://github.com/{name.lower()})')
-
-    def truncate(self, string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
-        """
-        Append the ending to the cut string if len(string) exceeds length else return unchanged string.
-
-        .. note ::
-            The actual length of the **content** of the string equals length - len(ending) without full_word
-
-        :param string: The string to truncate
-        :param length: The desired length of the string
-        :param ending: The ending to append
-        :param full_word: Whether to cut in the middle of the last word ("pyth...")
-                          or to skip it entirely and append the ending
-        :return: The truncated (or unchanged) string
-        """
-
-        if len(string) > length:
-            if full_word:
-                string: str = string[:length - len(ending)]
-                return f"{string[:string.rindex(' ')]}{ending}".strip()
-            return string[:length - len(ending)] + ending
-        return string
-
-    def flatten(self, iterable: Iterable) -> Iterable:
-        return list(iterable | traverse)
-
-    def external_to_discord_timestamp(self, timestamp: str, ts_format: str) -> str:
-        """
-        Convert an external timestamp to the <t:timestamp> Discord format
-
-        :param timestamp: The timestamp
-        :param ts_format: The format of the timestamp
-        :return: The converted timestamp
-        """
-
-        return f'<t:{int(datetime.datetime.strptime(timestamp, ts_format).timestamp())}>'
-
     def github_to_discord_timestamp(self, github_timestamp: str) -> str:
         """
         Convert a GitHub-formatted timestamp (%Y-%m-%dT%H:%M:%SZ) to the <t:timestamp> Discord format
@@ -290,26 +438,6 @@ class Manager:
         """
 
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
-
-    def log(self,
-            message: str,
-            category: str = 'core',
-            bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
-            category_color: Fore = Fore.MAGENTA,
-            message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
-        """
-        Colorful logging function because why not.
-
-        :param message: The message to log
-        :param category: The text in brackets
-        :param bracket_color: The color of the brackets
-        :param category_color: The color of the text in the brackets
-        :param message_color: The color of the message
-        """
-
-        print(
-            f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
-            f'{Style.RESET_ALL}')
 
     def get_last_call_from_callstack(self, frames_back: int = 2) -> str:
         """
@@ -420,40 +548,6 @@ class Manager:
             self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
                      category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
         return final_size
-
-    def opt(self, obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
-        """
-        Run an operation on an object if bool(object) == True
-
-        :param obj: The object to run the operation on
-        :param op: The operation to run if object is True
-        :param args: Optional arguments for op
-        :param kwargs: Optional keyword arguments for op
-        :return: The result of the operation or the unchanged object
-        """
-
-        if isinstance(op, (int, str)):
-            return obj[op] if obj else obj
-
-        return op(obj, *args, **kwargs) if obj else obj
-
-    def getopt(self, obj: Any, attr: tuple[str, ...] | str | list[str]) -> Any:
-        """
-        Optional chaining for getting attributes
-
-        :param obj: The object to get the attribute from
-        :param attr: The attribute to get
-        :return: The attribute or None if it doesn't exist
-        """
-
-        if isinstance(attr, str):
-            attr: list[str] = attr.split('.')
-
-        for sub_attr in attr:
-            obj = getattr(obj, sub_attr, None)
-            if obj is None:
-                return
-        return obj
 
     def dict_full_path(self,
                        dict_: AnyDict,
@@ -568,25 +662,6 @@ class Manager:
             _recursive(proxy)
         return proxy
 
-    async def verify_send_perms(self, channel: discord.TextChannel) -> bool:
-        """
-        Check if the client can comfortably send a message to a channel
-
-        :param channel: The channel to check permissions for
-        :return: Whether the client can send a message or not
-        """
-
-        if isinstance(channel, discord.DMChannel):
-            return True
-        perms: list = list(iter(channel.permissions_for(channel.guild.me)))
-        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
-        if all(req in perms + overwrites for req in [("send_messages", True),
-                                                     ("read_messages", True),
-                                                     ("read_message_history", True)]) \
-                or ("administrator", True) in perms:
-            return True
-        return False
-
     async def get_link_reference(self,
                                  ctx: commands.Context) -> Optional[GitCommandData]:
         """
@@ -614,16 +689,6 @@ class Manager:
                                                               match.groups())) for cmd in command)
                 return GitCommandData(command, kwargs)
         self.debug(f'No match found for "{ctx.message.content}"')
-
-    async def get_most_common(self, items: list | tuple) -> Any:
-        """
-        Get the most common item from a list/tuple
-
-        :param items: The iterable to return the most common item of
-        :return: The most common item from the iterable
-        """
-
-        return max(set(items), key=items.count)
 
     def construct_gravatar_url(self, email: str, size: int = 512, default: Optional[str] = None) -> str:
         """
@@ -805,17 +870,6 @@ class Manager:
         except AttributeError:
             return self.locale.master
 
-    def get_nested_key(self, dict_: AnyDict, key: Iterable[str] | str) -> Any:
-        """
-        Get a nested dictionary key
-
-        :param dict_: The dictionary to get the key from
-        :param key: The key to get
-        :return: The value associated with the key
-        """
-
-        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
-
     def get_by_key_from_sequence(self,
                                  seq: DictSequence,
                                  key: str,
@@ -849,34 +903,6 @@ class Manager:
                     matching.append(d)
         return matching
 
-    def get_remaining_keys(self, dict_: dict, keys: Iterable[str]) -> list[str]:
-        """
-        Return list(set(dict.keys()) ^ set(keys))
-
-        :param dict_: The dictionary to get the remaining keys from
-        :param keys: The keys to perform the XOR operation with
-        :return: The remaining keys
-        """
-
-        return list(set(dict_.keys()) ^ set(keys))
-
-    def regex_get(self, dict_: dict, pattern: re.Pattern | str, default: Any = None) -> Any:
-        """
-        Kinda like dict.get, but with regex or __in__
-
-        :param dict_: The dictionary to get the value from
-        :param pattern: The pattern to match (The action will be __in__ if it's a string)
-        :param default: The default value to return if no match is found
-        :return: The value associated with the pattern, or the default value
-        """
-
-        compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
-                             else lambda k_: pattern in k_)
-        for k, v in dict_.items():
-            if compare(k):
-                return v
-        return default
-
     def populate_generic_numbered_resource(self,
                                            resource: dict,
                                            fmt_str: Optional[str] = None,
@@ -907,17 +933,6 @@ class Manager:
                 else:
                     populated[rk] = rv
         return fmt_str.format(**populated) if fmt_str else populated
-
-    def gen_separator_line(self, length: Any, char: str = '⎯') -> str:
-        """
-        Generate a separator line with the provided length or the __len__ of the object passed
-
-        :param length: The length of the separator line
-        :param char: The character to use for the separator line
-        :return: The separator line
-        """
-
-        return char * (length if isinstance(length, int) else len(length))
 
     def option_display_list_format(self, options: dict[str, str] | list[str], style: str = 'pixel') -> str:
         """
@@ -959,9 +974,9 @@ class Manager:
         """
 
         for locale in self.locale.languages:
-            for k, v in locale.items():
-                match_: int = fuzz.token_set_ratio(attribute, v)
-                if v == attribute or match_ > 80:
+            for lv in locale.values():
+                match_: int = fuzz.token_set_ratio(attribute, lv)
+                if lv == attribute or match_ > 80:
                     return locale, match_ == 100
 
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:

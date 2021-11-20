@@ -5,9 +5,10 @@ import atexit
 import copy
 from typing import Optional
 from collections import OrderedDict
-from cli.config import APP_ROOT_DIR, LOCALE_DIR
+from cli.config import APP_ROOT_DIR
+from .common import get_master_locale, save_changes
 
-__all__: tuple = ('run_help_helper',)
+__all__: tuple = ('run_help_helper', 'PROMPTS')
 # We use these ugly-ish type annotations since we can't annotate global variables
 DEBUG = False  # type: bool
 OLD_LOCALE = None  # type: Optional[OrderedDict]
@@ -36,24 +37,16 @@ def fix_dict(d: OrderedDict) -> OrderedDict:
     return d
 
 
-def exit_save_changes(unregister_atexit: bool = True) -> None:
+def exit_save_changes() -> None:
     global LOCALE, OLD_LOCALE
 
     if LOCALE and OLD_LOCALE and LOCALE != OLD_LOCALE:
         if not DEBUG:
-            if unregister_atexit:
-                atexit.unregister(exit_save_changes)
-            with open(os.path.join(LOCALE_DIR, f'{LOCALE["meta"]["name"]}.last.json'), 'w+') as old_locale_file:
-                old_locale_file.write(json.dumps(OLD_LOCALE, indent=2))
-            with open(os.path.join(LOCALE_DIR, f'{LOCALE["meta"]["name"]}.json'), 'w+') as locale_file:
-                locale_file.write(json.dumps(LOCALE, indent=2))
+            save_changes(LOCALE, OLD_LOCALE)
             click.echo(click.style('Changes saved.', fg='green'))
         else:
             click.echo(click.style('Exit-save callback would be called,'
                                    ' but debug mode is enabled.', fg='yellow', italic=True))
-
-
-atexit.register(exit_save_changes)
 
 
 def prompt(name: str, is_group: bool) -> OrderedDict:
@@ -76,6 +69,7 @@ def prompt(name: str, is_group: bool) -> OrderedDict:
 def run_help_helper(debug: bool = False):
     global LOCALE, OLD_LOCALE, DEBUG
 
+    atexit.register(exit_save_changes)
     DEBUG = debug
     if debug:
         click.echo(click.style('Debug mode enabled.', fg='yellow', italic=True))
@@ -88,11 +82,8 @@ def run_help_helper(debug: bool = False):
         click.echo(click.style('Could not find commands.json!'
                                ' Generate it with "git dev export-commands json" via Discord', fg='bright_red'))
         return
-    with open(os.path.join(LOCALE_DIR, 'index.json'), 'r') as locale_index_file:
-        locale_index: dict = json.load(locale_index_file)
-    with open(os.path.join(LOCALE_DIR, f'{locale_index["master"]}.json'), 'r') as locale_file:
-        LOCALE = json.load(locale_file, object_pairs_hook=OrderedDict)  # noqa, we use OrderedDict to be safe
-        OLD_LOCALE = copy.deepcopy(LOCALE)
+    LOCALE = get_master_locale()
+    OLD_LOCALE = copy.deepcopy(LOCALE)
 
     processed: list[str] = []
 
@@ -120,7 +111,6 @@ def run_help_helper(debug: bool = False):
                                               f' (Next up: {commands[commands.index(command_name) + 1]})',
                                               blink=True, fg='bright_cyan'),
                                   default=True, show_default=True)) or command_name == commands[-1]:
-                exit_save_changes()
                 break
         else:
             click.echo(click.style(f'Skipping command/group {command_name} - already added', fg='cyan'))

@@ -52,10 +52,8 @@ def exit_save_changes() -> None:
 def prompt(name: str, is_group: bool) -> OrderedDict:
     term: str = "command" if not is_group else "group"
     click.echo(click.style(f'{term.title()}: {name}', fg='bright_cyan'))
-    underscored_name: str = name.replace(' ', '_')
     prompt_results: dict = {vn: p() for vn, p in PROMPTS.items()}
-    ret = OrderedDict([('underscored_name', underscored_name),
-                       ('brief', ''),
+    ret = OrderedDict([('brief', ''),
                        ('usage', None),
                        ('example', None),
                        ('description', None),
@@ -88,7 +86,8 @@ def run_help_helper(debug: bool = False):
     processed: list[str] = []
 
     for command_name in commands:
-        if command_name not in LOCALE['help']['commands']:
+        underscored_name: str = command_name.replace(' ', '_')
+        if underscored_name not in LOCALE['help']['commands']:
             command_data = prompt(command_name,
                                   is_group=(raw_command_list_json.count('"' + command_name + ' ') > 1
                                             and ' ' not in command_name))
@@ -97,7 +96,7 @@ def run_help_helper(debug: bool = False):
                                  '\n'.join([click.style(f'{k}: {v}', fg='cyan')
                                             for k, v in command_data.items()]) + ' |',
                                  default=True, show_default=True):
-                    LOCALE['help']['commands'][command_data.pop('underscored_name')] = command_data
+                    LOCALE['help']['commands'][underscored_name] = command_data
                     break
                 else:
                     to_correct = click.prompt(click.style('What do you wish to correct? ("nevermind" to skip)',

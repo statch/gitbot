@@ -118,7 +118,8 @@
     "website": "website"
   },
   "permissions": {
-    "manage_webhooks": "Manage Webhooks"
+    "manage_webhooks": "Manage Webhooks",
+    "manage_channels": "Manage Channels"
   },
   "privacy_policy": {
     "title": "Privacy Policy",
@@ -786,6 +787,94 @@
         ],
         "qa_resource": "repo",
         "required_permissions": []
+      },
+      "config": {
+        "brief": "A command group responsible for setting and viewing GitBot's options",
+        "usage": "config [subcommand]",
+        "example": null,
+        "description": "Some of the settings are server-wide, so to adjust them you'll need specific permissions",
+        "argument_explainers": [
+          "subcommand"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_show": {
+        "brief": "View your saved GitBot options",
+        "usage": null,
+        "example": null,
+        "description": "If used inside a server, displays server-wide options as well",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_show_feed": {
+        "brief": "View repos that are logged in the server's release feeds",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_repo": {
+        "brief": "Set a quick-access repository",
+        "usage": "config repo <repo>",
+        "example": "config repo statch/gitbot",
+        "description": "Setting this will allow you to use certain commands that take in a repository in a shorter way (ex. git repo statch/gitbot -> git repo)",
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_lang": {
+        "brief": "Set GitBot's language (for you)",
+        "usage": "config lang [language]",
+        "example": "config lang portuguese",
+        "description": "If this command is used without a language name, it will display a list of available languages to choose from",
+        "argument_explainers": [
+          "locale"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed": {
+        "brief": "A command group used for creating and managing repository release feeds",
+        "usage": "config feed [subcommand]",
+        "example": null,
+        "description": "You can use commands in this group to set channels as release \"feeds\", add repos to them, and then get notified whenever a new release is created!",
+        "argument_explainers": [
+          "subcommand"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed_repo": {
+        "brief": "Add a repo to a release feed",
+        "usage": "config feed repo <repo>",
+        "example": "config feed repo statch/gitbot",
+        "description": "This command will display a list of your release feeds and ask you to choose which feed the repo should be added to",
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "config_feed_channel": {
+        "brief": "Add a new release feed",
+        "usage": "config feed channel <channel>",
+        "example": null,
+        "description": "This command will allow you to add a channel as a release feed, to then add repos and wait for new releases. You can have 5 of these in your server!",
+        "argument_explainers": [
+          "channel"
+        ],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
       }
     },
     "argument_explainers": {
@@ -800,10 +889,32 @@
       "repo_or_subcommand": {
         "name": "repo-or-subcommand",
         "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
+      },
+      "user": {
+        "name": "user",
+        "content": "The name of a GitHub user (ex. `itsmewulf`)"
+      },
+      "org": {
+        "name": "org",
+        "content": "The name of a GitHub organization (ex. `statch`)"
+      },
+      "subcommand": {
+        "name": "subcommand",
+        "content": "The name of another command in this group"
+      },
+      "locale": {
+        "name": "language",
+        "content": "A GitBot-supported language to use (ex. `portuguese`)"
+      },
+      "channel": {
+        "name": "channel",
+        "content": "The name, mention or ID of a channel in this server (ex. `#general`)"
       }
     },
     "qa_disclaimers": {
-      "repo": "This command can be called without the repo argument if you have a repo saved!\nUse git config to check it out!"
+      "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
+      "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
+      "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
     }
   },
   "dev": {

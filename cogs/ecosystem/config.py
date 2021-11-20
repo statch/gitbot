@@ -302,7 +302,7 @@ class Config(commands.Cog):
             await ctx.err(ctx.l.generic.nonexistent.repo.base)
 
     @config_command_group.command(name='lang', aliases=['locale', 'language'])
-    @commands.has_permissions(add_reactions=True)
+    @commands.bot_has_guild_permissions(add_reactions=True)
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_locale_command(self, ctx: commands.Context, locale: Optional[str] = None) -> None:
         ctx.fmt.set_prefix('config locale')
@@ -515,7 +515,6 @@ class Config(commands.Cog):
                 if await embed.confirmation(ctx, _callback):
                     await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
                     await ctx.success(ctx.fmt('success', channel.mention))
-                return
 
     @delete_feed_group.command('repo')
     @commands.guild_only()

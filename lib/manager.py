@@ -28,7 +28,9 @@ from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
                          CacheSchema, ParsedRepositoryData)
-from typing import Optional, Callable, Any, Reversible, Iterable, Type
+from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 
@@ -663,7 +665,7 @@ class Manager:
         return proxy
 
     async def get_link_reference(self,
-                                 ctx: commands.Context) -> Optional[GitCommandData]:
+                                 ctx: 'GitBotContext') -> Optional[GitCommandData]:
         """
         Get the command data required for invocation from a context
 
@@ -768,56 +770,6 @@ class Manager:
         if os.path.isdir(path):
             return DirProxy(path=path, ext=ext, **kwargs)
         self.debug(f'Not a directory: "{path}"')
-
-    async def enrich_context(self, ctx: commands.Context) -> commands.Context:
-        """
-        Bind useful attributes to the passed context object
-
-        :param ctx: The context object to bind additional attributes to
-        :return: The context object (With new attributes bound)
-        """
-
-        ctx.__nocache__ = False
-        ctx.__autoinvoked__ = False
-        ctx.info = functools.partial(self.send_info, ctx)
-        ctx.err = functools.partial(self.send_error, ctx)
-        ctx.success = functools.partial(self.send_success, ctx)
-        ctx.fmt = self.fmt(ctx)
-        ctx.l = await self.get_locale(ctx)  # noqa
-        return ctx
-
-    async def send_error(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
-        """
-        Context.send() with an emoji slapped in front ;-; (!)
-
-        :param ctx: The command invocation context
-        :param msg: The message content
-        :param kwargs: ctx.send keyword arguments
-        """
-
-        return await ctx.send(f'{self.e.err}  {msg}', **kwargs)
-
-    async def send_success(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
-        """
-        Context.send() with an emoji slapped in front ;-; (checkmark)
-
-        :param ctx: The command invocation context
-        :param msg: The message content
-        :param kwargs: ctx.send keyword arguments
-        """
-
-        return await ctx.send(f'{self.e.checkmark}  {msg}', **kwargs)
-
-    async def send_info(self, ctx: commands.Context, msg: str, **kwargs) -> discord.Message:
-        """
-        Context.send() with an emoji slapped in front ;-; (github)
-
-        :param ctx: The command invocation context
-        :param msg: The message content
-        :param kwargs: ctx.send keyword arguments
-        """
-
-        return await ctx.send(f'{self.e.github}  {msg}', **kwargs)
 
     @normalize_identity(context_resource='guild')
     async def get_autoconv_config(self,
@@ -1044,7 +996,7 @@ class Manager:
         for locale in self.l:
             _preprocess(locale)
 
-    def fmt(self, ctx: commands.Context) -> object:
+    def fmt(self, ctx: 'GitBotContext') -> object:
         """
         Instantiate a new Formatter object. Meant for binding to Context.
 
@@ -1055,8 +1007,8 @@ class Manager:
         self_: Manager = self
 
         class _Formatter:
-            def __init__(self, ctx_: commands.Context):
-                self.ctx: commands.Context = ctx_
+            def __init__(self, ctx_: 'GitBotContext'):
+                self.ctx: 'GitBotContext' = ctx_
                 self.prefix: str = ''
 
             def __call__(self, resource: tuple | str | list, /, *args, **kwargs) -> str:

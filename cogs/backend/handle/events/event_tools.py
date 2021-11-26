@@ -8,9 +8,10 @@ from cogs.github.other.snippets.snippet_tools import handle_url, gen_carbon_inme
 from typing import Optional
 from lib.typehints import AutomaticConversion
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
-def set_handler_ctx_attributes(ctx: commands.Context) -> commands.Context:
+def set_handler_ctx_attributes(ctx: GitBotContext) -> commands.Context:
     ctx.__silence_max_concurrency_error__ = True
     ctx.__silence_command_on_cooldown_error__ = True
     return ctx
@@ -19,7 +20,7 @@ def set_handler_ctx_attributes(ctx: commands.Context) -> commands.Context:
 @commands.command('snippet-no-error', hidden=True)
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(6, wait=True)
-async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Message]:
+async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message]:
     codeblock: Optional[str] = None
     config: AutomaticConversion = await Mgr.get_autoconv_config(ctx)
     if (attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
@@ -52,7 +53,7 @@ async def silent_snippet_command(ctx: commands.Context) -> Optional[discord.Mess
         return reply
 
 
-async def handle_codeblock_message(ctx: commands.Context) -> Optional[discord.Message]:
+async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Message]:
     set_handler_ctx_attributes(ctx)
     return await ctx.invoke(silent_snippet_command)
 
@@ -60,7 +61,7 @@ async def handle_codeblock_message(ctx: commands.Context) -> Optional[discord.Me
 @commands.command('resolve-url-no-error', hidden=True)
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(10, wait=True)
-async def resolve_url_command(ctx: commands.Context) -> Optional[discord.Message]:
+async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
     if (await Mgr.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await Mgr.get_link_reference(ctx)):
         ctx.__autoinvoked__ = True
         if isinstance(cmd_data.command, commands.Command):
@@ -83,7 +84,7 @@ async def resolve_url_command(ctx: commands.Context) -> Optional[discord.Message
                     continue
 
 
-async def handle_link_message(ctx: commands.Context) -> Optional[discord.Message]:
+async def handle_link_message(ctx: GitBotContext) -> Optional[discord.Message]:
     set_handler_ctx_attributes(ctx)
 
     async def _send(*args, **kwargs):

@@ -1,9 +1,18 @@
+"""
+Custom Discord embed interface implementation for GitBot
+~~~~~~~~~~~~~~~~~~~
+A non-native replacement for the embed object provided in discord.ext.commands
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
 import enum
 import discord
 import asyncio
 from lib.utils.regex import MARKDOWN_EMOJI_RE
-from discord.ext import commands
-from typing import Callable, Optional, Awaitable, Any
+from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
 from lib.typehints import EmbedLike
 
 __all__: tuple = ('GitBotEmbed', 'GitBotCommandState')
@@ -46,7 +55,7 @@ class GitBotEmbed(discord.Embed):
     async def send(self, messageable: discord.abc.Messageable, *args, **kwargs) -> discord.Message:
         return await messageable.send(embed=self, *args, **kwargs)
 
-    async def edit_with_state(self, ctx: commands.Context, state: int) -> None:
+    async def edit_with_state(self, ctx: 'GitBotContext', state: int) -> None:
         if ctx.author.id is ctx.guild.me.id:
             _embed: EmbedLike = ctx.message.embeds[0] if ctx.message.embeds else None
             if _embed:
@@ -75,7 +84,7 @@ class GitBotEmbed(discord.Embed):
         to_edit.set_footer(text=footer)
 
     async def input_with_timeout(self,
-                                 ctx: commands.Context,
+                                 ctx: 'GitBotContext',
                                  event: str,
                                  timeout: int,
                                  timeout_check: Callable[[Any], bool],
@@ -112,11 +121,11 @@ class GitBotEmbed(discord.Embed):
         if not init_message:
             init_message: discord.Message = await self.send(ctx)
 
-        new_ctx: commands.Context = await ctx.bot.get_context(init_message)
+        new_ctx: 'GitBotContext' = await ctx.bot.get_context(init_message)
         missing_slots: set = set(dir(ctx)) ^ set(dir(new_ctx))
         for slot in missing_slots:
             setattr(new_ctx, slot, getattr(ctx, slot))
-        ctx: commands.Context = new_ctx
+        ctx: 'GitBotContext' = new_ctx
         antispam: int = 0
 
         try:
@@ -137,7 +146,7 @@ class GitBotEmbed(discord.Embed):
             await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)
         return None, None
 
-    async def confirmation(self, ctx: commands.Context, callback: GitBotEmbedResponseCallback) -> bool:
+    async def confirmation(self, ctx: 'GitBotContext', callback: GitBotEmbedResponseCallback) -> bool:
         initial_message: discord.Message = await self.send(ctx)
         await initial_message.add_reaction('<:checkmark:770244084727283732>')
         await initial_message.add_reaction('<:failure:770244076896256010>')

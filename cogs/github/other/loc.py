@@ -10,6 +10,7 @@ from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubRepository
+from lib.structs.discord.context import GitBotContext
 
 _25MB_BYTES: int = int(25 * (1024 ** 2))
 
@@ -21,22 +22,22 @@ class LinesOfCode(commands.Cog):
     @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'], hidden=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    async def lines_of_code_command_nocache(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+    async def lines_of_code_command_nocache(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.__nocache__ = True
         await ctx.invoke(self.lines_of_code_command, repo=repo)
 
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    async def lines_of_code_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+    async def lines_of_code_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
-            await ctx.err(ctx.l.generic.nonexistent.repo.base)
+            await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
         processed: Optional[dict] = await self.process_repo(ctx, repo)
         if not processed:
-            await ctx.err(ctx.l.loc.file_too_big)
+            await ctx.error(ctx.l.loc.file_too_big)
             return
         title: str = ctx.fmt('title', repo)
         embed: GitBotEmbed = GitBotEmbed(
@@ -55,7 +56,7 @@ class LinesOfCode(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    async def process_repo(self, ctx: commands.Context, repo: GitHubRepository) -> Optional[dict]:
+    async def process_repo(self, ctx: GitBotContext, repo: GitHubRepository) -> Optional[dict]:
         if (not ctx.__nocache__) and (cached := Mgr.loc_cache.get(repo := repo.lower())):
             return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'

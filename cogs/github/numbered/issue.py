@@ -4,6 +4,7 @@ from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
 from lib.typehints import GitHubRepository
+from lib.structs.discord.context import GitBotContext
 
 
 class Issue(commands.Cog):
@@ -13,7 +14,7 @@ class Issue(commands.Cog):
     @gitbot_command(name='issue', aliases=['i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
-    async def issue_command(self, ctx: commands.Context, repo: GitHubRepository, issue_number: str = None) -> None:
+    async def issue_command(self, ctx: GitBotContext, repo: GitHubRepository, issue_number: str = None) -> None:
         ctx.fmt.set_prefix('issue')
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
@@ -21,7 +22,7 @@ class Issue(commands.Cog):
         else:
             if not issue_number:
                 if not repo.isnumeric():
-                    await ctx.err(ctx.l.issue.stored_no_number)
+                    await ctx.error(ctx.l.issue.stored_no_number)
                     return
                 num: str = repo
                 stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
@@ -29,19 +30,19 @@ class Issue(commands.Cog):
                     repo: str = stored
                     issue_number: str = num
                 else:
-                    await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                    await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                     return
 
             try:
                 issue: dict | str = await Git.get_issue(repo, int(issue_number))
             except ValueError:
-                await ctx.err(ctx.l.issue.second_argument_number)
+                await ctx.error(ctx.l.issue.second_argument_number)
                 return
             if isinstance(issue, str):
                 if issue == 'repo':
-                    await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                    await ctx.error(ctx.l.generic.nonexistent.repo.base)
                 else:
-                    await ctx.err(ctx.l.generic.nonexistent.issue_number)
+                    await ctx.error(ctx.l.generic.nonexistent.issue_number)
                 return
 
         em: str = f"<:issue_open:788517560164810772>"

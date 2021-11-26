@@ -1,11 +1,24 @@
+"""
+Custom Discord embed paging interface implementation for GitBot
+~~~~~~~~~~~~~~~~~~~
+A set of objects used to handle embed pagination inside Discord
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
 import discord
 import asyncio
 from time import time
 from enum import Enum
 from discord.ext import commands
-from typing import Optional, NoReturn
-from lib.structs.discord.gitbot_embed import GitBotEmbed, GitBotCommandState
+from typing import Optional, NoReturn, TYPE_CHECKING
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.embed import GitBotEmbed, GitBotCommandState
 from lib.globs import Mgr
+
+
+__all__: tuple = ('EmbedPagesControl', 'ACTIONS', 'EmbedPages')
 
 
 class EmbedPagesControl(Enum):
@@ -74,7 +87,7 @@ class EmbedPages:
 
         return self.time_since_last_action > self.timeout and self.lifetime < self.lifespan
 
-    async def start(self, ctx: commands.Context) -> None:
+    async def start(self, ctx: GitBotContext) -> None:
         """
         Start the paginator in the passed context.
 
@@ -83,7 +96,7 @@ class EmbedPages:
 
         self._ensure_perms(ctx.channel)
         self.start_time = time()
-        self.context: commands.Context = ctx
+        self.context: GitBotContext = ctx
         self._edit_embed_footer(self.pages[self.current_page])
         message: discord.Message = await ctx.send(embed=self.pages[self.current_page])
         for embed in self.pages[1:]:

@@ -6,6 +6,7 @@ from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
+from lib.structs.discord.context import GitBotContext
 
 
 class Commits(commands.Cog):
@@ -15,7 +16,7 @@ class Commits(commands.Cog):
     @gitbot_command('commits')
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
-    async def commits_command(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None):
+    async def commits_command(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None):
         _re_result = False
         maybe_ref = ''
         if repo and not (_re_result := REPOSITORY_NAME_RE.match(repo)):
@@ -24,7 +25,7 @@ class Commits(commands.Cog):
             repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if not repo:
                 await Mgr.db.users.delitem(ctx, 'repo')
-                await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                 return
 
         parsed: ParsedRepositoryData = Mgr.parse_repo(repo)
@@ -33,8 +34,8 @@ class Commits(commands.Cog):
         commits: list[dict] = await Git.get_latest_commits(parsed.slashname, parsed.branch)
         if isinstance(commits, str):
             if commits == 'ref':
-                return await ctx.err(ctx.fmt('generic nonexistent ref', f'`{parsed.branch}`', f'`{parsed.slashname}`'))
-            return await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                return await ctx.error(ctx.fmt('generic nonexistent ref', f'`{parsed.branch}`', f'`{parsed.slashname}`'))
+            return await ctx.error(ctx.l.generic.nonexistent.repo.base)
         embed: GitBotEmbed = GitBotEmbed(
             title=Mgr.e.github + '  ' + ctx.fmt('commits embed title',
                                                 f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`'),
@@ -54,7 +55,7 @@ class Commits(commands.Cog):
             elif numbers := Mgr.get_numbers_in_range_in_str(res.content, len(commits)):
                 ctx.data = commits[numbers[0]-1 if numbers[0] != 0 else 0]
                 return GitBotCommandState.SUCCESS
-            await ctx.err(ctx.l.commits.no_match)
+            await ctx.error(ctx.l.commits.no_match)
             return GitBotCommandState.CONTINUE
 
         await embed.input_with_timeout(
@@ -72,7 +73,7 @@ class Commits(commands.Cog):
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def commit_command(self,
-                             ctx: commands.Context,
+                             ctx: GitBotContext,
                              repo: Optional[GitHubRepository] = None,
                              oid: Optional[str] = None):
         ctx.fmt.set_prefix('commit')
@@ -86,7 +87,7 @@ class Commits(commands.Cog):
                 repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
                 if not repo:
                     await Mgr.db.users.delitem(ctx, 'repo')
-                    await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                    await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                     return
                 is_stored: bool = True
             commit: Optional[dict] | Literal[False] = (await Git.get_latest_commit(repo) if not oid
@@ -96,12 +97,12 @@ class Commits(commands.Cog):
         if not commit:
             if commit is False:
                 if is_stored and oid:
-                    await ctx.err(await ctx.err(ctx.l.generic.nonexistent.repo.qa_changed))
+                    await ctx.error(await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed))
                     await Mgr.db.users.delitem(ctx, 'repo')
                 else:
-                    await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                    await ctx.error(ctx.l.generic.nonexistent.repo.base)
             else:
-                await ctx.err(ctx.fmt('!generic nonexistent commit', f'`{repo.lower()}`'))
+                await ctx.error(ctx.fmt('!generic nonexistent commit', f'`{repo.lower()}`'))
         else:
             truncated_headline: str = Mgr.truncate(commit['messageHeadline'], 43)
             # 56 because we want the icon, thumbnail, headline, and the abbreviated object ID

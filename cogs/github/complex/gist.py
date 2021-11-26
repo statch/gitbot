@@ -5,6 +5,7 @@ from lib.globs import Git, Mgr
 from typing import Optional
 from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubUser
+from lib.structs.discord.context import GitBotContext
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
                            'cpp', 'html', 'php', 'json', 'xml', 'yml',
@@ -18,17 +19,17 @@ class Gist(commands.Cog):
     @gitbot_command(name='gist', aliases=['gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self,
-                           ctx: commands.Context,
+                           ctx: GitBotContext,
                            user: GitHubUser,
                            ind: Optional[int | str] = None) -> None:
         ctx.fmt.set_prefix('gist')
         data: dict = await Git.get_user_gists(user)
         if not data:
-            await ctx.err(ctx.l.generic.nonexistent.user.base)
+            await ctx.error(ctx.l.generic.nonexistent.user.base)
             return
         if (gists := len(data['gists']['nodes'])) < 2:
             if gists == 0:
-                await ctx.err(ctx.l.generic.nonexistent.gist)
+                await ctx.error(ctx.l.generic.nonexistent.gist)
             else:
                 await ctx.send(embed=await self.build_gist_embed(ctx, data, 1,
                                                                  footer=ctx.l.gist.no_list))
@@ -75,7 +76,7 @@ class Gist(commands.Cog):
                                                                timeout=30)
                 success, err_msg = validate_index(msg.content)
                 if not success:
-                    await ctx.err(err_msg, delete_after=7)
+                    await ctx.error(err_msg, delete_after=7)
                     continue
                 break
             except asyncio.TimeoutError:
@@ -89,7 +90,7 @@ class Gist(commands.Cog):
         await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.content), ctx.l.gist.content_notice))
 
     async def build_gist_embed(self,
-                               ctx: commands.Context,
+                               ctx: GitBotContext,
                                data: dict,
                                index: int,
                                footer: Optional[str] = None) -> discord.Embed:

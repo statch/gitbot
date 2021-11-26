@@ -9,6 +9,7 @@ from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
 class Repo(commands.Cog):
@@ -17,21 +18,21 @@ class Repo(commands.Cog):
 
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
-    async def repo_command_group(self, ctx: commands.Context, repo: Optional[GitHubRepository] = None) -> None:
+    async def repo_command_group(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
         if not repo:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.repo_info_command, repo=stored)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa)
         else:
             await ctx.invoke(self.repo_info_command, repo=repo)
 
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @normalize_repository
-    async def repo_info_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+    async def repo_info_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')
@@ -40,9 +41,9 @@ class Repo(commands.Cog):
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'repo')
-                await ctx.err(ctx.l.generic.nonexistent.repo.qa_changed)
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return None
 
         embed: GitBotEmbed = GitBotEmbed(
@@ -120,7 +121,7 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
-    async def repo_files_command(self, ctx: commands.Context, repo_or_path: GitHubRepository) -> None:
+    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
@@ -132,9 +133,9 @@ class Repo(commands.Cog):
             src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
-                await ctx.err(ctx.l.generic.nonexistent.path)
+                await ctx.error(ctx.l.generic.nonexistent.path)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
         files: list = sorted([f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f['type'] == 'file' else
                               f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})" for f in src[:15]],
@@ -158,7 +159,7 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
-    async def download_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+    async def download_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[bytes | bool] = await Git.get_repo_zip(repo)
@@ -179,7 +180,7 @@ class Repo(commands.Cog):
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def issue_list_command(self,
-                                 ctx: commands.Context,
+                                 ctx: GitBotContext,
                                  repo: Optional[GitHubRepository] = None,
                                  state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
@@ -188,7 +189,7 @@ class Repo(commands.Cog):
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def pull_request_list_command(self,
-                                        ctx: commands.Context,
+                                        ctx: GitBotContext,
                                         repo: Optional[GitHubRepository] = None,
                                         state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
@@ -197,13 +198,13 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='commits')
     @commands.cooldown(5, 40, commands.BucketType.user)
     async def commit_list_command(self,
-                                  ctx: commands.Context,
+                                  ctx: GitBotContext,
                                   repo: Optional[GitHubRepository] = None) -> None:
         await ctx.invoke(self.bot.get_command('commits'), repo=repo)
 
     @repo_command_group.command(name='loc')
     @commands.cooldown(8, 60, commands.BucketType.default)
-    async def loc_command(self, ctx: commands.Context, repo: GitHubRepository) -> None:
+    async def loc_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 
 

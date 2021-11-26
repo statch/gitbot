@@ -2,6 +2,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
 from lib.utils.decorators import gitbot_command
+from lib.structs.discord.context import GitBotContext
 
 
 class License(commands.Cog):
@@ -10,10 +11,10 @@ class License(commands.Cog):
 
     @gitbot_command(name='license')
     @commands.cooldown(10, 20, commands.BucketType.user)
-    async def license_command(self, ctx: commands.Context, *, license_: str) -> None:
+    async def license_command(self, ctx: GitBotContext, *, license_: str) -> None:
         license_: dict = Mgr.get_license(license_)
         if license_ is None:
-            return await ctx.err(ctx.l.license.error)
+            return await ctx.error(ctx.l.license.error)
         embed: GitBotEmbed = GitBotEmbed(
             color=Mgr.c.rounded,
             title=license_['name'],

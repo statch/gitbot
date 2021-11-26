@@ -11,6 +11,7 @@ from lib.globs import PyPI as _PyPI, Mgr
 from pkg_resources import parse_version
 from lib.typehints import PyPIProject
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
 class PyPI(commands.Cog):
@@ -19,7 +20,7 @@ class PyPI(commands.Cog):
 
     @gitbot_group('pypi', invoke_without_command=True)
     @commands.cooldown(5, 30, commands.BucketType.user)
-    async def pypi_command_group(self, ctx: commands.Context, project: Optional[PyPIProject] = None) -> None:
+    async def pypi_command_group(self, ctx: GitBotContext, project: Optional[PyPIProject] = None) -> None:
         if project is not None:
             await ctx.invoke(self.project_info_command, project=project)
         else:
@@ -39,7 +40,7 @@ class PyPI(commands.Cog):
 
     @pypi_command_group.command('info', aliases=['i'])
     @commands.cooldown(5, 30, commands.BucketType.user)
-    async def project_info_command(self, ctx: commands.Context, project: PyPIProject) -> None:
+    async def project_info_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
         ctx.fmt.set_prefix('pypi info')
         data: Optional[dict] = await _PyPI.get_project_data(project.lower())
         if data:
@@ -90,12 +91,12 @@ class PyPI(commands.Cog):
 
             await ctx.send(embed=embed)
         else:
-            await ctx.err(ctx.l.generic.nonexistent.python_package)
+            await ctx.error(ctx.l.generic.nonexistent.python_package)
 
     @pypi_command_group.command('downloads', aliases=['dl'])
     @commands.cooldown(3, 30, commands.BucketType.user)
     @commands.max_concurrency(7)
-    async def project_releases_command(self, ctx: commands.Context, project: PyPIProject) -> None:
+    async def project_releases_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
         ctx.fmt.set_prefix('pypi downloads')
         downloads_overall: Optional[dict] = await _PyPI.get_project_overall_downloads(project)
         if downloads_overall and (data := downloads_overall['data']):
@@ -123,7 +124,7 @@ class PyPI(commands.Cog):
                                                                                            engine='kaleido')),
                                                           filename=f'{project}-downloads-overall.png'))
         else:
-            await ctx.err(ctx.l.generic.nonexistent.python_package)
+            await ctx.error(ctx.l.generic.nonexistent.python_package)
 
 
 def setup(bot: commands.Bot) -> None:

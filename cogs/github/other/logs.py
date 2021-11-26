@@ -3,6 +3,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from lib.utils.decorators import gitbot_command
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
 class Logs(commands.Cog):
@@ -14,14 +15,14 @@ class Logs(commands.Cog):
     @commands.bot_has_permissions(manage_webhooks=True)
     @commands.has_permissions(manage_webhooks=True)
     @commands.guild_only()
-    async def logs_command(self, ctx: commands.Context) -> None:
+    async def logs_command(self, ctx: GitBotContext) -> None:
         ctx.fmt.set_prefix('logs')
         try:
             Mgr.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Logs',
                                                                         reason=f'GitHub Logs setup by {ctx.author}')
         except (discord.errors.HTTPException, discord.errors.Forbidden):
-            await ctx.err(ctx.l.logs.webhook_failed)
+            await ctx.error(ctx.l.logs.webhook_failed)
             return
         embed: GitBotEmbed = GitBotEmbed(
             color=0x4287f5,
@@ -40,7 +41,7 @@ class Logs(commands.Cog):
             )
             await ctx.author.send(embed=url_embed)
         except discord.errors.HTTPException:
-            await ctx.err(ctx.l.logs.dm_failed)
+            await ctx.error(ctx.l.logs.dm_failed)
             try:
                 await webhook.delete(reason=f'GitHub Logs setup by {ctx.author} failed')
             except discord.errors.HTTPException:

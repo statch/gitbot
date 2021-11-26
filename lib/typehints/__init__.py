@@ -42,4 +42,4 @@ __all__: tuple = (
 AnyDict = dict | DictProxy | CaseInsensitiveDict | MaxAgeDict | FixedSizeOrderedDict
 DictSequence = tuple[AnyDict] | list[AnyDict] | DirProxy
 Identity = int | str | commands.Context
-EmbedLike = discord.Embed | Type['lib.structs.discord.gitbot_embed.GitBotEmbed']
+EmbedLike = discord.Embed | Type['lib.structs.discord.embed.GitBotEmbed']

@@ -5,6 +5,7 @@ from lib.utils import decorators
 from lib.structs import GitBotEmbed
 from lib.globs import Mgr
 from lib.typehints import CommandHelp, CommandGroupHelp
+from lib.structs.discord.context import GitBotContext
 
 
 class Help(commands.Cog):
@@ -23,7 +24,7 @@ class Help(commands.Cog):
         return self.bot.get_command(name)
 
     def generate_command_help_embed(self,
-                                    ctx: commands.Context,
+                                    ctx: GitBotContext,
                                     command: GitBotCommand,
                                     content: Optional[CommandHelp | CommandGroupHelp] = None) -> GitBotEmbed:
         content: CommandHelp | CommandGroupHelp = content or command.get_help_content(ctx)
@@ -55,10 +56,10 @@ class Help(commands.Cog):
             embed.set_footer(text=qa_disclaimer)
         return embed
 
-    async def send_command_help(self, ctx: commands.Context, command: GitBotCommand) -> None:
+    async def send_command_help(self, ctx: GitBotContext, command: GitBotCommand) -> None:
         await ctx.send(embed=self.generate_command_help_embed(ctx, command))
 
-    async def send_command_group_help(self, ctx: commands.Context, command_group: GitBotCommandGroup) -> None:
+    async def send_command_group_help(self, ctx: GitBotContext, command_group: GitBotCommandGroup) -> None:
         content: CommandGroupHelp = command_group.get_help_content(ctx)
         # since a group is basically a command with additional attributes, we can somewhat reuse the same embed
         embed: GitBotEmbed = self.generate_command_help_embed(ctx, command_group, content=content)
@@ -70,11 +71,11 @@ class Help(commands.Cog):
 
     @gitbot_command('help', aliases=['h', 'halp' 'commands', 'cmds',
                                      'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
-    async def help_command(self, ctx: commands.Context, *, command_or_group: Optional[str] = None) -> None:
+    async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None) -> None:
         if command_or_group is not None:
             command_or_group: Optional[GitBotCommand | GitBotCommandGroup] = self._get_command(command_or_group)
             if not command_or_group:
-                return await ctx.err(ctx.l.generic.nonexistent.command_or_group)
+                return await ctx.error(ctx.l.generic.nonexistent.command_or_group)
             match type(command_or_group):  # ah yes, the almighty type() call for checks. Don't kill me.
                 case decorators.GitBotCommand:  # dot-access to resolve name capture pattern error - pep-0634
                     await self.send_command_help(ctx, command_or_group)

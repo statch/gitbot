@@ -3,6 +3,7 @@ from datetime import date
 from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 from .event_tools import build_guild_embed, handle_codeblock_message, handle_link_message  # noqa
 
 
@@ -53,9 +54,8 @@ class Events(commands.Cog):
     async def on_message(self, message: discord.Message) -> None:
         if message.author.id == self.bot.user.id:
             return
-        ctx: commands.Context = await self.bot.get_context(message)
+        ctx: GitBotContext = await self.bot.get_context(message)
         if await Mgr.verify_send_perms(message.channel) and ctx.command is None:
-            await Mgr.enrich_context(ctx)
             if all([self.bot.user in message.mentions, message.reference is None]):
                 embed: GitBotEmbed = GitBotEmbed(
                     color=Mgr.c.rounded,

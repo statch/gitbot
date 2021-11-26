@@ -2,19 +2,19 @@ import re
 import io
 from typing import Optional
 from aiohttp import ClientResponse
-from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr, Carbon
+from lib.structs.discord.context import GitBotContext
 
 
-async def handle_url(ctx: commands.Context, url: str, **kwargs) -> tuple:
+async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
     match_: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
     if match_:
         return await get_text_from_url_and_data(ctx, await compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
 
 
-async def get_text_from_url_and_data(ctx: commands.Context,
+async def get_text_from_url_and_data(ctx: GitBotContext,
                                      url: str,
                                      data: tuple,
                                      max_line_count: int = 25,

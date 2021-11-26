@@ -4,6 +4,7 @@ from lib.globs import Git, Mgr
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubOrganization
+from lib.structs.discord.context import GitBotContext
 
 
 class Org(commands.Cog):
@@ -11,20 +12,20 @@ class Org(commands.Cog):
         self.bot: commands.Bot = bot
 
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
-    async def org_command_group(self, ctx: commands.Context, org: Optional[GitHubOrganization] = None) -> None:
+    async def org_command_group(self, ctx: GitBotContext, org: Optional[GitHubOrganization] = None) -> None:
         if not org:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.org_info_command, organization=stored)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.org.qa)
+                await ctx.error(ctx.l.generic.nonexistent.org.qa)
         else:
             await ctx.invoke(self.org_info_command, organization=org)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='info', aliases=['i'])
-    async def org_info_command(self, ctx: commands.Context, organization: GitHubOrganization) -> None:
+    async def org_info_command(self, ctx: GitBotContext, organization: GitHubOrganization) -> None:
         ctx.fmt.set_prefix('org info')
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')
@@ -33,9 +34,9 @@ class Org(commands.Cog):
         if not org:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'org')
-                await ctx.err(ctx.l.generic.nonexistent.org.qa_changed)
+                await ctx.error(ctx.l.generic.nonexistent.org.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.org.base)
+                await ctx.error(ctx.l.generic.nonexistent.org.base)
             return None
 
         embed = discord.Embed(
@@ -82,15 +83,15 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='repos', aliases=['r'])
-    async def org_repos_command(self, ctx: commands.Context, org: GitHubOrganization) -> None:
+    async def org_repos_command(self, ctx: GitBotContext, org: GitHubOrganization) -> None:
         ctx.fmt.set_prefix('org repos')
         o: Optional[dict] = await Git.get_org(org)
         repos: list = await Git.get_org_repos(org)
         if o is None:
-            await ctx.err(ctx.l.generic.nonexistent.org.base)
+            await ctx.error(ctx.l.generic.nonexistent.org.base)
             return
         if not repos:
-            await ctx.err(ctx.l.generic.nonexistent.repos.org)
+            await ctx.error(ctx.l.generic.nonexistent.repos.org)
             return
         embed: discord.Embed = discord.Embed(
             title=ctx.fmt('owner', org) if org[0].isupper() else ctx.fmt('owner', org).lower(),

@@ -4,14 +4,14 @@ from typing import Optional
 from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
-def silenced(ctx: commands.Context, error) -> bool:
+def silenced(ctx: GitBotContext, error) -> bool:
     return bool(getattr(ctx, f'__silence_{Mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
 
 
-async def respond_to_command_doesnt_exist(ctx: commands.Context, error: commands.CommandNotFound) -> discord.Message:
-    await Mgr.enrich_context(ctx)
+async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:
     ctx.fmt.set_prefix('errors command_not_found')
     embed: GitBotEmbed = GitBotEmbed(
         color=0x0384fc,
@@ -24,7 +24,7 @@ async def respond_to_command_doesnt_exist(ctx: commands.Context, error: commands
     return await ctx.send(embed=embed)
 
 
-async def log_error_in_discord(ctx: commands.Context, error: Exception) -> Optional[discord.Message]:
+async def log_error_in_discord(ctx: GitBotContext, error: Exception) -> Optional[discord.Message]:
     channel: discord.TextChannel = await ctx.bot.fetch_channel(853247229036593164)
     if channel:
         guild_id: str = str(ctx.guild.id) if not isinstance(ctx.channel, discord.DMChannel) else 'DM'

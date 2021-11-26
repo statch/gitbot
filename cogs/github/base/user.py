@@ -4,6 +4,7 @@ from typing import Optional
 from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
+from lib.structs.discord.context import GitBotContext
 
 
 class User(commands.Cog):
@@ -11,20 +12,20 @@ class User(commands.Cog):
         self.bot: commands.Bot = bot
 
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
-    async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
+    async def user_command_group(self, ctx: GitBotContext, user: Optional[str] = None) -> None:
         if not user:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.user_info_command, user=stored)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.user.qa)
+                await ctx.error(ctx.l.generic.nonexistent.user.qa)
         else:
             await ctx.invoke(self.user_info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='info', aliases=['i'])
-    async def user_info_command(self, ctx: commands.Context, user: GitHubUser) -> None:
+    async def user_info_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')
@@ -33,9 +34,9 @@ class User(commands.Cog):
         if not u:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'user')
-                await ctx.err(ctx.l.generic.nonexistent.user.qa_changed)
+                await ctx.error(ctx.l.generic.nonexistent.user.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.user.base)
+                await ctx.error(ctx.l.generic.nonexistent.user.base)
             return None
 
         embed = discord.Embed(
@@ -96,15 +97,15 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='repos', aliases=['r'])
-    async def user_repos_command(self, ctx: commands.Context, user: GitHubUser) -> None:
+    async def user_repos_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user repos')
         u: Optional[dict] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
-            await ctx.err(ctx.l.generic.nonexistent.user.base)
+            await ctx.error(ctx.l.generic.nonexistent.user.base)
             return
         if not repos:
-            await ctx.err(ctx.l.user.repos.no_public)
+            await ctx.error(ctx.l.user.repos.no_public)
             return
         title: str = ctx.fmt('owner', user) if user[0].isupper() else ctx.fmt('owner', user).lower()
         embed: discord.Embed = discord.Embed(

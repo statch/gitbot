@@ -2,7 +2,9 @@ import re
 import functools
 import inspect
 from discord.ext import commands
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Union, TYPE_CHECKING
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
 from lib.utils import regex
 from lib.typehints import GitHubRepository
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
@@ -24,7 +26,7 @@ def restricted() -> commands.Command:
     Allow only wulf to use commands with this decorator
     """
 
-    def pred(ctx: commands.Context) -> bool:
+    def pred(ctx: 'GitBotContext') -> bool:
         return ctx.author.id == 548803750634979340
 
     return commands.check(pred)
@@ -96,7 +98,7 @@ def normalize_identity(context_resource: str = 'author') -> Callable:
 
     def decorator(func: Callable) -> Callable:
         def wrapper(*args: tuple, **kwargs: dict) -> Any:
-            def normalize_id(_id: int | str | commands.Context) -> int:
+            def normalize_id(_id: Union[int | str, 'GitBotContext']) -> int:
                 return int(_id) if not isinstance(_id, commands.Context) else getattr(_id, context_resource).id
 
             return normalize_argument(func, '_id', normalize_id, *args, **kwargs)
@@ -140,21 +142,22 @@ def gitbot_command(name: str, cls=GitBotCommand, **attrs) -> Callable:
     :param attrs: Additional attributes
     """
 
-    def decorator(func) -> commands.Command:
+    def decorator(func) -> GitBotCommand:
         return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator
 
 
-def gitbot_group(name: str, **attrs) -> Callable:
+def gitbot_group(name: str, cls=GitBotCommandGroup, **attrs) -> Callable:
     """
     A group decorator that automatically injects "-" and "--" aliases.
 
     :param name: The group name
+    :param cls: The command group class
     :param attrs: Additional attributes
     """
 
     def decorator(func) -> GitBotCommandGroup:
-        return GitBotCommandGroup(func, name=name, **_inject_aliases(name, **attrs))
+        return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator

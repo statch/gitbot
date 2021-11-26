@@ -5,6 +5,7 @@ from lib.typehints import GitHubRepository
 from discord.ext import commands
 from lib.utils.decorators import normalize_repository
 from lib.utils.decorators import gitbot_command
+from lib.structs.discord.context import GitBotContext
 
 PR_STATES: dict = {
     "open": Mgr.e.pr_open,
@@ -21,7 +22,7 @@ class PullRequest(commands.Cog):
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
     async def pull_request_command(self,
-                                   ctx: commands.Context,
+                                   ctx: GitBotContext,
                                    repo: GitHubRepository,
                                    pr_number: Optional[str] = None):
         ctx.fmt.set_prefix('pr')
@@ -31,7 +32,7 @@ class PullRequest(commands.Cog):
         else:
             if not pr_number:
                 if not repo.isnumeric():
-                    await ctx.err(ctx.l.pr.stored_no_number)
+                    await ctx.error(ctx.l.pr.stored_no_number)
                     return
                 elif not pr_number and repo.isnumeric():
                     num: str = repo
@@ -40,20 +41,20 @@ class PullRequest(commands.Cog):
                         repo: str = stored
                         pr_number: str = num
                     else:
-                        await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                        await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                         return
 
             try:
                 pr: dict | str = await Git.get_pull_request(repo, int(pr_number))
             except ValueError:
-                await ctx.err(ctx.l.pr.second_argument_number)
+                await ctx.error(ctx.l.pr.second_argument_number)
                 return
 
             if isinstance(pr, str):
                 if pr == 'repo':
-                    await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                    await ctx.error(ctx.l.generic.nonexistent.repo.base)
                 else:
-                    await ctx.err(ctx.l.generic.nonexistent.pr_number)
+                    await ctx.error(ctx.l.generic.nonexistent.pr_number)
                 return
 
         title: str = Mgr.truncate(pr['title'], 90)

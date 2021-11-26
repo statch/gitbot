@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 from random import randint
 from itertools import cycle
 from lib.globs import Mgr
+from lib.structs.discord.context import GitBotContext
 
 
 class MiscellaneousBackgroundTasks(commands.Cog):
@@ -27,7 +28,7 @@ class MiscellaneousBackgroundTasks(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
-    async def on_command(self, ctx: commands.Context):
+    async def on_command(self, ctx: GitBotContext):
         if Mgr.env.production:
             self.statcord.command_run(ctx)
 

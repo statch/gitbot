@@ -119,7 +119,8 @@
   },
   "permissions": {
     "manage_webhooks": "Manage Webhooks",
-    "manage_channels": "Manage Channels"
+    "manage_channels": "Manage Channels",
+    "manage_guild": "Manage Server"
   },
   "privacy_policy": {
     "title": "Privacy Policy",
@@ -871,6 +872,152 @@
         "argument_explainers": [
           "channel"
         ],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "config_user": {
+        "brief": "Set a quick-access user",
+        "usage": "config user <user>",
+        "example": "config user itsmewulf",
+        "description": "Setting this will allow you to use certain commands that take in a user in a shorter way (ex. git user itsmewulf -> git user)",
+        "argument_explainers": [
+          "user"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete": {
+        "brief": "A command group responsible for deleting GitBot config values",
+        "usage": "config delete [subcommand]",
+        "example": null,
+        "description": "Commands in this group allow you to reset config fields to their default values or delete items from feeds",
+        "argument_explainers": [
+          "subcommand"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_repo": {
+        "brief": "Delete your quick-access repository",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget\" your saved repo, so commands will no longer use the shortened syntax",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed": {
+        "brief": "A command group responsible for deleting saved feed channels or repos logged in these channels",
+        "usage": "config delete feed [subcommand]",
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed_channel": {
+        "brief": "A command responsible for deleting a release feed channel",
+        "usage": "config delete feed channel [channel]",
+        "example": null,
+        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive. If you use this command without the channel argument, a list of active feeds will be displayed.",
+        "argument_explainers": [
+          "channel"
+        ],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_guild",
+          "manage_channels"
+        ]
+      },
+      "config_delete_feed_repo": {
+        "brief": "A command used to delete a repo from a release feed",
+        "usage": "config delete feed repo <repo>",
+        "example": null,
+        "description": "This command allows you to delete a repository from a specific release feed channel. Once deleted, new releases of this repo will no longer arrive in this feed. Other feeds following this repo won't be affected.",
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_guild",
+          "manage_channels"
+        ]
+      },
+      "config_delete_language": {
+        "brief": "Reset your GitBot language to default",
+        "usage": null,
+        "example": null,
+        "description": "This command will reset GitBot's language to English",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_user": {
+        "brief": "Delete your quick-access user",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget: your saved user, so commands will no longer use the shortened syntax",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_all": {
+        "brief": "Delete all config values bound to your GitBot profile",
+        "usage": null,
+        "example": null,
+        "description": "This command doesn't affect server settings. ",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_org": {
+        "brief": "Delete your quick-access organization",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget: your saved org, so commands will no longer use the shortened syntax",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_org": {
+        "brief": "Set a quick-access organization",
+        "usage": "config org <org>",
+        "example": "config org statch",
+        "description": "Setting this will allow you to use certain commands that take in an organization in a shorter way (ex. git org statch -> git org)",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_autoconv": {
+        "brief": "A command group for configuring GitBot's automatic behaviors",
+        "usage": "config autoconv [subcommand]",
+        "example": null,
+        "description": "Subcommands in this group control server-wide settings that affect GitBot's autonomy - mainly automatically converting GitHub links to information, creating Carbon images from codeblocks and more!",
+        "argument_explainers": [
+          "subcommand"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_autoconv_link": {
+        "brief": "Toggle automatic GitHub link resolving",
+        "usage": null,
+        "example": null,
+        "description": "This command toggles the automatic resolving of links sent in chat (except for line links). GitBot will reply to messages with links it understands with information about what's on the other end of that URL",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "config_autoconv_lines": {
+        "brief": "Toggle automatic GitHub Line link resolving",
+        "usage": null,
+        "example": null,
+        "description": "This command, not to be confused with general URL resolving, manages only the line aspect of URLs. When a link containing line mentions (ex. #L9-L42) is sent in chat, GitBot will attempt to convert it into either a codeblock, or an image, based on your selection",
+        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"

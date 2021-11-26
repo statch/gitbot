@@ -103,6 +103,7 @@ def run_help_helper(debug: bool = False):
                                                           fg='yellow'),
                                               type=click.Choice([*PROMPTS.keys(), 'nevermind'], case_sensitive=False))
                     if to_correct == 'nevermind':
+                        LOCALE['help']['commands'][underscored_name] = command_data
                         break
                     command_data[to_correct] = PROMPTS[to_correct]()
                     fix_dict(command_data)

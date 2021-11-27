@@ -66,7 +66,7 @@ class TypedCache(BaseCache):
     """
 
     def __init__(self, schema: CacheSchemaLikeType, maxsize: int = 128, max_age: Optional[int] = None):
-        self.schema: CacheSchema = schema if isinstance(schema, CacheSchema) else CacheSchema(schema[0], schema[1])
+        self.schema: CacheSchema = schema if isinstance(schema, CacheSchema) else CacheSchema(*schema)
         super().__init__(maxsize=maxsize, max_age=max_age)
 
     def __setitem__(self, key: Any, value: Any) -> None:

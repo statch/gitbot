@@ -25,7 +25,9 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='info', aliases=['i'])
-    async def user_info_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
+    async def user_info_command(self, ctx: GitBotContext, user: Optional[GitHubUser] = None) -> None:
+        if not user:
+            return await ctx.invoke(self.user_command_group)
         ctx.fmt.set_prefix('user info')
         if hasattr(ctx, 'data'):
             u: dict = getattr(ctx, 'data')

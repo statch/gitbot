@@ -1022,6 +1022,113 @@
         "required_permissions": [
           "manage_channels"
         ]
+      },
+      "config_autoconv_codeblock": {
+        "brief": "Toggle automatic codeblock to Carbon image conversion",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "commit": {
+        "brief": "Get info on a commit",
+        "usage": "commit [repo] [oid]",
+        "example": "commit statch/gitbot 3546fa7faada2c61d0a0edf3ec09e1fc28ed7677",
+        "description": "Get detailed info about a GitHub commit. If you have a quick-access repo set, you can use this command with only the oid argument, or without arguments altogether - it will default to your saved repo and the latest commit. You can also pass just the repo - the latest commit will be returned",
+        "argument_explainers": [
+          "repo",
+          "oid"
+        ],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "logs": {
+        "brief": "Get commit feeds in the current channel",
+        "usage": null,
+        "example": null,
+        "description": "This command creates a webhook (a fancy name for a not-so-fancy thing), that's then sent to you along with instructions to get the feed up and running. You add the URL from the instructions into repo(s) of choice, and you get all the commits right as they happen!",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_webhooks"
+        ]
+      },
+      "org": {
+        "brief": "Get info about a GitHub organization",
+        "usage": "org [org-or-subcommand]",
+        "example": "org statch",
+        "description": "This command group allows you to view info about an org, its repos, and more!",
+        "argument_explainers": [
+          "org-or-subcommand"
+        ],
+        "qa_resource": "org",
+        "required_permissions": []
+      },
+      "org_info": {
+        "brief": "Get info about a GitHub organization",
+        "usage": "org info <org>",
+        "example": "org info statch",
+        "description": "Get detailed information about an org - when it was created, who the members are, how many repos it has, and more!",
+        "argument_explainers": [
+          "org"
+        ],
+        "qa_resource": "org",
+        "required_permissions": []
+      },
+      "org_repos": {
+        "brief": "Get a list of an organization's repos",
+        "usage": "org repos <org>",
+        "example": "org repos statch",
+        "description": null,
+        "argument_explainers": [
+          "org"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "privacy": {
+        "brief": "The GitBot privacy policy",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "support": {
+        "brief": "Get support if you ran into a problem, or simply want to chat!",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "snippet": {
+        "brief": "Convert a codeblock or a GitHub line link into a Carbon image",
+        "usage": "snippet <codeblock-or-lines>",
+        "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
+        "description": null,
+        "argument_explainers": [
+          "codeblock-or-lines"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "snippet_raw": {
+        "brief": "Get the content of a GitHub line link in the form of a codeblock",
+        "usage": "snippet raw <lines>",
+        "example": "snippet raw https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
+        "description": null,
+        "argument_explainers": [
+          "lines"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
     "argument_explainers": {
@@ -1056,6 +1163,22 @@
       "channel": {
         "name": "channel",
         "content": "The name, mention or ID of a channel in this server (ex. `#general`)"
+      },
+      "oid": {
+        "name": "oid",
+        "content": "A Git object ID (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) that corresponds to an object - a commit, tree, blob, tag, etc."
+      },
+      "org-or-subcommand": {
+        "name": "org-or-subcommand",
+        "content": "Either an organization name, or another subcommand from this group"
+      },
+      "codeblock-or-lines": {
+        "name": "codeblock-or-lines",
+        "content": "Either a codeblock, or a GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+      },
+      "lines": {
+        "name": "lines",
+        "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       }
     },
     "qa_disclaimers": {

@@ -52,7 +52,7 @@ class Manager:
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
         self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
         self._setup_db()
-        self.l: DirProxy = self.readdir('resources/locale/', '.json', exclude='index.json')
+        self.l: DirProxy = self.readdir('resources/locale/', '.json', exclude=('index.json', 'en.last.json'))
         self.e: DictProxy = self.load_json('emoji')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
                                                                             and v.startswith('#')) else int(v[1:], 16))

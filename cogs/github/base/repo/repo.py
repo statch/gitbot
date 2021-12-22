@@ -32,7 +32,9 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @normalize_repository
-    async def repo_info_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
+    async def repo_info_command(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
+        if not repo:
+            return await ctx.invoke(self.repo_command_group)
         ctx.fmt.set_prefix('repo info')
         if hasattr(ctx, 'data'):
             r: dict = getattr(ctx, 'data')

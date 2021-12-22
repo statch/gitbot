@@ -25,7 +25,9 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='info', aliases=['i'])
-    async def org_info_command(self, ctx: GitBotContext, organization: GitHubOrganization) -> None:
+    async def org_info_command(self, ctx: GitBotContext, organization: Optional[GitHubOrganization]) -> None:
+        if not organization:
+            return await ctx.invoke(self.org_command_group)
         ctx.fmt.set_prefix('org info')
         if hasattr(ctx, 'data'):
             org: dict = getattr(ctx, 'data')

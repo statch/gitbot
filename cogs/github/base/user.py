@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_group
+from lib.utils.decorators import gitbot_group, fmt_prefix
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
 
@@ -99,8 +99,8 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='repos', aliases=['r'])
+    @fmt_prefix('user repos')
     async def user_repos_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
-        ctx.fmt.set_prefix('user repos')
         u: Optional[dict] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:

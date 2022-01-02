@@ -5,7 +5,7 @@ from .list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_group
+from lib.utils.decorators import normalize_repository, gitbot_group, fmt_prefix
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
@@ -123,8 +123,8 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
+    @fmt_prefix('repo files')
     async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository) -> None:
-        ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
             repo: GitHubRepository = "/".join(repo_or_path.split("/", 2)[:2])  # noqa
@@ -161,8 +161,8 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
+    @fmt_prefix('repo download')
     async def download_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
-        ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[bytes | bool] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return

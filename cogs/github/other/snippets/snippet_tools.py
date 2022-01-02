@@ -5,6 +5,7 @@ from aiohttp import ClientResponse
 from lib.utils import regex
 from lib.globs import Mgr, Carbon
 from lib.structs.discord.context import GitBotContext
+from lib.utils.decorators import fmt_prefix
 
 
 async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
@@ -14,12 +15,12 @@ async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
     return None, ctx.l.snippets.no_lines_mentioned
 
 
+@fmt_prefix('snippets')
 async def get_text_from_url_and_data(ctx: GitBotContext,
                                      url: str,
                                      data: tuple,
                                      max_line_count: int = 25,
                                      wrap_in_codeblock: bool = True) -> Optional[tuple]:
-    ctx.fmt.set_prefix('snippets')
     if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
             return None, ctx.fmt('length_limit_exceeded', max_line_count)

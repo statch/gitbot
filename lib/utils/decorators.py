@@ -17,7 +17,7 @@ def _inject_aliases(name: str, **attrs) -> dict:
     aliases: list[str] = attrs.get('aliases') or []
     to_add: list[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))
     aliases.extend([*to_add, *(gen_aliases(name)[1:])])
-    attrs['aliases']: list[str] = list(set(aliases))
+    attrs['aliases'] = list(set(aliases))
     return attrs
 
 
@@ -77,7 +77,7 @@ def normalize_argument(func: Callable,
 
     if target in kwargs:
         param: Any = kwargs[target]
-        kwargs[target]: Any = normalizing_func(param)
+        kwargs[target] = normalizing_func(param)
     else:
         spec: inspect.FullArgSpec = inspect.getfullargspec(func)
         if target in spec.args:
@@ -161,3 +161,21 @@ def gitbot_group(name: str, cls=GitBotCommandGroup, **attrs) -> Callable:
         return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator
+
+
+def fmt_prefix(prefix: str):
+    """
+    Set the context locale formatting prefix to the passed one
+
+    :param prefix: The prefix to set
+    """
+
+    def wrapper(func):
+        @functools.wraps(func)
+        async def wrapped(ctx: 'GitBotContext', *args, **kwargs):
+            ctx.fmt.set_prefix(prefix)
+            return await func(ctx, *args, **kwargs)
+
+        return wrapped
+
+    return wrapper

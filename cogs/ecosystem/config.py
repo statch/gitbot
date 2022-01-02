@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_group
+from lib.utils.decorators import normalize_repository, gitbot_group, fmt_prefix
 from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitHubUser, GitBotGuild,
                            ReleaseFeedItem, ReleaseFeed,
@@ -109,8 +109,8 @@ class Config(commands.Cog):
     @config_show_command_group.command(name='feed', aliases=['f'])
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.user)
+    @fmt_prefix('config show feed')
     async def config_show_feed_command(self, ctx: GitBotContext):
-        ctx.fmt.set_prefix('config show feed')
         guild: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if guild and 'feed' in guild:
             embed: GitBotEmbed = GitBotEmbed(
@@ -146,8 +146,8 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
+    @fmt_prefix('config feed channel')
     async def feed_channel_command(self, ctx: GitBotContext, channel) -> None:
-        ctx.fmt.set_prefix('config feed channel')
         try:
             channel: Optional[discord.TextChannel] = await commands.TextChannelConverter().convert(ctx, channel)
         except commands.BadArgument:
@@ -200,8 +200,8 @@ class Config(commands.Cog):
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @normalize_repository
+    @fmt_prefix('config feed repo')
     async def feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
-        ctx.fmt.set_prefix('config feed repo')
         release: Optional[dict] = await Git.get_latest_release(repo)
         if not release:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
@@ -304,8 +304,8 @@ class Config(commands.Cog):
     @config_command_group.command(name='lang', aliases=['locale', 'language'])
     @commands.bot_has_guild_permissions(add_reactions=True)
     @commands.cooldown(5, 30, commands.BucketType.user)
+    @fmt_prefix('config locale')
     async def config_locale_command(self, ctx: GitBotContext, locale: Optional[str] = None) -> None:
-        ctx.fmt.set_prefix('config locale')
         if locale:
             l_ = Mgr.get_locale_meta_by_attribute(locale.lower())
             if l_:
@@ -399,8 +399,8 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @commands.has_guild_permissions(manage_channels=True)
+    @fmt_prefix('config autoconv gh_lines')
     async def config_autoconv_lines_command(self, ctx: GitBotContext, skip_state: Optional[str] = None) -> None:
-        ctx.fmt.set_prefix('config autoconv gh_lines')
         skip_state: Optional[int] = self._validate_github_lines_conversion_state(skip_state)
         guild: Optional[GitBotGuild] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         if skip_state is None:
@@ -466,8 +466,8 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @normalize_repository
+    @fmt_prefix('config delete feed default')
     async def delete_feed_group(self, ctx: GitBotContext) -> None:
-        ctx.fmt.set_prefix('config delete feed default')
         if ctx.invoked_subcommand is None:
             # TODO Document two commands defined below
             pass
@@ -481,8 +481,8 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
+    @fmt_prefix('config delete feed channel')
     async def delete_feed_channel_command(self, ctx: GitBotContext, channel=None) -> None:
-        ctx.fmt.set_prefix('config delete feed channel')
         guild, feed = await self._feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
@@ -520,8 +520,8 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
-    async def delete_feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
-        ctx.fmt.set_prefix('config delete feed repo')
+    @fmt_prefix('config delete feed repo')
+    async def delete_feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository):
         guild, feed = await self._feed_prerequisites(ctx)
         if not guild or not feed:
             return await ctx.error(ctx.l.generic.nonexistent.release_feed)

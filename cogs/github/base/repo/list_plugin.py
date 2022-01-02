@@ -5,6 +5,7 @@ from lib.globs import Git, Mgr
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
+from lib.utils.decorators import fmt_prefix
 
 __all__: tuple = (
     'issue_list',
@@ -12,8 +13,8 @@ __all__: tuple = (
 )
 
 
+@fmt_prefix('repo issues')
 async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
-    ctx.fmt.set_prefix('repo issues')
     if (lstate := state.lower()) not in ('open', 'closed'):
         await ctx.error(ctx.l.generic.issue.invalid_state.format(lstate))
         return
@@ -62,8 +63,8 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
             return
 
 
+@fmt_prefix('repo pulls')
 async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
-    ctx.fmt.set_prefix('repo pulls')
     if (lstate := state.lower()) not in ('open', 'closed', 'merged'):
         await ctx.error(ctx.l.generic.pr.invalid_state.format(lstate))
         return

@@ -8,7 +8,7 @@ from discord.ext import commands
 from typing import Optional
 from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_command
+from lib.utils.decorators import gitbot_command, fmt_prefix
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
 
@@ -29,8 +29,8 @@ class LinesOfCode(commands.Cog):
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
+    @fmt_prefix('loc')
     async def lines_of_code_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
-        ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)

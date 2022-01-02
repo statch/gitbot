@@ -1,7 +1,7 @@
 import discord
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_command
+from lib.utils.decorators import normalize_repository, gitbot_command, fmt_prefix
 from discord.ext import commands
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
@@ -14,8 +14,8 @@ class Issue(commands.Cog):
     @gitbot_command(name='issue', aliases=['i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
+    @fmt_prefix('issue')
     async def issue_command(self, ctx: GitBotContext, repo: GitHubRepository, issue_number: str = None) -> None:
-        ctx.fmt.set_prefix('issue')
         if hasattr(ctx, 'data'):
             issue: dict = getattr(ctx, 'data')
             issue_number: int | str = issue['number']

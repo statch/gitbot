@@ -6,7 +6,7 @@ from discord.ext import commands
 from typing import Optional
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
-from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup
+from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup, fmt_prefix
 from lib.structs.discord.context import GitBotContext
 
 
@@ -25,8 +25,8 @@ class Dev(commands.Cog):
 
     @gitbot_group('dev', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
+    @fmt_prefix('dev default')
     async def dev_command_group(self, ctx: GitBotContext) -> None:
-        ctx.fmt.set_prefix('dev default')
         if ctx.invoked_subcommand is None:
             commands_: list = [
                 f'`git dev --missing-locales` - {ctx.l.dev.default.commands.missing_locales}'
@@ -44,8 +44,8 @@ class Dev(commands.Cog):
 
     @dev_command_group.command('missing-locales', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
+    @fmt_prefix('dev missing_locales')
     async def missing_locales_command(self, ctx: GitBotContext, locale_: str) -> None:
-        ctx.fmt.set_prefix('dev missing_locales')
         locale_data: Optional[tuple[list[str]], dict, bool] = Mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
             await ctx.error(ctx.l.generic.nonexistent.locale)

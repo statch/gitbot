@@ -5,14 +5,15 @@ from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
+from lib.utils.decorators import fmt_prefix
 
 
 def silenced(ctx: GitBotContext, error) -> bool:
     return bool(getattr(ctx, f'__silence_{Mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
 
 
+@fmt_prefix('errors command_not_found')
 async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:
-    ctx.fmt.set_prefix('errors command_not_found')
     embed: GitBotEmbed = GitBotEmbed(
         color=0x0384fc,
         title=ctx.l.errors.command_not_found.title,

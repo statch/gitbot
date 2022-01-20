@@ -540,6 +540,10 @@
       }
     }
   },
+  "support": {
+    "title": "Servidor de Suporte - GitBot",
+    "description": "Se você teve qualquer problema com o bot, sinta-se a vontade para entrar em nosso [servidor de suporte](https://discord.gg/3e5fwpA)."
+  },
   "help": {
     "alias_note": "Você pode encontrar uma lista de Aliases usando o comando git --aliases",
     "default": {

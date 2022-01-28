@@ -107,11 +107,14 @@ def run_help_helper(debug: bool = False):
                         break
                     command_data[to_correct] = PROMPTS[to_correct]()
                     fix_dict(command_data)
-            if (not click.confirm(click.style(f'Do you wish to add another command?'
-                                              f' (Next up: {commands[commands.index(command_name) + 1]})',
-                                              blink=True, fg='bright_cyan'),
-                                  default=True, show_default=True)) or command_name == commands[-1]:
-                break
+            try:
+                if (not click.confirm(click.style(f'Do you wish to add another command?'
+                                                  f' (Next up: {commands[commands.index(command_name) + 1]})',
+                                                  blink=True, fg='bright_cyan'),
+                                      default=True, show_default=True)) or command_name == commands[-1]:
+                    break
+            except IndexError:
+                pass
         else:
             click.echo(click.style(f'Skipping command/group {command_name} - already added', fg='cyan'))
         processed.append(command_name)

@@ -55,6 +55,9 @@ class Help(commands.Cog):
                                              in permissions]), inline=False)
         if qa_disclaimer := command.get_qa_disclaimer(ctx):
             embed.set_footer(text=qa_disclaimer)
+        if not argument_explainers:  # since there's no arguments, let's spice this embed up a bit
+            embed.color = 0x268BD2
+            embed.set_footer(text=f'{ctx.l.help.no_arguments_footer}', icon_url=self.bot.user.avatar_url)
         return embed
 
     async def send_command_help(self, ctx: GitBotContext, command: GitBotCommand) -> None:
@@ -107,7 +110,7 @@ class Help(commands.Cog):
             if not command_or_group:
                 return await ctx.error(ctx.l.generic.nonexistent.command_or_group)
             match type(command_or_group):  # ah yes, the almighty type() call for checks. Don't kill me.
-                case decorators.GitBotCommand:  # dot-access to resolve name capture pattern error - pep-0634
+                case decorators.GitBotCommand:  # dot-access to avoid name capture pattern error - pep-0634
                     await self.send_command_help(ctx, command_or_group)
                 case decorators.GitBotCommandGroup:
                     await self.send_command_group_help(ctx, command_or_group)

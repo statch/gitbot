@@ -424,7 +424,7 @@
   "commits": {
     "embed": {
       "title": "Latest commits in {0}",
-      "footer": "You can type 'cancel' to quit this dialog"
+      "footer": "Type the number of the commit you wish to view.\nYou can type 'cancel' to quit this dialog"
     },
     "no_match": "That's not a **valid number/OID from the list!** Try again!"
   },
@@ -754,6 +754,7 @@
   "help": {
     "required_permissions": "Required Permissions",
     "commands_inside_group": "Commands inside this group",
+    "no_arguments_footer": "This command doesn't take any arguments. You're good to go!",
     "default": {
       "title": "GitBot Help",
       "description": ""
@@ -762,7 +763,7 @@
       "repo": {
         "brief": "Get info about a GitHub repo",
         "description": "This command group provides many useful commands ranging from overall info and stats, to downloading and inspecting a repo's code.",
-        "usage": "repo [repo-or-subcommand]",
+        "usage": "repo [repo_or_subcommand]",
         "example": null,
         "argument_explainers": [
           "repo_or_subcommand"
@@ -784,7 +785,7 @@
       "commits": {
         "brief": "Get latest commits from a GitHub repository",
         "description": null,
-        "usage": "commits [repo-with-branch]",
+        "usage": "commits [repo_with_branch]",
         "example": "commits statch/gitbot",
         "argument_explainers": [
           "repo_with_branch"
@@ -1062,7 +1063,7 @@
       },
       "org": {
         "brief": "Get info about a GitHub organization",
-        "usage": "org [org-or-subcommand]",
+        "usage": "org [org_or_subcommand]",
         "example": "org statch",
         "description": "This command group allows you to view info about an org, its repos, and more!",
         "argument_explainers": [
@@ -1113,7 +1114,7 @@
       },
       "snippet": {
         "brief": "Convert a codeblock or a GitHub line link into a Carbon image",
-        "usage": "snippet <codeblock-or-lines>",
+        "usage": "snippet <codeblock_or_lines>",
         "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
         "argument_explainers": [
@@ -1146,7 +1147,7 @@
       },
       "pypi_downloads": {
         "brief": "Get a 3-month download chart for a PyPI package",
-        "usage": "pypi downloads <package-name>",
+        "usage": "pypi downloads <package_name>",
         "example": "pypi downloads httpcats",
         "description": null,
         "argument_explainers": [
@@ -1157,7 +1158,7 @@
       },
       "pypi_info": {
         "brief": "Get info about a PyPI package",
-        "usage": "pypi info <package-name>",
+        "usage": "pypi info <package_name>",
         "example": "pypi info httpcats",
         "description": null,
         "argument_explainers": [
@@ -1168,7 +1169,7 @@
       },
       "repo_issues": {
         "brief": "Get issues in a GitHub repo",
-        "usage": "repo issues [repo] [issue-state]",
+        "usage": "repo issues [repo] [issue_state]",
         "example": "repo issues statch/gitbot closed",
         "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
         "argument_explainers": [
@@ -1191,7 +1192,7 @@
       },
       "repo_pulls": {
         "brief": "Get pull requests in a GitHub repo",
-        "usage": "repo pulls [repo] [pr-state]",
+        "usage": "repo pulls [repo] [pr_state]",
         "example": "repo pulls statch/gitbot merged",
         "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
         "argument_explainers": [
@@ -1199,6 +1200,175 @@
           "pr_state"
         ],
         "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_files": {
+        "brief": "View a GitHub repo's file structure ",
+        "usage": "repo files <repo>",
+        "example": "repo files statch/gitbot",
+        "description": null,
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_commits": {
+        "brief": "Get latest commits from a GitHub repository",
+        "description": null,
+        "usage": "repo commits [repo_with_branch]",
+        "example": "repo commits statch/gitbot",
+        "argument_explainers": [
+          "repo_with_branch"
+        ],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "invite": {
+        "brief": "Invite the bot to your server!",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pr": {
+        "brief": "Get info about a Pull Request",
+        "usage": "pr [repo] <pr_number>",
+        "example": "pr statch/gitbot 39",
+        "description": null,
+        "argument_explainers": [
+          "repo",
+          "pr_number"
+        ],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "vote": {
+        "brief": "Vote for GitBot!",
+        "usage": null,
+        "example": null,
+        "description": "Voting massively helps GitBot reach as many devs as possible!",
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "stats": {
+        "brief": "Get some bot statistics",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "uptime": {
+        "brief": "Get the bot's current uptime",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "argument_explainers": [],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "user": {
+        "brief": "Get info about a GitHub user",
+        "usage": "user [user_or_subcommand]",
+        "example": "user itsmewulf",
+        "description": "Commands inside this group allow you to view info about a user, their repos, and more!",
+        "argument_explainers": [
+          "user_or_subcommand"
+        ],
+        "qa_resource": "user",
+        "required_permissions": []
+      },
+      "user_info": {
+        "brief": "Get info about a GitHub user",
+        "usage": "user info <user>",
+        "example": "user info itsmewulf",
+        "description": "Get detailed info about a GitHub user - contributions, orgs, repos, and more!",
+        "argument_explainers": [
+          "user"
+        ],
+        "qa_resource": "user",
+        "required_permissions": []
+      },
+      "user_repos": {
+        "brief": "Get a GitHub user's repos",
+        "usage": "user repos <user>",
+        "example": "user repos itsmewulf",
+        "description": null,
+        "argument_explainers": [
+          "user"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "gist": {
+        "brief": "Get a gist authored by a GitHub user",
+        "usage": "gist <user> [gist_list_number]",
+        "example": "gist itsmewulf",
+        "description": "This command shows you a list of a user's latest gists, from which you can pick one to inspect by sending its number. You can also use it with both a username and a number corresponding to a gist from the list to skip the dialog.",
+        "argument_explainers": [
+          "user",
+          "gist_list_number"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "loc": {
+        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "usage": "loc <repo>",
+        "example": "loc statch/gitbot",
+        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "issue": {
+        "brief": "Inspect a GitHub issue",
+        "usage": "issue [repo] <issue_number>",
+        "example": "issue statch/gitbot 53",
+        "description": "Find out what an issue is about, the participants, labels, and a whole lot more!",
+        "argument_explainers": [
+          "repo",
+          "issue_number"
+        ],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "help": {
+        "brief": "Find out about GitBot's commands!",
+        "usage": "help [command]",
+        "example": "help user",
+        "description": "This is the command you're using right now!",
+        "argument_explainers": [
+          "command"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "license": {
+        "brief": "Get info about a license",
+        "usage": "license <license_name>",
+        "example": "license MIT",
+        "description": "Find out what an open-source license is all about - its permissions, conditions, limitations, and more!",
+        "argument_explainers": [
+          "license_name"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "ping": {
+        "brief": "The bot's current ping",
+        "usage": null,
+        "example": null,
+        "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
+        "argument_explainers": [],
+        "qa_resource": null,
         "required_permissions": []
       }
     },
@@ -1214,6 +1384,10 @@
       "repo_or_subcommand": {
         "name": "repo-or-subcommand",
         "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
+      },
+      "user_or_subcommand": {
+        "name": "user-or-subcommand",
+        "content": "Either a GitHub username, or another subcommand from this group"
       },
       "user": {
         "name": "user",
@@ -1262,6 +1436,26 @@
       "pr_state": {
         "name": "pr-state",
         "content": "A pull request state (eg. `open`, `closed`, or `merged`)"
+      },
+      "pr_number": {
+        "name": "pr-number",
+        "content": "A GitHub pull request number"
+      },
+      "issue_number": {
+        "name": "issue-number",
+        "content": "A GitHub issue number"
+      },
+      "gist_list_number": {
+        "name": "gist-list-number",
+        "content": "A number corresponding to a gist from the list"
+      },
+      "command": {
+        "name": "command",
+        "content": "The name of one of GitBot's commands"
+      },
+      "license_name": {
+        "name": "license-name",
+        "content": "The name of an open-source license (ex. `MIT`)"
       }
     },
     "qa_disclaimers": {

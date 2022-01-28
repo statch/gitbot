@@ -6,13 +6,22 @@ A set of non-native replacements for command objects provided in discord.ext.com
 :license: CC BY-NC-ND 4.0, see LICENSE for more details.
 """
 
+import enum
 from discord.ext import commands
 from typing import Callable, Generator, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
 from lib.typehints import ArgumentExplainer, CommandHelp, CommandGroupHelp, LocaleName
+from lib.utils.regex import HELP_PARAMETER_REGEX
 
 __all__: tuple = ('GitBotCommand', 'GitBotCommandGroup')
+
+
+# not used for now, but may come in handy once I get around to refactoring the help system again
+@enum.unique
+class ParameterTypeChars(enum.Enum):
+    OPTIONAL: tuple[str, str] = ('[', ']')
+    REQUIRED: tuple[str, str] = ('<', '>')
 
 
 class GitBotCommand(commands.Command):
@@ -47,6 +56,9 @@ class GitBotCommand(commands.Command):
             return
         if not help_['usage']:
             help_['usage'] = self.fullname
+        params: list[tuple[str, str]] = HELP_PARAMETER_REGEX.findall(help_['usage'])
+        for _, param_name in params:
+            help_['usage'] = help_['usage'].replace(param_name, ctx.l.help.argument_explainers[param_name]['name'])
         self._cached_help_contents[ctx.l.meta.name] = help_
         return help_
 

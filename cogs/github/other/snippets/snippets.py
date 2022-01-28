@@ -6,7 +6,7 @@ from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr
 from typing import Optional
-from lib.utils.decorators import gitbot_group, fmt_prefix
+from lib.utils.decorators import gitbot_group 
 from lib.structs.discord.context import GitBotContext, MessageFormattingStyle
 
 
@@ -17,8 +17,8 @@ class Snippets(commands.Cog):
 
     @gitbot_group(name='snippet', invoke_without_command=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
-    @fmt_prefix('snippets')
     async def snippet_command_group(self, ctx: GitBotContext, *, link_or_codeblock: str) -> None:
+        ctx.fmt.set_prefix('snippets')
         if ctx.invoked_subcommand is None:
             codeblock: Optional[str] = Mgr.extract_content_from_codeblock(link_or_codeblock)
             if codeblock:
@@ -45,8 +45,8 @@ class Snippets(commands.Cog):
 
     @snippet_command_group.command(name='raw')
     @commands.cooldown(3, 30, commands.BucketType.user)
-    @fmt_prefix('snippets')
     async def raw_snippet_command(self, ctx: GitBotContext, link: str) -> None:
+        ctx.fmt.set_prefix('snippets')
         text, err = await handle_url(ctx, link)
         if text:
             await ctx.send(text)

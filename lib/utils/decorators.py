@@ -161,21 +161,3 @@ def gitbot_group(name: str, cls=GitBotCommandGroup, **attrs) -> Callable:
         return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator
-
-
-def fmt_prefix(prefix: str):
-    """
-    Set the context locale formatting prefix to the passed one
-
-    :param prefix: The prefix to set
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        async def wrapped(ctx: 'GitBotContext', *args, **kwargs):
-            ctx.fmt.set_prefix(prefix)
-            return await func(ctx, *args, **kwargs)
-
-        return wrapped
-
-    return wrapper

@@ -22,9 +22,11 @@ __all__: tuple = ('EmbedPagesControl', 'ACTIONS', 'EmbedPages')
 
 
 class EmbedPagesControl(Enum):
+    FIRST = '⏮'
     BACK = '◀'
     STOP = '⏹'
     NEXT = '▶'
+    LAST = '⏭'
 
 
 ACTIONS: set = {e.value for e in EmbedPagesControl}
@@ -44,10 +46,13 @@ class EmbedPages:
                      no matter if an action occurred or not it will close after this time.
     """
 
-    def __init__(self, pages: list[GitBotEmbed | discord.Embed], timeout: int = 75, lifespan: int = 300):
+    def __init__(self,
+                 pages: Optional[list[GitBotEmbed | discord.Embed]] = None,
+                 timeout: int = 75,
+                 lifespan: int = 300):
+        self.pages: list = pages if pages else []
         self.lifespan: float = lifespan
         self.timeout: int = timeout
-        self.pages: list[GitBotEmbed | discord.Embed] = pages
         self.current_page: int = 0
         self.start_time: Optional[float] = None
         self.last_action_time: Optional[float] = None
@@ -87,7 +92,21 @@ class EmbedPages:
 
         return self.time_since_last_action > self.timeout and self.lifetime < self.lifespan
 
-    async def start(self, ctx: GitBotContext) -> None:
+    def add_page(self, page: GitBotEmbed | discord.Embed) -> None:
+        """
+        Add a new page to the paginator.
+        """
+
+        self.pages.append(page)
+
+    def remove_page(self, page: GitBotEmbed | discord.Embed) -> None:
+        """
+        Remove a page from the paginator.
+        """
+
+        self.pages.remove(page)
+
+    async def start(self, ctx: 'GitBotContext') -> None:
         """
         Start the paginator in the passed context.
 
@@ -123,14 +142,22 @@ class EmbedPages:
 
     async def next_page(self):
         if self.current_page + 1 < len(self.pages):
-            self.current_page += 1
-            self._action_time()
-            await self.message.edit(embed=self.pages[self.current_page])
+            await self.update_page(self.current_page + 1)
 
     async def previous_page(self):
         if self.current_page > 0:
-            self.current_page -= 1
-            self._action_time()
+            await self.update_page(self.current_page - 1)
+
+    async def to_first_page(self):
+        await self.update_page(0)
+
+    async def to_last_page(self):
+        await self.update_page(len(self.pages) - 1)
+
+    async def update_page(self, page: int):
+        if 0 <= page < len(self.pages):
+            self.current_page = page
+            self.last_action_time: float = time()
             await self.message.edit(embed=self.pages[self.current_page])
 
     def _edit_embed_footer(self, embed: discord.Embed | GitBotEmbed) -> None:
@@ -148,9 +175,6 @@ class EmbedPages:
         self.last_action_time: float = self.start_time
         self.bot: commands.Bot = self.context.bot
         self.message: discord.Message = message
-
-    def _action_time(self) -> None:
-        self.last_action_time: float = time()
 
     def _ensure_perms(self, channel: discord.TextChannel) -> NoReturn:
         if not isinstance(channel, discord.DMChannel):
@@ -179,7 +203,7 @@ class EmbedPages:
                                                              timeout=self.timeout)
                 except asyncio.TimeoutError:
                     Mgr.debug(f'Event timeout with lifetime={self.lifetime} '
-                              f'and time_since_last_action={self.time_since_last_action}')
+                              f'and time since last action={self.time_since_last_action}')
                     await self.edit(GitBotCommandState.TIMEOUT)
                     break
                 action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
@@ -188,6 +212,10 @@ class EmbedPages:
                         await self.previous_page()
                     case EmbedPagesControl.NEXT:
                         await self.next_page()
+                    case EmbedPagesControl.FIRST:
+                        await self.to_first_page()
+                    case EmbedPagesControl.LAST:
+                        await self.to_last_page()
                     case EmbedPagesControl.STOP:
                         await self.edit(GitBotCommandState.CLOSED)
                         Mgr.debug('Stopping embed paginator loop - closed')
@@ -198,6 +226,15 @@ class EmbedPages:
                 Mgr.debug(f'Iteration complete with action {action.name}')
             else:
                 Mgr.debug(f'Timeout with lifetime={self.lifetime} '
-                          f'and time_since_last_action={self.time_since_last_action}')
+                          f'and time since last action={self.time_since_last_action}')
                 await self.edit(GitBotCommandState.TIMEOUT)
                 break
+
+    def __add__(self, embed: discord.Embed | GitBotEmbed):
+        self.add_page(embed)
+
+    def __sub__(self, embed: discord.Embed | GitBotEmbed):
+        self.remove_page(embed)
+
+    def __len__(self):
+        return len(self.pages)

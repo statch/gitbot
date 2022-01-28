@@ -1,8 +1,7 @@
 from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs.discord.context import GitBotContext
-from .error_tools import respond_to_command_doesnt_exist, log_error_in_discord,  silenced
-from lib.utils.decorators import fmt_prefix
+from .error_tools import respond_to_command_doesnt_exist, log_error_in_discord,  silenced  # noqa
 
 
 class Errors(commands.Cog):
@@ -10,8 +9,8 @@ class Errors(commands.Cog):
         self.bot: commands.Bot = bot
 
     @commands.Cog.listener()
-    @fmt_prefix('errors')
     async def on_command_error(self, ctx: GitBotContext, error) -> None:
+        ctx.fmt.set_prefix('errors')
         if not Mgr.env.production and not getattr(ctx, '__autoinvoked__', False):
             raise error
         if silenced(ctx, error):

@@ -8,7 +8,7 @@ from discord.ext import commands
 from typing import Optional
 from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_command, fmt_prefix
+from lib.utils.decorators import gitbot_command 
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
 
@@ -29,8 +29,8 @@ class LinesOfCode(commands.Cog):
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
-    @fmt_prefix('loc')
     async def lines_of_code_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
+        ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await Git.get_repo(repo)
         if not r:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
@@ -44,7 +44,7 @@ class LinesOfCode(commands.Cog):
             color=0x00a6ff,
             title=title,
             url=r['url'],
-            description=(ctx.fmt('description', processed["header"]["n_lines"], processed["SUM"]["nFiles"])
+            description=(ctx.fmt('description', processed['header']['n_lines'], processed['SUM']['nFiles'])
                          + '\n'
                          + f'{"⎯" * len(title)}\n'
                          + f'**{ctx.l.loc.stats.code}:** {processed["SUM"]["code"]}\n'
@@ -71,8 +71,8 @@ class LinesOfCode(commands.Cog):
                 await fp.write(files)
             await Mgr.unzip_file(tmp_zip_path, tmp_dir_path)
             output: dict = json.loads(subprocess.check_output(['/bin/perl', 'cloc.pl', '--json', tmp_dir_path]))
-        except subprocess.CalledProcessError:
-            pass
+        except subprocess.CalledProcessError as e:
+            Mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
         else:
             Mgr.loc_cache[repo] = output
             return output

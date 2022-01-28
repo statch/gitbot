@@ -1,3 +1,13 @@
+"""
+An organized way to manage the different locales,
+the database, and other utilities used by GitBot.
+It ties these modules together creating a single, performant interface.
+~~~~~~~~~~~~~~~~~~~
+GitBot utility class providing an elegant way to manage different aspects of the bot
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
 import re
 import os
 import ast
@@ -28,7 +38,7 @@ from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
                          CacheSchema, ParsedRepositoryData)
-from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING
+from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
@@ -62,7 +72,7 @@ class Manager:
         self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
         self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
         self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
-        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 15)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 7)
         self.locale.master = getattr(self.l, str(self.locale.master))
         self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
@@ -300,6 +310,21 @@ class Manager:
         """
 
         return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
+
+    @staticmethod
+    def chunks(iterable: list | tuple, chunk_size: int) -> Generator[list | tuple, None, None]:
+        """
+        Returns a generator of equally sized chunks from an iterable.
+        If the iterable is not evenly divisible by chunk_size, the last chunk will be smaller.
+        Useful for displaying a list inside multiple embeds.
+
+        :param iterable: The iterable to chunk
+        :param chunk_size: The size of the chunks (list has len 10, chunk_size is 5 -> 2 lists of 5)
+        :return: A generator of chunks sized <= chunk_size
+        """
+
+        n: int = max(1, chunk_size)
+        return (iterable[i:i + n] for i in range(0, len(iterable), n))
 
     def _setup_db(self) -> None:
         """
@@ -996,7 +1021,7 @@ class Manager:
         for locale in self.l:
             _preprocess(locale)
 
-    def fmt(self, ctx: 'GitBotContext') -> object:
+    def fmt(self, ctx: 'GitBotContext'):
         """
         Instantiate a new Formatter object. Meant for binding to Context.
 

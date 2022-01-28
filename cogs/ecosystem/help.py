@@ -3,6 +3,7 @@ from typing import Iterator, Optional
 from lib.utils.decorators import gitbot_command, GitBotCommand, GitBotCommandGroup
 from lib.utils import decorators
 from lib.structs import GitBotEmbed
+from lib.structs.discord.pages import EmbedPages
 from lib.globs import Mgr
 from lib.typehints import CommandHelp, CommandGroupHelp
 from lib.structs.discord.context import GitBotContext
@@ -69,9 +70,38 @@ class Help(commands.Cog):
                                          for c in content['commands']]), inline=False)
         await embed.send(ctx)
 
+    async def send_help(self, ctx: GitBotContext) -> None:
+        pages: EmbedPages = EmbedPages()
+        # TODO first page should be overall info and description
+        index_embed: GitBotEmbed = GitBotEmbed(
+            title=f'{Mgr.e.github}   {ctx.l.help.default.title}',
+            description=f'{ctx.l.help.default.description}',
+            thumbnail=self.bot.user.avatar_url,
+            url=f'https://docs.statch.org',
+            color=Mgr.c.discord.fuchsia
+        )
+        pages + index_embed
+        chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(Mgr.chunks(list(self._get_commands()), 10))
+        for chunk in chunks:
+            embed: GitBotEmbed = GitBotEmbed(
+                title=f'{Mgr.e.github}   Help',
+                description='',
+                url=f'https://docs.statch.org',
+            )
+            for command in chunk:
+                try:
+                    content: CommandHelp | CommandGroupHelp = command.get_help_content(ctx)
+                    brief: str = Mgr.truncate(content['brief'], 70 - len(command.fullname), full_word=True)
+                    embed.description += f'`{command.fullname}`: {brief}\n' if type(command) is GitBotCommand \
+                        else f'`{command.fullname}`  {Mgr.e.folder}: {brief}\n'
+                except (KeyError, TypeError) as e:
+                    self.bot.dispatch('error', e)
+            pages + embed
+        await pages.start(ctx)
+
     @gitbot_command('help', aliases=['h', 'halp' 'commands', 'cmds',
                                      'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
-    async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None) -> None:
+    async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None):
         if command_or_group is not None:
             command_or_group: Optional[GitBotCommand | GitBotCommandGroup] = self._get_command(command_or_group)
             if not command_or_group:
@@ -83,6 +113,8 @@ class Help(commands.Cog):
                     await self.send_command_group_help(ctx, command_or_group)
                 case _:
                     pass  # TODO do something if a plain commands.command/group was used for some reason?
+        else:
+            await self.send_help(ctx)
 
 
 def setup(bot: commands.Bot) -> None:

@@ -33,6 +33,7 @@ class GitBotContext(commands.Context):
         self.__autoinvoked__ = False
         self.fmt = Mgr.fmt(self)
         self.l = None  # noqa
+        self.data: Optional[dict] = None  # field used by chained invocations and quick access
         super().__init__(**attrs)
 
     def _format_content(self, content: str, style: MessageFormattingStyle | str) -> str:

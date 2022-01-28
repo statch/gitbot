@@ -2,7 +2,7 @@ import discord
 from typing import Optional
 from lib.globs import Git, Mgr
 from discord.ext import commands
-from lib.utils.decorators import gitbot_group, fmt_prefix
+from lib.utils.decorators import gitbot_group 
 from lib.typehints import GitHubOrganization
 from lib.structs.discord.context import GitBotContext
 
@@ -85,8 +85,8 @@ class Org(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='repos', aliases=['r'])
-    @fmt_prefix('org repos')
     async def org_repos_command(self, ctx: GitBotContext, org: GitHubOrganization) -> None:
+        ctx.fmt.set_prefix('org repos')
         o: Optional[dict] = await Git.get_org(org)
         repos: list = await Git.get_org_repos(org)
         if o is None:

@@ -3,7 +3,7 @@ from typing import Optional
 from lib.globs import Git, Mgr
 from lib.typehints import GitHubRepository
 from discord.ext import commands
-from lib.utils.decorators import normalize_repository, gitbot_command, fmt_prefix
+from lib.utils.decorators import normalize_repository, gitbot_command 
 from lib.structs.discord.context import GitBotContext
 
 PR_STATES: dict = {
@@ -20,11 +20,11 @@ class PullRequest(commands.Cog):
     @gitbot_command(name='pr', aliases=['pull', 'pull-request', 'pullrequest'])
     @commands.cooldown(10, 30, commands.BucketType.user)
     @normalize_repository
-    @fmt_prefix('pr')
     async def pull_request_command(self,
                                    ctx: GitBotContext,
                                    repo: GitHubRepository,
                                    pr_number: Optional[str] = None):
+        ctx.fmt.set_prefix('pr')
         if hasattr(ctx, 'data'):
             pr: dict = getattr(ctx, 'data')
             pr_number: str | int = pr['number']

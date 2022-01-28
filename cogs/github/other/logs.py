@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from lib.globs import Mgr
-from lib.utils.decorators import gitbot_command, fmt_prefix
+from lib.utils.decorators import gitbot_command 
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
 
@@ -15,8 +15,8 @@ class Logs(commands.Cog):
     @commands.bot_has_permissions(manage_webhooks=True)
     @commands.has_permissions(manage_webhooks=True)
     @commands.guild_only()
-    @fmt_prefix('logs')
     async def logs_command(self, ctx: GitBotContext) -> None:
+        ctx.fmt.set_prefix('logs')
         try:
             Mgr.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Logs',

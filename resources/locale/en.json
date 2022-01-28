@@ -754,10 +754,13 @@
   "help": {
     "required_permissions": "Required Permissions",
     "commands_inside_group": "Commands inside this group",
-    "default": {},
+    "default": {
+      "title": "GitBot Help",
+      "description": ""
+    },
     "commands": {
       "repo": {
-        "brief": "Get info about a GitHub repo.",
+        "brief": "Get info about a GitHub repo",
         "description": "This command group provides many useful commands ranging from overall info and stats, to downloading and inspecting a repo's code.",
         "usage": "repo [repo-or-subcommand]",
         "example": null,
@@ -768,7 +771,7 @@
         "required_permissions": []
       },
       "repo_download": {
-        "brief": "Download the code of a GitHub repo.\nThe max size is 8MB.",
+        "brief": "Download the code of a GitHub repo",
         "description": null,
         "usage": "download <repo>",
         "example": "download statch/gitbot",
@@ -779,7 +782,7 @@
         "required_permissions": []
       },
       "commits": {
-        "brief": "Get latest commits from a GitHub repository.",
+        "brief": "Get latest commits from a GitHub repository",
         "description": null,
         "usage": "commits [repo-with-branch]",
         "example": "commits statch/gitbot",
@@ -1063,7 +1066,7 @@
         "example": "org statch",
         "description": "This command group allows you to view info about an org, its repos, and more!",
         "argument_explainers": [
-          "org-or-subcommand"
+          "org_or_subcommand"
         ],
         "qa_resource": "org",
         "required_permissions": []
@@ -1114,7 +1117,7 @@
         "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
         "argument_explainers": [
-          "codeblock-or-lines"
+          "codeblock_or_lines"
         ],
         "qa_resource": null,
         "required_permissions": []
@@ -1128,6 +1131,74 @@
           "lines"
         ],
         "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi": {
+        "brief": "Get info about PyPI packages",
+        "usage": "pypi [subcommand]",
+        "example": null,
+        "description": "This command group allows you to view info about PyPI packages such as creation date, downloads and more!",
+        "argument_explainers": [
+          "subcommand"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi_downloads": {
+        "brief": "Get a 3-month download chart for a PyPI package",
+        "usage": "pypi downloads <package-name>",
+        "example": "pypi downloads httpcats",
+        "description": null,
+        "argument_explainers": [
+          "package_name"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi_info": {
+        "brief": "Get info about a PyPI package",
+        "usage": "pypi info <package-name>",
+        "example": "pypi info httpcats",
+        "description": null,
+        "argument_explainers": [
+          "package_name"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_issues": {
+        "brief": "Get issues in a GitHub repo",
+        "usage": "repo issues [repo] [issue-state]",
+        "example": "repo issues statch/gitbot closed",
+        "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
+        "argument_explainers": [
+          "repo",
+          "issue_state"
+        ],
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_info": {
+        "brief": "Get info about a GitHub repo",
+        "usage": "repo info <repo>",
+        "example": "repo info statch/gitbot",
+        "description": null,
+        "argument_explainers": [
+          "repo"
+        ],
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_pulls": {
+        "brief": "Get pull requests in a GitHub repo",
+        "usage": "repo pulls [repo] [pr-state]",
+        "example": "repo pulls statch/gitbot merged",
+        "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
+        "argument_explainers": [
+          "repo",
+          "pr_state"
+        ],
+        "qa_resource": "repo",
         "required_permissions": []
       }
     },
@@ -1168,17 +1239,29 @@
         "name": "oid",
         "content": "A Git object ID (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) that corresponds to an object - a commit, tree, blob, tag, etc."
       },
-      "org-or-subcommand": {
+      "org_or_subcommand": {
         "name": "org-or-subcommand",
         "content": "Either an organization name, or another subcommand from this group"
       },
-      "codeblock-or-lines": {
+      "codeblock_or_lines": {
         "name": "codeblock-or-lines",
         "content": "Either a codeblock, or a GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       },
       "lines": {
         "name": "lines",
         "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+      },
+      "package_name": {
+        "name": "package-name",
+        "content": "The name of a package (ex. `httpcats`)"
+      },
+      "issue_state": {
+        "name": "issue-state",
+        "content": "The state of the issue (eg. `open` or `closed`)"
+      },
+      "pr_state": {
+        "name": "pr-state",
+        "content": "A pull request state (eg. `open`, `closed`, or `merged`)"
       }
     },
     "qa_disclaimers": {

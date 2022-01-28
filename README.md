@@ -21,7 +21,7 @@ _________________
 
 _________________
 
-Make sure to check out our [official website](https://statch.tech/gitbot "GitBot Official Website")  
-**If you have any problems or questions, feel free to join [the support server](https://discord.gg/3e5fwpA)**
+Make sure to check out our [official website](https://statch.org/gitbot "Official GitBot website")  
+**If you have any problems or questions, feel free to join [the support server](https://discord.statch.org)**
 
 **© 2020-2022 statch, Not affiliated with** [**GitHub Inc.**](https://github.com/)

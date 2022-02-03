@@ -12,6 +12,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from typing import Optional, Iterable
 from lib.typehints import EmbedLike
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
 
@@ -29,6 +30,7 @@ class MessageFormattingStyle(enum.Enum):
 
 class GitBotContext(commands.Context):
     def __init__(self, **attrs):
+        self.command: GitBotCommand | GitBotCommandGroup
         self.__nocache__ = False
         self.__autoinvoked__ = False
         self.fmt = Mgr.fmt(self)
@@ -77,3 +79,14 @@ class GitBotContext(commands.Context):
 
     async def prepare(self) -> None:
         self.l = await Mgr.get_locale(self)  # noqa
+
+    async def group_help(self, subcommand_check: bool = True):
+        """
+        Used for root group methods without any additional logic.
+        """
+
+        parent: Optional[GitBotCommand | GitBotCommandGroup] = (self.command.parent if not
+                                                                isinstance(self.command,
+                                                                           GitBotCommandGroup) else self.command)
+        if parent and (not self.invoked_subcommand or not subcommand_check):
+            return await parent.send_help(self)

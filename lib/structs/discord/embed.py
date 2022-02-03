@@ -147,6 +147,14 @@ class GitBotEmbed(discord.Embed):
         return None, None
 
     async def confirmation(self, ctx: 'GitBotContext', callback: GitBotEmbedResponseCallback) -> bool:
+        """
+        Run a prompt to confirm something.
+
+        :param ctx: The invocation context
+        :param callback: The callback to use (same as in :meth:`input_with_timeout`)
+        :return: Whether the user confirmed
+        """
+
         initial_message: discord.Message = await self.send(ctx)
         await initial_message.add_reaction('<:checkmark:770244084727283732>')
         await initial_message.add_reaction('<:failure:770244076896256010>')

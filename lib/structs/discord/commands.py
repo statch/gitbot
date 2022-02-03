@@ -102,3 +102,13 @@ class GitBotCommandGroup(commands.Group, GitBotCommand):
         help_.setdefault('commands', self.commands if not command_contents else [cmd.get_help_content(ctx)
                                                                                  for cmd in self.commands])
         return help_
+
+    async def send_help(self, ctx: 'GitBotContext') -> None:
+        """
+        Sends the localized help embed corresponding to this group if ctx.invoked_subcommand is None.
+
+        :param ctx: The context of the command invocation
+        """
+
+        if not ctx.invoked_subcommand:
+            await ctx.invoke(ctx.bot.get_command('help'), command_or_group=self.fullname)

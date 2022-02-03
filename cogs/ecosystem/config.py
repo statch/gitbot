@@ -29,11 +29,11 @@ class Config(commands.Cog):
             lines: list = [ctx.l.config.default.brief_1,
                            "\n" + ctx.l.config.default.title,
                            ctx.l.config.default.brief_2,
-                           f"`git config user {{{ctx.l.argument_placeholders.user}}}` " + Mgr.e.arrow + " " +
+                           f"`git config user {{{ctx.l.help.argument_explainers.user.name}}}` " + Mgr.e.arrow + " " +
                            ctx.l.config.default.commands.user,
-                           f"`git config org {{{ctx.l.argument_placeholders.org}}}` " + Mgr.e.arrow + " " +
+                           f"`git config org {{{ctx.l.help.argument_explainers.org.name}}}` " + Mgr.e.arrow + " " +
                            ctx.l.config.default.commands.org,
-                           f"`git config repo {{{ctx.l.argument_placeholders.repo}}}` " + Mgr.e.arrow + " " +
+                           f"`git config repo {{{ctx.l.help.argument_explainers.repo.name}}}` " + Mgr.e.arrow + " " +
                            ctx.l.config.default.commands.repo,
                            f"`git config language` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.locale,
                            f"`git config feed` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
@@ -117,7 +117,7 @@ class Config(commands.Cog):
                 color=Mgr.c.discord.blurple,
                 title=f"{Mgr.e.github}  {ctx.l.config.show.feed.title}",
                 description=self.construct_release_feed_list(ctx, guild['feed']),
-                footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.argument_placeholders.channel}}}'))
+                footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.help.argument_explainers.channel}}}'))
             await embed.send(ctx)
         else:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
@@ -131,8 +131,8 @@ class Config(commands.Cog):
                 color=Mgr.c.discord.fuchsia,
                 title=ctx.l.config.feed.default.title,
                 description=ctx.fmt('description',
-                                    f'`git config feed channel {{{ctx.l.argument_placeholders.channel}}}`',
-                                    f'`git config feed repo {{{ctx.l.argument_placeholders.repo}}}`')
+                                    f'`git config feed channel {{{ctx.l.help.argument_explainers.channel.name}}}`',
+                                    f'`git config feed repo {{{ctx.l.help.argument_explainers.repo.name}}}`')
             )
             await ctx.send(embed=embed)
 
@@ -153,10 +153,10 @@ class Config(commands.Cog):
         except commands.BadArgument:
             await ctx.error(ctx.l.config.feed.channel.invalid_channel)
             return
-        g: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
-        feed: dict = g.get('feed', {})
+        guild: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        feed: dict = guild.get('feed', {})
         success: bool = False
-        if g:
+        if guild:
             if len(feed) >= 5:
                 embed_limit_reached: discord.Embed = discord.Embed(
                     color=Mgr.c.discord.yellow,
@@ -173,7 +173,7 @@ class Config(commands.Cog):
                     return
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
-                await Mgr.db.guilds.update_one(g, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
+                await Mgr.db.guilds.update_one(guild, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
                                                                                      hook=hook.url[33:],
                                                                                      repos=[])}})
                 success: bool = True
@@ -190,7 +190,7 @@ class Config(commands.Cog):
                 title=ctx.l.config.feed.channel.success_embed.title,
                 description=ctx.fmt(f'success_embed description',
                                     channel.mention,
-                                    f'`git config feed repo {{{ctx.l.argument_placeholders.repo}}}`'),
+                                    f'`git config feed repo {{{ctx.l.help.argument_explainers.repo}}}`'),
                 footer=ctx.fmt('success_embed footer', 'git config delete feed channel')
             )
             await ctx.send(embed=embed)
@@ -340,7 +340,7 @@ class Config(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=Mgr.c.rounded,
             title=f'{Mgr.e.github}  {ctx.l.config.locale.title}',
-            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.argument_placeholders.lang}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
+            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.lang}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
                 languages)
         )
         await ctx.send(embed=embed)
@@ -365,9 +365,7 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def config_autoconv_group(self, ctx: GitBotContext) -> None:
-        if not ctx.invoked_subcommand:
-            # TODO Document autoconv commands
-            pass
+        await ctx.group_help()
 
     @config_autoconv_group.command('codeblock')
     @commands.guild_only()
@@ -571,7 +569,7 @@ class Config(commands.Cog):
 
             if to_delete:
                 ctx.fmt.set_prefix('+success')
-                to_delete = Mgr.get_by_key_from_sequence(present_in, 'cid', to_delete, multiple=True, unpack=True)
+                to_delete: list = Mgr.get_by_key_from_sequence(present_in, 'cid', to_delete, multiple=True, unpack=True)
                 ud: dict = {f'feed.{guild["feed"].index(to_delete[n])}.repos':
                             Mgr.get_by_key_from_sequence(rf['repos'],
                                                          'name', repo.lower()) for n, rf in enumerate(to_delete)}

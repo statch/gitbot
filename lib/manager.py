@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
 An organized way to manage the different locales,
 the database, and other utilities used by GitBot.

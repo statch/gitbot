@@ -49,11 +49,13 @@ class EmbedPages:
     def __init__(self,
                  pages: Optional[list[GitBotEmbed | discord.Embed]] = None,
                  timeout: int = 75,
-                 lifespan: int = 300):
+                 lifespan: int = 300,
+                 action_polling_rate: float = 0.5):
         self.pages: list = pages if pages else []
         self.lifespan: float = lifespan
         self.timeout: int = timeout
         self.current_page: int = 0
+        self.action_polling_rate: float = action_polling_rate
         self.start_time: Optional[float] = None
         self.last_action_time: Optional[float] = None
         self.message: Optional[discord.Message] = None
@@ -206,6 +208,8 @@ class EmbedPages:
                               f'and time since last action={self.time_since_last_action}')
                     await self.edit(GitBotCommandState.TIMEOUT)
                     break
+                if self.time_since_last_action < self.action_polling_rate:
+                    await asyncio.sleep(self.action_polling_rate - self.time_since_last_action)
                 action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
                 match action:
                     case EmbedPagesControl.BACK:
@@ -222,7 +226,6 @@ class EmbedPages:
                         break
                 Mgr.debug('Removing control reaction')
                 await reaction.message.remove_reaction(reaction.emoji, user)
-                await asyncio.sleep(0.555)
                 Mgr.debug(f'Iteration complete with action {action.name}')
             else:
                 Mgr.debug(f'Timeout with lifetime={self.lifetime} '

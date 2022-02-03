@@ -25,8 +25,8 @@ class PyPI(commands.Cog):
             await ctx.invoke(self.project_info_command, project=project)
         else:
             commands_: list = [
-                f'`git pypi {{{ctx.l.argument_placeholders.package}}}` - {ctx.l.pypi.default.commands.info}',
-                f'`git pypi downloads {{{ctx.l.argument_placeholders.package}}}` - {ctx.l.pypi.default.commands.downloads}'
+                f'`git pypi {{{ctx.l.help.argument_explainers.package.name}}}` - {ctx.l.pypi.default.commands.info}',
+                f'`git pypi downloads {{{ctx.l.help.argument_explainers.package.name}}}` - {ctx.l.pypi.default.commands.downloads}'
             ]
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.languages.python,

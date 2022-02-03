@@ -1,3 +1,14 @@
+# coding: utf-8
+
+"""
+Dot-access and case-insensitive proxy for dicts.
+~~~~~~~~~~~~~~~~~~~
+For ease of use when dealing with JSON files, it wraps lists as well.
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
+
 from typing import Optional, Iterator, ItemsView, TypeVar
 from ..dicts.case_insensitive_dict import CaseInsensitiveDict
 
@@ -18,7 +29,7 @@ class DictProxy(CaseInsensitiveDict):
         The object to wrap with DictProxy.
     """
 
-    def __init__(self, data: Optional[list | dict[_KT, _VT]] = None, **kwargs):
+    def __init__(self, data: Optional[list[_VT] | dict[_KT, _VT]] = None, **kwargs):
         if data is None:
             data: dict[_KT, _VT] = {}
         self.__items: list[_VT] | dict[_KT, _VT] = data

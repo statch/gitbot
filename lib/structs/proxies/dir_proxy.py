@@ -23,7 +23,7 @@ class DirProxy:
                 with open(os.path.join(dir_, file), 'r') as fp:
                     content: DictProxy | str = DictProxy(json.load(fp)) if file.endswith('.json') else fp.read()
                     self.__items.append(content)
-                    setattr(self, file[:file.rindex('.')], content)
+                    setattr(self, file[:file.index('.')], content)
 
     def __iter__(self):
         yield from self.__items

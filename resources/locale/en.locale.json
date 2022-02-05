@@ -745,7 +745,17 @@
     "no_arguments_footer": "This command doesn't take any arguments. You're good to go!",
     "default": {
       "title": "GitBot Help",
-      "description": "Here you'll find a list of all the commands that gitbot has to offer.\n**You can use `gitbot help <command>` to get more information about a specific command.**"
+      "description": "Here you'll find a list of all the commands that GitBot has to offer.\n**You can use `git help [command]` to get more information about a specific command.**",
+      "fields": [
+        {
+          "name": "Argument style",
+          "value": "When a command accepts input, it will be shown in one of the following ways:\n{emoji_square}  `[argument]` - for **optional** arguments\n{emoji_square}  `<argument>` - for **required** arguments"
+        },
+        {
+          "name": "Quick-access",
+          "value": "Some commands utilize your saved users, repos, orgs, etc. to make their syntax shorter. If that's the case - it will be mentioned in the command's help footer, and you can skip the corresponding argument."
+        }
+      ]
     },
     "commands": {
       "repo": {
@@ -753,9 +763,6 @@
         "description": "This command group provides many useful commands ranging from overall info and stats, to downloading and inspecting a repo's code.",
         "usage": "repo [repo_or_subcommand]",
         "example": null,
-        "argument_explainers": [
-          "repo_or_subcommand"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -764,9 +771,6 @@
         "description": null,
         "usage": "download <repo>",
         "example": "download statch/gitbot",
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -775,9 +779,6 @@
         "description": null,
         "usage": "commits [repo_with_branch]",
         "example": "commits statch/gitbot",
-        "argument_explainers": [
-          "repo_with_branch"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -786,9 +787,6 @@
         "usage": "config [subcommand]",
         "example": null,
         "description": "Some of the settings are server-wide, so to adjust them you'll need specific permissions",
-        "argument_explainers": [
-          "subcommand"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -797,7 +795,6 @@
         "usage": null,
         "example": null,
         "description": "If used inside a server, displays server-wide options as well",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -806,7 +803,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -815,20 +811,14 @@
         "usage": "config repo <repo>",
         "example": "config repo statch/gitbot",
         "description": "Setting this will allow you to use certain commands that take in a repository in a shorter way (ex. git repo statch/gitbot -> git repo)",
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
       "config_lang": {
         "brief": "Set GitBot's language (for you)",
-        "usage": "config lang [language]",
+        "usage": "config lang [locale]",
         "example": "config lang portuguese",
         "description": "If this command is used without a language name, it will display a list of available languages to choose from",
-        "argument_explainers": [
-          "locale"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -837,9 +827,6 @@
         "usage": "config feed [subcommand]",
         "example": null,
         "description": "You can use commands in this group to set channels as release \"feeds\", add repos to them, and then get notified whenever a new release is created!",
-        "argument_explainers": [
-          "subcommand"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -848,9 +835,6 @@
         "usage": "config feed repo <repo>",
         "example": "config feed repo statch/gitbot",
         "description": "This command will display a list of your release feeds and ask you to choose which feed the repo should be added to",
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -861,9 +845,6 @@
         "usage": "config feed channel <channel>",
         "example": null,
         "description": "This command will allow you to add a channel as a release feed, to then add repos and wait for new releases. You can have 5 of these in your server!",
-        "argument_explainers": [
-          "channel"
-        ],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -874,9 +855,6 @@
         "usage": "config user <user>",
         "example": "config user itsmewulf",
         "description": "Setting this will allow you to use certain commands that take in a user in a shorter way (ex. git user itsmewulf -> git user)",
-        "argument_explainers": [
-          "user"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -885,9 +863,6 @@
         "usage": "config delete [subcommand]",
         "example": null,
         "description": "Commands in this group allow you to reset config fields to their default values or delete items from feeds",
-        "argument_explainers": [
-          "subcommand"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -896,7 +871,6 @@
         "usage": null,
         "example": null,
         "description": "This command will tell GitBot to \"forget\" your saved repo, so commands will no longer use the shortened syntax",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -905,7 +879,6 @@
         "usage": "config delete feed [subcommand]",
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -914,9 +887,6 @@
         "usage": "config delete feed channel [channel]",
         "example": null,
         "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive. If you use this command without the channel argument, a list of active feeds will be displayed.",
-        "argument_explainers": [
-          "channel"
-        ],
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",
@@ -928,9 +898,6 @@
         "usage": "config delete feed repo <repo>",
         "example": null,
         "description": "This command allows you to delete a repository from a specific release feed channel. Once deleted, new releases of this repo will no longer arrive in this feed. Other feeds following this repo won't be affected.",
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",
@@ -942,7 +909,6 @@
         "usage": null,
         "example": null,
         "description": "This command will reset GitBot's language to English",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -951,7 +917,6 @@
         "usage": null,
         "example": null,
         "description": "This command will tell GitBot to \"forget: your saved user, so commands will no longer use the shortened syntax",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -960,7 +925,6 @@
         "usage": null,
         "example": null,
         "description": "This command doesn't affect server settings. ",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -969,7 +933,6 @@
         "usage": null,
         "example": null,
         "description": "This command will tell GitBot to \"forget: your saved org, so commands will no longer use the shortened syntax",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -978,7 +941,6 @@
         "usage": "config org <org>",
         "example": "config org statch",
         "description": "Setting this will allow you to use certain commands that take in an organization in a shorter way (ex. git org statch -> git org)",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -987,9 +949,6 @@
         "usage": "config autoconv [subcommand]",
         "example": null,
         "description": "Subcommands in this group control server-wide settings that affect GitBot's autonomy - mainly automatically converting GitHub links to information, creating Carbon images from codeblocks and more!",
-        "argument_explainers": [
-          "subcommand"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -998,7 +957,6 @@
         "usage": null,
         "example": null,
         "description": "This command toggles the automatic resolving of links sent in chat (except for line links). GitBot will reply to messages with links it understands with information about what's on the other end of that URL",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -1009,7 +967,6 @@
         "usage": null,
         "example": null,
         "description": "This command, not to be confused with general URL resolving, manages only the line aspect of URLs. When a link containing line mentions (ex. #L9-L42) is sent in chat, GitBot will attempt to convert it into either a codeblock, or an image, based on your selection",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -1020,7 +977,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -1031,10 +987,6 @@
         "usage": "commit [repo] [oid]",
         "example": "commit statch/gitbot 3546fa7faada2c61d0a0edf3ec09e1fc28ed7677",
         "description": "Get detailed info about a GitHub commit. If you have a quick-access repo set, you can use this command with only the oid argument, or without arguments altogether - it will default to your saved repo and the latest commit. You can also pass just the repo - the latest commit will be returned",
-        "argument_explainers": [
-          "repo",
-          "oid"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1043,7 +995,6 @@
         "usage": null,
         "example": null,
         "description": "This command creates a webhook (a fancy name for a not-so-fancy thing), that's then sent to you along with instructions to get the feed up and running. You add the URL from the instructions into repo(s) of choice, and you get all the commits right as they happen!",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": [
           "manage_webhooks"
@@ -1054,9 +1005,6 @@
         "usage": "org [org_or_subcommand]",
         "example": "org statch",
         "description": "This command group allows you to view info about an org, its repos, and more!",
-        "argument_explainers": [
-          "org_or_subcommand"
-        ],
         "qa_resource": "org",
         "required_permissions": []
       },
@@ -1065,9 +1013,6 @@
         "usage": "org info <org>",
         "example": "org info statch",
         "description": "Get detailed information about an org - when it was created, who the members are, how many repos it has, and more!",
-        "argument_explainers": [
-          "org"
-        ],
         "qa_resource": "org",
         "required_permissions": []
       },
@@ -1076,9 +1021,6 @@
         "usage": "org repos <org>",
         "example": "org repos statch",
         "description": null,
-        "argument_explainers": [
-          "org"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1087,7 +1029,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1096,7 +1037,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1105,9 +1045,6 @@
         "usage": "snippet <codeblock_or_lines>",
         "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
-        "argument_explainers": [
-          "codeblock_or_lines"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1116,9 +1053,6 @@
         "usage": "snippet raw <lines>",
         "example": "snippet raw https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
-        "argument_explainers": [
-          "lines"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1127,9 +1061,6 @@
         "usage": "pypi [subcommand]",
         "example": null,
         "description": "This command group allows you to view info about PyPI packages such as creation date, downloads and more!",
-        "argument_explainers": [
-          "subcommand"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1138,9 +1069,6 @@
         "usage": "pypi downloads <package_name>",
         "example": "pypi downloads httpcats",
         "description": null,
-        "argument_explainers": [
-          "package_name"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1149,9 +1077,6 @@
         "usage": "pypi info <package_name>",
         "example": "pypi info httpcats",
         "description": null,
-        "argument_explainers": [
-          "package_name"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1160,10 +1085,6 @@
         "usage": "repo issues [repo] [issue_state]",
         "example": "repo issues statch/gitbot closed",
         "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
-        "argument_explainers": [
-          "repo",
-          "issue_state"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1172,9 +1093,6 @@
         "usage": "repo info <repo>",
         "example": "repo info statch/gitbot",
         "description": null,
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1183,10 +1101,6 @@
         "usage": "repo pulls [repo] [pr_state]",
         "example": "repo pulls statch/gitbot merged",
         "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
-        "argument_explainers": [
-          "repo",
-          "pr_state"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1195,9 +1109,6 @@
         "usage": "repo files <repo>",
         "example": "repo files statch/gitbot",
         "description": null,
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1206,9 +1117,6 @@
         "description": null,
         "usage": "repo commits [repo_with_branch]",
         "example": "repo commits statch/gitbot",
-        "argument_explainers": [
-          "repo_with_branch"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1217,7 +1125,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1226,10 +1133,6 @@
         "usage": "pr [repo] <pr_number>",
         "example": "pr statch/gitbot 39",
         "description": null,
-        "argument_explainers": [
-          "repo",
-          "pr_number"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1238,7 +1141,6 @@
         "usage": null,
         "example": null,
         "description": "Voting massively helps GitBot reach as many devs as possible!",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1247,7 +1149,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1256,7 +1157,6 @@
         "usage": null,
         "example": null,
         "description": null,
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1265,9 +1165,6 @@
         "usage": "user [user_or_subcommand]",
         "example": "user itsmewulf",
         "description": "Commands inside this group allow you to view info about a user, their repos, and more!",
-        "argument_explainers": [
-          "user_or_subcommand"
-        ],
         "qa_resource": "user",
         "required_permissions": []
       },
@@ -1276,9 +1173,6 @@
         "usage": "user info <user>",
         "example": "user info itsmewulf",
         "description": "Get detailed info about a GitHub user - contributions, orgs, repos, and more!",
-        "argument_explainers": [
-          "user"
-        ],
         "qa_resource": "user",
         "required_permissions": []
       },
@@ -1287,9 +1181,6 @@
         "usage": "user repos <user>",
         "example": "user repos itsmewulf",
         "description": null,
-        "argument_explainers": [
-          "user"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1298,10 +1189,6 @@
         "usage": "gist <user> [gist_list_number]",
         "example": "gist itsmewulf",
         "description": "This command shows you a list of a user's latest gists, from which you can pick one to inspect by sending its number. You can also use it with both a username and a number corresponding to a gist from the list to skip the dialog.",
-        "argument_explainers": [
-          "user",
-          "gist_list_number"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1310,9 +1197,6 @@
         "usage": "loc <repo>",
         "example": "loc statch/gitbot",
         "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
-        "argument_explainers": [
-          "repo"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1321,10 +1205,6 @@
         "usage": "issue [repo] <issue_number>",
         "example": "issue statch/gitbot 53",
         "description": "Find out what an issue is about, the participants, labels, and a whole lot more!",
-        "argument_explainers": [
-          "repo",
-          "issue_number"
-        ],
         "qa_resource": "repo",
         "required_permissions": []
       },
@@ -1333,9 +1213,6 @@
         "usage": "help [command]",
         "example": "help user",
         "description": "This is the command you're using right now!",
-        "argument_explainers": [
-          "command"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1344,9 +1221,6 @@
         "usage": "license <license_name>",
         "example": "license MIT",
         "description": "Find out what an open-source license is all about - its permissions, conditions, limitations, and more!",
-        "argument_explainers": [
-          "license_name"
-        ],
         "qa_resource": null,
         "required_permissions": []
       },
@@ -1355,7 +1229,6 @@
         "usage": null,
         "example": null,
         "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
-        "argument_explainers": [],
         "qa_resource": null,
         "required_permissions": []
       }

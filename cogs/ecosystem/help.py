@@ -75,14 +75,10 @@ class Help(commands.Cog):
 
     async def send_help(self, ctx: GitBotContext) -> None:
         pages: EmbedPages = EmbedPages()
-        # TODO first page should be overall info and description
-        index_embed: GitBotEmbed = GitBotEmbed(
-            title=f'{Mgr.e.github}   {ctx.l.help.default.title}',
-            description=f'{ctx.l.help.default.description}',
-            thumbnail=self.bot.user.avatar_url,
-            url=f'https://docs.statch.org',
-            color=Mgr.c.discord.fuchsia
-        )
+        index_embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx, 'help default',
+                                                                    url='https://docs.statch.org',
+                                                                    color=Mgr.c.discord.fuchsia,
+                                                                    thumbnail=self.bot.user.avatar_url)
         pages + index_embed
         chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(Mgr.chunks(list(self._get_commands()), 10))
         for chunk in chunks:

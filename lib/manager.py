@@ -64,7 +64,7 @@ class Manager:
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
         self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
         self._setup_db()
-        self.l: DirProxy = self.readdir('resources/locale/', '.json', exclude=('index.json', 'en.last.json'))
+        self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json'))
         self.e: DictProxy = self.load_json('emoji')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
                                                                             and v.startswith('#')) else int(v[1:], 16))
@@ -1019,6 +1019,14 @@ class Manager:
                 elif isinstance(v, str):
                     if '{emoji_' in v:
                         node[k] = r.LOCALE_EMOJI_TEMPLATE_RE.sub(self._replace_emoji, v)
+                elif isinstance(v, list):
+                    for i, item in enumerate(v):
+                        if isinstance(item, str):
+                            if '{emoji_' in item:
+                                v[i] = r.LOCALE_EMOJI_TEMPLATE_RE.sub(self._replace_emoji, item)
+                        elif isinstance(item, (DictProxy, dict)):
+                            _preprocess(item)
+                    node[k] = v
 
         for locale in self.l:
             _preprocess(locale)

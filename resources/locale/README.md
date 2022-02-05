@@ -47,8 +47,8 @@ And that's a `meta` field done! Now simply add it to the `languages` field in `i
 ```
 
 ## Locale file
-As mentioned in the beginning, locales are JSON files with names being their `name` meta attribute (`pl.json` for Polish).
-After creating it, copy the contents of the English locale (`en.json`) as it's the only one that is *always* up to date. Then, replace the `meta` field with the one you created earlier. After having done that, you can start on translating in compliance with the [guidelines](#localization-guidelines)!
+As mentioned in the beginning, locales are JSON files with names being their `name` meta attribute (`pl.locale.json` for Polish) and a `locale` suffix.
+After creating it, copy the contents of the English locale (`en.locale.json`) as it's the only one that is *always* up to date. Then, replace the `meta` field with the one you created earlier. After having done that, you can start translating in compliance with the [guidelines](#general-localization-guidelines)!
 
 # General localization guidelines
 - You don't translate keys, only the values
@@ -70,11 +70,6 @@ The `help` section is very important to be kept up-to-date, since it allows us t
   "usage": "command signature [with_args]",
   "example": "command --usage example",
   "description": "A detailed description",
-  "argument_explainers": [
-    "a_list",
-    "of_arguments",
-    "used_in_the_command"
-  ],
   "qa_resource": "If the command uses a quick-access resource (user, org, repo or null)",
   "required_permissions": ["THE_PERMISSIONS", "REQUIRED", "TO_RUN_THE_COMMAND"]
 }
@@ -83,7 +78,6 @@ Now, there are some important things to mention:
 - **The following subfields should remain unchanged** (They don't vary from language to language, since they depend on other fields that *are* supposed to be changed):
   - `usage`
   - `example`
-  - `arguments_explainers`
   - `qa_resource`
   - `required_permissions`  
 

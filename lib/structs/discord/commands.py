@@ -57,8 +57,10 @@ class GitBotCommand(commands.Command):
         if not help_['usage']:
             help_['usage'] = self.fullname
         params: list[tuple[str, str]] = HELP_PARAMETER_REGEX.findall(help_['usage'])
+        help_['argument_explainers'] = []
         for _, param_name in params:
             help_['usage'] = help_['usage'].replace(param_name, ctx.l.help.argument_explainers[param_name]['name'])
+            help_['argument_explainers'] += [param_name]  # infer argument explainers from usage
         self._cached_help_contents[ctx.l.meta.name] = help_
         return help_
 

@@ -9,14 +9,16 @@ A non-native replacement for the embed object provided in discord.ext.commands
 import enum
 import discord
 import asyncio
+import functools
+import operator
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
+from structs.proxies.dict_proxy import DictProxy
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
 from lib.typehints import EmbedLike
 
 __all__: tuple = ('GitBotEmbed', 'GitBotCommandState')
-
 
 @enum.unique
 class GitBotCommandState(enum.Enum):
@@ -51,6 +53,28 @@ class GitBotEmbed(discord.Embed):
         self.set_thumbnail(url=thumbnail)
         if author_name:
             self.set_author(name=author_name, url=author_url, icon_url=author_icon_url)
+
+    @classmethod
+    def from_locale_resource(cls, ctx: 'GitBotContext', resource: str, **kwargs) -> 'GitBotEmbed':
+        """
+        Creates an embed from a locale resource.
+
+        :param ctx: The context for localization of the embed
+        :param resource: The locale resource to use
+        :param args: The arguments to pass to the embed
+        :param kwargs: The keyword arguments to pass to the embed
+        :return: The created embed
+        """
+
+        resource: DictProxy = functools.reduce(operator.getitem, resource.split(), ctx.l)  # noqa: type valid
+        kwargs.setdefault('title', resource.get('title', discord.Embed.Empty))
+        kwargs.setdefault('description', resource.get('description', discord.Embed.Empty))
+        kwargs.setdefault('footer', resource.get('footer', discord.Embed.Empty))
+        embed: 'GitBotEmbed' = cls(**kwargs)
+        if 'fields' in resource:
+            for field in resource['fields']:
+                embed.add_field(name=field['name'], value=field['value'], inline=field.get('inline', False))
+        return embed
 
     async def send(self, messageable: discord.abc.Messageable, *args, **kwargs) -> discord.Message:
         return await messageable.send(embed=self, *args, **kwargs)

@@ -25,26 +25,7 @@ class Config(commands.Cog):
     @gitbot_group('config', aliases=['cfg', 'configure'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_command_group(self, ctx: GitBotContext) -> None:
-        if ctx.invoked_subcommand is None:
-            lines: list = [ctx.l.config.default.brief_1,
-                           "\n" + ctx.l.config.default.title,
-                           ctx.l.config.default.brief_2,
-                           f"`git config user {{{ctx.l.help.argument_explainers.user.name}}}` " + Mgr.e.arrow + " " +
-                           ctx.l.config.default.commands.user,
-                           f"`git config org {{{ctx.l.help.argument_explainers.org.name}}}` " + Mgr.e.arrow + " " +
-                           ctx.l.config.default.commands.org,
-                           f"`git config repo {{{ctx.l.help.argument_explainers.repo.name}}}` " + Mgr.e.arrow + " " +
-                           ctx.l.config.default.commands.repo,
-                           f"`git config language` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.locale,
-                           f"`git config feed` " + Mgr.e.arrow + " " + ctx.l.config.default.commands.feed,
-                           "\n" + ctx.l.config.default.deletion]
-            embed = discord.Embed(
-                color=Mgr.c.rounded,
-                title=f"{Mgr.e.github}  {ctx.l.config.default.embed_title}",
-                description='\n'.join(lines)
-            )
-            embed.set_footer(text=ctx.l.config.default.footer)
-            await ctx.send(embed=embed)
+        await ctx.group_help()
 
     def construct_release_feed_list(self, ctx: GitBotContext, rf: ReleaseFeed) -> str:
         item: str = '' if rf else ctx.l.generic.nonexistent.release_feed
@@ -125,16 +106,7 @@ class Config(commands.Cog):
     @config_command_group.group(name='feed', aliases=['release', 'f', 'releases'], invoke_without_command=True)
     @commands.cooldown(7, 30, commands.BucketType.guild)
     async def config_release_feed_group(self, ctx: GitBotContext) -> None:
-        if ctx.invoked_subcommand is None:
-            ctx.fmt.set_prefix('config feed default')
-            embed: discord.Embed = discord.Embed(
-                color=Mgr.c.discord.fuchsia,
-                title=ctx.l.config.feed.default.title,
-                description=ctx.fmt('description',
-                                    f'`git config feed channel {{{ctx.l.help.argument_explainers.channel.name}}}`',
-                                    f'`git config feed repo {{{ctx.l.help.argument_explainers.repo.name}}}`')
-            )
-            await ctx.send(embed=embed)
+        await ctx.group_help()
 
     async def create_webhook(self, ctx: GitBotContext, channel: discord.TextChannel) -> Optional[discord.Webhook]:
         try:
@@ -465,10 +437,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @normalize_repository
     async def delete_feed_group(self, ctx: GitBotContext) -> None:
-        ctx.fmt.set_prefix('config delete feed default')
-        if ctx.invoked_subcommand is None:
-            # TODO Document two commands defined below
-            pass
+        await ctx.group_help()
 
     async def _feed_prerequisites(self, ctx: GitBotContext) -> tuple[GitBotGuild, ReleaseFeed]:
         guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}

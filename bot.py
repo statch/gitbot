@@ -1,7 +1,3 @@
-# TODO With the new help system being implemented,
-#  group-specific help needs to be updated to match the parameter signature annotation style,
-#  perhaps using the <> simplified parameter syntax
-
 import os.path
 import discord
 import logging

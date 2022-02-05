@@ -20,9 +20,6 @@ PROMPTS = OrderedDict([('brief', lambda: click.prompt(f'Brief', type=str)),
                        ('qa_resource', lambda: click.prompt(f'Quick-Access Resource',
                                                             type=click.Choice(['user', 'org', 'repo', 'skip'],
                                                                               case_sensitive=False), default='skip')),
-                       ('argument_explainers', lambda: [ae.strip() for ae in
-                                                        click.prompt(f'Argument Explainers',
-                                                                     type=str, default='skip').split(',')]),
                        ('required_permissions', lambda: [rp.strip() for rp in
                                                          click.prompt(f'Required Permissions',
                                                                       type=str, default='skip').split(',')])])
@@ -57,7 +54,6 @@ def prompt(name: str, is_group: bool) -> OrderedDict:
                        ('usage', None),
                        ('example', None),
                        ('description', None),
-                       ('argument_explainers', []),
                        ('qa_resource', None),
                        ('required_permissions', [])])
     ret.update(prompt_results)

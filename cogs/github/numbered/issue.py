@@ -16,7 +16,7 @@ class Issue(commands.Cog):
     @normalize_repository
     async def issue_command(self, ctx: GitBotContext, repo: GitHubRepository, issue_number: str = None) -> None:
         ctx.fmt.set_prefix('issue')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             issue: dict = getattr(ctx, 'data')
             issue_number: int | str = issue['number']
         else:

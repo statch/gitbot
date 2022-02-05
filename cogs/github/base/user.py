@@ -29,7 +29,7 @@ class User(commands.Cog):
         if not user:
             return await ctx.invoke(self.user_command_group)
         ctx.fmt.set_prefix('user info')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             u: dict = getattr(ctx, 'data')
         else:
             u: dict = await Git.get_user(user)

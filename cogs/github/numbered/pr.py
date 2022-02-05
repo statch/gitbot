@@ -25,7 +25,7 @@ class PullRequest(commands.Cog):
                                    repo: GitHubRepository,
                                    pr_number: Optional[str] = None):
         ctx.fmt.set_prefix('pr')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             pr: dict = getattr(ctx, 'data')
             pr_number: str | int = pr['number']
         else:

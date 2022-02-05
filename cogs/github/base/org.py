@@ -29,7 +29,7 @@ class Org(commands.Cog):
         if not organization:
             return await ctx.invoke(self.org_command_group)
         ctx.fmt.set_prefix('org info')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             org: dict = getattr(ctx, 'data')
         else:
             org: dict = await Git.get_org(organization)

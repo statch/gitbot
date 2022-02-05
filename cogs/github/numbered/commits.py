@@ -66,7 +66,7 @@ class Commits(commands.Cog):
             response_callback=_callback,
             with_antispam=True
         )
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             await ctx.invoke(self.commit_command, repo=None, oid=None)
 
     @gitbot_command('commit')

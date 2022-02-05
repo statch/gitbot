@@ -36,7 +36,7 @@ class Repo(commands.Cog):
         if not repo:
             return await ctx.invoke(self.repo_command_group)
         ctx.fmt.set_prefix('repo info')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             r: dict = getattr(ctx, 'data')
         else:
             r: Optional[dict] = await Git.get_repo(repo)
@@ -46,7 +46,7 @@ class Repo(commands.Cog):
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.repo.base)
-            return None
+            return
 
         embed: GitBotEmbed = GitBotEmbed(
             color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else Mgr.c.rounded,
@@ -119,6 +119,7 @@ class Repo(commands.Cog):
         if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
             embed.set_footer(text=ctx.fmt('license', r["licenseInfo"]["name"]))
 
+        print('What???')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)

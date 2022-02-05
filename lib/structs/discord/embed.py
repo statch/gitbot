@@ -13,12 +13,13 @@ import functools
 import operator
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
-from structs.proxies.dict_proxy import DictProxy
+from lib.structs.proxies.dict_proxy import DictProxy
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
 from lib.typehints import EmbedLike
 
 __all__: tuple = ('GitBotEmbed', 'GitBotCommandState')
+
 
 @enum.unique
 class GitBotCommandState(enum.Enum):

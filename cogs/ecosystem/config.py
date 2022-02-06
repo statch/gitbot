@@ -98,7 +98,7 @@ class Config(commands.Cog):
                 color=Mgr.c.discord.blurple,
                 title=f"{Mgr.e.github}  {ctx.l.config.show.feed.title}",
                 description=self.construct_release_feed_list(ctx, guild['feed']),
-                footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.help.argument_explainers.channel}}}'))
+                footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.help.argument_explainers.channel.name}}}'))
             await embed.send(ctx)
         else:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
@@ -146,8 +146,8 @@ class Config(commands.Cog):
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
                 await Mgr.db.guilds.update_one(guild, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
-                                                                                     hook=hook.url[33:],
-                                                                                     repos=[])}})
+                                                                                         hook=hook.url[33:],
+                                                                                         repos=[])}})
                 success: bool = True
         else:
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
@@ -162,7 +162,7 @@ class Config(commands.Cog):
                 title=ctx.l.config.feed.channel.success_embed.title,
                 description=ctx.fmt(f'success_embed description',
                                     channel.mention,
-                                    f'`git config feed repo {{{ctx.l.help.argument_explainers.repo}}}`'),
+                                    f'`git config feed repo {{{ctx.l.help.argument_explainers.repo.name}}}`'),
                 footer=ctx.fmt('success_embed footer', 'git config delete feed channel')
             )
             await ctx.send(embed=embed)
@@ -312,7 +312,7 @@ class Config(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=Mgr.c.rounded,
             title=f'{Mgr.e.github}  {ctx.l.config.locale.title}',
-            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.lang}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
+            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.language.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
                 languages)
         )
         await ctx.send(embed=embed)

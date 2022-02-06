@@ -312,7 +312,7 @@ class Config(commands.Cog):
         embed: discord.Embed = discord.Embed(
             color=Mgr.c.rounded,
             title=f'{Mgr.e.github}  {ctx.l.config.locale.title}',
-            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.language.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
+            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.locale.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
                 languages)
         )
         await ctx.send(embed=embed)
@@ -332,7 +332,7 @@ class Config(commands.Cog):
         return state
 
     @config_command_group.group('autoconv',
-                                aliases=['automatic-conversion', 'auto-conversion'],
+                                aliases=['automatic-conversion', 'auto-conversion', 'auto'],
                                 invoke_without_command=True)
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.guild)

@@ -119,7 +119,6 @@ class Repo(commands.Cog):
         if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
             embed.set_footer(text=ctx.fmt('license', r["licenseInfo"]["name"]))
 
-        print('What???')
         await ctx.send(embed=embed)
 
     @commands.cooldown(15, 30, commands.BucketType.user)

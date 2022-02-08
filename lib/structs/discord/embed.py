@@ -56,13 +56,19 @@ class GitBotEmbed(discord.Embed):
             self.set_author(name=author_name, url=author_url, icon_url=author_icon_url)
 
     @classmethod
+    def success(cls, text: str, **kwargs) -> 'GitBotEmbed':
+        kwargs.setdefault('description', f'<:checkmark:770244084727283732>  {text}')
+        kwargs.setdefault('color', 0x57f287)
+        embed: 'GitBotEmbed' = cls(**kwargs)
+        return embed
+
+    @classmethod
     def from_locale_resource(cls, ctx: 'GitBotContext', resource: str, **kwargs) -> 'GitBotEmbed':
         """
         Creates an embed from a locale resource.
 
         :param ctx: The context for localization of the embed
         :param resource: The locale resource to use
-        :param args: The arguments to pass to the embed
         :param kwargs: The keyword arguments to pass to the embed
         :return: The created embed
         """

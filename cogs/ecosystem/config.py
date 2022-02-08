@@ -22,7 +22,7 @@ class Config(commands.Cog):
             ('carbon', 'image', 'carbonara', 'img'): 2
         }
 
-    @gitbot_group('config', aliases=['cfg', 'configure'])
+    @gitbot_group('config', aliases=['cfg', 'configure', 'settings'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     async def config_command_group(self, ctx: GitBotContext) -> None:
         await ctx.group_help()
@@ -250,7 +250,7 @@ class Config(commands.Cog):
     async def config_user_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
         u: bool = await Mgr.db.users.setitem(ctx, 'user', user)
         if u:
-            await ctx.success(ctx.fmt('config qa_set user', user))
+            await ctx.success_embed(ctx.fmt('config qa_set user', Mgr.to_github_hyperlink(user, True)))
         else:
             await ctx.error(ctx.l.generic.nonexistent.user.base)
 
@@ -259,7 +259,7 @@ class Config(commands.Cog):
     async def config_org_command(self, ctx: GitBotContext, org: GitHubOrganization) -> None:
         o: bool = await Mgr.db.users.setitem(ctx, 'org', org)
         if o:
-            await ctx.success(ctx.fmt('config qa_set org', org))
+            await ctx.success_embed(ctx.fmt('config qa_set org', Mgr.to_github_hyperlink(org, True)))
         else:
             await ctx.error(ctx.l.generic.nonexistent.org.base)
 
@@ -269,7 +269,7 @@ class Config(commands.Cog):
     async def config_repo_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         r: bool = await Mgr.db.users.setitem(ctx, 'repo', repo)
         if r:
-            await ctx.success(ctx.fmt('config qa_set repo', repo))
+            await ctx.success_embed(ctx.fmt('config qa_set repo', Mgr.to_github_hyperlink(repo, True)))
         else:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
 
@@ -300,7 +300,7 @@ class Config(commands.Cog):
                 await Mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
                 setattr(ctx, 'l', await Mgr.get_locale(ctx))
                 Mgr.locale_cache[ctx.author.id] = l_[0]['name']
-                await ctx.success(ctx.fmt('success', l_[0]['localized_name'].capitalize()))
+                await ctx.success_embed(ctx.fmt('success', l_[0]['localized_name'].capitalize()))
                 return
             await ctx.error(ctx.fmt('failure', locale), delete_after=7)
 

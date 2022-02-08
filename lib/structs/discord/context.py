@@ -12,6 +12,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from typing import Optional, Iterable
 from lib.typehints import EmbedLike
+from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
@@ -76,6 +77,9 @@ class GitBotContext(commands.Context):
 
     async def error(self, *args, **kwargs) -> discord.Message:
         return await self.send(*args, style=MessageFormattingStyle.ERROR, **kwargs)
+
+    async def success_embed(self, text: str, **kwargs) -> discord.Message:
+        return await GitBotEmbed.success(text, **kwargs).send(self)
 
     async def prepare(self) -> None:
         self.l = await Mgr.get_locale(self)  # noqa

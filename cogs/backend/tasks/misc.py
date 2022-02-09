@@ -17,10 +17,11 @@ class MiscellaneousBackgroundTasks(commands.Cog):
 
     @tasks.loop(minutes=randint(2, 5))
     async def status_changer(self):
-        presences: cycle = cycle([discord.Game(f"in {len(self.bot.guilds)} servers"),
-                                  discord.Activity(type=discord.ActivityType.watching, name="git --help"),
+        presences: cycle = cycle([discord.Activity(type=discord.ActivityType.watching, name="GitHub Universe"),
+                                  discord.Activity(type=discord.ActivityType.watching, name="your repos"),
+                                  discord.Activity(type=discord.ActivityType.watching, name="git help"),
                                   discord.Activity(
-                                      type=discord.ActivityType.listening, name="your Git feed")])
+                                      type=discord.ActivityType.listening, name="your release feed")])
         await self.bot.change_presence(activity=next(presences), status=discord.Status.online)
 
     @status_changer.before_loop

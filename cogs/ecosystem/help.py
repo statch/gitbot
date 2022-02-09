@@ -20,8 +20,8 @@ class Help(commands.Cog):
                 yield command
 
     def _get_command(self, name: str) -> Optional[GitBotCommand | GitBotCommandGroup]:
-        if name.startswith(self.bot.command_prefix):
-            name: str = name.strip(self.bot.command_prefix)
+        if (name := name.strip()).startswith(self.bot.command_prefix):
+            name: str = name.strip(self.bot.command_prefix).strip()
         return self.bot.get_command(name)
 
     def generate_command_help_embed(self,

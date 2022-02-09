@@ -181,8 +181,7 @@ class EmbedPages:
     def _ensure_perms(self, channel: discord.TextChannel) -> NoReturn:
         if not isinstance(channel, discord.DMChannel):
             permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
-            if not (permissions.administrator or (permissions.is_superset(discord.Permissions.all_channel())
-                                                  and permissions.manage_messages)):
+            if not (permissions.administrator or all([permissions.manage_messages, permissions.add_reactions])):
                 raise EmbedPagesPermissionError
 
     async def _add_controls(self):

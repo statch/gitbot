@@ -16,6 +16,11 @@
       "title": "This command doesn't exist!",
       "description": "The **closest existing command** is: {0}",
       "footer": "If you believe this is an error, please contact support."
+    },
+    "embed_pages_permission_error": {
+      "title": "I don't have the permissions required!",
+      "description": "This command requires a little magic to work (edit messages and remove reactions).\n**I need to be able to manage messages and add reactions**",
+      "footer": "Adjust my permissions and try again."
     }
   },
   "events": {

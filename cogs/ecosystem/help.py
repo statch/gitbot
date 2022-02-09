@@ -100,6 +100,7 @@ class Help(commands.Cog):
 
     @gitbot_command('help', aliases=['h', 'halp' 'commands', 'cmds',
                                      'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
+    @commands.max_concurrency(1, commands.BucketType.user)
     async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None):
         if command_or_group is not None:
             command_or_group: Optional[GitBotCommand | GitBotCommandGroup] = self._get_command(command_or_group)

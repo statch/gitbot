@@ -4,7 +4,7 @@
 # Adding a locale
 
 ## Prerequistites
-Localizing GitBot doesn't require any programming knowledge (Although it can certainly come in handy). What it does require, however, is basic knowledge of [JSON syntax](https://www.w3schools.com/js/js_json_syntax.asp), GitHub/git, and very good knowledge of both the target language and English. With GitBot's code and UI we aim for quality, and with translations we want to deliver the same - no Google Translate jankery with this one.
+Localizing GitBot doesn't require any programming knowledge (Although it can certainly come in handy). What it does require, however, is basic knowledge of [JSON syntax](https://www.w3schools.com/js/js_json_syntax.asp), GitHub/git, and very good knowledge of both the target language and English. With GitBot's code and UI we aim for quality, and with translations we want to deliver the same - have at it!
 
 ## Overview
 ### Getting started

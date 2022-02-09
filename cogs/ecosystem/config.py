@@ -87,40 +87,7 @@ class Config(commands.Cog):
                 embed.set_footer(text=ctx.fmt('!config show base footer', 'git config show feed'))
             await ctx.send(embed=embed)
 
-    @config_show_command_group.command(name='feed', aliases=['f'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_show_command(self, ctx: commands.Context) -> None:
-        ctx.fmt.set_prefix('config show')
-        query: dict = await Mgr.db.users.find_one({"_id": ctx.author.id}) or {}
-        if not isinstance(ctx.channel, discord.DMChannel):
-            release: Optional[dict] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
-        else:
-            release = None
-        if not query and release is None or ((release and len(release) == 1) and not query):
-            await ctx.err(ctx.l.generic.nonexistent.qa)
-            return
-        lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
-        user: str = ctx.fmt('qa list user', f'`{query["user"]}`' if 'user' in query else f'`{ctx.l.config.show.item_not_set}`')
-        org: str = ctx.fmt('qa list org', f'`{query["org"]}`' if 'org' in query else f'`{ctx.l.config.show.item_not_set}`')
-        repo: str = ctx.fmt('qa list repo', f'`{query["repo"]}`' if 'repo' in query else f'`{ctx.l.config.show.item_not_set}`')
-        feed: str = f'{ctx.l.config.show.guild.list.feed}\n' + '\n'.join(
-            [f'{Mgr.e.square} `{r["repo"]}`' for r in release['feed']]) if release and release[
-            'feed'] else f'{ctx.l.config.show.guild.list.feed} `{ctx.l.config.show.item_not_configured}`'
-        accessibility: list = ctx.l.config.show.accessibility.heading + '\n' + '\n'.join([lang])
-        qa: list = ctx.l.config.show.qa.heading + '\n' + '\n'.join([user, org, repo])
-        guild: list = ctx.l.config.show.guild.heading + '\n' + '\n'.join([feed])
-        shortest_heading_len: int = min(map(len, [ctx.l.config.show.accessibility.heading,
-                                                  ctx.l.config.show.guild.heading,
-                                                  ctx.l.config.show.qa.heading]))
-        linebreak: str = f'\n{"⎯" * shortest_heading_len}\n'
-        embed = discord.Embed(
-            color=0xefefef,
-            title=f"{Mgr.e.github}  {ctx.l.config.show.title}",
-            description=f"{accessibility}{linebreak}{qa}{linebreak}{guild}"
-        )
-        await ctx.send(embed=embed)
-
-    @config_command_group.command(name='feed', aliases=['release', 'f', 'releases'])
+    @config_show_command_group.command(name='feed', aliases=['release', 'f', 'releases'])
     @commands.guild_only()
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_show_feed_command(self, ctx: GitBotContext):

@@ -128,10 +128,10 @@ class Config(commands.Cog):
         except commands.BadArgument:
             await ctx.error(ctx.l.config.feed.channel.invalid_channel)
             return
-        guild: dict = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
-        feed: dict = guild.get('feed', {})
+        guild: Optional[GitBotGuild] = await Mgr.db.guilds.find_one({'_id': ctx.guild.id})
         success: bool = False
         if guild:
+            feed: dict = guild.get('feed', {})
             if len(feed) >= 5:
                 embed_limit_reached: discord.Embed = discord.Embed(
                     color=Mgr.c.discord.yellow,

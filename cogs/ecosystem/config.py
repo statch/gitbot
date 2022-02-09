@@ -64,8 +64,11 @@ class Config(commands.Cog):
                     if (guild and guild.get('feed')) else f'{ctx.l.config.show.base.guild.list.feed}' \
                                                           f' `{ctx.l.config.show.base.item_not_configured}`'
                 ctx.fmt.set_prefix('+guild list autoconv')
-                ac: AutomaticConversion = {k: (v if k not in (_ac := guild.get('autoconv', {}))
-                                           else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
+                if not guild:
+                    ac: AutomaticConversion = Mgr.env.autoconv_default
+                else:
+                    ac: AutomaticConversion = {k: (v if k not in (_ac := guild.get('autoconv', {}))
+                                               else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
                 codeblock: str = ctx.fmt('codeblock',
                                          f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
                 lines: str = ctx.fmt('gh_lines',

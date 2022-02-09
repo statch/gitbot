@@ -1,10 +1,10 @@
 import discord
-import datetime
-from babel.dates import format_date
 from discord.ext import commands
-from typing import Union, Optional
+from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_group
+from lib.utils.decorators import gitbot_group 
+from lib.typehints import GitHubUser
+from lib.structs.discord.context import GitBotContext
 
 
 class User(commands.Cog):
@@ -12,41 +12,42 @@ class User(commands.Cog):
         self.bot: commands.Bot = bot
 
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
-    async def user_command_group(self, ctx: commands.Context, user: Optional[str] = None) -> None:
-        info_command: commands.Command = self.bot.get_command(f'user --info')
+    async def user_command_group(self, ctx: GitBotContext, user: Optional[str] = None) -> None:
         if not user:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(info_command, user=stored)
+                await ctx.invoke(self.user_info_command, user=stored)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.user.qa)
+                await ctx.error(ctx.l.generic.nonexistent.user.qa)
         else:
-            await ctx.invoke(info_command, user=user)
+            await ctx.invoke(self.user_info_command, user=user)
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='info', aliases=['i'])
-    async def user_info_command(self, ctx: commands.Context, user: str) -> None:
+    async def user_info_command(self, ctx: GitBotContext, user: Optional[GitHubUser] = None) -> None:
+        if not user:
+            return await ctx.invoke(self.user_command_group)
         ctx.fmt.set_prefix('user info')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             u: dict = getattr(ctx, 'data')
         else:
             u: dict = await Git.get_user(user)
         if not u:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'user')
-                await ctx.err(ctx.l.generic.nonexistent.user.qa_changed)
+                await ctx.error(ctx.l.generic.nonexistent.user.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.user.base)
+                await ctx.error(ctx.l.generic.nonexistent.user.base)
             return None
 
         embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=ctx.fmt('title', user) if user[0].isupper() else ctx.fmt('title', user.lower()),
             url=u['url']
         )
 
-        contrib_count: Union[tuple, None] = u['contributions']
+        contrib_count: Optional[tuple] = u['contributions']
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
@@ -75,9 +76,8 @@ class User(commands.Cog):
         else:
             contrib: str = ""
 
-        joined_at: str = ctx.fmt('joined_at',
-                                  format_date(datetime.datetime.strptime(u['createdAt'],
-                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'medium', locale=ctx.l.meta.name)) + '\n'
+        joined_at: str = ctx.fmt('joined_at', Mgr.github_to_discord_timestamp(u['createdAt'])) + '\n'
+
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
         w_url: str = u['websiteUrl']
@@ -99,22 +99,22 @@ class User(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='repos', aliases=['r'])
-    async def user_repos_command(self, ctx: commands.Context, user: str) -> None:
+    async def user_repos_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user repos')
-        u: Union[dict, None] = await Git.get_user(user)
+        u: Optional[dict] = await Git.get_user(user)
         repos = await Git.get_user_repos(user)
         if u is None:
-            await ctx.err(ctx.l.generic.nonexistent.user.base)
+            await ctx.error(ctx.l.generic.nonexistent.user.base)
             return
         if not repos:
-            await ctx.err(ctx.l.user.repos.no_public)
+            await ctx.error(ctx.l.user.repos.no_public)
             return
         title: str = ctx.fmt('owner', user) if user[0].isupper() else ctx.fmt('owner', user).lower()
         embed: discord.Embed = discord.Embed(
             title=title,
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
-            color=0xefefef,
+            color=Mgr.c.rounded,
             url=f"https://github.com/{user}"
         )
         if (c := len(repos)) > 15:

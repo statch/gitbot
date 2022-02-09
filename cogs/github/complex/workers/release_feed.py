@@ -1,44 +1,60 @@
-import asyncio
 import discord
 import datetime
+from motor.motor_asyncio import AsyncIOMotorCursor
 from bot import logger
 from bs4 import BeautifulSoup
-from typing import List, Tuple, Optional
+from typing import Optional
 from discord.ext import tasks, commands
 from lib.globs import Git, Mgr
+from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo, GitBotGuild, TagNameUpdateData
 
 
-class ReleaseFeed(commands.Cog):
+class ReleaseFeedWorker(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.release_feed_worker.start()
+        if Mgr.env.run_release_feed_worker:
+            self.release_feed_worker.start()
 
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:
-        async for doc in Mgr.db.guilds.find({}):
+        Mgr.debug('Starting worker cycle')
+        query: AsyncIOMotorCursor = Mgr.db.guilds.find({})
+        async for guild in query:
+            Mgr.debug(f'Handling GID {guild["_id"]}')
+            guild: GitBotGuild
             changed: bool = False
             update: list = []
-            for item in doc['feed']:
-                res: Optional[dict] = await Git.get_latest_release(item['repo'])
-                if res:
-                    if res['release']:
-                        if (t := res['release']['tagName']) != item['release']:
-                            await self.handle_feed_item(doc, item, res)
+            for rfi in guild['feed']:
+                for repo in rfi['repos']:
+                    res: Optional[dict] = await Git.get_latest_release(repo['name'])
+                    if res:
+                        if res['release'] and (t := res['release']['tagName']) != repo['tag']:
+                            await self.handle_feed_repo(guild, repo, rfi, res)
                             changed: bool = True
-                        update.append((item['repo'], t))
-                else:
-                    await self.handle_missing_item(doc, item)
-                await asyncio.sleep(2)
+                            update.append(TagNameUpdateData(rfi, repo, t))
+                            Mgr.debug(f'New release found for repo "{repo["name"]}" (tag: {repo["tag"]})'
+                                      f' in GID {guild["_id"]}')
+                        else:
+                            Mgr.debug(f'No new release for repo "{repo["name"]}" (tag: {repo["tag"]})'
+                                      f' in GID {guild["_id"]}')
+                    else:
+                        Mgr.debug(f'Missing repo detected in GID {guild["_id"]} ("{repo["name"]}")')
+                        await self.handle_missing_feed_repo(guild, rfi, repo)
             if changed:
-                await self.update_with_data(doc['_id'], update)
+                Mgr.debug(f'Changes detected in GID {guild["_id"]}')
+                await self.update_tag_names_with_data(guild, update)
 
-    async def handle_feed_item(self, doc: dict, item: dict, new_release: dict) -> None:
+    async def handle_feed_repo(self,
+                               guild: GitBotGuild,
+                               repo: ReleaseFeedRepo,
+                               rfi: ReleaseFeedItem,
+                               new_release: dict) -> None:
         stage: str = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
         if new_release['release']['isDraft']:
             stage += ' draft'
         embed: discord.Embed = discord.Embed(
             color=new_release['color'],
-            title=f'New {item["repo"]} {stage}! `{new_release["release"]["tagName"]}`',
+            title=f'New {repo["name"]} {stage}! `{new_release["release"]["tagName"]}`',
             url=new_release['release']['url']
         )
         if new_release['usesCustomOpenGraphImage']:
@@ -53,48 +69,48 @@ class ReleaseFeed(commands.Cog):
                       f'{datetime.datetime.strptime(new_release["release"]["createdAt"], "%Y-%m-%dT%H:%M:%SZ").strftime("%e, %b %Y")}\n'
 
         asset_c: int = new_release["release"]["releaseAssets"]["totalCount"]
-        assets: str = f'Has {asset_c} assets attached\n'.replace('0',
-                                                                 'no') if asset_c != 1 else 'Has one asset attached'
+        assets: str = f'Has {asset_c} assets attached\n'.replace('0', 'no') if asset_c != 1 else 'Has one asset attached'
         info: str = f'{author}{assets}'
 
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
 
-        await self.doc_send(doc, embed)
+        await self.send_to_rfi(guild, rfi, embed)
 
-    async def update_with_data(self, guild_id: int, to_update: List[Tuple[str]]) -> None:
-        await Mgr.db.guilds.find_one_and_update({'_id': guild_id}, {
-            '$set': {'feed': [dict(repo=repo, release=release) for repo, release in to_update]}})
+    async def update_tag_names_with_data(self,
+                                         guild: GitBotGuild,
+                                         update_data: list[TagNameUpdateData]) -> None:
+        feed = guild['feed']
+        for ud in update_data:
+            (_repos := feed[feed.index(ud.rfi)]['repos'])[_repos.index(ud.rfr)] = {'name': ud.rfr['name'],
+                                                                                   'tag': ud.tag}
+        await Mgr.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
 
-    async def handle_missing_item(self, doc: dict, item: dict) -> None:
+    async def handle_missing_feed_repo(self, guild: GitBotGuild, rfi: ReleaseFeedItem, repo: ReleaseFeedRepo) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xda4353,
             title=f'One of your release feed repos was deleted/renamed!',
-            description=f'A repository previously saved as `{item["repo"]}` was **deleted or renamed** by the owner. '
+            description=f'A repository previously saved as `{repo["name"]}` was **deleted or renamed** by the owner. '
                         f'Please re-add it under the new name.'
         )
-        await Mgr.db.guilds.update_one(doc, {'$pull': {'feed': item}})
-        await self.doc_send(doc, embed)
+        await Mgr.db.guilds.update_one(guild, {'$pull': {f'feed.{guild["feed"].index(rfi)}.repos': repo}})
+        await self.send_to_rfi(guild, rfi, embed)
 
     @release_feed_worker.before_loop
     async def release_feed_worker_before_loop(self) -> None:
         logger.info('Release worker sleeping until the bot is ready...')
         await self.bot.wait_until_ready()
 
-    @commands.Cog.listener()
-    async def on_guild_remove(self, guild: discord.Guild) -> None:
-        await Mgr.db.guilds.find_one_and_delete({'_id': guild.id})
-
-    async def doc_send(self, doc: dict, embed: discord.Embed) -> bool:
+    async def send_to_rfi(self, guild: GitBotGuild, rfi: ReleaseFeedItem, embed: discord.Embed) -> bool:
         try:
-            webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + doc['hook'],
+            webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + rfi['hook'],
                                                                 adapter=discord.AsyncWebhookAdapter(Git.ses))
             await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
-            await Mgr.db.guilds.find_one_and_delete({'_id': doc['_id']})
+            await Mgr.db.guilds.find_one_and_delete({'_id': guild['_id']})
             return False
         return True
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(ReleaseFeed(bot))
+    bot.add_cog(ReleaseFeedWorker(bot))

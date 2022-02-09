@@ -2,7 +2,8 @@ import os
 import platform
 import requests
 import sentry_sdk
-from bot import bot, PRODUCTION, logger
+from lib.globs import Mgr
+from bot import bot, logger
 
 
 def prepare_cloc() -> None:
@@ -13,7 +14,7 @@ def prepare_cloc() -> None:
 
 
 def prepare_sentry() -> None:
-    if PRODUCTION and (dsn := os.environ.get('SENTRY_DSN')):
+    if Mgr.env.production and (dsn := Mgr.env.get('sentry_dsn')):
         sentry_sdk.init(
             dsn=dsn,
             traces_sample_rate=0.5
@@ -21,6 +22,11 @@ def prepare_sentry() -> None:
 
 
 def prepare() -> None:
+    if os.name != 'nt':
+        logger.info('Installing uvloop...')
+        __import__('uvloop').install()
+    else:
+        logger.info('Skipping uvloop install...')
     logger.info(f'Running on {platform.system()} {platform.release()}')
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
@@ -28,6 +34,10 @@ def prepare() -> None:
     prepare_sentry()
 
 
-if __name__ == '__main__':
+def run() -> None:
     prepare()
-    bot.run(os.getenv('BOT_TOKEN'))
+    bot.run(Mgr.env.bot_token)
+
+
+if __name__ == '__main__':
+    run()

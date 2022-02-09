@@ -1,3 +1,6 @@
+# GitBot locale stuff
+*.last.json
+
 # PyCharm Stuff
 .idea/
 

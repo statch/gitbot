@@ -1,8 +1,11 @@
 import discord
 import asyncio
-from discord.ext import commands
-from typing import Optional, Iterable, List, Union
+from typing import Optional, Iterable
 from lib.globs import Git, Mgr
+from lib.typehints import GitHubRepository
+from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
+ 
 
 __all__: tuple = (
     'issue_list',
@@ -10,10 +13,10 @@ __all__: tuple = (
 )
 
 
-async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo issues')
     if (lstate := state.lower()) not in ('open', 'closed'):
-        await ctx.err(ctx.l.generic.issue.invalid_state.format(lstate))
+        await ctx.error(ctx.l.generic.issue.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed'):
         state, lstate = s, s
@@ -22,24 +25,23 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
     if not repo:
         repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
-            await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+            await ctx.error(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    issues: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
+    issues: list | Iterable[dict] = await Mgr.reverse(await Git.get_last_issues_by_state(repo, state=state.upper()))
     if not issues:
         await handle_none(ctx, 'issue', stored, lstate)
         return
 
-    issue_strings: List[str] = [await make_string(repo, i, 'issues') for i in issues]
+    issue_strings: list[str] = [make_string(repo, i, 'issues') for i in issues]
 
-    embed: discord.Embed = discord.Embed(
-        color=0xefefef,
+    embed: GitBotEmbed = GitBotEmbed(
+        color=Mgr.c.rounded,
         title=ctx.fmt('title', f'`{lstate}`', repo),
         url=f'https://github.com/{repo}/issues',
-        description='\n'.join(issue_strings)
+        description='\n'.join(issue_strings),
+        footer=ctx.l.repo.issues.footer_tip
     )
-
-    embed.set_footer(text=ctx.l.repo.issues.footer_tip)
 
     await ctx.send(embed=embed)
 
@@ -50,8 +52,8 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
                                                           m.author.id == ctx.author.id, timeout=30)
             if msg.content.lower() == 'cancel':
                 return
-            if not (issue := await Mgr.validate_number(num := msg.content, issues)):
-                await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
+            if not (issue := await Mgr.validate_index(num := msg.content, issues)):
+                await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
                 ctx.data = await Git.get_issue('', 0, issue, True)
@@ -61,10 +63,10 @@ async def issue_list(ctx: commands.Context, repo: Optional[str] = None, state: s
             return
 
 
-async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo pulls')
     if (lstate := state.lower()) not in ('open', 'closed', 'merged'):
-        await ctx.err(ctx.l.generic.pr.invalid_state.format(lstate))
+        await ctx.error(ctx.l.generic.pr.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed', 'merged'):
         state, lstate = s, s
@@ -73,24 +75,23 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
     if not repo:
         repo: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
         if not repo:
-            await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+            await ctx.error(ctx.l.generic.nonexistent.repo.qa)
             return
         stored: bool = True
-    prs: Union[List, Iterable[dict]] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
+    prs: list | Iterable[dict] = await Mgr.reverse(await Git.get_last_pull_requests_by_state(repo, state=state.upper()))
     if not prs:
         await handle_none(ctx, 'pull request', stored, lstate)
         return
 
-    pr_strings: List[str] = [await make_string(repo, pr, 'pull') for pr in prs]
+    pr_strings: list[str] = [make_string(repo, pr, 'pull') for pr in prs]
 
-    embed: discord.Embed = discord.Embed(
-        color=0xefefef,
+    embed: GitBotEmbed = GitBotEmbed(
+        color=Mgr.c.rounded,
         title=ctx.fmt('title', f'`{lstate}`', repo),
         url=f'https://github.com/{repo}/pulls',
-        description='\n'.join(pr_strings)
+        description='\n'.join(pr_strings),
+        footer=ctx.l.repo.pulls.footer_tip
     )
-
-    embed.set_footer(text=ctx.l.repo.pulls.footer_tip)
 
     await ctx.send(embed=embed)
 
@@ -101,8 +102,8 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
                                                           m.author.id == ctx.author.id, timeout=30)
             if msg.content.lower() == 'cancel':
                 return
-            if not (pr := await Mgr.validate_number(num := msg.content, prs)):
-                await ctx.err(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
+            if not (pr := await Mgr.validate_index(num := msg.content, prs)):
+                await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
             else:
                 ctx.data = await Git.get_pull_request('', 0, pr)
@@ -112,28 +113,27 @@ async def pull_request_list(ctx: commands.Context, repo: Optional[str] = None, s
             return
 
 
-async def handle_none(ctx: commands.Context, item: str, stored: bool, state: str) -> None:
+async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -> None:
     if item is None:
         if stored:
             await Mgr.db.users.delitem(ctx, 'repo')
-            await ctx.err(ctx.l.generic.nonexistent.repo.saved_repo_unavailable)
+            await ctx.error(ctx.l.generic.nonexistent.repo.saved_repo_unavailable)
         else:
-            await ctx.err(ctx.l.generic.nonexistent.repo.base)
+            await ctx.error(ctx.l.generic.nonexistent.repo.base)
     else:
         if not stored:
             if item == 'issue':
-                await ctx.err(ctx.l.generic.nonexistent.repo.no_issues_with_state.format(f'`{state}`'))
+                await ctx.error(ctx.l.generic.nonexistent.repo.no_issues_with_state.format(f'`{state}`'))
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.no_pulls_with_state.format(f'`{state}`'))
+                await ctx.error(ctx.l.generic.nonexistent.repo.no_pulls_with_state.format(f'`{state}`'))
         else:
             if item == 'issue':
-                await ctx.err(ctx.l.generic.nonexistent.repo.no_issues_with_state_qa.format(f'`{state}`'))
+                await ctx.error(ctx.l.generic.nonexistent.repo.no_issues_with_state_qa.format(f'`{state}`'))
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.no_pulls_with_state_qa.format(f'`{state}`'))
-    return
+                await ctx.error(ctx.l.generic.nonexistent.repo.no_pulls_with_state_qa.format(f'`{state}`'))
 
 
-async def make_string(repo: str, item: dict, path: str) -> str:
+def make_string(repo: GitHubRepository, item: dict, path: str) -> str:
     url: str = f'https://github.com/{repo}/{path}/{item["number"]}/'
     return f'[`#{item["number"]}`]({url}) **|** [' \
-           f'{item["title"] if len(item["title"]) < 70 else item["title"][:67] + "..."}]({url})'
+           f'{Mgr.truncate(item["title"], 70)}]({url})'

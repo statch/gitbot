@@ -2,9 +2,10 @@ import discord.ext.commands as commands
 import discord
 import datetime as dt
 import ast
-from lib.utils.decorators import restricted
+from lib.utils.decorators import restricted, gitbot_command
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_command
+from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
 def insert_returns(body):
@@ -25,8 +26,8 @@ class Debug(commands.Cog):
         self.bot: commands.Bot = bot
 
     @restricted()
-    @gitbot_command(name='dispatch', aliases=['event'])
-    async def event_dispatch_command(self, ctx: commands.Context, event: str) -> None:
+    @gitbot_command(name='dispatch', aliases=['event'], hidden=True)
+    async def event_dispatch_command(self, ctx: GitBotContext, event: str) -> None:
         event = event.lower().replace('on_', '', 1)
         cor = {
             'guild_join': ctx.guild,
@@ -36,17 +37,16 @@ class Debug(commands.Cog):
         }
         if (e := cor.get(event)) is not None:
             self.bot.dispatch(event, e)
-            await ctx.send(f'{Mgr.e.github} Dispatched event `{event}`')
+            await ctx.success(f'Dispatched event `{event}`')
         else:
-            await ctx.send(f'{Mgr.e.err}  Failed to dispatch event `{event}`')
+            await ctx.error(f'Failed to dispatch event `{event}`')
 
     @restricted()
-    @gitbot_command(name='ratelimit', aliases=['rate'])
-    async def ratelimit_command(self, ctx: commands.Context) -> None:
+    @gitbot_command(name='ratelimit', aliases=['rate'], hidden=True)
+    async def ratelimit_command(self, ctx: GitBotContext) -> None:
         data = await Git.get_ratelimit()
         rate = data[0]
-        embed = discord.Embed(
-            color=0xefefef,
+        embed: GitBotEmbed = GitBotEmbed(
             title=f'{Mgr.e.err}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]
@@ -68,8 +68,8 @@ class Debug(commands.Cog):
 
     @commands.is_owner()
     @restricted()
-    @gitbot_command(name='eval')
-    async def eval_command(self, ctx: commands.Context, *, cmd: str) -> None:
+    @gitbot_command(name='eval', hidden=True)
+    async def eval_command(self, ctx: GitBotContext, *, cmd: str) -> None:
         if ctx.message.author.id == 548803750634979340:
             fn_name = '_eval_expr'
 
@@ -90,6 +90,7 @@ class Debug(commands.Cog):
                 'commands': commands,
                 'ctx': ctx,
                 'Git': Git,
+                'Mgr': Mgr,
                 '__import__': __import__
             }
             exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used

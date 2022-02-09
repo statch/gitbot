@@ -1,7 +1,7 @@
 import os
 import json
 from .dict_proxy import DictProxy
-from typing import Union, Any, Optional
+from typing import Any, Optional
 
 
 class DirProxy:
@@ -12,18 +12,18 @@ class DirProxy:
     ----------
     path: :class:`str`
         A path leading to the directory from which to extract files.
-    ext: :class:`Optional[:class:`Union[:class:`str`, :class:`tuple`]`]`
+    ext: :class:`Optional[:class:`:class:`str` | :class:`tuple`]`
         The extensions to include when mapping, if None, everything will be included.
     """
 
-    def __init__(self, path: str, ext: Optional[Union[str, tuple]] = None, exclude: Union[str, tuple] = ()):
+    def __init__(self, path: str, ext: Optional[str | tuple] = None, exclude: str | tuple = ()):
         self.__items: list = []
         for file in (os.listdir(dir_ := os.path.join(os.getcwd(), path))):
-            if file not in exclude and ext is None or file.endswith(ext):
+            if file not in exclude and (ext is None or file.endswith(ext)):
                 with open(os.path.join(dir_, file), 'r') as fp:
-                    content: Union[DictProxy, str] = DictProxy(json.load(fp)) if file.endswith('.json') else fp.read()
+                    content: DictProxy | str = DictProxy(json.load(fp)) if file.endswith('.json') else fp.read()
                     self.__items.append(content)
-                    setattr(self, file[:file.rindex('.')], content)
+                    setattr(self, file[:file.index('.')], content)
 
     def __iter__(self):
         yield from self.__items

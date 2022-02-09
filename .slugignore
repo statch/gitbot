@@ -1,6 +1,8 @@
 *.md
 docs/
+cli/
 Dockerfile
+migrations/
 .github/
 .pylintrc
 .graphqlconfig

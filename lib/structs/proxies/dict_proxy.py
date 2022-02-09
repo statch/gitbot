@@ -1,5 +1,20 @@
-from typing import Any, Union, Optional, Iterator, Dict
-from ..case_insensitive_dict import CaseInsensitiveDict
+# coding: utf-8
+
+"""
+Dot-access and case-insensitive proxy for dicts.
+~~~~~~~~~~~~~~~~~~~
+For ease of use when dealing with JSON files, it wraps lists as well.
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
+
+from typing import Optional, Iterator, ItemsView, TypeVar
+from ..dicts.case_insensitive_dict import CaseInsensitiveDict
+
+
+_KT = TypeVar('_KT', str, int, covariant=True)
+_VT = TypeVar('_VT', str, int, bool, float, list, dict, covariant=True)
 
 
 class DictProxy(CaseInsensitiveDict):
@@ -10,15 +25,16 @@ class DictProxy(CaseInsensitiveDict):
 
     Parameters
     ----------
-    data: :class:`Union[:class:`dict`, :class:`list`]`
+    data: :class:`Optional[:class:`list[_VT]` | :class:`dict[_KT, _VT]`]
         The object to wrap with DictProxy.
     """
 
-    def __init__(self, data: Optional[Union[list, Dict[str, Any]]] = None):
+    def __init__(self, data: Optional[list[_VT] | dict[_KT, _VT]] = None, **kwargs):
         if data is None:
-            data: dict = {}
-        self.__items: Union[list, dict] = data
+            data: dict[_KT, _VT] = {}
+        self.__items: list[_VT] | dict[_KT, _VT] = data
         if isinstance(data, dict):
+            data.update(kwargs)
             super().__init__(data)
             for k, v in data.items():
                 setattr(self, k.casefold(), (v if not isinstance(v, dict) else DictProxy(v)))
@@ -26,14 +42,18 @@ class DictProxy(CaseInsensitiveDict):
             self.__getitem__ = lambda i: self.__items[i]
 
     @property
-    def actual(self) -> Union[Dict[str, Any], list]:
+    def actual(self) -> dict[_KT, _VT] | list[_VT]:
         return self.__items
 
-    def __iter__(self) -> Iterator[Any]:
+    def items(self) -> ItemsView[_KT, _VT]:
+        # We override this to exclude _dict_proxy__items from the ItemsView iterator
+        yield from list(super().items())[1:]
+
+    def __iter__(self) -> Iterator[_VT]:
         yield from self.__items
 
-    def __getattr__(self, item: Union[str, int]) -> Any:
+    def __getattr__(self, item: _KT) -> _VT:
         return super().__getitem__(item)
 
-    def __setattr__(self, key: str, value: Any) -> None:
+    def __setattr__(self, key: _KT, value: _VT) -> None:
         super().__setitem__(key, value if type(value) != 'dict' else DictProxy(value))

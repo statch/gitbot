@@ -22165,9 +22165,6 @@ type ProjectColumnEdge {
   node: ProjectColumn
 }
 
-"""
-The semantic purpose of the column - todo, in progress, or done.
-"""
 enum ProjectColumnPurpose {
   """
   The column contains cards which are complete
@@ -22182,7 +22179,6 @@ enum ProjectColumnPurpose {
   """
   The column contains cards still to be worked on
   """
-  TODO
 }
 
 """

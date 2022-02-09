@@ -1,20 +1,23 @@
 import re
 
-REPO_RE: re.Pattern = re.compile(r'https://github\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)', re.IGNORECASE)
-USER_ORG_RE: re.Pattern = re.compile(r'https://github\.com/([a-zA-Z0-9-_]+)', re.IGNORECASE)
-PR_RE: re.Pattern = re.compile(r'https://github\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/pull/(\d+)', re.IGNORECASE)
-ISSUE_RE: re.Pattern = re.compile(r'https://github\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/issues/(\d+)', re.IGNORECASE)
-MD_EMOJI_RE: re.Pattern = re.compile(r':.*:', re.IGNORECASE)
-CODEBLOCK_RE: re.Pattern = re.compile(r'``?`?([a-z]*\n.+\n)*.+``?`?')
-ANY_URL_RE: re.Pattern = re.compile(
-    r'https?://(www\.)?[a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)', re.IGNORECASE)
-GITHUB_LINES_RE: re.Pattern = re.compile(
-    r'(github)\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/blob/(.+?)/(.+?)#L(\d+)[-~]?L?(\d*)', re.IGNORECASE)
-GITLAB_LINES_RE: re.Pattern = re.compile(
-    r'(gitlab)\.com/([a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/-/blob/(.+?)/(.+?)#L(\d+)-?(\d*)', re.IGNORECASE)
-GITHUB_REPO_URL: re.Pattern = re.compile(
-    r'github\.com/([a-zA-Z0-9-_]+)/([A-Za-z0-9_.-]+)'
-)
-GITHUB_REPO_GIT_URL: re.Pattern = re.compile(
-    r'github\.com/([a-zA-Z0-9-_]+)/([A-Za-z0-9_.-]+)\.git'
-)
+HELP_PARAMETER_REGEX = re.compile(r'(?P<param_type>[\[<])(?P<param_name>[a-zA-Z-_]+)[]>]')
+GIT_OBJECT_ID_RE: re.Pattern = re.compile(r'\b([a-f0-9]{40})\b')
+PASCAL_CASE_NAME_RE: re.Pattern = re.compile(r'(?<!^)(?=[A-Z])')
+MARKDOWN_EMOJI_RE: re.Pattern = re.compile(r'<?:.*:([0-9]{18})?>?', re.IGNORECASE)
+LOCALE_EMOJI_TEMPLATE_RE: re.Pattern = re.compile(r'{emoji_(?P<emoji_name>[a-zA-Z-_]+)}', re.IGNORECASE)
+DISCORD_CHANNEL_MENTION_RE: re.Pattern = re.compile(r'<#(?P<id>\d{18})>')
+MULTILINE_CODEBLOCK_RE: re.Pattern = re.compile(r'```(?P<extension>[a-z]*)\n*(?P<content>[\s\S]+)\n*```')
+SINGLE_LINE_CODEBLOCK_RE: re.Pattern = re.compile(r'`(?P<content>[\s\S]+)`')
+REPOSITORY_NAME_RE: re.Pattern = re.compile(r'(?P<slashname>(?P<owner>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})/(?P<name>[a-z\d.](?:[a-z\d.]|-(?=[a-z\d.])){0,38}))/?(?P<branch>[a-z\d.](?:[a-z\d.]|-(?=[a-z\d.])){0,38})?')
+
+GITHUB_NAME_RE: re.Pattern = re.compile(r'^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$', re.IGNORECASE)
+GITHUB_REPO_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}/[a-z\d.](?:[a-z\d.]|-(?=[a-z\d.])){0,38})', re.IGNORECASE)
+GITHUB_USER_ORG_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<name>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38})', re.IGNORECASE)
+GITHUB_PULL_REQUEST_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/pull/(?P<number>\d+)', re.IGNORECASE)
+GITHUB_PULL_REQUESTS_PLAIN_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/pulls', re.IGNORECASE)
+GITHUB_ISSUE_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/issues/(?P<number>\d+)', re.IGNORECASE)
+GITHUB_ISSUES_PLAIN_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/issues', re.IGNORECASE)
+GITHUB_REPO_GIT_URL_RE: re.Pattern = re.compile(r'github\.com/(?P<repo>[a-zA-Z0-9-_]+)/([A-Za-z0-9_.-]+)\.git', re.IGNORECASE)
+GITHUB_LINES_URL_RE: re.Pattern = re.compile(r'(github)\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/blob/(.+?)/(.+?)#L(\d+)[-~]?L?(\d*)', re.IGNORECASE)
+GITLAB_LINES_URL_RE: re.Pattern = re.compile(r'(gitlab)\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/-/blob/(.+?)/(.+?)#L(\d+)-?(\d*)', re.IGNORECASE)
+GITHUB_COMMIT_URL_RE: re.Pattern = re.compile(r'https://github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/commit/(?P<oid>\b([a-f0-9]{40})\b)')

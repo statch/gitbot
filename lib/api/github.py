@@ -1,17 +1,35 @@
 import aiohttp
 import asyncio
+import functools
 import gidgethub.aiohttp as gh
 from sys import version_info
-from typing import Union, List, Optional
+from typing import Optional, Callable, Any, Literal
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
-from lib.structs import DirProxy, GhProfileData
-from lib.utils.decorators import normalize_repository
+from lib.structs import DirProxy, GhProfileData, TypedCache, CacheSchema
+from lib.utils.decorators import normalize_repository, validate_github_name
+from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
 
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
+github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=450)
+
+
+def github_cached(func: Callable) -> Callable:
+    @functools.wraps(func)
+    async def wrapper(*args: tuple, **kwargs: dict) -> Any:
+        # actually 2nd cause we're working with methods
+        first_arg_or_arbitrary_kwarg = args[1] if args else next(iter(kwargs))
+        if cached := github_object_cache.get(first_arg_or_arbitrary_kwarg):
+            return cached
+        result: Any = await func(*args, **kwargs)
+        if isinstance(result, (dict, list)):
+            github_object_cache[first_arg_or_arbitrary_kwarg] = result
+        return result
+
+    return wrapper
 
 
 class GitHubAPI:
@@ -29,16 +47,16 @@ class GitHubAPI:
     def __init__(self, tokens: tuple, requester: str):
         requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
         self.__tokens: tuple = tokens
-        self._queries: DirProxy = DirProxy('./data/queries/', ('.gql', '.graphql'))
-        self.tokens: cycle = cycle(t for t in tokens if t is not None)
+        self.__token_cycle: cycle = cycle(t for t in self.__tokens if t is not None)
+        self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
         self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
         self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.__token)
 
     @property
     def __token(self) -> str:
-        return next(self.tokens)
+        return next(self.__token_cycle)
 
-    async def ghprofile_stats(self, name: str) -> Union[GhProfileData, None]:
+    async def ghprofile_stats(self, name: str) -> Optional[GhProfileData]:
         if '/' in name or '&' in name:
             return None
         res = await (await self.ses.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
@@ -47,7 +65,7 @@ class GitHubAPI:
             return None
         return GhProfileData(*[int(v) for v in period.values()])
 
-    async def get_ratelimit(self) -> tuple:
+    async def get_ratelimit(self) -> tuple[tuple[dict, ...], int]:
         results: list = []
         for token in self.__tokens:
             data = await (await self.ses.get(f'https://api.github.com/rate_limit',
@@ -55,19 +73,25 @@ class GitHubAPI:
             results.append(data)
         return tuple(results), len(self.__tokens)
 
-    async def get_user_repos(self, user: str) -> Optional[list]:
+    @github_cached
+    @validate_github_name('user')
+    async def get_user_repos(self, user: GitHubUser) -> Optional[list[dict]]:
         try:
             return list([x for x in await self.gh.getitem(f'/users/{user}/repos') if x['private'] is False])
         except BadRequest:
             return None
 
-    async def get_org(self, org: str) -> Optional[dict]:
+    @github_cached
+    @validate_github_name('org')
+    async def get_org(self, org: GitHubOrganization) -> Optional[dict]:
         try:
             return await self.gh.getitem(f'/orgs/{org}')
         except BadRequest:
             return None
 
-    async def get_org_repos(self, org: str) -> Union[List[dict], list]:
+    @github_cached
+    @validate_github_name('org', default=[])
+    async def get_org_repos(self, org: GitHubOrganization) -> list[dict]:
         try:
             res = list([x for x in await self.gh.getitem(f'/orgs/{org}/repos') if x['private'] is False])
             return res
@@ -75,7 +99,7 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_repo_files(self, repo: str) -> Union[List[dict], list]:
+    async def get_repo_files(self, repo: GitHubRepository) -> list[dict]:
         if repo.count('/') != 1:
             return []
         try:
@@ -84,7 +108,7 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_tree_file(self, repo: str, path: str):
+    async def get_tree_file(self, repo: GitHubRepository, path: str):
         if repo.count('/') != 1:
             return []
         if path[0] == '/':
@@ -94,26 +118,33 @@ class GitHubAPI:
         except BadRequest:
             return []
 
-    async def get_user_orgs(self, user: str) -> Union[List[dict], list]:
+    @github_cached
+    @validate_github_name('user', default=[])
+    async def get_user_orgs(self, user: GitHubUser) -> list[dict]:
         try:
             return list(await self.gh.getitem(f'/users/{user}/orgs'))
         except BadRequest:
             return []
 
-    async def get_org_members(self, org: str) -> Union[List[dict], list]:
+    @github_cached
+    @validate_github_name('org', default=[])
+    async def get_org_members(self, org: GitHubOrganization) -> list[dict]:
         try:
             return list(await self.gh.getitem(f'/orgs/{org}/members'))
         except BadRequest:
             return []
 
-    async def get_user_gists(self, user: str):
+    @github_cached
+    @validate_github_name('user')
+    async def get_user_gists(self, user: GitHubUser):
         try:
-            data = await self.gh.graphql(self._queries.user_gists, **{'Login': user})
+            data = await self.gh.graphql(self.queries.user_gists, **{'Login': user})
         except QueryError:
             return None
 
         return data['user']
 
+    @github_cached
     async def get_gist(self, gist_id: str) -> Optional[dict]:
         try:
             return dict(await self.gh.getitem(f'/gists/{gist_id}'))
@@ -121,9 +152,61 @@ class GitHubAPI:
             return None
 
     @normalize_repository
+    async def get_latest_commit(self, repo: GitHubRepository) -> Optional[dict] | Literal[False]:
+        split: list = repo.split('/')
+        if len(split) == 2:
+            owner: str = split[0]
+            repository: str = split[1]
+            try:
+                data: dict = await self.gh.graphql(self.queries.latest_commit, **{'Name': repository, 'Owner': owner})
+            except QueryError as e:
+                if 'Repository' in str(e):
+                    return False
+                return None
+            return data['repository']['defaultBranchRef']['target']
+
+    @normalize_repository
+    async def get_commit(self, repo: GitHubRepository, oid: str) -> Optional[dict] | Literal[False]:
+        split: list = repo.split('/')
+        if len(split) == 2:
+            owner: str = split[0]
+            repository: str = split[1]
+            try:
+                data: dict = await self.gh.graphql(self.queries.commit,
+                                                   **{'Name': repository, 'Owner': owner, 'Oid': oid})
+            except QueryError as e:
+                if 'Repository' in str(e):
+                    return False
+                return None
+            return data['repository']['object']
+
+    @normalize_repository
+    async def get_latest_commits(self, repo: GitHubRepository, ref: Optional[str] = None) -> list[dict] | str:
+        split: list = repo.split('/')
+        if len(split) == 2:
+            owner: str = split[0]
+            repository: str = split[1]
+            try:
+                key: str = 'defaultBranchRef'
+                if not ref:
+                    data = await self.gh.graphql(self.queries.latest_commits_from_default_ref,
+                                                 **{'Name': repository, 'Owner': owner, 'First': 10})
+                else:
+                    key: str = 'ref'
+                    data = await self.gh.graphql(self.queries.latest_commits_from_ref,
+                                                 **{'Name': repository, 'Owner': owner, 'RefName': ref, 'First': 10})
+            except QueryError as e:
+                if 'Repository' in str(e):
+                    return 'repo'
+                return 'ref'
+            if 'defaultBranchRef' not in data.get('repository', {}) and 'ref' not in data['repository']:
+                return 'ref'
+            return data['repository'][key]['target']['history']['nodes']
+
+    @normalize_repository
     async def get_repo_zip(self,
-                           repo: str,
-                           size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[Union[bool, bytes]]:
+                           repo: GitHubRepository,
+                           size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[bool | bytes]:
         if '/' not in repo or repo.count('/') > 1:
             return None
         res = await self.ses.get(BASE_URL + f'/repos/{repo}/zipball',
@@ -138,33 +221,34 @@ class GitHubAPI:
         return None
 
     @normalize_repository
-    async def get_latest_release(self, repo: str) -> Optional[dict]:
+    async def get_latest_release(self, repo: GitHubRepository) -> Optional[dict]:
         if len(_split := repo.split('/')) == 2:
             owner, name = _split
         else:
             return None
 
         try:
-            data: dict = await self.gh.graphql(self._queries.release, **{'Name': name, 'Owner': owner})
+            data: dict = await self.gh.graphql(self.queries.release, **{'Name': name, 'Owner': owner})
         except QueryError:
             return None
 
         data = data['repository']
         data['release'] = data['releases']['nodes'][0] if data['releases']['nodes'] else None
-        data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0xefefef
+        data['color'] = int(data['primaryLanguage']['color'][1:], 16) if data['primaryLanguage'] else 0x2f3136
         del data['primaryLanguage']
         del data['releases']
         return data
 
     @normalize_repository
-    async def get_repo(self, repo: str) -> Optional[dict]:
+    @github_cached
+    async def get_repo(self, repo: GitHubRepository) -> Optional[dict]:
         split: list = repo.split('/')
         if len(split) == 2:
             owner: str = split[0]
             repository: str = split[1]
 
             try:
-                data: dict = await self.gh.graphql(self._queries.repo, **{'Name': repository, 'Owner': owner})
+                data: dict = await self.gh.graphql(self.queries.repo, **{'Name': repository, 'Owner': owner})
             except QueryError:
                 return None
 
@@ -177,9 +261,9 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_pull_request(self,
-                               repo: str,
+                               repo: GitHubRepository,
                                number: int,
-                               data: Optional[dict] = None) -> Union[dict, str]:
+                               data: Optional[dict] = None) -> dict | str:
         if not data:
             if repo.count('/') != 1:
                 return 'repo'
@@ -188,9 +272,9 @@ class GitHubAPI:
             repository: str = split[1]
 
             try:
-                data = await self.gh.graphql(self._queries.pull_request, **{'Name': repository,
-                                                                            'Owner': owner,
-                                                                            'Number': number})
+                data = await self.gh.graphql(self.queries.pull_request, **{'Name': repository,
+                                                                           'Owner': owner,
+                                                                           'Number': number})
             except QueryError as e:
                 if 'number' in str(e):
                     return 'number'
@@ -210,9 +294,9 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_last_pull_requests_by_state(self,
-                                              repo: str,
+                                              repo: GitHubRepository,
                                               last: int = 10,
-                                              state: str = 'OPEN') -> Optional[List[dict]]:
+                                              state: str = 'OPEN') -> Optional[list[dict]]:
         if repo.count('/') != 1:
             return None
 
@@ -221,20 +305,20 @@ class GitHubAPI:
         repository: str = split[1]
 
         try:
-            data: dict = await self.gh.graphql(self._queries.pull_requests, **{'Name': repository,
-                                                                               'Owner': owner,
-                                                                               'States': state,
-                                                                               'Last': last})
+            data: dict = await self.gh.graphql(self.queries.pull_requests, **{'Name': repository,
+                                                                              'Owner': owner,
+                                                                              'States': state,
+                                                                              'Last': last})
         except QueryError:
             return None
         return data['repository']['pullRequests']['nodes']
 
     @normalize_repository
     async def get_issue(self,
-                        repo: str,
+                        repo: GitHubRepository,
                         number: int,
                         data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
-                        had_keys_removed: bool = False) -> Union[dict, str]:
+                        had_keys_removed: bool = False) -> dict | str:
         if not data:
             if repo.count('/') != 1:
                 return 'repo'
@@ -244,9 +328,9 @@ class GitHubAPI:
             repository: str = split[1]
 
             try:
-                data: dict = await self.gh.graphql(self._queries.issue, **{'Name': repository,
-                                                                           'Owner': owner,
-                                                                           'Number': number})
+                data: dict = await self.gh.graphql(self.queries.issue, **{'Name': repository,
+                                                                          'Owner': owner,
+                                                                          'Number': number})
             except QueryError as e:
                 if 'number' in str(e):
                     return 'number'
@@ -267,7 +351,10 @@ class GitHubAPI:
         return data
 
     @normalize_repository
-    async def get_last_issues_by_state(self, repo: str, last: int = 10, state: str = 'OPEN') -> Optional[List[dict]]:
+    async def get_last_issues_by_state(self,
+                                       repo: GitHubRepository,
+                                       last: int = 10,
+                                       state: str = 'OPEN') -> Optional[list[dict]]:
         if repo.count('/') != 1:
             return None
         split: list = repo.split('/')
@@ -275,19 +362,21 @@ class GitHubAPI:
         repository: str = split[1]
 
         try:
-            data: dict = await self.gh.graphql(self._queries.issues, **{'Name': repository,
-                                                                        'Owner': owner,
-                                                                        'States': state,
-                                                                        'Last': last})
+            data: dict = await self.gh.graphql(self.queries.issues, **{'Name': repository,
+                                                                       'Owner': owner,
+                                                                       'States': state,
+                                                                       'Last': last})
         except QueryError:
             return None
         return data['repository']['issues']['nodes']
 
-    async def get_user(self, user: str):
+    @github_cached
+    @validate_github_name('user')
+    async def get_user(self, user: GitHubUser) -> Optional[dict]:
         try:
-            data = await self.gh.graphql(self._queries.user, **{'Login': user,
-                                                                'FromTime': YEAR_START,
-                                                                'ToTime': datetime.utcnow().strftime('%Y-%m-%dT%XZ')})
+            data = await self.gh.graphql(self.queries.user, **{'Login': user,
+                                                               'FromTime': YEAR_START,
+                                                               'ToTime': datetime.utcnow().strftime('%Y-%m-%dT%XZ')})
         except QueryError:
             return None
         data_ = data['user']['contributionsCollection']['contributionCalendar']

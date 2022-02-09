@@ -1,57 +1,100 @@
-import json
+# coding: utf-8
+
+"""
+An organized way to manage the different locales,
+the database, and other utilities used by GitBot.
+It ties these modules together creating a single, performant interface.
+~~~~~~~~~~~~~~~~~~~
+GitBot utility class providing an elegant way to manage different aspects of the bot
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
 import re
 import os
-import functools
-import operator
+import ast
+import json
+import dotenv
 import discord
 import zipfile
 import os.path
-from colorama import Style, Fore
-from motor.motor_asyncio import AsyncIOMotorClient
-from discord.ext import commands
-from lib.typehints import DictSequence, AnyDict, Identity
-from lib.structs import DirProxy, DictProxy, GitCommandData, UserCollection
-from lib.utils import regex as r
-from lib.utils.decorators import normalize_identity
-from typing import Optional, Union, Callable, Any, Reversible, List, Iterable, Coroutine, Tuple, Dict
+import inspect
+import hashlib
+import aiohttp
+import certifi
+import operator
+import datetime
+import functools
+import dotenv.parser
+from sys import getsizeof
+from itertools import chain
 from fuzzywuzzy import fuzz
+from collections import deque
+from lib.utils import regex as r
+from colorama import Style, Fore
+from discord.ext import commands
+from urllib.parse import quote_plus
+from pipe import traverse, where, select
+from lib.utils.decorators import normalize_identity
+from lib.structs import (DirProxy, DictProxy,
+                         GitCommandData, UserCollection,
+                         TypedCache, SelfHashingCache,
+                         CacheSchema, ParsedRepositoryData)
+from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
 
 
 class Manager:
     """
     A class containing database, locale and utility functions
 
-    Parameters
-    ----------
-    github: :class:`core.net.github.api.GitHubAPI`
-        The GitHub API instance to use
+    :param github: The GitHubAPI instance to use
+    :type github: :class:`lib.net.github.api.GitHubAPI`
     """
 
     def __init__(self, github):
+        self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
+        self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
         self.git = github
-        self.db: AsyncIOMotorClient = AsyncIOMotorClient(os.getenv('DB_CONNECTION')).store
+        self.ses: aiohttp.ClientSession = self.git.ses
+        self._prepare_env()
+        self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
+        self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
+        self._setup_db()
+        self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json'))
         self.e: DictProxy = self.load_json('emoji')
-        self.l: DirProxy = DirProxy('data/locale/', '.json', exclude='index.json')
+        self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
+                                                                            and v.startswith('#')) else int(v[1:], 16))
+        self.i: DictProxy = self.load_json('images')
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.patterns: tuple = ((r.GITHUB_LINES_RE, 'snippet'),
-                                (r.GITLAB_LINES_RE, 'snippet'),
-                                (r.ISSUE_RE, 'issue'),
-                                (r.PR_RE, 'pr'),
-                                (r.REPO_RE, 'repo'),
-                                (r.USER_ORG_RE, 'user_org'))
-        self.type_to_func: dict = {'repo': self.git.get_repo,
-                                   'user_org': None,
-                                   'issue': self.git.get_issue,
-                                   'pr': self.git.get_pull_request,
-                                   'snippet': 'snippet'}
-        self.locale_cache: dict = {}
-        setattr(self.locale, 'master', getattr(self.l, self.locale.master))
-        setattr(self.db, 'users', UserCollection(self.db.users, self.git, self))
+        self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
+        self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
+        self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 7)
+        self.locale.master = getattr(self.l, str(self.locale.master))
+        self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
+        self.__preprocess_locale_emojis()
 
-    def get_closest_match_from_iterable(self, to_match: str, iterable: Iterable[str]) -> str:
+    @staticmethod
+    def parse_literal(literal: str) -> str | bytes | int | set | dict | tuple | list | bool | float | None:
+        """
+        Parse a literal into a Python object
+
+        :param literal: The literal to parse
+        :raises ValueError, SyntaxError: If the value is malformed, then ValueError or SyntaxError is raised
+        :return: The parsed literal (an object)
+        """
+
+        return ast.literal_eval(literal)
+
+    @staticmethod
+    def get_closest_match_from_iterable(to_match: str, iterable: Iterable[str]) -> str:
         """
         Iterate through an iterable of :class:`str` and return the item that resembles to_match the most.
 
@@ -60,14 +103,89 @@ class Manager:
         :return: The closest match
         """
 
-        best = 0, None
+        best = 0, ''
         for i in iterable:
-            if (m := fuzz.token_set_ratio(str(i), to_match)) > best[0]:
-                best = m, str(i)
+            if (m := fuzz.token_set_ratio(i := str(i), to_match)) > best[0]:
+                best = m, i
         return best[1]
 
-    def log(self,
-            message: str,
+    @staticmethod
+    def pascal_to_snake_case(string: str) -> str:
+        """
+        Convert a PascalCase string to snake_case
+
+        :param string: The string to convert
+        :return: The converted string
+        """
+
+        return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
+
+    @staticmethod
+    def to_github_hyperlink(name: str, codeblock: bool = False) -> str:
+        """
+        Return f"[{name}](GITHUB_URL)"
+
+        :param name: The GitHub name to embed in the hyperlink
+        :param codeblock: Whether to wrap the hyperlink with backticks
+        :return: The created hyperlink
+        """
+
+        return (f'[{name}](https://github.com/{name.lower()})' if not codeblock
+                else f'[`{name}`](https://github.com/{name.lower()})')
+
+    @staticmethod
+    def truncate(string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
+        """
+        Append the ending to the cut string if len(string) exceeds length else return unchanged string.
+
+        .. note ::
+            The actual length of the **content** of the string equals length - len(ending) without full_word
+
+        :param string: The string to truncate
+        :param length: The desired length of the string
+        :param ending: The ending to append
+        :param full_word: Whether to cut in the middle of the last word ("pyth...")
+                          or to skip it entirely and append the ending
+        :return: The truncated (or unchanged) string
+        """
+
+        if len(string) > length:
+            if full_word:
+                string: str = string[:length - len(ending)]
+                return f"{string[:string.rindex(' ')]}{ending}".strip()
+            return string[:length - len(ending)] + ending
+        return string
+
+    @staticmethod
+    def flatten(iterable: Iterable) -> Iterable:
+        return list(iterable | traverse)
+
+    @staticmethod
+    def external_to_discord_timestamp(timestamp: str, ts_format: str) -> str:
+        """
+        Convert an external timestamp to the <t:timestamp> Discord format
+
+        :param timestamp: The timestamp
+        :param ts_format: The format of the timestamp
+        :return: The converted timestamp
+        """
+
+        return f'<t:{int(datetime.datetime.strptime(timestamp, ts_format).timestamp())}>'
+
+    @staticmethod
+    def gen_separator_line(length: Any, char: str = '⎯') -> str:
+        """
+        Generate a separator line with the provided length or the __len__ of the object passed
+
+        :param length: The length of the separator line
+        :param char: The character to use for the separator line
+        :return: The separator line
+        """
+
+        return char * (length if isinstance(length, int) else len(length))
+
+    @staticmethod
+    def log(message: str,
             category: str = 'core',
             bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
             category_color: Fore = Fore.MAGENTA,
@@ -82,9 +200,12 @@ class Manager:
         :param message_color: The color of the message
         """
 
-        print(f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}{Style.RESET_ALL}')
+        print(
+            f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
+            f'{Style.RESET_ALL}')
 
-    def opt(self, obj: object, op: Callable, /, *args, **kwargs) -> Any:
+    @staticmethod
+    def opt(obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
         """
         Run an operation on an object if bool(object) == True
 
@@ -95,88 +216,32 @@ class Manager:
         :return: The result of the operation or the unchanged object
         """
 
+        if isinstance(op, (int, str)):
+            return obj[op] if obj else obj
+
         return op(obj, *args, **kwargs) if obj else obj
 
-    def dict_full_path(self,
-                       dict_: AnyDict,
-                       key: str,
-                       value: Optional[Any] = None) -> Optional[Tuple[str, ...]]:
+    @staticmethod
+    def getopt(obj: Any, attr: tuple[str, ...] | str | list[str]) -> Any:
         """
-        Get the full path of a dictionary key in the form of a tuple.
-        The value is an optional parameter that can be used to determine which key's path to return if many are present.
+        Optional chaining for getting attributes
 
-        :param dict_: The dictionary to which the key belongs
-        :param key: The key to get the full path to
-        :param value: The optional value for determining if a key is the right one
-        :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
+        :param obj: The object to get the attribute from
+        :param attr: The attribute to get
+        :return: The attribute or None if it doesn't exist
         """
 
-        if hasattr(dict_, 'actual'):
-            dict_: dict = dict_.actual
+        if isinstance(attr, str):
+            attr: list[str] = attr.split('.')
 
-        def _recursive(__prev: tuple = ()) -> Optional[Tuple[str, ...]]:
-            reduced: dict = self.get_nested_key(dict_, __prev)
-            for k, v in reduced.items():
-                if k == key and (value is None or (value is not None and v == value)):
-                    return *__prev, key
-                if isinstance(v, dict):
-                    if ret := _recursive((*__prev, k)):
-                        return ret
-        return _recursive()
+        for sub_attr in attr:
+            obj = getattr(obj, sub_attr, None)
+            if obj is None:
+                return
+        return obj
 
-    def strip_codeblock(self, codeblock: str) -> str:
-        """
-        Extract code from the codeblock while retaining indentation.
-
-        :param codeblock: The codeblock to strip
-        :return: The code extracted from the codeblock
-        """
-
-        return re.sub(r'^.*?\n', '\n', codeblock.strip('`')).rstrip().lstrip('\n')
-
-    async def unzip_file(self, zip_path: str, output_dir: str) -> None:
-        """
-        Unzip a ZIP file to a specified location
-
-        :param zip_path: The location of the ZIP file
-        :param output_dir: The output directory to extract ZIP file contents to
-        """
-
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-        with zipfile.ZipFile(zip_path, 'r') as _zip:
-            _zip.extractall(output_dir)
-
-    def correlate_license(self, to_match: str) -> Optional[DictProxy]:
-        """
-        Get a license matching the query.
-
-        :param to_match: The query to search by
-        :return: The license matched or None if match is less than 80
-        """
-
-        for i in list(self.licenses):
-            match = fuzz.token_set_ratio(to_match, i['name'])
-            match1 = fuzz.token_set_ratio(to_match, i['key'])
-            match2 = fuzz.token_set_ratio(to_match, i['spdx_id'])
-            if any([match > 80, match1 > 80, match2 > 80]):
-                return i
-        return None
-
-    def load_json(self, name: str) -> DictProxy:
-        """
-        Load a JSON file from the data dir
-
-        :param name: The name of the JSON file
-        :return: The loaded JSON wrapped in DictProxy
-        """
-
-        to_load = './data/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
-        with open(to_load, 'r') as fp:
-            data: Union[dict, list] = json.load(fp)
-        return DictProxy(data)
-
-    async def verify_send_perms(self, channel: discord.TextChannel) -> bool:
+    @staticmethod
+    async def verify_send_perms(channel: discord.TextChannel) -> bool:
         """
         Check if the client can comfortably send a message to a channel
 
@@ -195,36 +260,8 @@ class Manager:
             return True
         return False
 
-    async def get_link_reference(self, link: str) -> Optional[Union[GitCommandData, str, tuple]]:
-        """
-        Get the command data required for invocation from a link
-
-        :param link: The link to exchange for command data
-        :return: The command data requested
-        """
-
-        for pattern in self.patterns:
-            match: list = re.findall(pattern[0], link)
-            if match:
-                match: Union[str, tuple] = match[0]
-                action: Optional[Union[Callable, str]] = self.type_to_func[pattern[1]]
-                if isinstance(action, str):
-                    return GitCommandData(link, 'snippet', link)
-                if isinstance(match, tuple) and action:
-                    match: tuple = tuple(i if not i.isnumeric() else int(i) for i in match)
-                    obj: Union[dict, str] = await action(match[0], int(match[1]))
-                    if isinstance(obj, str):
-                        return obj, pattern[1]
-                    return GitCommandData(obj, pattern[1], match)
-                if not action:
-                    if (obj := await self.git.get_user((m := match))) is None:
-                        obj: Optional[dict] = await self.git.get_org(m)
-                        return GitCommandData(obj, 'org', m) if obj is not None else 'no-user-or-org'
-                    return GitCommandData(obj, 'user', m)
-                repo = await action(match)
-                return GitCommandData(repo, pattern[1], match) if repo is not None else 'repo'
-
-    async def get_most_common(self, items: Union[list, tuple]) -> Any:
+    @staticmethod
+    async def get_most_common(items: list | tuple) -> Any:
         """
         Get the most common item from a list/tuple
 
@@ -234,7 +271,490 @@ class Manager:
 
         return max(set(items), key=items.count)
 
-    async def validate_number(self, number: str, items: List[AnyDict]) -> Optional[dict]:
+    @staticmethod
+    def get_remaining_keys(dict_: dict, keys: Iterable[str]) -> list[str]:
+        """
+        Return list(set(dict.keys()) ^ set(keys))
+
+        :param dict_: The dictionary to get the remaining keys from
+        :param keys: The keys to perform the XOR operation with
+        :return: The remaining keys
+        """
+
+        return list(set(dict_.keys()) ^ set(keys))
+
+    @staticmethod
+    def regex_get(dict_: dict, pattern: re.Pattern | str, default: Any = None) -> Any:
+        """
+        Kinda like dict.get, but with regex or __in__
+
+        :param dict_: The dictionary to get the value from
+        :param pattern: The pattern to match (The action will be __in__ if it's a string)
+        :param default: The default value to return if no match is found
+        :return: The value associated with the pattern, or the default value
+        """
+
+        compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
+                             else lambda k_: pattern in k_)
+        for k, v in dict_.items():
+            if compare(k):
+                return v
+        return default
+
+    @staticmethod
+    def get_nested_key(dict_: AnyDict, key: Iterable[str] | str) -> Any:
+        """
+        Get a nested dictionary key
+
+        :param dict_: The dictionary to get the key from
+        :param key: The key to get
+        :return: The value associated with the key
+        """
+
+        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
+
+    @staticmethod
+    def chunks(iterable: list | tuple, chunk_size: int) -> Generator[list | tuple, None, None]:
+        """
+        Returns a generator of equally sized chunks from an iterable.
+        If the iterable is not evenly divisible by chunk_size, the last chunk will be smaller.
+        Useful for displaying a list inside multiple embeds.
+
+        :param iterable: The iterable to chunk
+        :param chunk_size: The size of the chunks (list has len 10, chunk_size is 5 -> 2 lists of 5)
+        :return: A generator of chunks sized <= chunk_size
+        """
+
+        n: int = max(1, chunk_size)
+        return (iterable[i:i + n] for i in range(0, len(iterable), n))
+
+    def _setup_db(self) -> None:
+        """
+        Setup the database connection with ENV vars and a more predictable certificate location.
+        """
+
+        self._ca_cert: str = certifi.where()
+        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
+                                                                appname=self.bot_dev_name,
+                                                                tls=self.env.db_use_tls,
+                                                                tlsCAFile=self._ca_cert,
+                                                                tlsAllowInvalidCertificates=False)
+        self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
+
+    def _eval_bool_literal_safe(self, literal: str) -> str | bool:
+        """
+        Safely convert a string literal to a boolean, or return the string
+
+        :param literal: The literal to convert
+        :return: The converted literal or the literal itself if it's not a boolean
+        """
+
+        if (literal_ := literal.lower()) == 'true':
+            return True
+        elif literal_ == 'false':
+            return False
+        return literal
+
+    def _set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
+        """
+        Optionally add an environment directive (behavior config for environment loading)
+
+        :param name: The name of the env binding
+        :param value: The value of the env binding
+        :param overwrite: Whether to overwrite an existing directive
+        :return: Whether or not the directive was added or not
+        """
+
+        if isinstance(value, str):
+            value: str | bool = self._eval_bool_literal_safe(value)
+
+        if (directive := name.lower()).startswith('directive_'):
+            if (directive := directive.replace('directive_', '')) not in \
+                    self.env_directives or (directive in self.env_directives and overwrite):
+                self.env_directives[directive] = value
+                self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                return True
+        return False
+
+    def _prepare_env(self) -> None:
+        """
+        Private function meant to be called at the time of instantiating this class,
+        loads .env with defaults from data/env_defaults.json into self.env.
+        """
+
+        self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
+                                         if not self._set_env_directive(k, v)})
+        self.env_directives: DictProxy = DictProxy()
+
+        with open('resources/env_defaults.json', 'r') as fp:
+            env_defaults: dict = json.loads(fp.read())
+            for k, v in env_defaults.items():
+                if not self._set_env_directive(k, v) and k not in self.env:
+                    self.env[k] = v
+        self.load_dotenv()
+
+    def parse_repo(self, repo: Optional[str]) -> Optional[Type[ParsedRepositoryData] | str]:
+        """
+        Parse a owner/name(/branch)? repo string into :class:`ParsedRepositoryData`
+
+        :param repo: The repo string
+        :return: The parsed repo or the repo argument unchanged
+        """
+
+        if repo and (match := r.REPOSITORY_NAME_RE.match(repo)):
+            return ParsedRepositoryData(**match.groupdict())
+        return repo
+
+    def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
+        """
+        Handle an environment key->value binding.
+
+        :param binding: The binding to handle
+        """
+
+        if not self._set_env_directive(binding.key, binding.value):
+            try:
+                if self.env_directives.get('eval_literal'):
+                    if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
+                        self.env[binding.key] = parsed
+                    else:
+                        self.env[binding.key] = (parsed := self.parse_literal(binding.value))
+                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                else:
+                    self.env[binding.key] = binding.value
+                    self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                return
+            except (ValueError, SyntaxError):
+                self.env[binding.key] = binding.value
+                self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+
+    def load_dotenv(self) -> None:
+        """
+        Load the .env file (if it exists) into self.env.
+        This method's capabilities are largely extended compared to plain dotenv:
+            - Directives ("DIRECTIVE_{X}") that modify the behavior of the parser
+            - Defaults are loaded from env_defaults.json first, so that .env values take precedence
+            - With the "eval_literal" directive active, binding values are parsed with AST during runtime
+        """
+
+        dotenv_path: str = dotenv.find_dotenv()
+        if dotenv_path:
+            self.log('Found .env file, loading environment variables listed inside of it.',
+                     f'core-{Fore.LIGHTYELLOW_EX}env')
+            with open(dotenv_path, 'r') as fp:
+                for binding in dotenv.parser.parse_stream(fp):
+                    self._handle_env_binding(binding)
+
+    def github_to_discord_timestamp(self, github_timestamp: str) -> str:
+        """
+        Convert a GitHub-formatted timestamp (%Y-%m-%dT%H:%M:%SZ) to the <t:timestamp> Discord format
+
+        :param github_timestamp: The GitHub timestamp to convert
+        :return: The converted timestamp
+        """
+
+        return self.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+
+    _number_re: re.Pattern = re.compile(r'\d+')
+
+    def get_numbers_in_range_in_str(self, string: str, max_: int = 10) -> list[int]:
+        """
+        Return a list of numbers from str that are < max_
+
+        :param string: The string to search for numbers
+        :param max_: The max_ number to include in the returned list
+        :return: The list of numbers
+        """
+
+        return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
+
+    def get_last_call_from_callstack(self, frames_back: int = 2) -> str:
+        """
+        Get the name of a callable in the callstack.
+        If the encountered callable is a method, return the name in the "ClassName.method_name" format.
+
+        :param frames_back: The number of frames to go back and get the callable name from
+        :return: The callable name
+        """
+
+        frame = inspect.stack()[frames_back][0]
+        if 'self' in frame.f_locals:
+            return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
+        return frame.f_code.co_name
+
+    def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+        """
+        A special variant of :meth:`Manager.log` that sets the
+        category name as the name of the outer function (the caller)
+        and only fires if the ENV[PRODUCTION] value is False.
+
+        :param message: The message to log to the console
+        :param message_color: The optional message color override
+        """
+
+        if self.debug_mode:
+            self.log(message,
+                     f'debug-{Fore.LIGHTYELLOW_EX}{self.get_last_call_from_callstack()}{Style.RESET_ALL}',
+                     Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
+
+    _int_word_conv_map: dict = {
+        'zero': 0,
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9,
+        'ten': 10
+    }
+
+    def wtoi(self,
+             word: str) -> Optional[int]:
+        """
+        Word to :class:`int`. I'm sorry.
+
+        :param word: The word to convert
+        :return: The converted word or None if invalid
+        """
+
+        return self._int_word_conv_map.get(word.casefold())
+
+    def itow(self, _int: int) -> Optional[str]:
+        """
+        :class:`int` to word. I'm sorry.
+
+        :param _int: The integer to convert
+        :return: The converted int or None if invalid
+        """
+
+        for k, v in self._int_word_conv_map.items():
+            if v == _int:
+                return k
+
+    def sizeof(self, object_: object, handlers: Optional[dict] = None, verbose: bool = False) -> int:
+        """
+        Return the approximate memory footprint of an object and all of its contents.
+
+        Automatically finds the contents of the following builtin containers and
+        their subclasses: :class:`tuple`, :class:`list`, :class:`deque`, :class:`dict`,
+        :class:`set` and :class:`frozenset`. To search other containers, add handlers to iterate over their contents:
+
+        handlers = {SomeContainerClass: iter,
+                    OtherContainerClass: OtherContainerClass.get_elements}
+        """
+
+        if handlers is None:
+            handlers: dict = {}
+
+        all_handlers: dict = {tuple: iter, list: iter,
+                              deque: iter, dict: lambda d: chain.from_iterable(d.items()),
+                              set: iter, frozenset: iter}
+        all_handlers.update(handlers)
+        seen: set = set()
+
+        def _sizeof(_object: object) -> int:
+            if id(_object) in seen:
+                return 0
+            seen.add(id(_object))
+            size: int = getsizeof(_object, getsizeof(0))
+
+            if verbose:
+                self.log(
+                    message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
+                    category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTRED_EX}r{Style.RESET_ALL}]')
+
+            for type_, handler in all_handlers.items():
+                if isinstance(_object, type_):
+                    size += sum(map(_sizeof, handler(_object)))
+                    break
+            return size
+
+        final_size: int = _sizeof(object_)
+        if verbose:
+            self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
+                     category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
+        return final_size
+
+    def dict_full_path(self,
+                       dict_: AnyDict,
+                       key: str,
+                       value: Optional[Any] = None) -> Optional[tuple[str, ...]]:
+        """
+        Get the full path of a dictionary key in the form of a tuple.
+        The value is an optional parameter that can be used to determine which key's path to return if many are present.
+
+        :param dict_: The dictionary to which the key belongs
+        :param key: The key to get the full path to
+        :param value: The optional value for determining if a key is the right one
+        :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
+        """
+
+        if hasattr(dict_, 'actual'):
+            dict_: dict = dict_.actual
+
+        def _recursive(__prev: tuple = ()) -> Optional[tuple[str, ...]]:
+            reduced: dict = self.get_nested_key(dict_, __prev)
+            for k, v in reduced.items():
+                if k == key and (value is None or (value is not None and v == value)):
+                    return *__prev, key
+                if isinstance(v, dict):
+                    if ret := _recursive((*__prev, k)):
+                        return ret
+
+        return _recursive()
+
+    def extract_content_from_codeblock(self, codeblock: str) -> Optional[str]:
+        """
+        Extract code from the codeblock while retaining indentation.
+
+        :param codeblock: The codeblock to strip
+        :return: The code extracted from the codeblock
+        """
+
+        match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
+                            re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
+        if match_:
+            self.debug('Matched codeblock')
+            return match_.group('content').rstrip('\n')
+        self.debug("Couldn't match codeblock")
+
+    async def unzip_file(self, zip_path: str, output_dir: str) -> None:
+        """
+        Unzip a ZIP file to a specified location
+
+        :param zip_path: The location of the ZIP file
+        :param output_dir: The output directory to extract ZIP file contents to
+        """
+
+        if not os.path.exists(output_dir):
+            self.debug(f'Creating output directory "{output_dir}"')
+            os.mkdir(output_dir)
+        with zipfile.ZipFile(zip_path, 'r') as _zip:
+            self.debug(f'Extracting zip archive "{zip_path}"')
+            _zip.extractall(output_dir)
+
+    def get_license(self, to_match: str) -> Optional[DictProxy]:
+        """
+        Get a license matching the query.
+
+        :param to_match: The query to search by
+        :return: The best license matched or None if match is less than 80
+        """
+
+        best: list[tuple[int, DictProxy]] = []
+
+        for i in list(self.licenses):
+            _match1: int = fuzz.token_set_ratio(to_match, i['name'])
+            _match2: int = fuzz.token_set_ratio(to_match, i['key'])
+            _match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
+            if any([_match1 > 80, _match2 > 80, _match3 > 80]):
+                score: int = sum([_match1, _match2, _match3])
+                self.debug(f'Matched license "{i["name"]}" with one-attribute confidence >80 from "{to_match}"')
+                best.append((score, i))
+        if best:
+            pick: tuple[int, DictProxy] = max(best, key=lambda s: s[0])
+            self.debug(f'Found {len(best)} matching licenses, picking the best one with score {pick[0]}')
+            return pick[1]
+        self.debug(f'No matching license found for "{to_match}"')
+        return None
+
+    def load_json(self,
+                  name: str,
+                  apply_func: Optional[Callable[[str, list | str | int | bool], Any]] = None) -> DictProxy:
+        """
+        Load a JSON file from the data dir
+
+        :param name: The name of the JSON file
+        :param apply_func: The function to apply to all dictionary k->v tuples except when isinstance(v, dict),
+               then apply recursion until an actionable value (list | str | int | bool) is found in the node
+        :return: The loaded JSON wrapped in DictProxy
+        """
+
+        to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+        with open(to_load, 'r') as fp:
+            data: dict | list = json.load(fp)
+        proxy: DictProxy = DictProxy(data)
+
+        if apply_func:
+            self.debug(f'Applying func {apply_func.__name__}')
+
+            def _recursive(node: AnyDict) -> None:
+                for k, v in node.items():
+                    if isinstance(v, (dict, DictProxy)):
+                        _recursive(v)
+                    else:
+                        node[k] = apply_func(k, v)
+
+            _recursive(proxy)
+        return proxy
+
+    async def get_link_reference(self,
+                                 ctx: 'GitBotContext') -> Optional[GitCommandData]:
+        """
+        Get the command data required for invocation from a context
+
+        :param ctx: The context to search for links, and then optionally exchange for command data
+        :return: The command data requested
+        """
+
+        combos: tuple[tuple[re.Pattern, tuple | str], ...] = ((r.GITHUB_PULL_REQUEST_URL_RE, 'pr'),
+                                                              (r.GITHUB_ISSUE_URL_RE, 'issue'),
+                                                              (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
+                                                              (r.GITHUB_ISSUES_PLAIN_URL_RE, 'repo issues'),
+                                                              (r.GITHUB_COMMIT_URL_RE, 'commit'),
+                                                              (r.GITHUB_REPO_URL_RE, 'repo info'),
+                                                              (r.GITHUB_USER_ORG_URL_RE, ('user info', 'org info')))
+        for pattern, command_name in combos:
+            if match := pattern.search(ctx.message.content):
+                if isinstance(command_name, str):
+                    command: commands.Command = ctx.bot.get_command(command_name)
+                    kwargs: dict = dict(zip(command.clean_params.keys(), match.groups()))
+                else:
+                    command: tuple[commands.Command, ...] = tuple(ctx.bot.get_command(name) for name in command_name)
+                    kwargs: tuple[dict, ...] = tuple(dict(zip(cmd.clean_params.keys(),
+                                                              match.groups())) for cmd in command)
+                return GitCommandData(command, kwargs)
+        self.debug(f'No match found for "{ctx.message.content}"')
+
+    def construct_gravatar_url(self, email: str, size: int = 512, default: Optional[str] = None) -> str:
+        """
+        Construct a valid Gravatar URL with optional size and default parameters
+
+        :param email: The email to fetch the Gravatar for
+        :param size: The size of the Gravatar, default is 512
+        :param default: The URL to default to if the email address doesn't have a Gravatar
+        :return: The Gravatar URL constructed with the arguments
+        """
+
+        url: str = f'https://www.gravatar.com/avatar/{hashlib.md5(email.encode("utf8").lower()).hexdigest()}?s={size}'
+        if default:
+            url += f'&d={quote_plus(default)}'
+        return url
+
+    async def ensure_http_status(self,
+                                 url: str,
+                                 code: int = 200,
+                                 method: str = 'GET',
+                                 alt: Any = None,
+                                 **kwargs) -> Any:
+        """
+        Ensure that an HTTP request returned a particular status, if not, return the alt parameter
+
+        :param url: The URL to request
+        :param code: The wanted status code
+        :param method: The method of the request
+        :param alt: The value to return if the status code is different from the code parameter
+        :return: The URL if the statuses match, or the alt parameter if not
+        """
+
+        if (await self.ses.request(method=method, url=url, **kwargs)).status == code:
+            return url
+        return alt
+
+    async def validate_index(self, number: str, items: list[AnyDict]) -> Optional[dict]:
         """
         Validate an index against a list of indexed dicts
 
@@ -249,9 +769,9 @@ class Manager:
             number: int = int(number)
         except (TypeError, ValueError):
             return None
-        matched = [i for i in items if i['number'] == number]
+        matched = self.opt([i for i in items if i['number'] == number], 0)
         if matched:
-            return matched[0]
+            return matched
 
     async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
         """
@@ -262,9 +782,10 @@ class Manager:
         """
 
         if seq:
-            return type(seq)(reversed(seq))
+            return type(seq)(reversed(seq))  # noqa
+        self.debug('Sequence is None')
 
-    async def readdir(self, path: str, ext: Optional[Union[str, list, tuple]] = None) -> DirProxy:
+    def readdir(self, path: str, ext: Optional[str | list | tuple] = None, **kwargs) -> Optional[DirProxy]:
         """
         Read a directory and return a file-mapping object
 
@@ -274,30 +795,39 @@ class Manager:
         """
 
         if os.path.isdir(path):
-            return DirProxy(path=path, ext=ext)
+            return DirProxy(path=path, ext=ext, **kwargs)
+        self.debug(f'Not a directory: "{path}"')
 
-    async def error(self, ctx: commands.Context, msg: str, **kwargs) -> None:
+    @normalize_identity(context_resource='guild')
+    async def get_autoconv_config(self,
+                                  _id: Identity,
+                                  did_exist: bool = False) -> Type[AutomaticConversion] | tuple[AutomaticConversion,
+                                                                                                bool]:
         """
-        Context.send() with an emoji slapped in front ;-;
+        Get the configured permission for automatic conversion from messages (links, snippets, etc.)
 
-        :param ctx: The command invocation context
-        :param msg: The message content
-        :param kwargs: ctx.send keyword arguments
-        """
-
-        await ctx.send(f'{self.e.err}  {msg}', **kwargs)
-
-    def error_ctx_bindable(self, ctx: commands.Context) -> functools.partial[Coroutine]:
-        """
-        Manager.error with the Context parameter removed
-
-        :param ctx: The command invocation context
-        :return: A partial version of Manager.error bindable to Context
+        :param _id: The guild ID to get the permission value for
+        :param did_exist: If to return whether if the guild document existed, or if the value is default
+        :return: The permission value, by default env[AUTOCONV_DEFAULT]
         """
 
-        return functools.partial(self.error, ctx)
+        _did_exist: bool = False
 
-    @normalize_identity
+        if cached := self.autoconv_cache.get(_id):
+            _did_exist: bool = True
+            permission: AutomaticConversion = cached
+            self.debug(f'Returning cached value for identity "{_id}"')
+        else:
+            stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
+            if stored:
+                permission: AutomaticConversion = stored.get('autoconv', self.env.autoconv_default)
+                _did_exist: bool = True
+            else:
+                permission: AutomaticConversion = self.env.autoconv_default
+            self.autoconv_cache[_id] = permission
+        return permission if not did_exist else (permission, _did_exist)
+
+    @normalize_identity()
     async def get_locale(self, _id: Identity) -> DictProxy:
         """
         Get the locale associated with a user, defaults to the master locale
@@ -306,54 +836,99 @@ class Manager:
         :return: The locale associated with the user
         """
 
-        locale: str = self.locale.master.meta.name
-        if cached := self.locale_cache.get(_id, None):
-            locale: str = cached
+        locale: LocaleName = self.locale.master.meta.name
+        if cached := self.locale_cache.get(_id):
+            locale: LocaleName = cached
+            self.debug(f'Returning cached value for identity "{_id}"')
         else:
-            stored: Optional[str] = await self.db.users.getitem(_id, 'locale')
-            if stored:
+            if stored := await self.db.users.getitem(_id, 'locale'):
                 locale: str = stored
-                self.locale_cache[_id] = locale
         try:
+            self.locale_cache[_id] = locale
             return getattr(self.l, locale)
         except AttributeError:
             return self.locale.master
 
-    def get_nested_key(self, dict_: AnyDict, key_: Union[Iterable[str], str]) -> Any:
-        """
-        Get a nested dictionary key
-
-        :param dict_: The dictionary to get the key from
-        :param key_: The key to get
-        :return: The value associated with the key
-        """
-
-        return functools.reduce(operator.getitem, key_ if not isinstance(key_, str) else key_.split(), dict_)
-
     def get_by_key_from_sequence(self,
                                  seq: DictSequence,
                                  key: str,
-                                 value: Any) -> Optional[AnyDict]:
+                                 value: Any,
+                                 multiple: bool = False,
+                                 unpack: bool = False) -> Optional[AnyDict | list[AnyDict]]:
         """
         Get a dictionary from an iterable, where d[key] == value
 
         :param seq: The sequence of dicts
         :param key: The key to check
         :param value: The wanted value
+        :param multiple: Whether to search for multiple valid dicts, time complexity is always O(n) with this flag
+        :param unpack: Whether the comparison op should be __in__ or __eq__
         :return: The dictionary with the matching value, if any
         """
 
+        matching: list = []
         if len((_key := key.split())) > 1:
             key: list = _key
         for d in seq:
             if isinstance(key, str):
-                if key in d and d[key] == value:
-                    return d
+                if (key in d) and (d[key] == value) if not unpack else (d[key] in value):
+                    if not multiple:
+                        return d
+                    matching.append(d)
             else:
-                if self.get_nested_key(d, key) == value:
-                    return d
+                if (self.get_nested_key(d, key) == value) if not unpack else (self.get_nested_key(d, key) in value):
+                    if not multiple:
+                        return d
+                    matching.append(d)
+        return matching
 
-    def get_missing_keys_for_locale(self, locale: str) -> Optional[Tuple[List[str], DictProxy, bool]]:
+    def populate_generic_numbered_resource(self,
+                                           resource: dict,
+                                           fmt_str: Optional[str] = None,
+                                           **values: int) -> dict[str, str] | str:
+        """
+        The GitBot locale is a bit special, as it has a lot of numbered resources.
+        Generic numbered resources are sub-dictionaries of locale values; they contain 3 or more keys:
+        - `plural`: The plural formatting string (n > 1)
+        - `singular`: The singular formatting string (n == 1)
+        - `no_(...)`: The formatting string for n == 0
+        This function will populate a generic numbered resource, and return the formatted string if provided
+
+        :param resource: The resource to populate
+        :param fmt_str: The formatting string to use
+        :param values: The values to use for the formatting string
+        :return: The formatted string, or the resource
+        """
+
+        populated: dict[str, str] = {}
+        for rk, rv in resource.items():
+            for vn, v in values.items():
+                if isinstance(rv, dict):
+                    if rk == vn:
+                        res: str = resource[rk]['plural'].format(v)
+                        if v < 2:
+                            res: str = resource[rk]['singular'] if v == 1 else self.regex_get(resource[rk], 'no_')
+                        populated[rk] = res
+                else:
+                    populated[rk] = rv
+        return fmt_str.format(**populated) if fmt_str else populated
+
+    def option_display_list_format(self, options: dict[str, str] | list[str], style: str = 'pixel') -> str:
+        """
+        Utility method to construct a string representation of a numbered list from :class:`dict` or :class:`list`
+
+        :param options: The options to build the list from
+        :param style: The style of digits to use (emoji.json["digits"][style])
+        :return: The created list string
+        """
+
+        resource: dict = self.e['digits'][style]
+        if isinstance(options, dict):
+            return '\n'.join([f"{resource[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"
+                              for i, kv in enumerate(options.items())])
+        return '\n'.join([f"{resource[self.itow(i+1)]} - {v}" for i, v in enumerate(options)])
+
+    def get_missing_keys_for_locale(self, locale: str) -> Optional[tuple[list[str], DictProxy, bool]]:
         """
         Get keys missing from a locale in comparison to the master locale
 
@@ -361,13 +936,14 @@ class Manager:
         :return: The missing keys for the locale and the confidence of the attribute match
         """
 
-        locale_data: Optional[Tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
+        locale_data: Optional[tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
         if locale_data:
-            missing: list = list(set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
+            missing: list = list(
+                set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
             missing.sort(key=lambda path: len(path) * sum(map(len, path)))
             return missing, locale_data[0], locale_data[1]
 
-    def get_locale_meta_by_attribute(self, attribute: str) -> Optional[Tuple[DictProxy, bool]]:
+    def get_locale_meta_by_attribute(self, attribute: str) -> Optional[tuple[DictProxy, bool]]:
         """
         Get a locale from a potentially malformed attribute.
         If there isn't a match above 80, returns None
@@ -377,10 +953,10 @@ class Manager:
         """
 
         for locale in self.locale.languages:
-            for k, v in locale.items():
-                match: int = fuzz.token_set_ratio(attribute, v)
-                if v == attribute or match > 80:
-                    return locale, match == 100
+            for lv in locale.values():
+                match_: int = fuzz.token_set_ratio(attribute, lv)
+                if lv == attribute or match_ > 80:
+                    return locale, match_ == 100
 
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
         """
@@ -396,8 +972,9 @@ class Manager:
             for k, v in ref.items():
                 if k not in node:
                     if locale:
-                        self.log(f'missing key "{k}" patched.', f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
-                        self._missing_locale_keys[dict_.meta.name].append(self.dict_full_path(ref_.actual, k, v))
+                        self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
+                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
+                                 f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
@@ -418,7 +995,43 @@ class Manager:
             if locale != self.locale.master and 'meta' in locale:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master, locale=True))
 
-    def fmt(self, ctx: commands.Context) -> object:
+    def _replace_emoji(self, match_: re.Match, default: str = '**[?]**') -> str:
+        """
+        Generate a replacement string from a match object's emoji_name variable with a Manager emoji
+
+        :param match_: The match to generate the replacement for
+        :return: The replacement string
+        """
+
+        if group := match_.group('emoji_name'):
+            return self.e.get(group, default)
+        return match_.string
+
+    def __preprocess_locale_emojis(self):
+        """
+        Preprocess locales by replacing {emoji_[x]} with self.e.[x] (Emoji formatting)
+        """
+
+        def _preprocess(node: AnyDict) -> None:
+            for k, v in node.items():
+                if isinstance(v, (DictProxy, dict)):
+                    _preprocess(v)
+                elif isinstance(v, str):
+                    if '{emoji_' in v:
+                        node[k] = r.LOCALE_EMOJI_TEMPLATE_RE.sub(self._replace_emoji, v)
+                elif isinstance(v, list):
+                    for i, item in enumerate(v):
+                        if isinstance(item, str):
+                            if '{emoji_' in item:
+                                v[i] = r.LOCALE_EMOJI_TEMPLATE_RE.sub(self._replace_emoji, item)
+                        elif isinstance(item, (DictProxy, dict)):
+                            _preprocess(item)
+                    node[k] = v
+
+        for locale in self.l:
+            _preprocess(locale)
+
+    def fmt(self, ctx: 'GitBotContext'):
         """
         Instantiate a new Formatter object. Meant for binding to Context.
 
@@ -429,18 +1042,29 @@ class Manager:
         self_: Manager = self
 
         class _Formatter:
-            def __init__(self, ctx_: commands.Context):
-                self.ctx: commands.Context = ctx_
+            def __init__(self, ctx_: 'GitBotContext'):
+                self.ctx: 'GitBotContext' = ctx_
                 self.prefix: str = ''
 
-            def __call__(self, resource: Union[tuple, str, list], /, *args) -> str:
-                resource: str = self.prefix + resource if not resource.startswith(self.prefix) else resource
+            def __call__(self, resource: tuple | str | list, /, *args, **kwargs) -> str:
+                skip_prefix: bool = False
+                if resource.startswith('!'):  # skip-prefix behavior if the resource has a preceding exclamation mark
+                    skip_prefix: bool = True
+                    resource: str = resource[1:]
+                resource: str = ((self.prefix if not skip_prefix else '') + resource
+                                 if not resource.startswith(self.prefix) else resource)
                 try:
-                    return self_.get_nested_key(self.ctx.l, resource).format(*args)
+                    return self_.get_nested_key(self.ctx.l, resource).format(*args, **kwargs)
                 except IndexError:
                     return self_.get_nested_key(self_.locale.master, resource).format(*args)
 
-            def set_prefix(self, prefix: str) -> None:
-                self.prefix: str = prefix.strip() + ' '
+            def set_prefix(self, prefix: str, absolute: bool = True) -> None:
+                if prefix.startswith('+'):
+                    self_.debug(f'Prefix mode is append, stripping op sign in \'{prefix}\'')
+                    prefix: str = prefix[1:]
+                    absolute: bool = False
+                self.prefix: str = prefix.strip() + ' ' if absolute else self.prefix + prefix.strip() + ' '
+                self_.debug(f'Locale formatting prefix set to \'{self.prefix.strip()}\' in '
+                            f'\'{self_.get_last_call_from_callstack(frames_back=2)}\'')
 
         return _Formatter(ctx)

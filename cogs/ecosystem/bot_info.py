@@ -7,6 +7,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from os.path import isfile, isdir, join
 from lib.utils.decorators import gitbot_command
+from lib.structs.discord.context import GitBotContext
 
 
 pid: int = os.getpid()
@@ -26,7 +27,10 @@ def dir_line_count(directory) -> int:
     return sum(map(lambda item: item_line_count(join(directory, item)), os.listdir(directory)))
 
 
-LINES_OF_CODE: int = sum((dir_line_count('./cogs'), dir_line_count('./lib')))
+LINES_OF_CODE: int = sum((dir_line_count('./cogs'),
+                          dir_line_count('./lib'),
+                          dir_line_count('./resources/queries'),
+                          item_line_count('./bot.py')))
 
 
 class BotInfo(commands.Cog):
@@ -35,7 +39,7 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='uptime', aliases=['up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def uptime_command(self, ctx: commands.Context) -> None:
+    async def uptime_command(self, ctx: GitBotContext) -> None:
         now: datetime.datetime = datetime.datetime.utcnow()
         delta: datetime.timedelta = now - start_time
         hours, remainder = divmod(int(delta.total_seconds()), 3600)
@@ -47,7 +51,7 @@ class BotInfo(commands.Cog):
             time_format: str = '**{h}** hours, **{m}** minutes, and **{s}** seconds.'
         uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=None,
             description=f'{Mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
         )
@@ -55,18 +59,18 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='ping')
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def ping_command(self, ctx: commands.Context) -> None:
+    async def ping_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description=f"{Mgr.e.timer}  {ctx.fmt('ping', round(self.bot.latency * 1000))}"
         )
         await ctx.send(embed=embed)
 
     @gitbot_command(name='privacy', aliases=['policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def privacy_policy(self, ctx: commands.Context) -> None:
+    async def privacy_policy(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=f'{Mgr.e.github}  {ctx.l.privacy_policy.title}'
         )
         embed.add_field(name=ctx.l.privacy_policy.what.title, inline=False,
@@ -83,9 +87,9 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='support')
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def support_command(self, ctx: commands.Context) -> None:
+    async def support_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description=ctx.l.support.description
         )
         embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.support.title)
@@ -93,9 +97,9 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='invite')
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def invite_command(self, ctx: commands.Context) -> None:
+    async def invite_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description=f"[**{ctx.l.invite.invite_verb} {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id"
                         f"=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]("
                         f"https://discord.gg/3e5fwpA) "
@@ -105,9 +109,9 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='vote')
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def vote_command(self, ctx: commands.Context) -> None:
+    async def vote_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
                         "https://botsfordiscord.com/bot/761269120691470357) "
         )
@@ -116,8 +120,8 @@ class BotInfo(commands.Cog):
 
     @gitbot_command(name='stats')
     @commands.cooldown(15, 30, commands.BucketType.member)
-    async def stats_command(self, ctx: commands.Context) -> None:
-        embed: discord.Embed = discord.Embed(color=0xefefef)
+    async def stats_command(self, ctx: GitBotContext) -> None:
+        embed: discord.Embed = discord.Embed(color=Mgr.c.rounded)
         users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = "**{:.3f}GB** RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f"**{psutil.cpu_percent()}%** CPU,"

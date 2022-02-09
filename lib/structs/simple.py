@@ -1,9 +1,11 @@
-from collections import namedtuple
+from recordclass import recordclass
 
 __all__: tuple = (
     'GitCommandData',
-    'GhProfileData'
+    'GhProfileData',
+    'ParsedRepositoryData'
 )
 
-GitCommandData = namedtuple('GitCommandData', 'data type args')
-GhProfileData = namedtuple('GhProfileData', 'all_time month fortnight week day hour')
+GitCommandData = recordclass('GitCommandData', 'command kwargs')
+GhProfileData = recordclass('GhProfileData', 'all_time month fortnight week day hour')
+ParsedRepositoryData = recordclass('ParsedRepositoryData', 'owner name branch slashname')

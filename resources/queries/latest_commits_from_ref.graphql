@@ -1,0 +1,57 @@
+query($Name: String!, $Owner: String!, $RefName: String!, $First: Int!) {
+  repository(name: $Name, owner: $Owner) {
+    ref(qualifiedName: $RefName) {
+      target {
+        ... on Commit {
+          history(first: $First) {
+            nodes {
+              url
+              oid
+              committedDate
+              pushedDate
+              committedDate
+              abbreviatedOid
+              changedFiles
+              messageBody
+              messageHeadline
+              additions
+              deletions
+              committedViaWeb
+              status {
+                state
+              }
+              checkSuites(first: 50) {
+                nodes {
+                  status
+                }
+              }
+              signature {
+                signer {
+                  login
+                }
+                isValid
+                wasSignedByGitHub
+              }
+              author {
+                name
+                user {
+                  login
+                  url
+                  avatarUrl
+                }
+              }
+              committer {
+                name
+                user {
+                  login
+                  url
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

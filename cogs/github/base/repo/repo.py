@@ -1,14 +1,15 @@
 import discord
-import datetime
 import re
 import io
-from .list_plugin import issue_list, pull_request_list
-from babel.dates import format_date
+from .list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
-from typing import Union, Optional
+from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_group
-from lib.utils.regex import MD_EMOJI_RE
+from lib.utils.decorators import normalize_repository, gitbot_group 
+from lib.utils.regex import MARKDOWN_EMOJI_RE
+from lib.typehints import GitHubRepository
+from lib.structs import GitBotEmbed
+from lib.structs.discord.context import GitBotContext
 
 
 class Repo(commands.Cog):
@@ -17,42 +18,42 @@ class Repo(commands.Cog):
 
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
-    async def repo_command_group(self, ctx: commands.Context, repo: Optional[str] = None) -> None:
-        info_command: commands.Command = self.bot.get_command(f'repo --info')
+    async def repo_command_group(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
         if not repo:
             stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
-                await ctx.invoke(info_command, repo=stored)
+                await ctx.invoke(self.repo_info_command, repo=stored)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.qa)
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa)
         else:
-            await ctx.invoke(info_command, repo=repo)
+            await ctx.invoke(self.repo_info_command, repo=repo)
 
     @repo_command_group.command(name='info', aliases=['i'])
     @commands.cooldown(15, 30, commands.BucketType.user)
     @normalize_repository
-    async def repo_info_command(self, ctx: commands.Context, repo: str) -> None:
+    async def repo_info_command(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
+        if not repo:
+            return await ctx.invoke(self.repo_command_group)
         ctx.fmt.set_prefix('repo info')
-        if hasattr(ctx, 'data'):
+        if ctx.data:
             r: dict = getattr(ctx, 'data')
         else:
-            r: Union[dict, None] = await Git.get_repo(str(repo))
+            r: Optional[dict] = await Git.get_repo(repo)
         if not r:
             if hasattr(ctx, 'invoked_with_stored'):
                 await Mgr.db.users.delitem(ctx, 'repo')
-                await ctx.err(ctx.l.generic.nonexistent.repo.qa_changed)
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.base)
-            return None
+                await ctx.error(ctx.l.generic.nonexistent.repo.base)
+            return
 
-        embed = discord.Embed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else 0xefefef,
+        embed: GitBotEmbed = GitBotEmbed(
+            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else Mgr.c.rounded,
             title=repo,
-            url=r['url']
+            url=r['url'],
+            thumbnail=r['owner']['avatarUrl']
         )
-
-        embed.set_thumbnail(url=r['owner']['avatarUrl'])
 
         watch: int = r['watchers']['totalCount']
         star: int = r['stargazers']['totalCount']
@@ -60,7 +61,7 @@ class Repo(commands.Cog):
 
         if r['description'] is not None and len(r['description']) != 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.repo.info.glossary[0]}:",
-                            value=f"```{re.sub(MD_EMOJI_RE, '', r['description']).strip()}```")
+                            value=f"```{re.sub(MARKDOWN_EMOJI_RE, '', r['description']).strip()}```")
 
         watchers: str = ctx.fmt('watchers plural', watch, f"{r['url']}/watchers") if watch != 1 else ctx.fmt('watchers singular', f"{r['url']}/watchers")
         if watch == 0:
@@ -85,9 +86,7 @@ class Repo(commands.Cog):
         if 'isFork' in r and r['isFork'] is True:
             forked = ctx.fmt('fork_notice', f"[{r['parent']['nameWithOwner']}]({r['parent']['url']})") + '\n'
 
-        created_at = ctx.fmt('created_at',
-                                  format_date(datetime.datetime.strptime(r['createdAt'],
-                                                             '%Y-%m-%dT%H:%M:%SZ').date(), 'full', locale=ctx.l.meta.name)) + '\n'
+        created_at = ctx.fmt('created_at', Mgr.github_to_discord_timestamp(r['createdAt'])) + '\n'
 
         languages = ""
         if lang := r['primaryLanguage']:
@@ -124,32 +123,32 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
-    async def repo_files_command(self, ctx: commands.Context, repo_or_path: str) -> None:
+    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
-            repo = "/".join(repo_or_path.split("/", 2)[:2])
-            file = repo_or_path[len(repo):]
-            src = await Git.get_tree_file(repo, file)
-            is_tree = True
+            repo: GitHubRepository = "/".join(repo_or_path.split("/", 2)[:2])  # noqa
+            file: str = repo_or_path[len(repo):]
+            src: list = await Git.get_tree_file(repo, file)
+            is_tree: bool = True
         else:
             src = await Git.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
-                await ctx.err(ctx.l.generic.nonexistent.path)
+                await ctx.error(ctx.l.generic.nonexistent.path)
             else:
-                await ctx.err(ctx.l.generic.nonexistent.repo.base)
+                await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
-        files: list = [f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f[
-                                                                          'type'] == 'file' else f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})"
-                       for f in src[:15]]
+        files: list = sorted([f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f['type'] == 'file' else
+                              f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})" for f in src[:15]],
+                             key=lambda fs: 'file' in fs)
         if is_tree:
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
             link: str = f"https://github.com/{repo_or_path}"
         embed = discord.Embed(
-            color=0xefefef,
+            color=Mgr.c.rounded,
             title=f"{repo_or_path}" if len(repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
             description='\n'.join(files),
             url=link
@@ -162,20 +161,19 @@ class Repo(commands.Cog):
     @commands.max_concurrency(10, commands.BucketType.default, wait=False)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
-    async def download_command(self, ctx: commands.Context, repo: str) -> None:
+    async def download_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo download')
         msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
-        src_bytes: Optional[Union[bytes, bool]] = await Git.get_repo_zip(repo)
+        src_bytes: Optional[bytes | bool] = await Git.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
             return await msg.edit(content=f"{Mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
         elif src_bytes is False:
             return await msg.edit(
                 content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
-        file: discord.File = discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj)
         try:
-            await ctx.send(file=file)
-            await msg.edit(content=f'{Mgr.e.github}  {ctx.fmt("done", repo)}')
+            await ctx.send(file=discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj))
+            await msg.edit(content=f'{Mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
                 content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
@@ -183,14 +181,33 @@ class Repo(commands.Cog):
     @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
-    async def issue_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    async def issue_list_command(self,
+                                 ctx: GitBotContext,
+                                 repo: Optional[GitHubRepository] = None,
+                                 state: str = 'open') -> None:
         await issue_list(ctx, repo, state)
 
     @repo_command_group.command(name='pulls', aliases=['prs', 'pull', 'pr'])
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
-    async def pull_request_list_command(self, ctx: commands.Context, repo: Optional[str] = None, state: str = 'open') -> None:
+    async def pull_request_list_command(self,
+                                        ctx: GitBotContext,
+                                        repo: Optional[GitHubRepository] = None,
+                                        state: str = 'open') -> None:
         await pull_request_list(ctx, repo, state)
+
+    # signature from cogs.github.numbered.commits.Commits.commits
+    @repo_command_group.command(name='commits')
+    @commands.cooldown(5, 40, commands.BucketType.user)
+    async def commit_list_command(self,
+                                  ctx: GitBotContext,
+                                  repo: Optional[GitHubRepository] = None) -> None:
+        await ctx.invoke(self.bot.get_command('commits'), repo=repo)
+
+    @repo_command_group.command(name='loc')
+    @commands.cooldown(8, 60, commands.BucketType.default)
+    async def loc_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
+        await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 
 
 def setup(bot: commands.Bot) -> None:

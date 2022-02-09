@@ -47,15 +47,41 @@ And that's a `meta` field done! Now simply add it to the `languages` field in `i
 ```
 
 ## Locale file
-As mentioned in the beginning, locales are JSON files with names being their `name` meta attribute (`pl.json` for Polish).
-After creating it, copy the contents of the English locale (`en.json`) as it's the only one that is *always* up to date. Then, replace the `meta` field with the one you created earlier. After having done that, you can start on translating in compliance with the [guidelines](#localization-guidelines)!
+As mentioned in the beginning, locales are JSON files with names being their `name` meta attribute (`pl.locale.json` for Polish) and a `locale` suffix.
+After creating it, copy the contents of the English locale (`en.locale.json`) as it's the only one that is *always* up to date. Then, replace the `meta` field with the one you created earlier. After having done that, you can start translating in compliance with the [guidelines](#general-localization-guidelines)!
 
-# Localization guidelines
+# General localization guidelines
 - You don't translate keys, only the values
 - Keep capitalization/punctuation consistent
 - The meaning must always stay the same
 - Newlines are there to separate sections, or keep the lines from being too long - make sure everything looks and feels right
 - Every `{X}` placeholder must be kept, if you can't figure out what it represents, look in the code or ask in the Discussions tab/Discord
 - Keep markdown/hyperlinks consistent wherever possible
+
+# Specifics
+Some fields (sometimes called sections) require special care and attention (don't we all?). Ones aren't supposed to be translated, others need to be filled out in a specific manner. You can read all about that below!
+
+## Help
+The `help` section is very important to be kept up-to-date, since it allows us to keep users happy and reduce their confusion regarding some more complex commands.  
+**Every entry in this section's `commands` subfield follows this format**:
+```json
+"command_name": {
+  "brief": "A brief command description",
+  "usage": "command signature [with_args]",
+  "example": "command --usage example",
+  "description": "A detailed description",
+  "qa_resource": "If the command uses a quick-access resource (user, org, repo or null)",
+  "required_permissions": ["THE_PERMISSIONS", "REQUIRED", "TO_RUN_THE_COMMAND"]
+}
+```
+Now, there are some important things to mention:
+- **The following subfields should remain unchanged** (They don't vary from language to language, since they depend on other fields that *are* supposed to be changed):
+  - `usage`
+  - `example`
+  - `qa_resource`
+  - `required_permissions`  
+
+# Something's not very clear?
+If you have any questions regarding the localization process, need help, or just want to talk - join our [**Discord!**](https://discord.statch.org) *(I promise we don't bite!)*
 
 *Thank you for being such an important part of the GitBot family* ♥️

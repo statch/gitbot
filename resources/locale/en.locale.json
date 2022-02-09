@@ -625,7 +625,7 @@
       }
     },
     "qa_set": {
-      "user": "Quick access user set to {0",
+      "user": "Quick access user set to {0}",
       "org": "Quick access organization set to {0}",
       "repo": "Quick access repo set to {0}"
     },

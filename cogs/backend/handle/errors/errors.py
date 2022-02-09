@@ -11,11 +11,11 @@ class Errors(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: GitBotContext, error) -> None:
         ctx.fmt.set_prefix('errors')
-        if (not Mgr.env.production) and not getattr(ctx, '__autoinvoked__', False):
+        if not Mgr.env.production and not getattr(ctx, '__autoinvoked__', False):
             raise error
         if silenced(ctx, error):
             return
-        match error:
+        match type(error):
             case commands.MissingRequiredArgument:
                 await ctx.error(ctx.l.errors.missing_required_argument)
             case commands.CommandOnCooldown:

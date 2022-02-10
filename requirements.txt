@@ -12,7 +12,7 @@ dlabs.py
 statcord.py==3.1.0
 beautifulsoup4==4.10.0
 colorama==0.4.4
-requests==2.26.0
+requests==2.27.1
 py-carbon
 sentry-sdk==1.4.3
 aiofiles==0.8.0

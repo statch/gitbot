@@ -15,7 +15,7 @@ colorama==0.4.4
 requests==2.26.0
 py-carbon
 sentry-sdk==1.4.3
-aiofiles==0.7.0
+aiofiles==0.8.0
 plotly==5.3.1
 pandas
 kaleido==0.2.1

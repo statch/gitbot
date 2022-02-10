@@ -24,7 +24,10 @@ class FixedSizeOrderedDict(OrderedDict):
 
     def _pop(self) -> Any:
         if self.full:
-            return self.popitem(last=False)
+            try:
+                return self.popitem(last=False)
+            except KeyError:
+                pass
 
     def __setitem__(self, key: Any, value: Any) -> Any:
         super().__setitem__(key, value)

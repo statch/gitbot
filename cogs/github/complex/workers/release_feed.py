@@ -18,7 +18,7 @@ class ReleaseFeedWorker(commands.Cog):
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:
         Mgr.debug('Starting worker cycle')
-        query: AsyncIOMotorCursor = Mgr.db.guilds.find({})
+        query: AsyncIOMotorCursor = Mgr.db.guilds.find({'feed': {'$exists': True}})
         async for guild in query:
             Mgr.debug(f'Handling GID {guild["_id"]}')
             guild: GitBotGuild

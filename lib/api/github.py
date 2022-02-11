@@ -201,7 +201,10 @@ class GitHubAPI:
                 return 'ref'
             if 'defaultBranchRef' not in data.get('repository', {}) and 'ref' not in data['repository']:
                 return 'ref'
-            return data['repository'][key]['target']['history']['nodes']
+            try:
+                return data['repository'][key]['target']['history']['nodes']
+            except (TypeError, KeyError):
+                return []
 
     @normalize_repository
     async def get_repo_zip(self,

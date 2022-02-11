@@ -36,6 +36,8 @@ class Commits(commands.Cog):
             if commits == 'ref':
                 return await ctx.error(ctx.fmt('generic nonexistent ref', f'`{parsed.branch}`', f'`{parsed.slashname}`'))
             return await ctx.error(ctx.l.generic.nonexistent.repo.base)
+        if not commits:
+            return await ctx.error(ctx.l.commits.empty)
         embed: GitBotEmbed = GitBotEmbed(
             title=Mgr.e.github + '  ' + ctx.fmt('commits embed title',
                                                 f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`'),
@@ -110,8 +112,9 @@ class Commits(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 title=f'{Mgr.e.branch}  {truncated_headline} `{commit["abbreviatedOid"]}`',
                 url=commit['url'],
-                thumbnail=commit['author']['user']['avatarUrl']
             )
+            if commit['author']['user'] and commit['author']['user'].get(['avatarUrl']):
+                embed.set_thumbnail(url=commit['author']['user']['avatarUrl'])
             full_headline: str = (commit['messageHeadline'] + '\n\n'
                                   if len(truncated_headline) < len(commit['messageHeadline']) else '')
             message: str = (f"{Mgr.truncate(commit['messageBody'], 247, full_word=True)}"

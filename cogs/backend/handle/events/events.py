@@ -63,7 +63,7 @@ class Events(commands.Cog):
                     thumbnail=self.bot.user.avatar_url,
                     author_name=self.bot.user.name,
                     author_icon_url=self.bot.user.avatar_url,
-                    author_url='https://statch.tech/gitbot'
+                    author_url='https://statch.org/gitbot'
                 )
                 await embed.send(message.channel)
             else:

@@ -942,7 +942,7 @@ class Manager:
         locale_data: Optional[tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
         if locale_data:
             missing: list = list(
-                set(item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None))
+                {item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None})
             missing.sort(key=lambda path: len(path) * sum(map(len, path)))
             return missing, locale_data[0], locale_data[1]
 

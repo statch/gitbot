@@ -92,6 +92,9 @@ disable=raw-checker-failed,
         unnecessary-lambda,
         inconsistent-return-statements,
         wrong-import-order,
+        missing-function-docstring,
+        missing-module-docstring,
+        missing-class-docstring,
 
 
 # Enable the message, report, category or checker with the given id(s). You can

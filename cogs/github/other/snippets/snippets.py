@@ -6,7 +6,7 @@ from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr
 from typing import Optional
-from lib.utils.decorators import gitbot_group 
+from lib.utils.decorators import gitbot_group
 from lib.structs.discord.context import GitBotContext, MessageFormattingStyle
 
 

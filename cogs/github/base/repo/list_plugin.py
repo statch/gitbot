@@ -5,7 +5,7 @@ from lib.globs import Git, Mgr
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
- 
+
 
 __all__: tuple = (
     'issue_list',

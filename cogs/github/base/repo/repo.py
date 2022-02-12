@@ -5,7 +5,7 @@ from .list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_group 
+from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed

@@ -3,7 +3,7 @@ import asyncio
 from discord.ext import commands
 from lib.globs import Git, Mgr
 from typing import Optional
-from lib.utils.decorators import gitbot_command 
+from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
 

@@ -8,7 +8,7 @@ from discord.ext import commands
 from typing import Optional
 from lib.structs import GitBotEmbed
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_command 
+from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
 

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from lib.globs import Mgr
-from lib.utils.decorators import gitbot_command 
+from lib.utils.decorators import gitbot_command
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
 

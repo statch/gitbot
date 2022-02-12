@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import gitbot_group 
+from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
 

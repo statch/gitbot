@@ -1,7 +1,7 @@
 import discord
 from typing import Optional
 from lib.globs import Git, Mgr
-from lib.utils.decorators import normalize_repository, gitbot_command 
+from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext

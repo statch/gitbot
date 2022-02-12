@@ -328,20 +328,8 @@ class Manager:
         n: int = max(1, chunk_size)
         return (iterable[i:i + n] for i in range(0, len(iterable), n))
 
-    def _setup_db(self) -> None:
-        """
-        Setup the database connection with ENV vars and a more predictable certificate location.
-        """
-
-        self._ca_cert: str = certifi.where()
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
-                                                                appname=self.bot_dev_name,
-                                                                tls=self.env.db_use_tls,
-                                                                tlsCAFile=self._ca_cert,
-                                                                tlsAllowInvalidCertificates=False)
-        self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
-
-    def _eval_bool_literal_safe(self, literal: str) -> str | bool:
+    @staticmethod
+    def _eval_bool_literal_safe(literal: str) -> str | bool:
         """
         Safely convert a string literal to a boolean, or return the string
 
@@ -354,6 +342,47 @@ class Manager:
         elif literal_ == 'false':
             return False
         return literal
+
+    @staticmethod
+    def parse_repo(repo: Optional[str]) -> Optional[Type[ParsedRepositoryData] | str]:
+        """
+        Parse an owner/name(/branch)? repo string into :class:`ParsedRepositoryData`
+
+        :param repo: The repo string
+        :return: The parsed repo or the repo argument unchanged
+        """
+
+        if repo and (match := r.REPOSITORY_NAME_RE.match(repo)):
+            return ParsedRepositoryData(**match.groupdict())
+        return repo
+
+    @staticmethod
+    def get_last_call_from_callstack(frames_back: int = 2) -> str:
+        """
+        Get the name of a callable in the callstack.
+        If the encountered callable is a method, return the name in the "ClassName.method_name" format.
+
+        :param frames_back: The number of frames to go back and get the callable name from
+        :return: The callable name
+        """
+
+        frame = inspect.stack()[frames_back][0]
+        if 'self' in frame.f_locals:
+            return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
+        return frame.f_code.co_name
+
+    def _setup_db(self) -> None:
+        """
+        Setup the database connection with ENV vars and a more predictable certificate location.
+        """
+
+        self._ca_cert: str = certifi.where()
+        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
+                                                                appname=self.bot_dev_name,
+                                                                tls=self.env.db_use_tls,
+                                                                tlsCAFile=self._ca_cert,
+                                                                tlsAllowInvalidCertificates=False)
+        self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
 
     def _set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
         """
@@ -392,18 +421,6 @@ class Manager:
                 if not self._set_env_directive(k, v) and k not in self.env:
                     self.env[k] = v
         self.load_dotenv()
-
-    def parse_repo(self, repo: Optional[str]) -> Optional[Type[ParsedRepositoryData] | str]:
-        """
-        Parse a owner/name(/branch)? repo string into :class:`ParsedRepositoryData`
-
-        :param repo: The repo string
-        :return: The parsed repo or the repo argument unchanged
-        """
-
-        if repo and (match := r.REPOSITORY_NAME_RE.match(repo)):
-            return ParsedRepositoryData(**match.groupdict())
-        return repo
 
     def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
         """
@@ -467,20 +484,6 @@ class Manager:
         """
 
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
-
-    def get_last_call_from_callstack(self, frames_back: int = 2) -> str:
-        """
-        Get the name of a callable in the callstack.
-        If the encountered callable is a method, return the name in the "ClassName.method_name" format.
-
-        :param frames_back: The number of frames to go back and get the callable name from
-        :return: The callable name
-        """
-
-        frame = inspect.stack()[frames_back][0]
-        if 'self' in frame.f_locals:
-            return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
-        return frame.f_code.co_name
 
     def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
         """

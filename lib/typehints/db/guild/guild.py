@@ -3,9 +3,7 @@ from lib.typehints.generic import GuildID
 from lib.typehints.db.guild.release_feed import ReleaseFeed
 from .autoconv import AutomaticConversion
 
-__all__: tuple = (
-    'GitBotGuild'
-)
+__all__: tuple = ('GitBotGuild',)
 
 
 class GitBotGuild(TypedDict, total=False):

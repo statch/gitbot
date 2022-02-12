@@ -294,7 +294,7 @@ class Manager:
         :return: The value associated with the pattern, or the default value
         """
 
-        compare: Callable = ((lambda k_: bool(pattern.match(k))) if isinstance(pattern, re.Pattern)
+        compare: Callable = ((lambda k_: bool(pattern.match(k_))) if isinstance(pattern, re.Pattern)
                              else lambda k_: pattern in k_)
         for k, v in dict_.items():
             if compare(k):

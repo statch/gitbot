@@ -27,7 +27,7 @@ def prepare() -> None:
         __import__('uvloop').install()
     else:
         logger.info('Skipping uvloop install...')
-    logger.info(f'Running on {platform.system()} {platform.release()}')
+    logger.info('Running on %s %s' % (platform.system(), platform.release()))
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
     prepare_cloc()

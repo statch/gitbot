@@ -45,7 +45,7 @@ class Issue(commands.Cog):
                     await ctx.error(ctx.l.generic.nonexistent.issue_number)
                 return
 
-        em: str = f"<:issue_open:788517560164810772>"
+        em: str = '<:issue_open:788517560164810772>'
         if issue['state'].lower() == 'closed':
             em: str = '<:issue_closed:788517938168594452>'
         embed: discord.Embed = discord.Embed(

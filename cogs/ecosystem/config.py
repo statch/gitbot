@@ -163,7 +163,7 @@ class Config(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.discord.green,
                 title=ctx.l.config.feed.channel.success_embed.title,
-                description=ctx.fmt(f'success_embed description',
+                description=ctx.fmt('success_embed description',
                                     channel.mention,
                                     f'`git config feed repo {{{ctx.l.help.argument_explainers.repo.name}}}`'),
                 footer=ctx.fmt('success_embed footer', 'git config delete feed channel')
@@ -453,7 +453,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_channel_command(self, ctx: GitBotContext, channel=None) -> None:
         ctx.fmt.set_prefix('config delete feed channel')
-        guild, feed = await self._feed_prerequisites(ctx)
+        _, feed = await self._feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
@@ -531,7 +531,7 @@ class Config(commands.Cog):
                 await ctx.error(ctx.l.config.delete.feed.repo.multiple.no_feeds_mentioned)
                 return GitBotCommandState.CONTINUE, []
 
-            response, to_delete = await embed.input_with_timeout(
+            _, to_delete = await embed.input_with_timeout(
                 ctx=ctx,
                 event='message',
                 timeout=30,

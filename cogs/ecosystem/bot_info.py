@@ -100,9 +100,9 @@ class BotInfo(commands.Cog):
     async def invite_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
             color=Mgr.c.rounded,
-            description=f"[**{ctx.l.invite.invite_verb} {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id"
-                        f"=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]("
-                        f"https://discord.gg/3e5fwpA) "
+            description=f'[**{ctx.l.invite.invite_verb} {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id'
+                        f'=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]('
+                        'https://discord.gg/3e5fwpA)'
         )
         embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.invite.tagline)
         await ctx.send(embed=embed)
@@ -112,8 +112,8 @@ class BotInfo(commands.Cog):
     async def vote_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
             color=Mgr.c.rounded,
-            description="[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]("
-                        "https://botsfordiscord.com/bot/761269120691470357) "
+            description='[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]('
+                        'https://botsfordiscord.com/bot/761269120691470357)'
         )
         embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
@@ -123,8 +123,8 @@ class BotInfo(commands.Cog):
     async def stats_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(color=Mgr.c.rounded)
         users: int = sum([x.member_count for x in self.bot.guilds])
-        memory: str = "**{:.3f}GB** RAM".format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
-        cpu: str = f"**{psutil.cpu_percent()}%** CPU,"
+        memory: str = '**{:.3f}GB** RAM'.format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
+        cpu: str = f'**{psutil.cpu_percent()}%** CPU,'
         embed.add_field(name=f"{Mgr.e.stats}  {ctx.l.stats.title}", value=ctx.l.stats.body,
                         inline=False)
         embed.add_field(name=ctx.l.stats.system, value=f"{cpu}\n{memory}")

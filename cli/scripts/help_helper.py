@@ -13,15 +13,15 @@ __all__: tuple = ('run_help_helper', 'PROMPTS')
 DEBUG = False  # type: bool
 OLD_LOCALE = None  # type: Optional[OrderedDict]
 LOCALE = None  # type: Optional[OrderedDict]
-PROMPTS = OrderedDict([('brief', lambda: click.prompt(f'Brief', type=str)),
-                       ('description', lambda: click.prompt(f'Description', type=str, default='skip')),
-                       ('usage', lambda: click.prompt(f'Usage', type=str, default='skip')),
-                       ('example', lambda: click.prompt(f'Example', type=str, default='skip')),
-                       ('qa_resource', lambda: click.prompt(f'Quick-Access Resource',
+PROMPTS = OrderedDict([('brief', lambda: click.prompt('Brief', type=str)),
+                       ('description', lambda: click.prompt('Description', type=str, default='skip')),
+                       ('usage', lambda: click.prompt('Usage', type=str, default='skip')),
+                       ('example', lambda: click.prompt('Example', type=str, default='skip')),
+                       ('qa_resource', lambda: click.prompt('Quick-Access Resource',
                                                             type=click.Choice(['user', 'org', 'repo', 'skip'],
                                                                               case_sensitive=False), default='skip')),
                        ('required_permissions', lambda: [rp.strip() for rp in
-                                                         click.prompt(f'Required Permissions',
+                                                         click.prompt('Required Permissions',
                                                                       type=str, default='skip').split(',')])])
 
 
@@ -88,7 +88,7 @@ def run_help_helper(debug: bool = False):
                                   is_group=(raw_command_list_json.count('"' + command_name + ' ') > 1
                                             and ' ' not in command_name))
             while True:
-                if click.confirm(click.style(f'All good?', blink=True, fg='yellow') + '\n' +
+                if click.confirm(click.style('All good?', blink=True, fg='yellow') + '\n' +
                                  '\n'.join([click.style(f'{k}: {v}', fg='cyan')
                                             for k, v in command_data.items()]) + ' |',
                                  default=True, show_default=True):

@@ -53,7 +53,7 @@ if Mgr.env.production:
     extensions.extend([f'cogs.botlists.minor.{file[:-3]}' for file in os.listdir('cogs/botlists/minor')])
 
 for extension in extensions:
-    logger.info(f'Loading {extension}...')
+    logger.info('Loading %s...' % extension)
     bot.load_extension(extension)
 
 
@@ -111,5 +111,5 @@ async def before_invoke(ctx: GitBotContext) -> None:
 
 @bot.event
 async def on_ready() -> None:
-    logger.info(f'The bot is ready.')
-    logger.info(f'discord.py version: {discord.__version__}\n')
+    logger.info('The bot is ready.')
+    logger.info('discord.py version: %s\n' % discord.__version__)

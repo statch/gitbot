@@ -41,9 +41,9 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception) -> Optional
         elif isinstance(error, commands.CommandNotFound):
             embed: GitBotEmbed = GitBotEmbed(
                 color=0x0384fc,
-                title=f'Nonexistent command!',
+                title='Nonexistent command!',
                 description=f'```{(error := str(error))}```',
-                footer=f'Closest existing command: ' + closest_existing_command_from_error(ctx.bot, error)
+                footer='Closest existing command: ' + closest_existing_command_from_error(ctx.bot, error)
             )
         else:
             return

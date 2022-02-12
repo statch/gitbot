@@ -68,7 +68,7 @@ class GitHubAPI:
     async def get_ratelimit(self) -> tuple[tuple[dict, ...], int]:
         results: list = []
         for token in self.__tokens:
-            data = await (await self.ses.get(f'https://api.github.com/rate_limit',
+            data = await (await self.ses.get('https://api.github.com/rate_limit',
                                              headers={'Authorization': f'token {token}'})).json()
             results.append(data)
         return tuple(results), len(self.__tokens)

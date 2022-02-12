@@ -33,7 +33,7 @@ class Help(commands.Cog):
             title=f'{Mgr.e.github}   {ctx.l.glossary.command}: `{command.fullname}`',
             description=f'```{content["brief"]}```',
             thumbnail=self.bot.user.avatar_url,
-            url=f'https://docs.statch.tech'
+            url='https://docs.statch.tech'
         )
         if (example := content.get('example')) is not None:
             example: str = f'{self.bot.command_prefix}{example} ({ctx.l.glossary.example})'
@@ -85,7 +85,7 @@ class Help(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 title=f'{Mgr.e.github}   Help',
                 description='',
-                url=f'https://docs.statch.org',
+                url='https://docs.statch.org',
             )
             for command in chunk:
                 try:
@@ -112,7 +112,7 @@ class Help(commands.Cog):
                 case decorators.GitBotCommandGroup:
                     await self.send_command_group_help(ctx, command_or_group)
                 case _:
-                    pass  # TODO do something if a plain commands.command/group was used for some reason?
+                    pass
         else:
             await self.send_help(ctx)
 

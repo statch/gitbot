@@ -6,7 +6,8 @@ class CaseInsensitiveDict(dict):
     A subclass of :class:`dict` borrowed from discord.py, allowing case-insensitive operations.
     """
 
-    def _casefold(self, key: Any) -> Any:
+    @staticmethod
+    def _casefold(key: Any) -> Any:
         if hasattr(key, 'casefold'):
             return key.casefold()
         return key

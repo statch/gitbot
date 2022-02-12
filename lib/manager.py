@@ -415,7 +415,7 @@ class Manager:
                                          if not self._set_env_directive(k, v)})
         self.env_directives: DictProxy = DictProxy()
 
-        with open('resources/env_defaults.json', 'r') as fp:
+        with open('resources/env_defaults.json', 'r', encoding='utf8') as fp:
             env_defaults: dict = json.loads(fp.read())
             for k, v in env_defaults.items():
                 if not self._set_env_directive(k, v) and k not in self.env:
@@ -458,7 +458,7 @@ class Manager:
         if dotenv_path:
             self.log('Found .env file, loading environment variables listed inside of it.',
                      f'core-{Fore.LIGHTYELLOW_EX}env')
-            with open(dotenv_path, 'r') as fp:
+            with open(dotenv_path, 'r', encoding='utf8') as fp:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
 
@@ -677,7 +677,7 @@ class Manager:
         """
 
         to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
-        with open(to_load, 'r') as fp:
+        with open(to_load, 'r', encoding='utf8') as fp:
             data: dict | list = json.load(fp)
         proxy: DictProxy = DictProxy(data)
 

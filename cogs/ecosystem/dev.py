@@ -89,7 +89,7 @@ class Dev(commands.Cog):
             case _:
                 return
         if ctx.author.id == 548803750634979340 and not direct:
-            with open(f'{Mgr.root_directory}/commands.{format_.value}', 'w+') as exportfile:
+            with open(f'{Mgr.root_directory}/commands.{format_.value}', 'w+', encoding='utf8') as exportfile:
                 exportfile.write(command_strings)
             await ctx.success(ctx.fmt('success_direct', len(commands_)))
             self.export_commands_command.reset_cooldown(ctx)

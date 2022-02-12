@@ -20,7 +20,7 @@ class DirProxy:
         self.__items: list = []
         for file in (os.listdir(dir_ := os.path.join(os.getcwd(), path))):
             if file not in exclude and (ext is None or file.endswith(ext)):
-                with open(os.path.join(dir_, file), 'r') as fp:
+                with open(os.path.join(dir_, file), 'r', encoding='utf8') as fp:
                     content: DictProxy | str = DictProxy(json.load(fp)) if file.endswith('.json') else fp.read()
                     self.__items.append(content)
                     setattr(self, file[:file.index('.')], content)

@@ -69,7 +69,7 @@ def run_help_helper(debug: bool = False):
         click.echo(click.style('Debug mode enabled.', fg='yellow', italic=True))
 
     try:
-        with open(os.path.join(APP_ROOT_DIR, 'commands.json'), 'r') as command_file:
+        with open(os.path.join(APP_ROOT_DIR, 'commands.json'), 'r', encoding='utf8') as command_file:
             raw_command_list_json: str = command_file.read()
             commands: list[str] = json.loads(raw_command_list_json)
     except FileNotFoundError:

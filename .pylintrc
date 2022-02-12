@@ -89,12 +89,16 @@ disable=raw-checker-failed,
         no-else-return,
         line-too-long,
         invalid-name,
+        ungrouped-imports,
         unnecessary-lambda,
         inconsistent-return-statements,
         wrong-import-order,
         missing-function-docstring,
         missing-module-docstring,
         missing-class-docstring,
+        too-many-locals,
+        too-few-public-methods,
+        
 
 
 # Enable the message, report, category or checker with the given id(s). You can

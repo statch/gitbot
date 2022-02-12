@@ -1,0 +1,5 @@
+shell_injection:
+  wrappers.
+  subprocess:
+    - subprocess.Popen
+    - subprocess.call

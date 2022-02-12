@@ -8,7 +8,7 @@ __all__: tuple = ('MaxAgeDict', 'CaseInsensitiveMaxAgeDict')
 class MaxAgeDict(dict):
     """
     A special subclass of :class:`dict` that allows setting a max age for keys.
-    When accessing a saved key, a delete hook is called first that checks if key age < max_age,
+    When accessing a saved key, a delete-hook is called first that checks if key age < max_age,
     if it's not, behaves like the key doesn't exist and deletes it.
 
     :param max_age: The max age for keys expressed in seconds
@@ -45,8 +45,7 @@ class MaxAgeDict(dict):
     def __getitem__(self, key: Any) -> Any:
         if self.valid(key, delete=True):
             return super().__getitem__(key)
-        else:
-            raise KeyError
+        raise KeyError
 
     def __delitem__(self, key: Any) -> None:
         del self._age_map[key]

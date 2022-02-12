@@ -14,8 +14,6 @@ class CacheValidationError(Exception):
     Informative error message when an action's types don't match the schema ones.
     """
 
-    pass
-
 
 class CacheSchema:
     """

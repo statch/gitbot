@@ -64,19 +64,19 @@ class CaseInsensitiveMaxAgeDict(CaseInsensitiveDict, MaxAgeDict):
         CaseInsensitiveDict.__init__(self)
 
     def valid(self, key: Any, delete: bool = False) -> bool:
-        return MaxAgeDict.valid(self, CaseInsensitiveDict._casefold(self, key), delete=delete)
+        return MaxAgeDict.valid(self, CaseInsensitiveDict._casefold(key), delete=delete)
 
     def age(self, key: Any, default: Any = None) -> Any:
-        MaxAgeDict.age(self, CaseInsensitiveDict._casefold(self, key), default=default)
+        MaxAgeDict.age(self, CaseInsensitiveDict._casefold(key), default=default)
 
     def get(self, key: Any, default: Any = None) -> Any:
-        return MaxAgeDict.get(self, CaseInsensitiveDict._casefold(self, key), default=default)
+        return MaxAgeDict.get(self, CaseInsensitiveDict._casefold(key), default=default)
 
     def __getitem__(self, key: Any) -> Any:
-        return MaxAgeDict.__getitem__(self, CaseInsensitiveDict._casefold(self, key))
+        return MaxAgeDict.__getitem__(self, CaseInsensitiveDict._casefold(key))
 
     def __setitem__(self, key: Any, value: Any) -> None:
-        MaxAgeDict.__setitem__(self, CaseInsensitiveDict._casefold(self, key), value)
+        MaxAgeDict.__setitem__(self, CaseInsensitiveDict._casefold(key), value)
 
     def __delitem__(self, key: Any) -> Any:
-        MaxAgeDict.__delitem__(self, CaseInsensitiveDict._casefold(self, key))
+        MaxAgeDict.__delitem__(self, CaseInsensitiveDict._casefold(key))

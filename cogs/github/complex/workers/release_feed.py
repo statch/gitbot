@@ -43,6 +43,7 @@ class ReleaseFeedWorker(commands.Cog):
             if changed:
                 Mgr.debug(f'Changes detected in GID {guild["_id"]}')
                 await self.update_tag_names_with_data(guild, update)
+            Mgr.debug(f'Finished worker cycle for GID {guild["_id"]} - nothing changed')
 
     async def handle_feed_repo(self,
                                guild: GitBotGuild,

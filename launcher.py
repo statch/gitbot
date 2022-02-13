@@ -9,7 +9,7 @@ from bot import bot, logger
 def prepare_cloc() -> None:
     if not os.path.exists('cloc.pl'):
         res: requests.Response = requests.get('https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
-        with open('cloc.pl', 'wb', encoding='utf8') as fp:
+        with open('cloc.pl', 'wb') as fp:
             fp.write(res.content)
 
 

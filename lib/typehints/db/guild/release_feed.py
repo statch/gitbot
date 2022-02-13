@@ -1,12 +1,16 @@
-from typing import TypedDict, NamedTuple
+from typing import TypedDict, NamedTuple, Union, Literal, Optional
 from lib.typehints.generic import TagName
 
 __all__: tuple = (
     'ReleaseFeedRepo',
     'ReleaseFeedItem',
     'ReleaseFeed',
-    'TagNameUpdateData'
+    'TagNameUpdateData',
+    'ReleaseFeedItemMention'
 )
+
+
+ReleaseFeedItemMention = Union[int, Literal['everyone'], Literal['here']]
 
 
 class ReleaseFeedRepo(TypedDict):
@@ -23,7 +27,7 @@ class ReleaseFeedRepo(TypedDict):
     tag: str
 
 
-class ReleaseFeedItem(TypedDict):
+class ReleaseFeedItem(TypedDict, total=False):
     """
     Represents a release feed item from the database
 
@@ -36,6 +40,7 @@ class ReleaseFeedItem(TypedDict):
 
     cid: int
     hook: str
+    mention: Optional[ReleaseFeedItemMention]
     repos: list[ReleaseFeedRepo]
 
 

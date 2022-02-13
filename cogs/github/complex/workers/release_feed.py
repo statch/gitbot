@@ -43,7 +43,8 @@ class ReleaseFeedWorker(commands.Cog):
             if changed:
                 Mgr.debug(f'Changes detected in GID {guild["_id"]}')
                 await self.update_tag_names_with_data(guild, update)
-            Mgr.debug(f'Finished worker cycle for GID {guild["_id"]} - nothing changed')
+            else:
+                Mgr.debug(f'Finished worker cycle for GID {guild["_id"]} - nothing changed')
 
     async def handle_feed_repo(self,
                                guild: GitBotGuild,
@@ -72,11 +73,10 @@ class ReleaseFeedWorker(commands.Cog):
         asset_c: int = new_release["release"]["releaseAssets"]["totalCount"]
         assets: str = f'Has {asset_c} assets attached\n'.replace('0', 'no') if asset_c != 1 else 'Has one asset attached'
         info: str = f'{author}{assets}'
-
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
-
-        await self.send_to_rfi(guild, rfi, embed)
+        await self.send_to_rfi(guild, rfi, embed,
+                               Mgr.release_feed_mention(rfi['mention']) if rfi['mention'] else None)
 
     async def update_tag_names_with_data(self,
                                          guild: GitBotGuild,
@@ -102,11 +102,15 @@ class ReleaseFeedWorker(commands.Cog):
         logger.info('Release worker sleeping until the bot is ready...')
         await self.bot.wait_until_ready()
 
-    async def send_to_rfi(self, guild: GitBotGuild, rfi: ReleaseFeedItem, embed: discord.Embed) -> bool:
+    async def send_to_rfi(self,
+                          guild: GitBotGuild,
+                          rfi: ReleaseFeedItem,
+                          embed: Optional[discord.Embed] = None,
+                          text: Optional[str] = None) -> bool:
         try:
             webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + rfi['hook'],
                                                                 adapter=discord.AsyncWebhookAdapter(Git.ses))
-            await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+            await webhook.send(text, embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
             await Mgr.db.guilds.find_one_and_delete({'_id': guild['_id']})
             return False

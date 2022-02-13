@@ -40,11 +40,11 @@ from lib.structs import (DirProxy, DictProxy,
                          GitCommandData, UserCollection,
                          TypedCache, SelfHashingCache,
                          CacheSchema, ParsedRepositoryData)
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName, ReleaseFeedItemMention
 
 
 class Manager:
@@ -370,6 +370,19 @@ class Manager:
         if 'self' in frame.f_locals:
             return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
         return frame.f_code.co_name
+
+    @staticmethod
+    def release_feed_mention(mention: ReleaseFeedItemMention) -> str:
+        """
+        Convert a release feed mention field to an actual mention
+
+        :param mention: The release feed mention value
+        :return: The actual mention
+        """
+
+        if isinstance(mention, str):
+            return f'@{mention}'
+        return f'<@&{mention}>'
 
     def _setup_db(self) -> None:
         """

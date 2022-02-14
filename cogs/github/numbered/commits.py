@@ -113,7 +113,7 @@ class Commits(commands.Cog):
                 title=f'{Mgr.e.branch}  {truncated_headline} `{commit["abbreviatedOid"]}`',
                 url=commit['url'],
             )
-            if commit['author']['user'] and commit['author']['user'].get(['avatarUrl']):
+            if commit['author']['user'] and commit['author']['user'].get('avatarUrl'):
                 embed.set_thumbnail(url=commit['author']['user']['avatarUrl'])
             full_headline: str = (commit['messageHeadline'] + '\n\n'
                                   if len(truncated_headline) < len(commit['messageHeadline']) else '')

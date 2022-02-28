@@ -115,7 +115,7 @@ class Config(commands.Cog):
         try:
             return await channel.create_webhook(name=self.bot.user.name, reason=f'Release Feed channel setup by {ctx.author}')
         except discord.errors.Forbidden:
-            await ctx.error(ctx.l.config.feed.channel.no_perms)
+            await ctx.error(ctx.l.config.feed.no_perms)
 
     @config_release_feed_group.command('channel')
     @commands.has_guild_permissions(manage_channels=True)

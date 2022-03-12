@@ -45,7 +45,10 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         await Mgr.db.guilds.find_one_and_delete({'_id': guild.id})
-        del Mgr.autoconv_cache[guild.id]
+        try:
+            del Mgr.autoconv_cache[guild.id]
+        except KeyError:
+            pass
         embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild, False)
         Mgr.log(f'Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds', category='stats')
         await embed_l.send(self.bot.get_channel(775042132054376448))

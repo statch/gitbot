@@ -14,19 +14,18 @@ from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
-github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=450)
+github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, list)), maxsize=64, max_age=450)
 
 
 def github_cached(func: Callable) -> Callable:
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
-        # actually 2nd cause we're working with methods
-        first_arg_or_arbitrary_kwarg = args[1] if args else next(iter(kwargs))
-        if cached := github_object_cache.get(first_arg_or_arbitrary_kwarg):
+        cache_key: str = f'{id(func)}:{args[1] if args else next(iter(kwargs))}'
+        if cached := github_object_cache.get(cache_key):
             return cached
         result: Any = await func(*args, **kwargs)
         if isinstance(result, (dict, list)):
-            github_object_cache[first_arg_or_arbitrary_kwarg] = result
+            github_object_cache[cache_key] = result
         return result
 
     return wrapper
@@ -130,7 +129,7 @@ class GitHubAPI:
     @validate_github_name('org', default=[])
     async def get_org_members(self, org: GitHubOrganization) -> list[dict]:
         try:
-            return list(await self.gh.getitem(f'/orgs/{org}/members'))
+            return list(await self.gh.getitem(f'/orgs/{org}/public_members'))
         except BadRequest:
             return []
 

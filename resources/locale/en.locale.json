@@ -20,7 +20,8 @@
       "title": "I don't have the permissions required!",
       "description": "This command requires a little magic to work (edit messages and remove reactions).\n**I need to be able to manage messages and add reactions**",
       "footer": "Adjust my permissions and try again."
-    }
+    },
+    "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."

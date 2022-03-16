@@ -10,5 +10,6 @@
     "codeblock": false,
     "gh_url":  false,
     "gh_lines": 0
-  }
+  },
+  "hidden_commands": ["eval", "dispatch", "load", "unload", "reload"]
 }

@@ -110,7 +110,10 @@ async def build_guild_embed(bot: commands.Bot, guild: discord.Guild, state: bool
         thumbnail=guild.icon_url
     )
     embed.add_field(name='Name', value=str(guild))
-    embed.add_field(name='Members', value=str(guild.member_count))
+    try:
+        embed.add_field(name='Members', value=str(guild.member_count))
+    except AttributeError:
+        embed.add_field(name='Members', value='`Unknown`')
     embed.add_field(name='ID', value=f"`{str(guild.id)}`")
     embed.add_field(name='Owner', value=str(await bot.fetch_user(guild.owner_id)))
     embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))

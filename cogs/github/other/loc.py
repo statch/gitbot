@@ -39,7 +39,7 @@ class LinesOfCode(commands.Cog):
         if not processed:
             await ctx.error(ctx.l.loc.file_too_big)
             return
-        title: str = ctx.fmt('title', repo)
+        title: str = ctx.fmt('title', f'`{repo}`')
         embed: GitBotEmbed = GitBotEmbed(
             color=0x00a6ff,
             title=title,

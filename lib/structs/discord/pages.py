@@ -205,8 +205,12 @@ class EmbedPages:
                 except asyncio.TimeoutError:
                     Mgr.debug(f'Event timeout with lifetime={self.lifetime} '
                               f'and time since last action={self.time_since_last_action}')
-                    await self.edit(GitBotCommandState.TIMEOUT)
-                    break
+                    try:
+                        await self.edit(GitBotCommandState.TIMEOUT)
+                    except discord.errors.NotFound:
+                        pass
+                    finally:
+                        break
                 if self.time_since_last_action < self.action_polling_rate:
                     await asyncio.sleep(self.action_polling_rate - self.time_since_last_action)
                 action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)

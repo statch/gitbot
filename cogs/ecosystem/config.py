@@ -252,16 +252,12 @@ class Config(commands.Cog):
     @commands.has_guild_permissions(manage_channels=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
-    async def config_release_feed_mention(self, ctx: GitBotContext, channel):
+    async def config_release_feed_mention(self, ctx: GitBotContext, channel: discord.TextChannel):
         ctx.fmt.set_prefix('config feed mention')
         _, feed = await self._feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
-
-
-
-
 
     @config_command_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)

@@ -30,6 +30,8 @@ class Errors(commands.Cog):
             case commands.MissingPermissions:
                 await ctx.error(ctx.fmt('missing_permissions',
                                         ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
+            case commands.ChannelNotFound:
+                await ctx.error(ctx.fmt('channel_not_found', error.argument))
             case commands.NoPrivateMessage:
                 await ctx.error(ctx.l.errors.no_private_message)
             case pages.EmbedPagesPermissionError:

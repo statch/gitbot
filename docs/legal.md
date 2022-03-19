@@ -66,7 +66,7 @@ WHICH MEANS THAT SOME OF THE ABOVE DISCLAIMERS AND LIMITATIONS MAY NOT APPLY TO 
 YOU SPECIFICALLY ACKNOWLEDGE THAT THE TEAM SHALL NOT BE LIABLE FOR USER CONTENT, INCLUDING WITHOUT LIMITATION YOUR CONTENT, OR THE DEFAMATORY, OFFENSIVE, OR ILLEGAL CONDUCT OF ANY THIRD PARTY AND THAT THE RISK OF HARM OR DAMAGE FROM THE FOREGOING RESTS ENTIRELY WITH YOU.
 
 ## Indemnification Clause
-YOU AGREE TO INDEMNIFY AND HOLD THE TEAM HARMLESS FROM AND AGAINST ANY LOSS, LIABILITY, CLAIM, DEMAND, DAMAGES, COSTS AND EXPENSES, INCLUDING REASONABLE ATTORNEY'S FEES, ARISING OUT OF OR IN CONNECTION WITH:
+YOU AGREE TO INDEMNIFY AND HOLD THE TEAM HARMLESS FROM AND AGAINST ANY LOSS, LIABILITY, CLAIM, DEMAND, DAMAGES, COSTS AND EXPENSES, INCLUDING REASONABLE ATTORNEY'S FEES, ARISING OUT OF OR IN CONNECTION WITH:  
 (i) YOUR USE OF AND ACCESS TO THE SERVICE;  
 (ii) YOUR VIOLATION OF ANY TERM OF THESE TERMS;  
 (iii) YOUR VIOLATION OF ANY THIRD PARTY RIGHT, INCLUDING WITHOUT LIMITATION ANY COPYRIGHT, PROPERTY, OR PRIVACY RIGHT OR ANY THIRD PARTY AGREEMENT; OR  
@@ -82,7 +82,7 @@ If you have any questions or concerns about these Terms, please contact us at [p
 
 # Privacy Policy
 ## 1. Why and how we collect and use your information
-GitBot mainly provides an automated application for chat and social platforms, (the "Service") and is operated by The GitBot Team (the "Team", "we", "us", "Statch)  
+GitBot mainly provides an automated application for chat and social platforms, (the "Service") and is operated by The GitBot Team (the "Team", "we", "us", "Statch)
 for users of the Service (“you”, "your). This Privacy Policy sets forth our policy with respect to information that is collected from users of the Service.  
 Under applicable law, The GitBot Team is the "data controller" of personal data collected throughout your usage of the Service.  
 Our collection and use of your information is mandated to provide the Service and ensure the best possible user experience.
@@ -126,8 +126,8 @@ If you wish to manage a server's data, you can request to delete/view it only if
 
 ## Final
 Statch reserves the right to modify this Privacy Policy at any time without prior notice.
-The most current version of this Privacy Policy will be available at https://statch.org/legal.
-Please review this policy periodically, and especially before you provide any information.   
+The most current version of this Privacy Policy will be available at https://statch.org/gitbot/legal.html.
+Please review this policy periodically.
 Your continued use of the Service after any changes or revisions to this Privacy Policy shall indicate your agreement with the terms of such revised Privacy Policy.
 
 **This Privacy Policy was last updated on March 18th, 2022**

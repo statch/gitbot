@@ -55,7 +55,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        if message.author.id == self.bot.user.id:
+        if message.author.bot:
             return
         ctx: GitBotContext = await self.bot.get_context(message)
         if await Mgr.verify_send_perms(message.channel) and ctx.command is None:

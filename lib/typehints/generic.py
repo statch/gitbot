@@ -10,9 +10,12 @@ __all__: tuple = (
     'PyPIProject',
     'Hash',
     'MessageAttachmentURL',
-    'LocaleName'
+    'LocaleName',
+    'NumericStr'
 )
 
+
+NumericStr = NewType('NumericStr', str)
 GitHubRepository = NewType('GitHubRepository', str)
 GitHubUser = NewType('GitHubUser', str)
 GitHubOrganization = NewType('GitHubOrganization', str)

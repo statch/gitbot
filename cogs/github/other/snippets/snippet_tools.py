@@ -56,8 +56,8 @@ async def _compile_gitlab_link(data: tuple) -> str:
     return f'https://gitlab.com/{data[1]}/-/raw/{data[2]}/{data[3]}'
 
 
-async def gen_carbon_inmemory(code: str) -> io.BytesIO:
-    return await (await Carbon.generate_basic_image(code)).memorize()
+async def gen_carbon_inmemory(code: str, first_line_number: int = 1) -> io.BytesIO:
+    return await (await Carbon.generate_basic_image(code, first_line_number)).memorize()
 
 
 async def compile_url(match: tuple) -> str:

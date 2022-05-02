@@ -30,14 +30,15 @@ class Snippets(commands.Cog):
 
                 await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(codeblock)))
                 await msg.delete()
-            elif bool(re.search(regex.GITHUB_LINES_URL_RE, link_or_codeblock) or
-                      re.search(regex.GITLAB_LINES_URL_RE, link_or_codeblock)):
+            elif bool(match_ := (re.search(regex.GITHUB_LINES_URL_RE, link_or_codeblock) or
+                                 re.search(regex.GITLAB_LINES_URL_RE, link_or_codeblock))):
                 msg: discord.Message = await ctx.send(ctx.l.snippets.generating, style=MessageFormattingStyle.INFO)
                 text, err = await handle_url(ctx, link_or_codeblock,
                                              max_line_count=Mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
                 await msg.delete()
                 if text:
-                    await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(text)))
+                    await ctx.send(file=discord.File(filename='snippet.png',
+                                                     fp=await gen_carbon_inmemory(text, match_.group('first_line_number'))))
                 else:
                     await ctx.send(err, style=MessageFormattingStyle.ERROR)
             else:

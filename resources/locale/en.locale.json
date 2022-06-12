@@ -938,7 +938,7 @@
         "brief": "Delete your quick-access organization",
         "usage": null,
         "example": null,
-        "description": "This command will tell GitBot to \"forget: your saved org, so commands will no longer use the shortened syntax",
+        "description": "This command will tell GitBot to \"forget\" your saved org, so commands will no longer use the shortened syntax",
         "qa_resource": null,
         "required_permissions": []
       },

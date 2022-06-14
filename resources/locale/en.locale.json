@@ -1360,6 +1360,10 @@
       "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
       "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
       "title": "Missing keys in `{0}`"
+    },
+    "export_commands": {
+      "success_direct": "The command file **has been saved to** {0} ({1} commands)",
+      "success_download": "**Here's the command file!** ({1} commands)"
     }
   },
   "pypi": {

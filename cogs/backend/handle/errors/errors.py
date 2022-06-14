@@ -19,7 +19,14 @@ class Errors(commands.Cog):
             error: BaseException = error.__cause__
         match type(error):
             case commands.MissingRequiredArgument:
-                await ctx.error(ctx.l.errors.missing_required_argument)
+                missing_arg_embed: GitBotEmbed = GitBotEmbed(
+                    colour=Mgr.c.discord.yellow,
+                    title=ctx.l.errors.missing_required_argument.title,
+                    description=ctx.fmt('missing_required_argument description',
+                                        f'```haskell\n{ctx.prefix}help {ctx.command.fullname}```'),
+                    footer=ctx.l.errors.missing_required_argument.footer
+                )
+                await missing_arg_embed.send(ctx)
             case commands.CommandOnCooldown:
                 await ctx.error(ctx.fmt(f'command_on_cooldown {error.retry_after:.2f}'))
             case commands.MaxConcurrencyReached:

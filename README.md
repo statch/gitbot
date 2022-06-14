@@ -25,3 +25,5 @@ Make sure to check out our [official website](https://statch.org/gitbot "Officia
 **If you have any problems or questions, feel free to join [the support server](https://discord.statch.org)**
 
 **© 2020-2022 statch, Not affiliated with** [**GitHub Inc.**](https://github.com/)
+
+<a href="https://www.producthunt.com/posts/gitbot?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gitbot" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=349469&theme=dark" alt="GitBot - A&#0032;comprehensive&#0032;set&#0032;of&#0032;developer&#0032;tools&#0032;for&#0032;Discord&#0033; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>

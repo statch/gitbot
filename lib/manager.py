@@ -372,7 +372,7 @@ class Manager:
         return frame.f_code.co_name
 
     @staticmethod
-    def release_feed_mention(mention: ReleaseFeedItemMention) -> str:
+    def release_feed_mention_to_actual(mention: ReleaseFeedItemMention) -> str:
         """
         Convert a release feed mention field to an actual mention
 

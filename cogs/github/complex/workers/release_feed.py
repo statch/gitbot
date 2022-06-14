@@ -76,7 +76,7 @@ class ReleaseFeedWorker(commands.Cog):
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
         await self.send_to_rfi(guild, rfi, embed,
-                               Mgr.release_feed_mention(rfi['mention']) if rfi['mention'] else None)
+                               Mgr.release_feed_mention_to_actual(rfi['mention']) if rfi['mention'] else None)
 
     async def update_tag_names_with_data(self,
                                          guild: GitBotGuild,

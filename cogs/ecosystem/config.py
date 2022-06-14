@@ -254,10 +254,54 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def config_release_feed_mention(self, ctx: GitBotContext, channel: discord.TextChannel):
         ctx.fmt.set_prefix('config feed mention')
-        _, feed = await self._feed_prerequisites(ctx)
+        guild, feed = await self._feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
+
+        rfi: ReleaseFeedItem = Mgr.get_by_key_from_sequence(feed, 'cid', channel.id)
+        if not rfi:
+            return await ctx.error(ctx.fmt('!config feed not_a_feed', channel.mention))
+
+        mention_ask_embed: GitBotEmbed = GitBotEmbed(
+            color=Mgr.c.cyan,
+            title=ctx.fmt('embed title', f'`#{channel.name}`'),
+            description=ctx.l.config.feed.mention.embed.description,
+            footer=ctx.l.config.feed.mention.embed.footer
+        )
+
+        async def _callback(_, res: discord.Message):
+            if res.content.lower() in ('quit', 'cancel'):
+                await ctx.error(ctx.fmt('cancelled', channel.mention))
+                return GitBotCommandState.FAILURE
+            elif (rfi_mention_enum := res.content.lower().strip('@')) in ('everyone', 'here'):
+                return GitBotCommandState.SUCCESS, rfi_mention_enum
+            elif res.role_mentions or res.content.isnumeric() and len(res.content) == 18:
+                if not res.role_mentions:
+                    try:
+                        res.role_mentions[0] = await commands.RoleConverter().convert(ctx, res.content)
+                    except commands.BadArgument:
+                        await ctx.error(ctx.l.config.feed.mention.invalid)
+                        return GitBotCommandState.CONTINUE
+                return GitBotCommandState.SUCCESS, res.role_mentions[0].id
+            else:
+                await ctx.error(ctx.l.config.feed.mention.invalid)
+                return GitBotCommandState.CONTINUE
+
+        id_or_enum: int | str | None
+        _, id_or_enum = await mention_ask_embed.input_with_timeout(
+            ctx=ctx,
+            event='message',
+            timeout=45,
+            timeout_check=lambda msg: msg.channel.id == ctx.channel.id and msg.author.id == ctx.author.id,
+            response_callback=_callback,
+        )
+        if not id_or_enum:
+            return
+
+        await ctx.success(ctx.fmt('success', channel.mention, Mgr.release_feed_mention_to_actual(id_or_enum)),
+                          allowed_mentions=discord.AllowedMentions.none())
+        await Mgr.db.guilds.update_one(guild, {'$set': {f'feed.{guild["feed"].index(rfi)}.mention': id_or_enum}})
 
     @config_command_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)

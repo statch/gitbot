@@ -593,6 +593,7 @@
       "no_arg": "Please pass in a repository which you wish to follow!",
       "already_logged": "This repo's releases are **already being logged!**",
       "success": "New **{0}** releases will now be logged.",
+      "not_a_feed": "{0} is **not a release feed!** Try again?",
       "default": {
         "title": "Repository Release Feeds",
         "description": "Commands in this group allow you to get notified about new releases of a repository in designated channels.\n**To add a release feed channel:**\n{emoji_square}{0}\n**To add a repo to a channel:**\n{emoji_square}{1}"
@@ -629,6 +630,16 @@
         "success": "New {0} releases will now be logged in {1}!",
         "cancelled": "Adding a repo to the release feed **cancelled.**",
         "already_logged": "{0} releases are **already being logged** in {1}!"
+      },
+      "mention": {
+        "embed": {
+          "title": "Set a mention for releases in {0}",
+          "description": "Set the mention to be sent along with the message when a release is created, to get the attention of anyone interested.\n\n**Send the correct mention to set it.** You can also:\n{emoji_square} type \"everyone\" or \"here\" for these mentions\n{emoji_square} send a role's ID to set it without mentioning the role itself",
+          "footer": "You can type \"cancel\" to quit"
+        },
+        "cancelled": "Setting a mention for releases in {0} **cancelled.**",
+        "invalid": "That is not a valid mention/ID! **Try again.**",
+        "success": "New releases in {0} will now be sent with {1}!"
       }
     },
     "qa_set": {

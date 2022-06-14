@@ -6,7 +6,11 @@
     "flag": ":flag_um:"
   },
   "errors": {
-    "missing_required_argument": "You didn't pass in all of the arguments, **use** `git --help` **for info.**",
+    "missing_required_argument": {
+      "title": "You didn't provide all the arguments!",
+      "description": "To run this command you need to pass in all of the required arguments.\n**To find out more, type:**\n{0}",
+      "footer": "Still not working? Ask in the support server!"
+    },
     "command_on_cooldown": "**You're on cooldown!** Please try again in {0}s",
     "max_concurrency_reached": "This command is experiencing exceptional traffic. **Please try again in a few seconds.**",
     "missing_permissions": "**You're missing permissions required to do this!** You need {0}",
@@ -950,7 +954,7 @@
         "brief": "Delete your quick-access organization",
         "usage": null,
         "example": null,
-        "description": "This command will tell GitBot to \"forget: your saved org, so commands will no longer use the shortened syntax",
+        "description": "This command will tell GitBot to \"forget\" your saved org, so commands will no longer use the shortened syntax",
         "qa_resource": null,
         "required_permissions": []
       },

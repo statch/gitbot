@@ -506,40 +506,33 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
-    async def delete_feed_channel_command(self, ctx: GitBotContext, channel=None) -> None:
+    async def delete_feed_channel_command(self, ctx: GitBotContext, channel: discord.TextChannel) -> None:
         ctx.fmt.set_prefix('config delete feed channel')
         _, feed = await self._feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
-        if channel:
-            try:
-                channel: discord.TextChannel = await commands.TextChannelConverter().convert(ctx, channel)
-            except commands.BadArgument:
-                await ctx.error(ctx.l.config.delete.feed.channel.invalid_channel)
-                return
-            if channel:
-                rfi: ReleaseFeedItem = Mgr.get_by_key_from_sequence(feed, 'cid', channel.id)
-                if not rfi:
-                    await ctx.error(ctx.fmt('not_a_feed', channel.mention))
-                    return
-                ctx.fmt.set_prefix('+explicit confirmation')
-                embed: GitBotEmbed = GitBotEmbed(
-                    color=Mgr.c.cyan,
-                    title=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.title,
-                    description=ctx.fmt('embed description', channel.mention, f'`{len(rfi["repos"])}`'),
-                    footer=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.footer
-                )
+        rfi: ReleaseFeedItem = Mgr.get_by_key_from_sequence(feed, 'cid', channel.id)
+        if not rfi:
+            await ctx.error(ctx.fmt('not_a_feed', channel.mention))
+            return
+        ctx.fmt.set_prefix('+flow confirmation')
+        embed: GitBotEmbed = GitBotEmbed(
+            color=Mgr.c.cyan,
+            title=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.title,
+            description=ctx.fmt('embed description', channel.mention, f'`{len(rfi["repos"])}`'),
+            footer=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.footer
+        )
 
-                async def _callback(_, event):
-                    if event[0].emoji.id == 770244076896256010:
-                        await ctx.info(ctx.fmt('cancelled', channel.mention))
-                        return GitBotCommandState.FAILURE
-                    return GitBotCommandState.SUCCESS
+        async def _callback(_, event):
+            if event[0].emoji.id == 770244076896256010:
+                await ctx.info(ctx.fmt('cancelled', channel.mention))
+                return GitBotCommandState.FAILURE
+            return GitBotCommandState.SUCCESS
 
-                if await embed.confirmation(ctx, _callback):
-                    await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
-                    await ctx.success(ctx.fmt('success', channel.mention))
+        if await embed.confirmation(ctx, _callback):
+            await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
+            await ctx.success(ctx.fmt('success', channel.mention))
 
     @delete_feed_group.command('repo')
     @commands.guild_only()

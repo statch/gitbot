@@ -725,7 +725,7 @@
         "channel": {
           "not_a_feed": "{0} is **not configured as a release feed!**",
           "invalid_channel": "That's **not a valid channel!** Try again.",
-          "explicit": {
+          "flow": {
             "confirmation": {
               "embed": {
                 "title": "Are you sure?",
@@ -906,9 +906,9 @@
       },
       "config_delete_feed_channel": {
         "brief": "A command responsible for deleting a release feed channel",
-        "usage": "config delete feed channel [channel]",
+        "usage": "config delete feed channel <channel>",
         "example": null,
-        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive. If you use this command without the channel argument, a list of active feeds will be displayed.",
+        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive.",
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",

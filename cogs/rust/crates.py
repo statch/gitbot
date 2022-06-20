@@ -121,10 +121,11 @@ class Crates(commands.Cog):
                 thumbnail=Mgr.i.crates_logo,
                 footer=ctx.l.crates.downloads.footer
             )
-            await ctx.send(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
-                                                                                           format='png',
-                                                                                           engine='kaleido')),
-                                                          filename=f'{project}-downloads-overall.png'))
+            await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
+                                                                                            format='png',
+                                                                                            engine='kaleido')),
+                                                           filename=f'{project}-downloads-overall.png'),
+                            mention_author=False)
         else:
             await ctx.error(ctx.l.generic.nonexistent.rust_crate)
 

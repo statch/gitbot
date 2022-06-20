@@ -60,14 +60,10 @@ class Commits(commands.Cog):
             await ctx.error(ctx.l.commits.no_match)
             return GitBotCommandState.CONTINUE
 
-        await embed.input_with_timeout(
-            ctx=ctx,
-            event='message',
-            timeout=30,
-            timeout_check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id,
-            response_callback=_callback,
-            with_antispam=True
-        )
+        await embed.input_with_timeout(ctx=ctx, event='message', timeout=30,
+                                       timeout_check=lambda m: (m.channel.id == ctx.channel.id and
+                                                                m.author.id == ctx.author.id),
+                                       response_callback=_callback)
         if ctx.data:
             await ctx.invoke(self.commit_command, repo=None, oid=None)
 
@@ -158,9 +154,9 @@ class Commits(commands.Cog):
                                                                      queued=queued,
                                                                      in_progress=in_progress)
             info: str = f'{commit_time}{signature}{committed_via_web}{checks}'
-            embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info, inline=False)
-            embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes, inline=False)
-            embed.add_field(name=f':label: {ctx.l.commit.fields.oid}:', value=f'```\n{commit["oid"]}```', inline=False)
+            embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info)
+            embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes)
+            embed.add_field(name=f':label: {ctx.l.commit.fields.oid}:', value=f'```\n{commit["oid"]}```')
             await ctx.send(embed=embed)
 
 

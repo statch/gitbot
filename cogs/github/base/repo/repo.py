@@ -96,7 +96,7 @@ class Repo(commands.Cog):
                 languages = ctx.fmt('languages with_num', r['languages'], lang['name'])
 
         info: str = f"{created_at}{issues}{forks}{watchers_stargazers}{forked}{languages}"
-        embed.add_field(name=f":mag_right: {ctx.l.repo.info.glossary[1]}:", value=info, inline=False)
+        embed.add_field(name=f":mag_right: {ctx.l.repo.info.glossary[1]}:", value=info)
 
         homepage: tuple = (r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, ctx.l.repo.info.glossary[4])
         links: list = [homepage]
@@ -105,13 +105,12 @@ class Repo(commands.Cog):
             if lnk[0] is not None and len(lnk[0]) != 0:
                 link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
         if len(link_strings) != 0:
-            embed.add_field(name=f":link: {ctx.l.repo.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
+            embed.add_field(name=f":link: {ctx.l.repo.info.glossary[2]}:", value='\n'.join(link_strings))
 
-        if r['topics'][0] and len(r['topics'][0]) > 1:
-            topic_strings = ' '.join(
-                [f"[`{t['topic']['name']}`]({t['url']})" for t in r['topics'][0]])
-            more = f' `+{r["topics"][1] - 10}`' if r["topics"][1] > 10 else ""
-            embed.add_field(name=f':label: {ctx.l.repo.info.glossary[3]}:', value=topic_strings + more)
+        if topics := Mgr.render_label_like_list(r['topics'][0],
+                                                name_and_url_knames_if_dict=('topic name', 'url'),
+                                                total_n=r['topics'][1]):
+            embed.add_field(name=f':label: {ctx.l.repo.info.glossary[3]}:', value=topics)
 
         if r['graphic']:
             embed.set_image(url=r['graphic'])
@@ -158,7 +157,7 @@ class Repo(commands.Cog):
         await ctx.send(embed=embed)
 
     @repo_command_group.command(name='download', aliases=['dl'])
-    @commands.max_concurrency(10, commands.BucketType.default, wait=False)
+    @commands.max_concurrency(10)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
     async def download_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
@@ -205,7 +204,7 @@ class Repo(commands.Cog):
         await ctx.invoke(self.bot.get_command('commits'), repo=repo)
 
     @repo_command_group.command(name='loc')
-    @commands.cooldown(8, 60, commands.BucketType.default)
+    @commands.cooldown(8, 60)
     async def loc_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 

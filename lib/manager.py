@@ -34,6 +34,7 @@ from lib.utils import regex as r
 from colorama import Style, Fore
 from discord.ext import commands
 from urllib.parse import quote_plus
+from collections.abc import Collection
 from pipe import traverse, where, select
 from lib.utils.decorators import normalize_identity
 from lib.structs import (DirProxy, DictProxy,
@@ -64,7 +65,7 @@ class Manager:
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
         self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
         self._setup_db()
-        self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json'))
+        self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json',))
         self.e: DictProxy = self.load_json('emoji')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
                                                                             and v.startswith('#')) else int(v[1:], 16))
@@ -80,6 +81,52 @@ class Manager:
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
+
+    @staticmethod
+    def render_label_like_list(labels: Collection[str] | list[dict],
+                               *,
+                               name_and_url_knames_if_dict: tuple[str, str] | None = None,
+                               name_and_url_slug_knames_if_dict: tuple[str, str] | None = None,
+                               url_fmt: str = '',
+                               max_n: int = 10,
+                               total_n: int | None = None) -> str:
+        """
+        Render a basic codeblock+hyperlink, space-separated list of label-like strings/dicts.
+
+        :param labels: The labels to render, either an iterable[str] or an iterable of dicts representing labels
+        :param name_and_url_knames_if_dict: The keys to get for the name and url of the label, if the labels are dicts
+        :param name_and_url_slug_knames_if_dict: The keys to get for the name and url slug of the label,
+            if the labels are dicts. If this is set, `name_and_url_knames_if_dict` must NOT be set, and `url_fmt` must be set.
+        :param url_fmt: The format string to use for the URL of each label
+        :param max_n: Max number of labels to render until appending "+(len(labels)-max_n)"
+        :return: The rendered labels
+        """
+
+        if total_n is None:
+            total_n: int = len(labels)
+
+        if name_and_url_knames_if_dict and name_and_url_slug_knames_if_dict:
+            raise ValueError('Cannot specify both name_and_url_knames_if_dict and name_and_url_slug_knames_if_dict')
+        url_kn_is_slug: bool = False
+        if name_and_url_knames_if_dict is not None:
+            name_kn, url_kn = name_and_url_knames_if_dict
+        elif name_and_url_slug_knames_if_dict is not None:
+            url_kn_is_slug: bool = True
+            name_kn, url_kn = name_and_url_slug_knames_if_dict
+        if url_kn_is_slug and not url_fmt:
+            raise ValueError('url_fmt must be specified if urls should be dynamically generated')
+        is_collection_of_dicts: bool = bool(labels) and isinstance(labels[0], dict)
+        if labels:
+            more: str = f' `+{total_n - max_n}`' if total_n > max_n else ''
+            if not is_collection_of_dicts:
+                l_strings: str = ' '.join([f'[`{l_}`]({url_fmt.format(l_)})' for l_ in labels[:max_n]])
+            else:
+                l_strings: str = ' '.join(
+                    [f'[`{Manager.get_nested_key(l_, name_kn)}`]'  # noqa: no pre-assignment ref
+                     f'({url_fmt.format(Manager.get_nested_key(l_, url_kn)) if url_kn_is_slug else Manager.get_nested_key(l_, url_kn)})'  # noqa: ^
+                     for l_ in labels[:max_n]])
+            return l_strings + more
+        return ''
 
     @staticmethod
     def parse_literal(literal: str) -> str | bytes | int | set | dict | tuple | list | bool | float | None:
@@ -648,7 +695,7 @@ class Manager:
         if not os.path.exists(output_dir):
             self.debug(f'Creating output directory "{output_dir}"')
             os.mkdir(output_dir)
-        with zipfile.ZipFile(zip_path, 'r') as _zip:
+        with zipfile.ZipFile(zip_path) as _zip:
             self.debug(f'Extracting zip archive "{zip_path}"')
             _zip.extractall(output_dir)
 
@@ -1081,6 +1128,6 @@ class Manager:
                     absolute: bool = False
                 self.prefix: str = prefix.strip() + ' ' if absolute else self.prefix + prefix.strip() + ' '
                 self_.debug(f'Locale formatting prefix set to \'{self.prefix.strip()}\' in '
-                            f'\'{self_.get_last_call_from_callstack(frames_back=2)}\'')
+                            f'\'{self_.get_last_call_from_callstack()}\'')
 
         return _Formatter(ctx)

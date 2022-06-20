@@ -42,17 +42,15 @@ class Help(commands.Cog):
                               (f'\n{Mgr.gen_separator_line(content["usage"], "-")}'
                                f'\n{example}```' if example else '```'))
         if content['description'] is not None:
-            embed.add_field(name=f'{ctx.l.glossary.description}:',
-                            value=f'```{content["description"]}```', inline=False)
+            embed.add_field(name=f'{ctx.l.glossary.description}:', value=f'```{content["description"]}```')
         if argument_explainers := list(command.get_argument_explainers(ctx)):
-            embed.add_field(name=f'{ctx.l.glossary.arguments}:',
-                            value='\n'.join(f'**`{explainer["name"]}`**:'
-                                            f'\n{explainer["content"]}' for explainer in argument_explainers),
-                            inline=False)
+            embed.add_field(name=f'{ctx.l.glossary.arguments}:', value='\n'.join(f'**`{explainer["name"]}`**:'
+                                                                                 f'\n{explainer["content"]}' for
+                                                                                 explainer in argument_explainers))
         if permissions := list(command.get_permissions(ctx)):
             embed.add_field(name=f'{ctx.l.help.required_permissions}:',
                             value='\n'.join([f'{Mgr.e.circle_green}  {permission}' for permission
-                                             in permissions]), inline=False)
+                                             in permissions]))
         if qa_disclaimer := command.get_qa_disclaimer(ctx):
             embed.set_footer(text=qa_disclaimer)
         if not argument_explainers:  # since there's no arguments, let's spice this embed up a bit
@@ -70,7 +68,7 @@ class Help(commands.Cog):
         embed.title = f'{Mgr.e.github}   {ctx.l.glossary.command_group}: `{command_group.fullname}`'
         embed.add_field(name=f'{ctx.l.help.commands_inside_group}:',
                         value='\n'.join([f':white_small_square: `{self.bot.command_prefix}{c}`'
-                                         for c in content['commands']]), inline=False)
+                                         for c in content['commands']]))
         await embed.send(ctx)
 
     async def send_help(self, ctx: GitBotContext) -> None:

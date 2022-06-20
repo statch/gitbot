@@ -14,6 +14,8 @@ class ReleaseFeedWorker(commands.Cog):
         self.bot: commands.Bot = bot
         if Mgr.env.run_release_feed_worker:
             self.release_feed_worker.start()
+        else:
+            Mgr.log("Release feed worker is disabled - env.run_release_feed_worker == False")
 
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:

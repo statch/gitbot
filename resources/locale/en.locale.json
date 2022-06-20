@@ -64,7 +64,8 @@
       "issue_number": "An issue with this number **doesn't exist!**",
       "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
       "locale": "This locale doesn't exist!",
-      "python_package": "A Python Package with this name doesn't exist on PyPI!",
+      "python_package": "A Python package with this name doesn't exist on PyPI!",
+      "rust_crate": "A Rust crate with this name doesn't exist on crates.io!",
       "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
       "commit": "A commit with this OID **doesn't exist** in {0}!",
       "ref": "A branch called {0} **doesn't exist** in {1}!",
@@ -1088,7 +1089,7 @@
       },
       "pypi_downloads": {
         "brief": "Get a 3-month download chart for a PyPI package",
-        "usage": "pypi downloads <package_name>",
+        "usage": "pypi downloads <python_package_name>",
         "example": "pypi downloads httpcats",
         "description": null,
         "qa_resource": null,
@@ -1096,7 +1097,7 @@
       },
       "pypi_info": {
         "brief": "Get info about a PyPI package",
-        "usage": "pypi info <package_name>",
+        "usage": "pypi info <python_package_name>",
         "example": "pypi info httpcats",
         "description": null,
         "qa_resource": null,
@@ -1253,6 +1254,40 @@
         "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
         "qa_resource": null,
         "required_permissions": []
+      },
+      "config_feed_mention": {
+        "brief": "Configure a mention for new repo releases",
+        "usage": "config feed mention <channel>",
+        "example": null,
+        "description": "Pick who (roles/everyone/here) to ping when a new release comes out in a release feed!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "crates": {
+        "brief": "Get info about crates.io crates",
+        "usage": "crates [subcommand]",
+        "example": null,
+        "description": "This command group allows you to view info about Rust crates published to crates.io, such as creation date, authors, downloads and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_downloads": {
+        "brief": "Get download stats of a crates.io crate",
+        "usage": "crates downloads <rust_crate_name>",
+        "example": "crates downloads tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_info": {
+        "brief": "Get info about a crates.io crate",
+        "usage": "crates info <rust_crate_name>",
+        "example": "crates info tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
     "argument_explainers": {
@@ -1308,9 +1343,13 @@
         "name": "lines",
         "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       },
-      "package_name": {
-        "name": "package-name",
-        "content": "The name of a package (ex. `httpcats`)"
+      "rust_crate_name": {
+        "name": "rust-package-name",
+        "content": "The name of a Rust crate (ex. `tokio`)"
+      },
+      "python_package_name": {
+        "name": "python-package-name",
+        "content": "The name of a Python package (ex. `py-carbon`)"
       },
       "issue_state": {
         "name": "issue-state",
@@ -1392,6 +1431,43 @@
     "downloads": {
       "title": "{0} downloads over the last {1} days",
       "footer": "PyPi project statistics are provided by pypistats.org",
+      "glossary": [
+        "Date",
+        "Downloads"
+      ],
+      "stats": {
+        "yesterday": "Yesterday: **{0}**",
+        "last_week": "Last Week: **{0}**",
+        "last_month": "Last Month: **{0}**"
+      }
+    }
+  },
+  "crates": {
+    "default": {
+      "title": "Crates.io Commands",
+      "description": "Commands in this group are related to [crates.io](https://crates.io),\nthe Rust package index.\nBelow you can find a list of the commands in this group.",
+      "commands": {
+        "info": "Get information about a crate",
+        "downloads": "Crate downloads"
+      }
+    },
+    "info": {
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Keywords",
+        "Categories"
+      ],
+      "authors": "Authored by {0}",
+      "more_authors": "and {0} more",
+      "all_time_downloads": "All-time downloads!",
+      "created_at": "Created at {0}",
+      "license": "Licensed under the {0} license"
+    },
+    "downloads": {
+      "title": "{0} downloads over the last {1} days",
+      "footer": "Project statistics are fetched directly from crates.io",
       "glossary": [
         "Date",
         "Downloads"

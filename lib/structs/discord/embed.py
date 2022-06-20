@@ -41,6 +41,7 @@ class GitBotEmbed(discord.Embed):
     """
 
     def __init__(self,
+                 *,
                  footer: str = discord.Embed.Empty,
                  footer_icon_url: str = discord.Embed.Empty,
                  thumbnail: str = discord.Embed.Empty,
@@ -54,6 +55,9 @@ class GitBotEmbed(discord.Embed):
         self.set_thumbnail(url=thumbnail)
         if author_name:
             self.set_author(name=author_name, url=author_url, icon_url=author_icon_url)
+
+    def add_field(self, *, name: str, value: str, inline: bool = False) -> None:
+        super().add_field(name=name, value=value, inline=inline)
 
     @classmethod
     def success(cls, text: str, **kwargs) -> 'GitBotEmbed':

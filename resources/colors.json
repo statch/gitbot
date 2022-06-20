@@ -11,6 +11,7 @@
   "cyan":"#5CEFFF",
   "rounded": "#2F3136",
   "languages": {
-    "python": "#3572A5"
+    "python": "#3572A5",
+    "rust": "#D73824"
   }
 }

@@ -90,8 +90,7 @@ def run_help_helper(debug: bool = False):
             while True:
                 if click.confirm(click.style('All good?', blink=True, fg='yellow') + '\n' +
                                  '\n'.join([click.style(f'{k}: {v}', fg='cyan')
-                                            for k, v in command_data.items()]) + ' |',
-                                 default=True, show_default=True):
+                                            for k, v in command_data.items()]) + ' |', default=True):
                     LOCALE['help']['commands'][underscored_name] = command_data
                     break
                 else:
@@ -104,10 +103,12 @@ def run_help_helper(debug: bool = False):
                     command_data[to_correct] = PROMPTS[to_correct]()
                     fix_dict(command_data)
             try:
+                next_cmd: str = commands[commands.index(command_name) + 1]
+                next_skipped: bool = next_cmd.replace(' ', '_') in LOCALE['help']['commands']
                 if (not click.confirm(click.style(f'Do you wish to add another command?'
-                                                  f' (Next up: {commands[commands.index(command_name) + 1]})',
-                                                  blink=True, fg='bright_cyan'),
-                                      default=True, show_default=True)) or command_name == commands[-1]:
+                                                  f' (Next up: {commands[commands.index(command_name) + 1] if not next_skipped else "<skipped>"})',
+                                                  blink=True, fg='bright_cyan'), default=True)) or \
+                        command_name == commands[-1]:
                     break
             except IndexError:
                 pass

@@ -20,8 +20,8 @@ class License(commands.Cog):
             title=license_['name'],
             url=license_['html_url']
         )
-        embed.add_field(name=ctx.l.license.description, value=f'```{license_["description"]}```', inline=False)
-        embed.add_field(name=ctx.l.license.implementation, value=f'```{license_["implementation"]}```', inline=False)
+        embed.add_field(name=ctx.l.license.description, value=f'```{license_["description"]}```')
+        embed.add_field(name=ctx.l.license.implementation, value=f'```{license_["implementation"]}```')
         embed.add_field(name=ctx.l.license.permissions,
                         value=''.join([f'{Mgr.e.circle_green}  {x}\n' for x in license_['permissions']]) if len(
                               license_['permissions']) != 0 else ctx.l.license.none)

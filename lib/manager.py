@@ -93,6 +93,7 @@ class Manager:
         """
         Render a basic codeblock+hyperlink, space-separated list of label-like strings/dicts.
 
+        :param total_n: An integer value representing the length of the `labels` collection to use instead of a len() call
         :param labels: The labels to render, either an iterable[str] or an iterable of dicts representing labels
         :param name_and_url_knames_if_dict: The keys to get for the name and url of the label, if the labels are dicts
         :param name_and_url_slug_knames_if_dict: The keys to get for the name and url slug of the label,

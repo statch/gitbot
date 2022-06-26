@@ -1234,6 +1234,14 @@
         "qa_resource": null,
         "required_permissions": []
       },
+      "repo_loc": {
+        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "usage": "repo loc <repo>",
+        "example": "repo loc statch/gitbot",
+        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
       "issue": {
         "brief": "Inspect a GitHub issue",
         "usage": "issue [repo] <issue_number>",

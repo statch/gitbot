@@ -1299,6 +1299,16 @@
         "description": null,
         "qa_resource": null,
         "required_permissions": []
+      },
+      "config_delete_feed_mention": {
+        "brief": "Delete a mention from a release feed",
+        "usage": null,
+        "example": null,
+        "description": "Too pingy? Delete the mention you previously configured for a release feed and enjoy the silence!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
       }
     },
     "argument_explainers": {

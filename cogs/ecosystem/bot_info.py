@@ -8,6 +8,7 @@ from lib.globs import Mgr
 from os.path import isfile, isdir, join
 from lib.utils.decorators import gitbot_command
 from lib.structs.discord.context import GitBotContext
+from lib.structs import GitBotEmbed
 
 
 pid: int = os.getpid()
@@ -29,7 +30,7 @@ def dir_line_count(directory) -> int:
 
 LINES_OF_CODE: int = sum((dir_line_count('./cogs'),
                           dir_line_count('./lib'),
-                          dir_line_count('./resources/queries'),
+                          dir_line_count('./resources'),
                           item_line_count('./bot.py')))
 
 
@@ -69,20 +70,16 @@ class BotInfo(commands.Cog):
     @gitbot_command(name='privacy', aliases=['policy'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def privacy_policy(self, ctx: GitBotContext) -> None:
-        embed: discord.Embed = discord.Embed(
+        ctx.fmt.set_prefix('privacy_policy')
+        embed: GitBotEmbed = GitBotEmbed(
             color=Mgr.c.rounded,
-            title=f'{Mgr.e.github}  {ctx.l.privacy_policy.title}'
+            title=f'{Mgr.e.github}  {ctx.lp.title}'
         )
-        embed.add_field(name=ctx.l.privacy_policy.what.title, inline=False,
-                        value=ctx.l.privacy_policy.what.body)
-        embed.add_field(name=ctx.l.privacy_policy.use.title, inline=False,
-                        value=ctx.l.privacy_policy.use.body)
-        embed.add_field(name=ctx.l.privacy_policy.access.title, inline=False,
-                        value=ctx.l.privacy_policy.access.body)
-        embed.add_field(name=ctx.l.privacy_policy.deletion.title, inline=False,
-                        value=ctx.l.privacy_policy.deletion.body)
-        embed.add_field(name=ctx.l.privacy_policy.author.title, inline=False,
-                        value=ctx.l.privacy_policy.author.body)
+        embed.add_field(name=ctx.lp.what.title, value=ctx.lp.what.body)
+        embed.add_field(name=ctx.lp.use.title, value=ctx.lp.use.body)
+        embed.add_field(name=ctx.lp.access.title, value=ctx.lp.access.body)
+        embed.add_field(name=ctx.lp.deletion.title, value=ctx.lp.deletion.body)
+        embed.add_field(name=ctx.lp.author.title, value=ctx.lp.author.body)
         await ctx.send(embed=embed)
 
     @gitbot_command(name='support')
@@ -121,16 +118,17 @@ class BotInfo(commands.Cog):
     @gitbot_command(name='stats')
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def stats_command(self, ctx: GitBotContext) -> None:
+        ctx.fmt.set_prefix('stats')
         embed: discord.Embed = discord.Embed(color=Mgr.c.rounded)
         users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = '**{:.3f}GB** RAM'.format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
         cpu: str = f'**{psutil.cpu_percent()}%** CPU,'
-        embed.add_field(name=f"{Mgr.e.stats}  {ctx.l.stats.title}", value=ctx.l.stats.body,
+        embed.add_field(name=f"{Mgr.e.stats}  {ctx.lp.title}", value=ctx.lp.body,
                         inline=False)
-        embed.add_field(name=ctx.l.stats.system, value=f"{cpu}\n{memory}")
-        embed.add_field(name=ctx.l.stats.people.title,
+        embed.add_field(name=ctx.lp.system, value=f"{cpu}\n{memory}")
+        embed.add_field(name=ctx.lp.people.title,
                         value=ctx.fmt('stats people body', len(self.bot.guilds), users))
-        embed.add_field(name=ctx.l.stats.code.title,
+        embed.add_field(name=ctx.lp.code.title,
                         value=ctx.fmt('stats code body', LINES_OF_CODE, f'{platform.system()} {platform.release()}'))
         await ctx.send(embed=embed)
 

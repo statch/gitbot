@@ -22,12 +22,8 @@ class Config(commands.Cog):
             ('carbon', 'image', 'carbonara', 'img'): 2
         }
 
-    @gitbot_group('config', aliases=['cfg', 'configure', 'settings'])
-    @commands.cooldown(15, 30, commands.BucketType.user)
-    async def config_command_group(self, ctx: GitBotContext) -> None:
-        await ctx.group_help()
-
-    def construct_release_feed_list(self, ctx: GitBotContext, rf: ReleaseFeed) -> str:
+    @staticmethod
+    def construct_release_feed_list(ctx: GitBotContext, rf: ReleaseFeed) -> str:
         item: str = '' if rf else ctx.l.generic.nonexistent.release_feed
         for rfi in rf:
             item += Mgr.e.square + ' ' + f'<#{rfi["cid"]}>\n' + \
@@ -35,6 +31,31 @@ class Config(commands.Cog):
                                 for rfr in rfi['repos']]) if rfi['repos']
                      else f'⠀⠀- {ctx.l.config.show.feed.no_repos}') + '\n'
         return item
+
+    @staticmethod
+    async def toggle_autoconv_item(ctx: GitBotContext,
+                                   item: Literal['gh_url', 'codeblock']) -> bool:
+        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
+        config: AutomaticConversion = guild.get('autoconv', Mgr.env.autoconv_default)
+        config[item] = (state := not (config.get(item, Mgr.env.autoconv_default[item])))  # noqa cause PyCharm is high
+        if guild:
+            await Mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
+        else:
+            await Mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))
+        Mgr.autoconv_cache[ctx.guild.id] = config
+        await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
+        return state
+
+    @staticmethod
+    async def get_feed_prerequisites(ctx: GitBotContext) -> tuple[GitBotGuild, ReleaseFeed]:
+        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
+        feed: ReleaseFeed = guild.get('feed', [])
+        return guild, feed
+
+    @gitbot_group('config', aliases=['cfg', 'configure', 'settings'])
+    @commands.cooldown(15, 30, commands.BucketType.user)
+    async def config_command_group(self, ctx: GitBotContext) -> None:
+        await ctx.group_help()
 
     @config_command_group.group(name='show', aliases=['s'])
     @commands.cooldown(5, 30, commands.BucketType.user)
@@ -254,7 +275,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def config_release_feed_mention(self, ctx: GitBotContext, channel: discord.TextChannel):
         ctx.fmt.set_prefix('config feed mention')
-        guild, feed = await self._feed_prerequisites(ctx)
+        guild, feed = await self.get_feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
@@ -375,20 +396,6 @@ class Config(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    async def toggle_autoconv_item(self,
-                                   ctx: GitBotContext,
-                                   item: Literal['gh_url', 'codeblock']) -> bool:
-        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
-        config: AutomaticConversion = guild.get('autoconv', Mgr.env.autoconv_default)
-        config[item] = (state := not (config.get(item, Mgr.env.autoconv_default[item])))  # noqa cause PyCharm is high
-        if guild:
-            await Mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
-        else:
-            await Mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))
-        Mgr.autoconv_cache[ctx.guild.id] = config
-        await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
-        return state
-
     @config_command_group.group('autoconv',
                                 aliases=['automatic-conversion', 'auto-conversion', 'auto'],
                                 invoke_without_command=True)
@@ -434,20 +441,20 @@ class Config(commands.Cog):
         if skip_state is None:
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.rounded,
-                title=ctx.l.config.autoconv.gh_lines.embed.title,
-                description=(ctx.l.config.autoconv.gh_lines.embed.description
-                             + '\n' + Mgr.gen_separator_line(len(ctx.l.config.autoconv.gh_lines.embed.title))
-                             + '\n' + Mgr.option_display_list_format(ctx.l.config.autoconv.gh_lines.embed.options)),
-                footer=ctx.l.config.autoconv.gh_lines.embed.footer
+                title=ctx.lp.embed.title,
+                description=(ctx.lp.embed.description
+                             + '\n' + Mgr.gen_separator_line(len(ctx.lp.embed.title))
+                             + '\n' + Mgr.option_display_list_format(ctx.lp.embed.options)),
+                footer=ctx.lp.embed.footer
             )
 
             async def _callback(_, res: discord.Message):
                 if res.content.lower() in ('quit', 'cancel'):
-                    await ctx.error(ctx.l.config.autoconv.gh_lines.cancelled)
+                    await ctx.error(ctx.lp.cancelled)
                     return GitBotCommandState.FAILURE, None
                 elif (state := self._validate_github_lines_conversion_state(res.content)) is not None:
                     return GitBotCommandState.SUCCESS, state
-                await ctx.send(ctx.l.config.autoconv.gh_lines.invalid_response)
+                await ctx.send(ctx.lp.invalid_response)
                 return GitBotCommandState.CONTINUE, None
 
             response, actual_state = await embed.input_with_timeout(
@@ -461,7 +468,7 @@ class Config(commands.Cog):
                 return
         else:
             actual_state = skip_state
-        if (_str := str(actual_state)) in ctx.l.config.autoconv.gh_lines.results.keys():
+        if (_str := str(actual_state)) in ctx.lp.results.keys():
             if guild:
                 config: AutomaticConversion = guild.get('autoconv', Mgr.env.autoconv_default)
                 config['gh_lines'] = actual_state
@@ -471,23 +478,26 @@ class Config(commands.Cog):
                 config['gh_lines'] = actual_state
                 await Mgr.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
             Mgr.autoconv_cache[ctx.guild.id] = config
-            await ctx.success(ctx.l.config.autoconv.gh_lines.results[_str])
+            await ctx.success(ctx.lp.results[_str])
 
     @config_command_group.group(name='delete', aliases=['d', 'del'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_field_group(self, ctx: GitBotContext) -> None:
+        ctx.fmt.set_prefix('config delete default')
         if not ctx.invoked_subcommand:
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.rounded,
-                title=f"{Mgr.e.github}  {ctx.l.config.delete.default.title}",
-                description=f"{ctx.l.config.delete.default.description}\n"
-                            f"`git config --delete user` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.user}\n"
-                            f"`git config --delete org` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.org}\n"
-                            f"`git config --delete repo` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.repo}\n"
-                            f"`git config --delete feed` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.feed}\n"
-                            f"`git config --delete all` {Mgr.e.arrow} {ctx.l.config.delete.default.commands.all}"
+                title=f"{Mgr.e.github}  {ctx.lp.title}",
+                description=f"{ctx.lp.description}\n"
+                            f"`git config --delete user` {Mgr.e.arrow} {ctx.lp.commands.user}\n"
+                            f"`git config --delete org` {Mgr.e.arrow} {ctx.lp.commands.org}\n"
+                            f"`git config --delete repo` {Mgr.e.arrow} {ctx.lp.commands.repo}\n"
+                            f"`git config --delete feed` {Mgr.e.arrow} {ctx.lp.commands.feed}\n"
+                            f"`git config --delete all` {Mgr.e.arrow} {ctx.lp.commands.all}"
             )
             await ctx.send(embed=embed)
+
+    delete_feed_group: commands.Group
 
     @delete_field_group.group(name='feed', invoke_without_command=True)
     @commands.guild_only()
@@ -497,18 +507,13 @@ class Config(commands.Cog):
     async def delete_feed_group(self, ctx: GitBotContext) -> None:
         await ctx.group_help()
 
-    async def _feed_prerequisites(self, ctx: GitBotContext) -> tuple[GitBotGuild, ReleaseFeed]:
-        guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
-        feed: ReleaseFeed = guild.get('feed', [])
-        return guild, feed
-
     @delete_feed_group.command('channel')
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_channel_command(self, ctx: GitBotContext, channel: discord.TextChannel) -> None:
         ctx.fmt.set_prefix('config delete feed channel')
-        _, feed = await self._feed_prerequisites(ctx)
+        _, feed = await self.get_feed_prerequisites(ctx)
         if not feed:
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
@@ -534,13 +539,22 @@ class Config(commands.Cog):
             await Mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
             await ctx.success(ctx.fmt('success', channel.mention))
 
+    @staticmethod
+    def parse_channel_mention_or_number_response(msg: discord.Message,
+                                                 rfis: list[ReleaseFeedItem]) -> list[int]:
+        numbers: list[int] = Mgr.get_numbers_in_range_in_str(msg.content, len(rfis))
+        channel_ids: list[int] = [int(g) for g in DISCORD_CHANNEL_MENTION_RE.findall(msg.content)]
+        for n in numbers:
+            channel_ids.append(rfis[n - 1]['cid'])
+        return channel_ids
+
     @delete_feed_group.command('repo')
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def delete_feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository):
         ctx.fmt.set_prefix('config delete feed repo')
-        guild, feed = await self._feed_prerequisites(ctx)
+        guild, feed = await self.get_feed_prerequisites(ctx)
         if not guild or not feed:
             return await ctx.error(ctx.l.generic.nonexistent.release_feed)
         present_in: list[ReleaseFeedItem] = []
@@ -562,18 +576,11 @@ class Config(commands.Cog):
                 footer=ctx.l.config.delete.feed.repo.multiple.embed.footer
             )
 
-            def _parse(res: discord.Message) -> list[int]:
-                numbers: list[int] = Mgr.get_numbers_in_range_in_str(res.content, len(present_in))
-                channel_ids: list[int] = [int(g) for g in DISCORD_CHANNEL_MENTION_RE.findall(res.content)]
-                for n in numbers:
-                    channel_ids.append(present_in[n-1]['cid'])
-                return channel_ids
-
             async def _callback(_, res: discord.Message) -> tuple[int, Optional[list[int]]]:
                 if res.content.lower() in ('quit', 'cancel'):
                     await ctx.error(ctx.l.config.delete.feed.repo.multiple.cancelled)
                     return GitBotCommandState.FAILURE, None
-                found: list[int] = _parse(res)
+                found: list[int] = self.parse_channel_mention_or_number_response(res, present_in)
                 if found:
                     return GitBotCommandState.SUCCESS, found
                 await ctx.error(ctx.l.config.delete.feed.repo.multiple.no_feeds_mentioned)
@@ -624,6 +631,55 @@ class Config(commands.Cog):
                 await Mgr.db.guilds.update_one({'_id': ctx.guild.id},
                                                {'$pull': {f'feed.{guild["feed"].index(present_in[0])}.repos': rfr}})
                 await ctx.success(ctx.fmt('success', f'`{repo.lower()}`', f'<#{present_in[0]["cid"]}>'))
+
+    @delete_feed_group.command(name='mention')
+    @commands.guild_only()
+    @commands.has_guild_permissions(manage_channels=True)
+    @commands.cooldown(5, 60, commands.BucketType.guild)
+    async def delete_feed_mention_command(self, ctx: GitBotContext):
+        ctx.fmt.set_prefix('config delete feed mention')
+        guild, feed = await self.get_feed_prerequisites(ctx)
+        if not guild or not feed:
+            return await ctx.error(ctx.l.generic.nonexistent.release_feed)
+        rfis_with_mention: list = [rfi for rfi in feed if rfi.get('mention')]
+        if not rfis_with_mention:
+            return await ctx.error(ctx.l.generic.nonexistent.release_feed_with_mention)
+        selection_embed: GitBotEmbed = GitBotEmbed(
+                color=Mgr.c.cyan,
+                title=ctx.lp.embed.title,
+                description=(ctx.lp.embed.description
+                             + f'\n{Mgr.gen_separator_line(20)}\n'
+                             + Mgr.option_display_list_format([f'<#{rfi["cid"]}> - '
+                                                               f'{Mgr.release_feed_mention_to_actual(rfi["mention"])}'
+                                                               for rfi in rfis_with_mention])),
+                footer=ctx.lp.embed.footer
+        )
+
+        async def _callback(_, res: discord.Message) -> tuple[int, Optional[int]]:
+            if res.content.lower() in ('quit', 'cancel'):
+                await ctx.error(ctx.lp.cancelled)
+                return GitBotCommandState.FAILURE, None
+            found: list[int] = self.parse_channel_mention_or_number_response(res, rfis_with_mention)
+            if found:
+                return GitBotCommandState.SUCCESS, found[0]
+            await ctx.error(ctx.lp.invalid)
+            return GitBotCommandState.CONTINUE, None
+
+        _, to_delete = await selection_embed.input_with_timeout(
+                ctx=ctx,
+                event='message',
+                timeout=30,
+                timeout_check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id,
+                response_callback=_callback
+        )
+
+        if to_delete:
+            to_delete: ReleaseFeedItem = Mgr.get_by_key_from_sequence(feed, 'cid', to_delete)
+            await Mgr.db.guilds.update_one({'_id': guild['_id']},
+                                           {'$set': {f'feed.{feed.index(to_delete)}.mention': None}})
+            await ctx.success(ctx.fmt('success',
+                                      Mgr.release_feed_mention_to_actual(to_delete['mention']),
+                                      f'<#{to_delete["cid"]}>'), allowed_mentions=discord.AllowedMentions.none())
 
     @delete_field_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)

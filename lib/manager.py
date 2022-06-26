@@ -546,6 +546,20 @@ class Manager:
 
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
 
+    @staticmethod
+    def debug_static(message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+        """
+        A special variant of :meth:`Manager.log` that sets the
+        category name as the name of the outer function (the caller).
+
+        :param message: The message to log to the console
+        :param message_color: The optional message color override
+        """
+
+        Manager.log(message,
+                    f'debug-{Fore.LIGHTYELLOW_EX}{Manager.get_last_call_from_callstack()}{Style.RESET_ALL}',
+                    Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
+
     def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
         """
         A special variant of :meth:`Manager.log` that sets the
@@ -557,9 +571,7 @@ class Manager:
         """
 
         if self.debug_mode:
-            self.log(message,
-                     f'debug-{Fore.LIGHTYELLOW_EX}{self.get_last_call_from_callstack()}{Style.RESET_ALL}',
-                     Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
+            self.debug_static(message, message_color)
 
     _int_word_conv_map: dict = {
         'zero': 0,

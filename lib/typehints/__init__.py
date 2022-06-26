@@ -32,7 +32,8 @@ __all__: tuple = (
     'CommandHelp',
     'ArgumentExplainer',
     'CommandGroupHelp',
-    'CratesIOCrate'
+    'CratesIOCrate',
+    'ReleaseFeedItemMention'
 )
 
 AnyDict = dict | DictProxy | CaseInsensitiveDict | MaxAgeDict | FixedSizeOrderedDict

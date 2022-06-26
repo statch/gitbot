@@ -71,7 +71,8 @@
       "ref": "A branch called {0} **doesn't exist** in {1}!",
       "command": "**I couldn't find that command!** Re-check the spelling?",
       "group": "**I couldn't find that command group!** Re-check the spelling?",
-      "command_or_group": "**I couldn't find that command/group!** Re-check the spelling?"
+      "command_or_group": "**I couldn't find that command/group!** Re-check the spelling?",
+      "release_feed_with_mention": "This server doesn't have any **Release Feeds with a mention configured!**"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -737,6 +738,16 @@
               "cancelled": "**Action cancelled.** {0} wasn't deleted."
             }
           }
+        },
+        "mention": {
+          "embed": {
+            "title": "Delete a mention from a release feed",
+            "description": "Type the **channel name/number** of a feed to delete the mention associated with it!",
+            "footer": "You can type `cancel` to quit"
+          },
+          "cancelled": "Deletion of a mention from a release feed **cancelled.**",
+          "invalid": "That is not a valid channel/channel number from the list! **Try again.**",
+          "success": "The {0} mention for {1} has been **deleted.**"
         }
       },
       "user": {

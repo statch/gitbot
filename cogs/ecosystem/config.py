@@ -26,7 +26,8 @@ class Config(commands.Cog):
     def construct_release_feed_list(ctx: GitBotContext, rf: ReleaseFeed) -> str:
         item: str = '' if rf else ctx.l.generic.nonexistent.release_feed
         for rfi in rf:
-            item += Mgr.e.square + ' ' + f'<#{rfi["cid"]}>\n' + \
+            m: str = '' if not rfi.get('mention') else ' - ' + Mgr.release_feed_mention_to_actual(rfi['mention'])
+            item += Mgr.e.square + ' ' + f'<#{rfi["cid"]}>{m}\n' + \
                     ('\n'.join([f'⠀⠀- [`{rfr["name"]}`](https://github.com/{rfr["name"]})'
                                 for rfr in rfi['repos']]) if rfi['repos']
                      else f'⠀⠀- {ctx.l.config.show.feed.no_repos}') + '\n'

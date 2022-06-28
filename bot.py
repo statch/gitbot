@@ -47,7 +47,7 @@ extensions: list = [
     'cogs.backend.handle.events.events',
     'cogs.python.pypi',
     'cogs.rust.crates',
-    'cogs.devtools.file'
+    'cogs.devutils.file'
 ]
 
 if Mgr.env.production:

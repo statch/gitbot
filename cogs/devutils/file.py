@@ -8,7 +8,7 @@ from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.embed import GitBotEmbed
 
 
-class FileDevtools(commands.Cog):
+class FileDevutils(commands.Cog):
     __valid_hash_algos__: tuple = ('md5', 'sha1', 'sha256', 'sha512', 'sha224', 'sha384')
 
     def __init__(self, bot: commands.Bot):
@@ -26,7 +26,7 @@ class FileDevtools(commands.Cog):
         invalid_algo_embed: GitBotEmbed = GitBotEmbed(
                 title=ctx.l.file.generic_algo_related.invalid_algorithm_embed.title,
                 description=ctx.l.file.generic_algo_related.invalid_algorithm_embed.description.format(
-                        ' '.join([f'`{a}`' for a in FileDevtools.__valid_hash_algos__])),
+                        ' '.join([f'`{a}`' for a in FileDevutils.__valid_hash_algos__])),
                 color=Mgr.c.discord.yellow,
                 footer=ctx.l.file.generic_algo_related.invalid_algorithm_embed.footer
         )
@@ -42,8 +42,8 @@ class FileDevtools(commands.Cog):
         if not ctx.message.attachments:
             await ctx.error(ctx.lp.no_file)
             return False, None, None
-        if algorithm not in FileDevtools.__valid_hash_algos__:
-            await FileDevtools.send_invalid_algorithm_embed(ctx)
+        if algorithm not in FileDevutils.__valid_hash_algos__:
+            await FileDevutils.send_invalid_algorithm_embed(ctx)
             return False, None, None
         return True, ctx.message.attachments[0], algorithm
 
@@ -57,7 +57,7 @@ class FileDevtools(commands.Cog):
     async def file_hash_command(self, ctx: GitBotContext,
                                 algorithm: Optional[str] = None):
         ctx.fmt.set_prefix('file hash')
-        c, attachment, algorithm = await FileDevtools.hashutil_command_pred(ctx, algorithm)
+        c, attachment, algorithm = await FileDevutils.hashutil_command_pred(ctx, algorithm)
         if c:
             checksum: str = await self.get_filehash(attachment, algorithm)
             result_embed: GitBotEmbed = GitBotEmbed(
@@ -72,7 +72,7 @@ class FileDevtools(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def file_verify_checksum_command(self, ctx: GitBotContext, checksum: str, algorithm: Optional[str] = None):
         ctx.fmt.set_prefix('file verify')
-        c, attachment, algorithm = await FileDevtools.hashutil_command_pred(ctx, algorithm)
+        c, attachment, algorithm = await FileDevutils.hashutil_command_pred(ctx, algorithm)
         if c:
             to_compare: str = await self.get_filehash(attachment, algorithm)
             if to_compare == checksum:
@@ -88,4 +88,4 @@ class FileDevtools(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(FileDevtools(bot))
+    bot.add_cog(FileDevutils(bot))

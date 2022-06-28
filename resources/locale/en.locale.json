@@ -1317,6 +1317,32 @@
         "required_permissions": [
           "manage_channels"
         ]
+      },
+      "file": {
+        "brief": "A command group with utilities for dealing with files!",
+        "usage": "file [subcommand]",
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "file_hash": {
+        "brief": "Get the hash of a file",
+        "usage": "file hash [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Get a file hash of the provided file generated via the specified algorithm",
+        "qa_resource": null,
+        "required_permissions": [],
+        "requires_file": true
+      },
+      "file_verify": {
+        "brief": "Verify the integrity of a file",
+        "usage": "file verify <checksum> [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
+        "qa_resource": null,
+        "required_permissions": [],
+        "requires_file": true
       }
     },
     "argument_explainers": {
@@ -1407,6 +1433,18 @@
       "license_name": {
         "name": "license-name",
         "content": "The name of an open-source license (ex. `MIT`)"
+      },
+      "hashing_algorithm": {
+        "name": "hashing-algorithm",
+        "content": "The name of a GitBot-supported hashing algorithm (ex. `sha256`)"
+      },
+      "checksum": {
+        "name": "checksum",
+        "content": "A checksum (hash) generated via the specified hashing algorithm"
+      },
+      "file": {
+        "name": "*file",
+        "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
       }
     },
     "qa_disclaimers": {

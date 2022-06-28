@@ -1507,5 +1507,33 @@
         "last_month": "Last Month: **{0}**"
       }
     }
+  },
+  "file": {
+    "generic_algo_related": {
+      "invalid_algorithm_embed": {
+        "title": "Invalid hashing algorithm!",
+        "description": "**Please use one of the following:**\n{0}",
+        "footer": "If you'd like a specific algorithm to be supported, please contact the devs in the support server."
+      }
+    },
+    "hash": {
+      "using_sha256_default": "No algorithm specified, **using SHA256...**",
+      "no_file": "You need to send this command **along with a file to hash!**",
+      "result_embed_title": "{0} checksum of {1}"
+    },
+    "verify": {
+      "using_sha256_default": "No algorithm specified, **assuming SHA256...**",
+      "no_file": "You need to send this command **along with a file to verify!**",
+      "result_embed": {
+        "success": {
+          "title": "{emoji_checkmark}  Good to go!",
+          "description": "The checksums **match!**"
+        },
+        "failure": {
+          "title": "{emoji_failure}  Uh oh!",
+          "description": "The checksums **don't match!**"
+        }
+      }
+    }
   }
 }

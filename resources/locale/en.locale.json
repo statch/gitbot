@@ -1441,7 +1441,7 @@
         "content": "A checksum (hash) generated via the specified hashing algorithm"
       },
       "file": {
-        "name": "*file",
+        "name": "file",
         "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
       }
     },

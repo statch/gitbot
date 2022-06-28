@@ -1332,8 +1332,7 @@
         "example": null,
         "description": "Get a file hash of the provided file generated via the specified algorithm",
         "qa_resource": null,
-        "required_permissions": [],
-        "requires_file": true
+        "required_permissions": []
       },
       "file_verify": {
         "brief": "Verify the integrity of a file",
@@ -1341,8 +1340,7 @@
         "example": null,
         "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
         "qa_resource": null,
-        "required_permissions": [],
-        "requires_file": true
+        "required_permissions": []
       }
     },
     "argument_explainers": {

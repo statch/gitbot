@@ -119,28 +119,10 @@
     "manage_channels": "Manage Channels",
     "manage_guild": "Manage Server"
   },
-  "privacy_policy": {
-    "title": "Privacy Policy",
-    "what": {
-      "title": "What is stored?",
-      "body": "The only data stored are your User ID and quick access users, repos and orgs."
-    },
-    "use": {
-      "title": "How is all this used anyway?",
-      "body": "It's used to provide storage for your saved users, repos and organizations, your User ID is essential for the Bot to know, what data is yours."
-    },
-    "access": {
-      "title": "Who has access to this data?",
-      "body": "Only the Bot's developer has access, no one else. Your data isn't viewed or accessed in any way unless it's required to provide the service."
-    },
-    "deletion": {
-      "title": "How can I get rid of this stored data?",
-      "body": "You can do that very easily by using the `git config -delete` command!"
-    },
-    "author": {
-      "title": "Who wrote this and can this be changed?",
-      "body": "This privacy policy was written by [wulf](https://dsc.bio/wulf), the Bot's developer, and yes, all of this is subject to change in the future."
-    }
+  "legal": {
+    "title": "GitBot Legal",
+    "description": "**Thanks for being a user of GitBot!**\nIf you wish to take a look at the legal documents governing your use of GitBot, check out [**the legal page.**](https://statch.org/gitbot/legal.html)",
+    "footer": "For any further questions, please join the support server."
   },
   "uptime": "**I have been online for:**\n{0}",
   "invite": {
@@ -1058,8 +1040,8 @@
         "qa_resource": null,
         "required_permissions": []
       },
-      "privacy": {
-        "brief": "The GitBot privacy policy",
+      "legal": {
+        "brief": "The GitBot Privacy Policy and TOS",
         "usage": null,
         "example": null,
         "description": null,

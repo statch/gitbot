@@ -67,20 +67,14 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @gitbot_command(name='privacy', aliases=['policy'])
+    @gitbot_command(name='legal', aliases=['policy', 'privacy', 'tos', 'terms', 'privacy-policy', 'terms-of-service'])
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def privacy_policy(self, ctx: GitBotContext) -> None:
-        ctx.fmt.set_prefix('privacy_policy')
-        embed: GitBotEmbed = GitBotEmbed(
-            color=Mgr.c.rounded,
-            title=f'{Mgr.e.github}  {ctx.lp.title}'
-        )
-        embed.add_field(name=ctx.lp.what.title, value=ctx.lp.what.body)
-        embed.add_field(name=ctx.lp.use.title, value=ctx.lp.use.body)
-        embed.add_field(name=ctx.lp.access.title, value=ctx.lp.access.body)
-        embed.add_field(name=ctx.lp.deletion.title, value=ctx.lp.deletion.body)
-        embed.add_field(name=ctx.lp.author.title, value=ctx.lp.author.body)
-        await ctx.send(embed=embed)
+        embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx, 'legal',
+                                                              color=0x00afe8,
+                                                              url='https://statch.org/gitbot/legal.html')
+        embed.description += '\n```\nhttps://statch.org/gitbot/legal.html```'
+        await embed.send(ctx)
 
     @gitbot_command(name='support')
     @commands.cooldown(15, 30, commands.BucketType.member)

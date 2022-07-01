@@ -121,8 +121,8 @@ We use industry-standard security measures to protect your information from unau
 Nobody can see your information except for authorized members of the Team.
 
 ## 8. Viewing your data and deleting it
-You can request to delete/view your data at any time by contacting us at [privacy@statch.org](mailto:privacy@statch.org) with information necessary to identify your information (typically your Discord user ID).
-If you wish to manage a server's data, you can request to delete/view it only if you're the owner or a server administrator.
+You can request to delete/view your data at any time either by contacting us at [privacy@statch.org](mailto:privacy@statch.org) with information necessary to identify your information (typically your Discord user ID), or by using the `git config delete` command.
+If you wish to manage a server's data, you can request to delete it only if you're the owner or a server administrator.
 
 ## Final
 Statch reserves the right to modify this Privacy Policy at any time without prior notice.

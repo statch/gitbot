@@ -98,7 +98,7 @@ The rest of the data is GitBot-specific and does not use information correlated 
 (ii.b) "Autoconv" (Automatic Conversion) settings for the server, set by users with appropriate permissions.
 
 ## 3. Information shared with third parties
-We share limited information about your Discord profile with third parties to help us provide the Service.  The parties in question are:
+We share limited information about your Discord profile with third parties to help us provide the Service.  The parties in question are:  
 (i) The GitHub API, which is used to provide the Service;  
 (ii) Statcord, used to monitor and track usage of the Service;
 
@@ -130,4 +130,4 @@ The most current version of this Privacy Policy will be available at https://sta
 Please review this policy periodically.
 Your continued use of the Service after any changes or revisions to this Privacy Policy shall indicate your agreement with the terms of such revised Privacy Policy.
 
-**This Privacy Policy was last updated on March 18th, 2022**
+**This Privacy Policy was last updated on July 1st, 2022**

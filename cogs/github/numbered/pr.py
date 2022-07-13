@@ -110,14 +110,11 @@ class PullRequest(commands.Cog):
         embed.add_field(name=f':mag_right: {ctx.l.pr.glossary[0]}:', value=info, inline=False)
 
         embed.add_field(name=f'{ctx.l.pr.glossary[1]}:',
-                        value=''.join(participant_strings) if participant_strings else ctx.l.pr.no_participants,
-                        inline=True)
+                        value=''.join(participant_strings) if participant_strings else ctx.l.pr.no_participants)
         embed.add_field(name=f'{ctx.l.pr.glossary[2]}:',
-                        value=''.join(assignee_strings) if assignee_strings else ctx.l.pr.no_assignees,
-                        inline=True)
+                        value=''.join(assignee_strings) if assignee_strings else ctx.l.pr.no_assignees)
         embed.add_field(name=f'{ctx.l.pr.glossary[3]}:',
-                        value=''.join(reviewer_strings) if reviewer_strings else ctx.l.pr.no_reviewers,
-                        inline=True)
+                        value=''.join(reviewer_strings) if reviewer_strings else ctx.l.pr.no_reviewers)
         if pr['labels']:
             embed.add_field(name=f':label: {ctx.l.pr.glossary[4]}:', value=' '.join([f"`{lb}`" for lb in pr['labels']]), inline=False)
 

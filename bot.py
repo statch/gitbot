@@ -45,7 +45,9 @@ extensions: list = [
     'cogs.ecosystem.bot_info',
     'cogs.backend.handle.errors.errors',
     'cogs.backend.handle.events.events',
-    'cogs.python.pypi'
+    'cogs.python.pypi',
+    'cogs.rust.crates',
+    'cogs.devutils.file'
 ]
 
 if Mgr.env.production:

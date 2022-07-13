@@ -11,7 +11,8 @@ __all__: tuple = (
     'Hash',
     'MessageAttachmentURL',
     'LocaleName',
-    'NumericStr'
+    'NumericStr',
+    'CratesIOCrate'
 )
 
 
@@ -26,3 +27,4 @@ PyPIProject = NewType('PyPIProject', str)
 Hash = NewType('Hash', int)
 MessageAttachmentURL = NewType('MessageAttachmentURL', str)
 LocaleName = NewType('LocaleName', str)
+CratesIOCrate = NewType('CratesIOProject', str)

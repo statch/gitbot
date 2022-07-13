@@ -25,7 +25,8 @@
       "description": "This command requires a little magic to work (edit messages and remove reactions).\n**I need to be able to manage messages and add reactions**",
       "footer": "Adjust my permissions and try again."
     },
-    "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}"
+    "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}",
+    "channel_not_found": "I can't seem to find a channel named `{0}`...\n**Does it exist and do I have access?**"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -63,13 +64,15 @@
       "issue_number": "An issue with this number **doesn't exist!**",
       "qa": "**You don't have any quick access data configured!** Use `git config` to do it",
       "locale": "This locale doesn't exist!",
-      "python_package": "A Python Package with this name doesn't exist on PyPI!",
+      "python_package": "A Python package with this name doesn't exist on PyPI!",
+      "rust_crate": "A Rust crate with this name doesn't exist on crates.io!",
       "release_feed": "This server **doesn't have any Release Feeds!** (Use this command after adding one)",
       "commit": "A commit with this OID **doesn't exist** in {0}!",
       "ref": "A branch called {0} **doesn't exist** in {1}!",
       "command": "**I couldn't find that command!** Re-check the spelling?",
       "group": "**I couldn't find that command group!** Re-check the spelling?",
-      "command_or_group": "**I couldn't find that command/group!** Re-check the spelling?"
+      "command_or_group": "**I couldn't find that command/group!** Re-check the spelling?",
+      "release_feed_with_mention": "This server doesn't have any **Release Feeds with a mention configured!**"
     },
     "issue": {
       "invalid_state": "`{0}` is not a **valid issue state!** (Try `open` or `closed`)"
@@ -116,28 +119,10 @@
     "manage_channels": "Manage Channels",
     "manage_guild": "Manage Server"
   },
-  "privacy_policy": {
-    "title": "Privacy Policy",
-    "what": {
-      "title": "What is stored?",
-      "body": "The only data stored are your User ID and quick access users, repos and orgs."
-    },
-    "use": {
-      "title": "How is all this used anyway?",
-      "body": "It's used to provide storage for your saved users, repos and organizations, your User ID is essential for the Bot to know, what data is yours."
-    },
-    "access": {
-      "title": "Who has access to this data?",
-      "body": "Only the Bot's developer has access, no one else. Your data isn't viewed or accessed in any way unless it's required to provide the service."
-    },
-    "deletion": {
-      "title": "How can I get rid of this stored data?",
-      "body": "You can do that very easily by using the `git config -delete` command!"
-    },
-    "author": {
-      "title": "Who wrote this and can this be changed?",
-      "body": "This privacy policy was written by [wulf](https://dsc.bio/wulf), the Bot's developer, and yes, all of this is subject to change in the future."
-    }
+  "legal": {
+    "title": "GitBot Legal",
+    "description": "**Thanks for being a user of GitBot!**\nIf you wish to take a look at the legal documents governing your use of GitBot, check out [**the legal page.**](https://statch.org/gitbot/legal.html)",
+    "footer": "For any further questions, please join the support server."
   },
   "uptime": "**I have been online for:**\n{0}",
   "invite": {
@@ -596,6 +581,7 @@
       "no_arg": "Please pass in a repository which you wish to follow!",
       "already_logged": "This repo's releases are **already being logged!**",
       "success": "New **{0}** releases will now be logged.",
+      "not_a_feed": "{0} is **not a release feed!** Try again?",
       "default": {
         "title": "Repository Release Feeds",
         "description": "Commands in this group allow you to get notified about new releases of a repository in designated channels.\n**To add a release feed channel:**\n{emoji_square}{0}\n**To add a repo to a channel:**\n{emoji_square}{1}"
@@ -632,6 +618,16 @@
         "success": "New {0} releases will now be logged in {1}!",
         "cancelled": "Adding a repo to the release feed **cancelled.**",
         "already_logged": "{0} releases are **already being logged** in {1}!"
+      },
+      "mention": {
+        "embed": {
+          "title": "Set a mention for releases in {0}",
+          "description": "Set the mention to be sent along with the message when a release is created, to get the attention of anyone interested.\n\n**Send the correct mention to set it.** You can also:\n{emoji_square} type \"everyone\" or \"here\" for these mentions\n{emoji_square} send a role's ID to set it without mentioning the role itself",
+          "footer": "You can type \"cancel\" to quit"
+        },
+        "cancelled": "Setting a mention for releases in {0} **cancelled.**",
+        "invalid": "That is not a valid mention/ID! **Try again.**",
+        "success": "New releases in {0} will now be sent with {1}!"
       }
     },
     "qa_set": {
@@ -713,7 +709,7 @@
         "channel": {
           "not_a_feed": "{0} is **not configured as a release feed!**",
           "invalid_channel": "That's **not a valid channel!** Try again.",
-          "explicit": {
+          "flow": {
             "confirmation": {
               "embed": {
                 "title": "Are you sure?",
@@ -724,6 +720,16 @@
               "cancelled": "**Action cancelled.** {0} wasn't deleted."
             }
           }
+        },
+        "mention": {
+          "embed": {
+            "title": "Delete a mention from a release feed",
+            "description": "Type the **channel name/number** of a feed to delete the mention associated with it!",
+            "footer": "You can type `cancel` to quit"
+          },
+          "cancelled": "Deletion of a mention from a release feed **cancelled.**",
+          "invalid": "That is not a valid channel/channel number from the list! **Try again.**",
+          "success": "The {0} mention for {1} has been **deleted.**"
         }
       },
       "user": {
@@ -894,9 +900,9 @@
       },
       "config_delete_feed_channel": {
         "brief": "A command responsible for deleting a release feed channel",
-        "usage": "config delete feed channel [channel]",
+        "usage": "config delete feed channel <channel>",
         "example": null,
-        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive. If you use this command without the channel argument, a list of active feeds will be displayed.",
+        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive.",
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",
@@ -1034,8 +1040,8 @@
         "qa_resource": null,
         "required_permissions": []
       },
-      "privacy": {
-        "brief": "The GitBot privacy policy",
+      "legal": {
+        "brief": "The GitBot Privacy Policy and TOS",
         "usage": null,
         "example": null,
         "description": null,
@@ -1076,7 +1082,7 @@
       },
       "pypi_downloads": {
         "brief": "Get a 3-month download chart for a PyPI package",
-        "usage": "pypi downloads <package_name>",
+        "usage": "pypi downloads <python_package_name>",
         "example": "pypi downloads httpcats",
         "description": null,
         "qa_resource": null,
@@ -1084,7 +1090,7 @@
       },
       "pypi_info": {
         "brief": "Get info about a PyPI package",
-        "usage": "pypi info <package_name>",
+        "usage": "pypi info <python_package_name>",
         "example": "pypi info httpcats",
         "description": null,
         "qa_resource": null,
@@ -1210,6 +1216,14 @@
         "qa_resource": null,
         "required_permissions": []
       },
+      "repo_loc": {
+        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "usage": "repo loc <repo>",
+        "example": "repo loc statch/gitbot",
+        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
       "issue": {
         "brief": "Inspect a GitHub issue",
         "usage": "issue [repo] <issue_number>",
@@ -1239,6 +1253,74 @@
         "usage": null,
         "example": null,
         "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed_mention": {
+        "brief": "Configure a mention for new repo releases",
+        "usage": "config feed mention <channel>",
+        "example": null,
+        "description": "Pick who (roles/everyone/here) to ping when a new release comes out in a release feed!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "crates": {
+        "brief": "Get info about crates.io crates",
+        "usage": "crates [subcommand]",
+        "example": null,
+        "description": "This command group allows you to view info about Rust crates published to crates.io, such as creation date, authors, downloads and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_downloads": {
+        "brief": "Get download stats of a crates.io crate",
+        "usage": "crates downloads <rust_crate_name>",
+        "example": "crates downloads tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_info": {
+        "brief": "Get info about a crates.io crate",
+        "usage": "crates info <rust_crate_name>",
+        "example": "crates info tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed_mention": {
+        "brief": "Delete a mention from a release feed",
+        "usage": null,
+        "example": null,
+        "description": "Too pingy? Delete the mention you previously configured for a release feed and enjoy the silence!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "file": {
+        "brief": "A command group with utilities for dealing with files!",
+        "usage": "file [subcommand]",
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "file_hash": {
+        "brief": "Get the hash of a file",
+        "usage": "file hash [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Get a file hash of the provided file generated via the specified algorithm",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "file_verify": {
+        "brief": "Verify the integrity of a file",
+        "usage": "file verify <checksum> [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
         "qa_resource": null,
         "required_permissions": []
       }
@@ -1296,9 +1378,13 @@
         "name": "lines",
         "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       },
-      "package_name": {
-        "name": "package-name",
-        "content": "The name of a package (ex. `httpcats`)"
+      "rust_crate_name": {
+        "name": "rust-package-name",
+        "content": "The name of a Rust crate (ex. `tokio`)"
+      },
+      "python_package_name": {
+        "name": "python-package-name",
+        "content": "The name of a Python package (ex. `py-carbon`)"
       },
       "issue_state": {
         "name": "issue-state",
@@ -1327,6 +1413,18 @@
       "license_name": {
         "name": "license-name",
         "content": "The name of an open-source license (ex. `MIT`)"
+      },
+      "hashing_algorithm": {
+        "name": "hashing-algorithm",
+        "content": "The name of a GitBot-supported hashing algorithm (ex. `sha256`)"
+      },
+      "checksum": {
+        "name": "checksum",
+        "content": "A checksum (hash) generated via the specified hashing algorithm"
+      },
+      "file": {
+        "name": "file",
+        "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
       }
     },
     "qa_disclaimers": {
@@ -1348,6 +1446,10 @@
       "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
       "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
       "title": "Missing keys in `{0}`"
+    },
+    "export_commands": {
+      "success_direct": "The command file **has been saved to** {0} ({1} commands)",
+      "success_download": "**Here's the command file!** ({1} commands)"
     }
   },
   "pypi": {
@@ -1384,6 +1486,71 @@
         "yesterday": "Yesterday: **{0}**",
         "last_week": "Last Week: **{0}**",
         "last_month": "Last Month: **{0}**"
+      }
+    }
+  },
+  "crates": {
+    "default": {
+      "title": "Crates.io Commands",
+      "description": "Commands in this group are related to [crates.io](https://crates.io),\nthe Rust package index.\nBelow you can find a list of the commands in this group.",
+      "commands": {
+        "info": "Get information about a crate",
+        "downloads": "Crate downloads"
+      }
+    },
+    "info": {
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Keywords",
+        "Categories"
+      ],
+      "authors": "Authored by {0}",
+      "more_authors": "and {0} more",
+      "all_time_downloads": "All-time downloads!",
+      "created_at": "Created at {0}",
+      "license": "Licensed under the {0} license"
+    },
+    "downloads": {
+      "title": "{0} downloads over the last {1} days",
+      "footer": "Project statistics are fetched directly from crates.io",
+      "glossary": [
+        "Date",
+        "Downloads"
+      ],
+      "stats": {
+        "yesterday": "Yesterday: **{0}**",
+        "last_week": "Last Week: **{0}**",
+        "last_month": "Last Month: **{0}**"
+      }
+    }
+  },
+  "file": {
+    "generic_algo_related": {
+      "invalid_algorithm_embed": {
+        "title": "Invalid hashing algorithm!",
+        "description": "**Please use one of the following:**\n{0}",
+        "footer": "If you'd like a specific algorithm to be supported, please contact the devs in the support server."
+      }
+    },
+    "hash": {
+      "using_sha256_default": "No algorithm specified, **using SHA256...**",
+      "no_file": "You need to send this command **along with a file to hash!**",
+      "result_embed_title": "{0} checksum of {1}"
+    },
+    "verify": {
+      "using_sha256_default": "No algorithm specified, **assuming SHA256...**",
+      "no_file": "You need to send this command **along with a file to verify!**",
+      "result_embed": {
+        "success": {
+          "title": "{emoji_checkmark}  Good to go!",
+          "description": "The checksums **match!**"
+        },
+        "failure": {
+          "title": "{emoji_failure}  Uh oh!",
+          "description": "The checksums **don't match!**"
+        }
       }
     }
   }

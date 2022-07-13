@@ -25,8 +25,8 @@ class PyPI(commands.Cog):
             await ctx.invoke(self.project_info_command, project=project)
         else:
             commands_: list = [
-                f'`git pypi {{{ctx.l.help.argument_explainers.package.name}}}` - {ctx.l.pypi.default.commands.info}',
-                f'`git pypi downloads {{{ctx.l.help.argument_explainers.package.name}}}` - {ctx.l.pypi.default.commands.downloads}'
+                f'`git pypi {{{ctx.l.help.argument_explainers.python_package_name.name}}}` - {ctx.l.pypi.default.commands.info}',
+                f'`git pypi downloads {{{ctx.l.help.argument_explainers.python_package_name.name}}}` - {ctx.l.pypi.default.commands.downloads}'
             ]
             embed: GitBotEmbed = GitBotEmbed(
                 color=Mgr.c.languages.python,
@@ -34,7 +34,8 @@ class PyPI(commands.Cog):
                 description=ctx.l.pypi.default.description
                 + '\n\n'
                 + '\n'.join(commands_),
-                thumbnail=Mgr.i.pip_logo
+                thumbnail=Mgr.i.pip_logo,
+                url=f'https://pypi.org'
             )
             await ctx.send(embed=embed)
 
@@ -71,7 +72,7 @@ class PyPI(commands.Cog):
 
             requires_python: str = ctx.fmt('requires_python', f'`{data["info"]["requires_python"]}`') + '\n'
             info: str = f'{author}{first_uploaded_at}{requires_python}'
-            embed.add_field(name=f":mag_right: {ctx.l.pypi.info.glossary[1]}:", value=info, inline=False)
+            embed.add_field(name=f":mag_right: {ctx.l.pypi.info.glossary[1]}:", value=info)
 
             homepage: tuple = (data['info']['home_page'] if 'home_page' in data['info'] and data['info']['home_page'] else None, ctx.l.pypi.info.glossary[3])
             docs: tuple = (data['info']['docs_url'] if 'docs_url' in data['info'] and data['info']['docs_url'] else None, ctx.l.pypi.info.glossary[4])
@@ -82,9 +83,7 @@ class PyPI(commands.Cog):
                 if lnk[0] is not None and len(lnk[0]) != 0:
                     link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
             if len(link_strings) != 0:
-                embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:",
-                                value='\n'.join(link_strings),
-                                inline=False)
+                embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:", value='\n'.join(link_strings))
 
             if 'license' in data['info'] and data['info']['license']:
                 embed.set_footer(text=ctx.fmt('license', data['info']['license']))
@@ -96,7 +95,7 @@ class PyPI(commands.Cog):
     @pypi_command_group.command('downloads', aliases=['dl'])
     @commands.cooldown(3, 30, commands.BucketType.user)
     @commands.max_concurrency(7)
-    async def project_releases_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
+    async def project_downloads_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
         ctx.fmt.set_prefix('pypi downloads')
         downloads_overall: Optional[dict] = await _PyPI.get_project_overall_downloads(project)
         if downloads_overall and (data := downloads_overall['data']):
@@ -119,10 +118,11 @@ class PyPI(commands.Cog):
                 thumbnail=Mgr.i.pip_logo,
                 footer=ctx.l.pypi.downloads.footer
             )
-            await ctx.send(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
-                                                                                           format='png',
-                                                                                           engine='kaleido')),
-                                                          filename=f'{project}-downloads-overall.png'))
+            await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
+                                                                                            format='png',
+                                                                                            engine='kaleido')),
+                                                           filename=f'{project}-downloads-overall.png'),
+                            mention_author=False)
         else:
             await ctx.error(ctx.l.generic.nonexistent.python_package)
 

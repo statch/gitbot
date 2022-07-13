@@ -12,6 +12,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from typing import Optional, Iterable
 from lib.typehints import EmbedLike
+from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 
@@ -39,7 +40,8 @@ class GitBotContext(commands.Context):
         self.data: Optional[dict] = None  # field used by chained invocations and quick access
         super().__init__(**attrs)
 
-    def _format_content(self, content: str, style: MessageFormattingStyle | str) -> str:
+    @staticmethod
+    def _format_content(content: str, style: MessageFormattingStyle | str) -> str:
         match MessageFormattingStyle(style):
             case MessageFormattingStyle.ERROR:
                 return f'{Mgr.e.err}  {content}'
@@ -49,6 +51,14 @@ class GitBotContext(commands.Context):
                 return f'{Mgr.e.github}  {content}'
             case _:
                 return content
+
+    @property
+    def lp(self) -> DictProxy:
+        """
+        Returns a prefixed subset of the context locale.
+        """
+
+        return Mgr.get_nested_key(self.l, self.fmt.prefix.strip())
 
     async def send(self,
                    content: Optional[str] = None,

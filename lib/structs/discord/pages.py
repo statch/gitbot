@@ -14,6 +14,7 @@ from discord.ext import commands
 from typing import Optional, NoReturn, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
+    from lib.structs.discord.bot import GitBot
 from lib.structs.discord.embed import GitBotEmbed, GitBotCommandState
 from lib.globs import Mgr
 
@@ -59,8 +60,15 @@ class EmbedPages:
         self.start_time: Optional[float] = None
         self.last_action_time: Optional[float] = None
         self.message: Optional[discord.Message] = None
-        self.context: Optional[commands.Context] = None
-        self.bot: Optional[commands.Bot] = None
+        self.context: Optional['GitBotContext'] = None
+        self.bot: Optional['GitBot'] = None
+
+    @staticmethod
+    def _ensure_perms(channel: discord.TextChannel) -> NoReturn:
+        if not isinstance(channel, discord.DMChannel):
+            permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
+            if not (permissions.administrator or all([permissions.manage_messages, permissions.add_reactions])):
+                raise EmbedPagesPermissionError
 
     @property
     def current_page_string(self) -> str:
@@ -177,12 +185,6 @@ class EmbedPages:
         self.last_action_time: float = self.start_time
         self.bot: commands.Bot = self.context.bot
         self.message: discord.Message = message
-
-    def _ensure_perms(self, channel: discord.TextChannel) -> NoReturn:
-        if not isinstance(channel, discord.DMChannel):
-            permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
-            if not (permissions.administrator or all([permissions.manage_messages, permissions.add_reactions])):
-                raise EmbedPagesPermissionError
 
     async def _add_controls(self):
         if self.message:

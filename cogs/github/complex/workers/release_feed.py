@@ -17,6 +17,15 @@ class ReleaseFeedWorker(commands.Cog):
         else:
             Mgr.log("Release feed worker is disabled - env.run_release_feed_worker == False")
 
+    @staticmethod
+    async def update_tag_names_with_data(guild: GitBotGuild,
+                                         update_data: list[TagNameUpdateData]) -> None:
+        feed = guild['feed']
+        for ud in update_data:
+            (_repos := feed[feed.index(ud.rfi)]['repos'])[_repos.index(ud.rfr)] = {'name': ud.rfr['name'],
+                                                                                   'tag': ud.tag}
+        await Mgr.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
+
     @tasks.loop(minutes=45)
     async def release_feed_worker(self) -> None:
         Mgr.debug('Starting worker cycle')
@@ -78,16 +87,7 @@ class ReleaseFeedWorker(commands.Cog):
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
         await self.send_to_rfi(guild, rfi, embed,
-                               Mgr.release_feed_mention_to_actual(rfi['mention']) if rfi['mention'] else None)
-
-    async def update_tag_names_with_data(self,
-                                         guild: GitBotGuild,
-                                         update_data: list[TagNameUpdateData]) -> None:
-        feed = guild['feed']
-        for ud in update_data:
-            (_repos := feed[feed.index(ud.rfi)]['repos'])[_repos.index(ud.rfr)] = {'name': ud.rfr['name'],
-                                                                                   'tag': ud.tag}
-        await Mgr.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
+                               Mgr.release_feed_mention_to_actual(rfi['mention']) if rfi.get('mention') else None)
 
     async def handle_missing_feed_repo(self, guild: GitBotGuild, rfi: ReleaseFeedItem, repo: ReleaseFeedRepo) -> None:
         embed: discord.Embed = discord.Embed(

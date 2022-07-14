@@ -49,6 +49,10 @@ class Errors(commands.Cog):
                 await respond_to_command_doesnt_exist(ctx, error)
                 if Mgr.env.production:
                     await log_error_in_discord(ctx, error)
+            case commands.CheckFailure:
+                ...
+            case commands.RoleNotFound:
+                await ctx.error(ctx.fmt('role_not_found', error.argument))
             case _:
                 if (not Mgr.env.production) and not getattr(ctx, '__autoinvoked__', False):
                     raise error

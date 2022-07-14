@@ -26,7 +26,8 @@
       "footer": "Adjust my permissions and try again."
     },
     "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}",
-    "channel_not_found": "I can't seem to find a channel named `{0}`...\n**Does it exist and do I have access?**"
+    "channel_not_found": "I can't seem to find a channel named `{0}`...\n**Does it exist and do I have access?**",
+    "role_not_found": "I can't seem to find a role named `{0}`..."
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
@@ -772,6 +773,10 @@
           "value": "Some commands utilize your saved users, repos, orgs, etc. to make their syntax shorter. If that's the case - it will be mentioned in the command's help footer, and you can skip the corresponding argument."
         }
       ]
+    },
+    "no_help_for_command": {
+      "title": "Uh oh!",
+      "description": "This command does exist, **but there isn't any help for it as of yet!**\nIf you're still unsure how to use it, you can join the [support server](https://discord.statch.org) and **ask for help.**"
     },
     "commands": {
       "repo": {

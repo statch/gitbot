@@ -26,7 +26,7 @@ class ReleaseFeedWorker(commands.Cog):
                                                                                    'tag': ud.tag}
         await Mgr.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
 
-    @tasks.loop(minutes=45)
+    @tasks.loop(minutes=Mgr.env.release_feed_worker_interval)
     async def release_feed_worker(self) -> None:
         Mgr.debug('Starting worker cycle')
         query: AsyncIOMotorCursor = Mgr.db.guilds.find({'feed': {'$exists': True}})

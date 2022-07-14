@@ -445,7 +445,7 @@ class Manager:
                                                                 tlsAllowInvalidCertificates=False)
         self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
 
-    def _set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
+    def _maybe_set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
         """
         Optionally add an environment directive (behavior config for environment loading)
 
@@ -461,10 +461,13 @@ class Manager:
         if (directive := name.lower()).startswith('directive_'):
             if (directive := directive.replace('directive_', '')) not in \
                     self.env_directives or (directive in self.env_directives and overwrite):
-                self.env_directives[directive] = value
-                self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                self._set_env_directive(directive, value)
                 return True
         return False
+
+    def _set_env_directive(self, directive: str, value: bool) -> None:
+        self.env_directives[directive] = value
+        self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
 
     def _prepare_env(self) -> None:
         """
@@ -473,13 +476,13 @@ class Manager:
         """
 
         self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
-                                         if not self._set_env_directive(k, v)})
+                                         if not self._maybe_set_env_directive(k, v)})
         self.env_directives: DictProxy = DictProxy()
 
         with open('resources/env_defaults.json', 'r', encoding='utf8') as fp:
             env_defaults: dict = json.loads(fp.read())
             for k, v in env_defaults.items():
-                if not self._set_env_directive(k, v) and k not in self.env:
+                if not self._maybe_set_env_directive(k, v) and k not in self.env:
                     self.env[k] = v
         self.load_dotenv()
 
@@ -490,7 +493,7 @@ class Manager:
         :param binding: The binding to handle
         """
 
-        if not self._set_env_directive(binding.key, binding.value):
+        if not self._maybe_set_env_directive(binding.key, binding.value):
             try:
                 if self.env_directives.get('eval_literal'):
                     if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):

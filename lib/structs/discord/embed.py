@@ -178,7 +178,11 @@ class GitBotEmbed(discord.Embed):
                 await self.edit_with_state(ctx, state)
                 return event_data, return_args if return_args is None else return_args[0]
         except asyncio.TimeoutError:
-            await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)
+            try:
+                await self.edit_with_state(ctx, GitBotCommandState.TIMEOUT)
+            except discord.errors.NotFound:
+                # we don't really care if the message was deleted since it was timed out anyway
+                pass
         return None, None
 
     async def confirmation(self, ctx: 'GitBotContext', callback: GitBotEmbedResponseCallback) -> bool:

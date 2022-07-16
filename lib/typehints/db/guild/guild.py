@@ -1,7 +1,7 @@
 from typing import TypedDict
 from lib.typehints.generic import GuildID
 from lib.typehints.db.guild.release_feed import ReleaseFeed
-from .autoconv import AutomaticConversion
+from .autoconv import AutomaticConversionSettings
 
 __all__: tuple = ('GitBotGuild',)
 
@@ -18,4 +18,4 @@ class GitBotGuild(TypedDict, total=False):
 
     _id: GuildID
     feed: ReleaseFeed
-    autoconv: AutomaticConversion
+    autoconv: AutomaticConversionSettings

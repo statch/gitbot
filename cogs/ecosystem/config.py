@@ -5,7 +5,7 @@ from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitHubUser, GitBotGuild,
                            ReleaseFeedItem, ReleaseFeed,
-                           ReleaseFeedRepo, AutomaticConversion,
+                           ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
 from typing import Optional, Literal
 from lib.structs import GitBotEmbed, GitBotCommandState
@@ -37,7 +37,7 @@ class Config(commands.Cog):
     async def toggle_autoconv_item(ctx: GitBotContext,
                                    item: Literal['gh_url', 'codeblock']) -> bool:
         guild: GitBotGuild = await Mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
-        config: AutomaticConversion = guild.get('autoconv', Mgr.env.autoconv_default)
+        config: AutomaticConversionSettings = guild.get('autoconv', Mgr.env.autoconv_default)
         config[item] = (state := not (config.get(item, Mgr.env.autoconv_default[item])))  # noqa cause PyCharm is high
         if guild:
             await Mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
@@ -87,9 +87,9 @@ class Config(commands.Cog):
                                                           f' `{ctx.l.config.show.base.item_not_configured}`'
                 ctx.fmt.set_prefix('+guild list autoconv')
                 if not guild:
-                    ac: AutomaticConversion = Mgr.env.autoconv_default
+                    ac: AutomaticConversionSettings = Mgr.env.autoconv_default
                 else:
-                    ac: AutomaticConversion = {k: (v if k not in (_ac := guild.get('autoconv', {}))
+                    ac: AutomaticConversionSettings = {k: (v if k not in (_ac := guild.get('autoconv', {}))
                                                else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
                 codeblock: str = ctx.fmt('codeblock',
                                          f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
@@ -471,11 +471,11 @@ class Config(commands.Cog):
             actual_state = skip_state
         if (_str := str(actual_state)) in ctx.lp.results.keys():
             if guild:
-                config: AutomaticConversion = guild.get('autoconv', Mgr.env.autoconv_default)
+                config: AutomaticConversionSettings = guild.get('autoconv', Mgr.env.autoconv_default)
                 config['gh_lines'] = actual_state
                 await Mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {'autoconv.gh_lines': actual_state}})
             else:
-                config: AutomaticConversion = Mgr.env.autoconv_default
+                config: AutomaticConversionSettings = Mgr.env.autoconv_default
                 config['gh_lines'] = actual_state
                 await Mgr.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
             Mgr.autoconv_cache[ctx.guild.id] = config

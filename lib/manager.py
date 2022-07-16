@@ -45,7 +45,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # no
 from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversion, LocaleName, ReleaseFeedItemMention
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention
 
 
 class Manager:
@@ -880,8 +880,8 @@ class Manager:
     @normalize_identity(context_resource='guild')
     async def get_autoconv_config(self,
                                   _id: Identity,
-                                  did_exist: bool = False) -> Type[AutomaticConversion] | tuple[AutomaticConversion,
-                                                                                                bool]:
+                                  did_exist: bool = False) -> Type[AutomaticConversionSettings] | tuple[AutomaticConversionSettings,
+                                                                                                        bool]:
         """
         Get the configured permission for automatic conversion from messages (links, snippets, etc.)
 
@@ -894,15 +894,15 @@ class Manager:
 
         if cached := self.autoconv_cache.get(_id):
             _did_exist: bool = True
-            permission: AutomaticConversion = cached
+            permission: AutomaticConversionSettings = cached
             self.debug(f'Returning cached value for identity "{_id}"')
         else:
             stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
             if stored:
-                permission: AutomaticConversion = stored.get('autoconv', self.env.autoconv_default)
+                permission: AutomaticConversionSettings = stored.get('autoconv', self.env.autoconv_default)
                 _did_exist: bool = True
             else:
-                permission: AutomaticConversion = self.env.autoconv_default
+                permission: AutomaticConversionSettings = self.env.autoconv_default
             self.autoconv_cache[_id] = permission
         return permission if not did_exist else (permission, _did_exist)
 

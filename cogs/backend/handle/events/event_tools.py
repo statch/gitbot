@@ -6,7 +6,7 @@ from lib.globs import Mgr
 from lib.utils import regex
 from cogs.github.other.snippets.snippet_tools import handle_url, gen_carbon_inmemory
 from typing import Optional
-from lib.typehints import AutomaticConversion
+from lib.typehints import AutomaticConversionSettings
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
 
@@ -22,11 +22,12 @@ def set_handler_ctx_attributes(ctx: GitBotContext) -> commands.Context:
 @commands.max_concurrency(6, wait=True)
 async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message]:
     codeblock: Optional[str] = None
-    config: AutomaticConversion = await Mgr.get_autoconv_config(ctx)
+    config: AutomaticConversionSettings = await Mgr.get_autoconv_config(ctx)
+    match_ = None  # put the match_ name in the namespace
     if (attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
         Mgr.debug('Responding with cached asset URL')
         return await ctx.reply(attachment_url, mention_author=False)
-    elif (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and config['codeblock']:
+    elif (result := Mgr.extract_content_from_codeblock(ctx.message.content)) and config.get('codeblock', False):
         Mgr.debug(f'Converting codeblock in MID {ctx.message.id} into carbon snippet...')
         codeblock: str = result
     elif match_ := (regex.GITHUB_LINES_URL_RE.search(ctx.message.content)
@@ -44,10 +45,11 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
             if codeblock:
                 Mgr.debug(f'Converting MID {ctx.message.id} into codeblock...')
                 return await ctx.reply(codeblock, mention_author=False)
+    _1st_lineno: int = 1 if not match_ else match_.group('first_line_number')
     if codeblock and len(codeblock.splitlines()) < Mgr.env.carbon_len_threshold:
         start: float = time.time()
         reply: discord.Message = await ctx.reply(file=discord.File(filename='snippet.png',
-                                                                   fp=await gen_carbon_inmemory(codeblock, match_.group('first_line_number'))),  # noqa
+                                                                   fp=await gen_carbon_inmemory(codeblock, _1st_lineno)),
                                                  mention_author=False)
         Mgr.debug(f'Carbon asset generation elapsed: {time.time() - start}s')
         Mgr.carbon_attachment_cache[ctx.message.content] = reply.attachments[0].url

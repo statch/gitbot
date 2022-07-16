@@ -12,10 +12,15 @@ from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo, GitBotGuild, TagName
 class ReleaseFeedWorker(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+        self.iterno: int = 0
         if Mgr.env.run_release_feed_worker:
             self.release_feed_worker.start()
         else:
             Mgr.log("Release feed worker is disabled - env.run_release_feed_worker == False")
+
+    @property
+    def pretty_iterno(self):
+        return f'#{str(self.iterno).zfill(3)}'
 
     @staticmethod
     async def update_tag_names_with_data(guild: GitBotGuild,
@@ -28,7 +33,8 @@ class ReleaseFeedWorker(commands.Cog):
 
     @tasks.loop(minutes=Mgr.env.release_feed_worker_interval)
     async def release_feed_worker(self) -> None:
-        Mgr.debug('Starting worker cycle')
+        self.iterno += 1
+        Mgr.debug(f'Starting worker cycle {self.pretty_iterno}')
         query: AsyncIOMotorCursor = Mgr.db.guilds.find({'feed': {'$exists': True}})
         async for guild in query:
             Mgr.debug(f'Handling GID {guild["_id"]}')

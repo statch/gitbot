@@ -49,7 +49,7 @@ class GitBotEmbed(discord.Embed):
                  author_url: str = discord.Embed.Empty,
                  author_icon_url: str = discord.Embed.Empty,
                  **kwargs):
-        kwargs.setdefault('color', 0x2F3136)
+        kwargs.setdefault('color', 0x2f3136)
         super().__init__(**kwargs)
         self.set_footer(text=footer, icon_url=footer_icon_url)
         self.set_thumbnail(url=thumbnail)
@@ -91,22 +91,23 @@ class GitBotEmbed(discord.Embed):
         return await messageable.send(embed=self, *args, **kwargs)
 
     async def edit_with_state(self, ctx: 'GitBotContext', state: int) -> None:
-        if ctx.author.id is ctx.guild.me.id:
-            _embed: EmbedLike = ctx.message.embeds[0] if ctx.message.embeds else None
-            if _embed:
-                if state is GitBotCommandState.SUCCESS:
-                    self._input_with_timeout_update(0x57F287,
+        if ctx.author.id != ctx.guild.me.id:
+            return
+        if _embed := ctx.message.embeds[0] if ctx.message.embeds else None:
+            match state:
+                case GitBotCommandState.SUCCESS:
+                    self._input_with_timeout_update(0x57f287,
                                                     '<:checkmark:770244084727283732>',
                                                     ctx.l.generic.completed,
                                                     _embed)
-                elif state is GitBotCommandState.FAILURE:
-                    self._input_with_timeout_update(0xED4245,
+                case GitBotCommandState.FAILURE:
+                    self._input_with_timeout_update(0xed4245,
                                                     '<:failure:770244076896256010>',
                                                     ctx.l.generic.failure,
                                                     _embed)
-                elif state is GitBotCommandState.TIMEOUT:
-                    self._input_with_timeout_update(0xFEE75C, ':warning:', ctx.l.generic.inactive, _embed)
-                await ctx.message.edit(embed=_embed)
+                case GitBotCommandState.TIMEOUT:
+                    self._input_with_timeout_update(0xfee75c, ':warning:', ctx.l.generic.inactive, _embed)
+            await ctx.message.edit(embed=_embed)
 
     def _input_with_timeout_update(self,
                                    color: int,

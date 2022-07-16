@@ -74,8 +74,8 @@ class ReleaseFeedWorker(commands.Cog):
             embed.set_image(url=new_release['openGraphImageUrl'])
 
         if body := new_release['release']['descriptionHTML']:
-            body: str = BeautifulSoup(body, features='html.parser').getText()[:387].replace('\n\n', '\n')
-            body: str = f"```{body[:body.rindex(' ')]}...```".strip()
+            body: str = ' '.join(BeautifulSoup(body, features='html.parser').getText().split())
+            body: str = f"```{Mgr.truncate(body, 400, full_word=True)}```".strip()
 
         author: dict = new_release["release"]["author"]
         author: str = f'Created by [{author["login"]}]({author["url"]}) on ' \

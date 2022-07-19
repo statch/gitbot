@@ -1,6 +1,6 @@
 import re
 import discord
-from .snippet_tools import handle_url, gen_carbon_inmemory  # noqa
+from ._snippet_tools import handle_url, gen_carbon_inmemory  # noqa
 from aiohttp import ClientSession
 from discord.ext import commands
 from lib.utils import regex

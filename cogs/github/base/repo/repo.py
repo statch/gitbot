@@ -1,7 +1,7 @@
 import discord
 import re
 import io
-from .list_plugin import issue_list, pull_request_list  # noqa
+from ._list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Optional
 from lib.globs import Git, Mgr

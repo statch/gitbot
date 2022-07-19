@@ -3,7 +3,7 @@ import platform
 import requests
 import sentry_sdk
 from lib.globs import Mgr
-from bot import bot, logger
+from bot import bot
 
 
 def prepare_cloc() -> None:
@@ -23,11 +23,11 @@ def prepare_sentry() -> None:
 
 def prepare() -> None:
     if os.name != 'nt':
-        logger.info('Installing uvloop...')
+        bot.logger.info('Installing uvloop...')
         __import__('uvloop').install()
     else:
-        logger.info('Skipping uvloop install...')
-    logger.info('Running on %s %s' % (platform.system(), platform.release()))
+        bot.logger.info('Skipping uvloop install...')
+    bot.logger.info('Running on %s %s' % (platform.system(), platform.release()))
     if not os.path.exists('./tmp'):
         os.mkdir('tmp')
     prepare_cloc()

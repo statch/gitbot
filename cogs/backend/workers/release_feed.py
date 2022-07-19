@@ -1,16 +1,16 @@
 import discord
 import datetime
-from bot import logger
 from bs4 import BeautifulSoup
 from typing import Optional
 from discord.ext import tasks, commands
 from lib.globs import Git, Mgr
+from lib.structs.discord.bot import GitBot
 from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo, GitBotGuild, TagNameUpdateData
 
 
 class ReleaseFeedWorker(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
         self.iterno: int = 0
         if Mgr.env.run_release_feed_worker:
             self.release_feed_worker.start()
@@ -105,7 +105,7 @@ class ReleaseFeedWorker(commands.Cog):
 
     @release_feed_worker.before_loop
     async def release_feed_worker_before_loop(self) -> None:
-        logger.info('Release worker sleeping until the bot is ready...')
+        self.bot.logger.info('Release worker sleeping until the bot is ready...')
         await self.bot.wait_until_ready()
 
     async def send_to_rfi(self,
@@ -123,5 +123,5 @@ class ReleaseFeedWorker(commands.Cog):
         return True
 
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: GitBot) -> None:
     bot.add_cog(ReleaseFeedWorker(bot))

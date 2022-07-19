@@ -83,7 +83,7 @@ class Manager:
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
 
-    def get_current_commit(self) -> str | None:
+    def get_current_commit(self, short: bool = True) -> str | None:
         """
         Get the current commit hash of the running bot instance.
         Heroku uses the `HEROKU_SLUG_COMMIT` environment variable to store the commit hash,
@@ -94,7 +94,7 @@ class Manager:
 
         return self.opt(self.env.get('HEROKU_SLUG_COMMIT',
                                      subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()),
-                        operator.getitem, slice(7))
+                        operator.getitem, slice(7 if short else None))
 
     @staticmethod
     def render_label_like_list(labels: Collection[str] | list[dict],

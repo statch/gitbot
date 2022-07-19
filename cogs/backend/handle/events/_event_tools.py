@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from lib.globs import Mgr
 from lib.utils import regex
-from cogs.github.other.snippets.snippet_tools import handle_url, gen_carbon_inmemory
+from cogs.github.other.snippets._snippet_tools import handle_url, gen_carbon_inmemory
 from typing import Optional
 from lib.typehints import AutomaticConversionSettings
 from lib.structs import GitBotEmbed

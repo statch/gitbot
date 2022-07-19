@@ -3,7 +3,7 @@ from lib.globs import Mgr
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord import pages
 from lib.structs.discord.embed import GitBotEmbed
-from .error_tools import respond_to_command_doesnt_exist, log_error_in_discord,  silenced  # noqa
+from ._error_tools import respond_to_command_doesnt_exist, log_error_in_discord,  silenced  # noqa
 
 
 class Errors(commands.Cog):

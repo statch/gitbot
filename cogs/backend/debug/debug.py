@@ -1,3 +1,5 @@
+import os
+import sys
 import discord.ext.commands as commands
 import discord
 import datetime as dt
@@ -91,6 +93,8 @@ class Debug(commands.Cog):
                 'ctx': ctx,
                 'Git': Git,
                 'Mgr': Mgr,
+                'os': os,
+                'sys': sys,
                 '__import__': __import__
             }
             exec(compile(parsed, filename='<ast>', mode='exec'), env)  # pylint: disable=exec-used

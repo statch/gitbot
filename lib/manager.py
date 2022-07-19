@@ -25,6 +25,7 @@ import certifi
 import operator
 import datetime
 import functools
+import subprocess
 import dotenv.parser
 from sys import getsizeof
 from itertools import chain
@@ -81,6 +82,19 @@ class Manager:
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
+
+    def get_current_commit(self, short: bool = True) -> str | None:
+        """
+        Get the current commit hash of the running bot instance.
+        Heroku uses the `HEROKU_SLUG_COMMIT` environment variable to store the commit hash,
+        but when running locally, the commit hash is stored in the `.git/HEAD` file.
+
+        :return: The current commit hash
+        """
+
+        return self.opt(self.env.get('HEROKU_SLUG_COMMIT',
+                                     subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()),
+                        operator.getitem, slice(7 if short else None))
 
     @staticmethod
     def render_label_like_list(labels: Collection[str] | list[dict],

@@ -1,21 +1,25 @@
 import discord
 import datetime
-from motor.motor_asyncio import AsyncIOMotorCursor
-from bot import logger
 from bs4 import BeautifulSoup
 from typing import Optional
 from discord.ext import tasks, commands
 from lib.globs import Git, Mgr
+from lib.structs.discord.bot import GitBot
 from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo, GitBotGuild, TagNameUpdateData
 
 
 class ReleaseFeedWorker(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
+        self.iterno: int = 0
         if Mgr.env.run_release_feed_worker:
             self.release_feed_worker.start()
         else:
             Mgr.log("Release feed worker is disabled - env.run_release_feed_worker == False")
+
+    @property
+    def pretty_iterno(self):
+        return f'#{str(self.iterno).zfill(3)}'
 
     @staticmethod
     async def update_tag_names_with_data(guild: GitBotGuild,
@@ -28,9 +32,9 @@ class ReleaseFeedWorker(commands.Cog):
 
     @tasks.loop(minutes=Mgr.env.release_feed_worker_interval)
     async def release_feed_worker(self) -> None:
-        Mgr.debug('Starting worker cycle')
-        query: AsyncIOMotorCursor = Mgr.db.guilds.find({'feed': {'$exists': True}})
-        async for guild in query:
+        self.iterno += 1
+        Mgr.debug(f'Starting worker cycle {self.pretty_iterno}')
+        async for guild in Mgr.db.guilds.find({'feed': {'$exists': True}}):
             Mgr.debug(f'Handling GID {guild["_id"]}')
             guild: GitBotGuild
             changed: bool = False
@@ -101,7 +105,7 @@ class ReleaseFeedWorker(commands.Cog):
 
     @release_feed_worker.before_loop
     async def release_feed_worker_before_loop(self) -> None:
-        logger.info('Release worker sleeping until the bot is ready...')
+        self.bot.logger.info('Release worker sleeping until the bot is ready...')
         await self.bot.wait_until_ready()
 
     async def send_to_rfi(self,
@@ -119,5 +123,5 @@ class ReleaseFeedWorker(commands.Cog):
         return True
 
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: GitBot) -> None:
     bot.add_cog(ReleaseFeedWorker(bot))

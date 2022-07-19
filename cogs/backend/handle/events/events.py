@@ -4,7 +4,7 @@ from discord.ext import commands
 from lib.globs import Mgr
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
-from .event_tools import build_guild_embed, handle_codeblock_message, handle_link_message  # noqa
+from ._event_tools import build_guild_embed, handle_codeblock_message, handle_link_message  # noqa
 
 
 async def guild_text_channels(guild: discord.Guild):

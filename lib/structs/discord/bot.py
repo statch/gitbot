@@ -69,3 +69,4 @@ class GitBot(commands.Bot):
     async def on_ready(self) -> None:
         self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')
         self.logger.info(f'The bot is ready!')
+        self.logger.info(f'Runtime vars:\n' + '\n'.join(f'- {k}: {v}' for k, v in self.runtime_vars.items()))

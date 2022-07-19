@@ -1,7 +1,7 @@
 import discord
 from lib.globs import Mgr
 from discord.ext import commands
-from lib.utils.decorators import restricted, gitbot_command
+from lib.utils.decorators import restricted
 from lib.structs.discord.bot import GitBot
 from lib.structs.discord.context import GitBotContext
 
@@ -38,19 +38,19 @@ async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
             await ctx.success(f'**Successfully {op}ed** `{cog}`.')
 
 
-@gitbot_command(name='reload', hidden=True)
+@bot.command(name='reload', hidden=True)
 @restricted()
 async def reload_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
-@gitbot_command(name='load', hidden=True)
+@bot.command(name='load', hidden=True)
 @restricted()
 async def load_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
-@gitbot_command(name='unload', hidden=True)
+@bot.command(name='unload', hidden=True)
 @restricted()
 async def unload_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')

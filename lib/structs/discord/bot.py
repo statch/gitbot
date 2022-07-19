@@ -12,6 +12,7 @@ import logging
 from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 from lib.globs import Mgr
 
 __all__: tuple = ('GitBot',)
@@ -40,6 +41,12 @@ class GitBot(commands.Bot):
         ctx: GitBotContext = await super().get_context(message, cls=cls)
         await ctx.prepare()
         return ctx
+
+    def command(self, *args, **kwargs):
+        return super().command(*args, **kwargs, cls=GitBotCommand)
+
+    def group(self, *args, **kwargs):
+        return super().group(*args, **kwargs, cls=GitBotCommandGroup)
 
     def load_extension(self, name: str, *, package=None):
         super().load_extension(name, package=package)

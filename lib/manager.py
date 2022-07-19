@@ -93,14 +93,20 @@ class Manager:
         """
 
         try:
-            commit: str | None = self.opt(os.environ.get('HEROKU_SLUG_COMMIT',
-                                                         subprocess.check_output(['git',
-                                                                                  'rev-parse',
-                                                                                  'HEAD']).decode('utf-8').strip()),
+            commit: str | None = self.opt(self.env.get('HEROKU_SLUG_COMMIT') or self.git_rev_parse_head(),
                                           operator.getitem, slice(7 if short else None))
             return commit if commit else 'unavailable'
         except subprocess.CalledProcessError:
             return 'unavailable'
+
+    @staticmethod
+    def git_rev_parse_head() -> str | None:
+        try:
+            subprocess.check_output(['git',
+                                     'rev-parse',
+                                     'HEAD']).decode('utf-8').strip()
+        except subprocess.CalledProcessError:
+            return None
 
     @staticmethod
     def render_label_like_list(labels: Collection[str] | list[dict],

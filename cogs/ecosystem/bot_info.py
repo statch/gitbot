@@ -72,8 +72,8 @@ class BotInfo(commands.Cog):
     async def privacy_policy(self, ctx: GitBotContext) -> None:
         embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx, 'legal',
                                                               color=0x00afe8,
-                                                              url='https://statch.org/gitbot/legal.html')
-        embed.description += '\n```\nhttps://statch.org/gitbot/legal.html```'
+                                                              url='https://statch.org/gitbot/legal')
+        embed.description += '\n```\nhttps://statch.org/gitbot/legal```'
         await embed.send(ctx)
 
     @gitbot_command(name='support')

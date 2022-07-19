@@ -92,16 +92,16 @@ class Manager:
         :return: The current commit hash
         """
 
-        commit: str | None = self.opt(self.env.get('HEROKU_SLUG_COMMIT') or self.git_rev_parse_head(),
+        commit: str | None = self.opt(self.env.get(self.env.commit_env_var_name) or self.git_rev_parse_head(),
                                       operator.getitem, slice(7 if short else None))
         return commit if commit else 'unavailable'
 
     @staticmethod
     def git_rev_parse_head() -> str | None:
         try:
-            subprocess.check_output(['git',
-                                     'rev-parse',
-                                     'HEAD']).decode('utf-8').strip()
+            return subprocess.check_output(['git',
+                                            'rev-parse',
+                                            'HEAD']).decode('utf-8').strip()
         except subprocess.CalledProcessError:
             return None
 

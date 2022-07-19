@@ -92,9 +92,12 @@ class Manager:
         :return: The current commit hash
         """
 
-        return self.opt(self.env.get('HEROKU_SLUG_COMMIT',
-                                     subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()),
-                        operator.getitem, slice(7 if short else None))
+        try:
+            return self.opt(self.env.get('HEROKU_SLUG_COMMIT',
+                                         subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()),
+                            operator.getitem, slice(7 if short else None))
+        except subprocess.CalledProcessError:
+            return None
 
     @staticmethod
     def render_label_like_list(labels: Collection[str] | list[dict],

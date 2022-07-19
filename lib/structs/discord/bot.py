@@ -69,8 +69,8 @@ class GitBot(commands.Bot):
 
     def load_cogs(self) -> None:
         for subdir in os.listdir('cogs'):
-            if os.path.isdir(f'cogs/{subdir}') and subdir \
-                    not in Mgr.env.production_only_cog_subdirs:
+            if os.path.isdir(f'cogs/{subdir}') and (subdir not in Mgr.env.production_only_cog_subdirs
+                                                    if not Mgr.env.production else True):
                 self.load_cogs_from_dir(f'cogs/{subdir}')
 
     async def on_ready(self) -> None:

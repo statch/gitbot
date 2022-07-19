@@ -21,7 +21,7 @@ __all__: tuple = ('GitBot',)
 class GitBot(commands.Bot):
     runtime_vars: dict[str, str] = {
         'discord.py-version': discord.__version__,
-        'gitbot-commit': Mgr.get_current_commit(),
+        'gitbot-commit': Mgr.get_current_commit(short=False),
     }
 
     def __init__(self, *args, **kwargs):

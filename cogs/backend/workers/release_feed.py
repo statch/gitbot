@@ -1,6 +1,5 @@
 import discord
 import datetime
-from motor.motor_asyncio import AsyncIOMotorCursor
 from bot import logger
 from bs4 import BeautifulSoup
 from typing import Optional
@@ -35,8 +34,7 @@ class ReleaseFeedWorker(commands.Cog):
     async def release_feed_worker(self) -> None:
         self.iterno += 1
         Mgr.debug(f'Starting worker cycle {self.pretty_iterno}')
-        query: AsyncIOMotorCursor = Mgr.db.guilds.find({'feed': {'$exists': True}})
-        async for guild in query:
+        async for guild in Mgr.db.guilds.find({'feed': {'$exists': True}}):
             Mgr.debug(f'Handling GID {guild["_id"]}')
             guild: GitBotGuild
             changed: bool = False

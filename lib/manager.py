@@ -261,8 +261,8 @@ class Manager:
         Check if the current terminal supports color.
         """
 
-        return self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else \
-            self.env.terminal_supports_color.lower() in ('true', '1', 'yes', 'y')
+        return (self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else
+                self._eval_bool_literal_safe(self.env.terminal_supports_color))
 
     def log(self,
             message: str,
@@ -429,11 +429,13 @@ class Manager:
         :return: The converted literal or the literal itself if it's not a boolean
         """
 
-        if (literal_ := literal.lower()) == 'true':
-            return True
-        elif literal_ == 'false':
-            return False
-        return literal
+        match literal.lower():
+            case 'true' | 't' | 'y' | '1' | 'yes':
+                return True
+            case 'false' | 'f' | 'n' | '0' | 'no':
+                return False
+            case _:
+                return literal
 
     @staticmethod
     def parse_repo(repo: Optional[str]) -> Optional[Type[ParsedRepositoryData] | str]:

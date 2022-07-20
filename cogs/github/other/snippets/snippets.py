@@ -7,7 +7,7 @@ from lib.utils import regex
 from lib.globs import Mgr
 from typing import Optional
 from lib.utils.decorators import gitbot_group
-from lib.structs.discord.context import GitBotContext, MessageFormattingStyle
+from lib.structs.discord.context import GitBotContext
 
 
 class Snippets(commands.Cog):
@@ -23,8 +23,7 @@ class Snippets(commands.Cog):
             codeblock: Optional[str] = Mgr.extract_content_from_codeblock(link_or_codeblock)
             if codeblock:
                 if len(codeblock.splitlines()) > Mgr.env.carbon_len_threshold:
-                    await ctx.send(ctx.fmt('length_limit_exceeded', Mgr.env.carbon_len_threshold),
-                                   style=MessageFormattingStyle.ERROR)
+                    await ctx.error(ctx.fmt('length_limit_exceeded', Mgr.env.carbon_len_threshold))
                     return
                 msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
 

@@ -255,12 +255,21 @@ class Manager:
 
         return char * (length if isinstance(length, int) else len(length))
 
-    @staticmethod
-    def log(message: str,
+    def terminal_supports_color(self) -> bool:
+        """
+        Check if the current terminal supports color.
+        """
+
+        return self.env.terminal_supports_color
+
+    def log(self,
+            message: str,
             category: str = 'core',
             bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
             category_color: Fore = Fore.MAGENTA,
-            message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
+            message_color: Fore = Fore.LIGHTWHITE_EX,
+            subcategory_color: Fore = Fore.LIGHTYELLOW_EX,
+            auto_subcategory: bool = True) -> None:
         """
         Colorful logging function because why not.
 
@@ -269,11 +278,21 @@ class Manager:
         :param bracket_color: The color of the brackets
         :param category_color: The color of the text in the brackets
         :param message_color: The color of the message
+        :param subcategory_color: The color of the subcategory (if any)
+        :param auto_subcategory: Whether to automatically color the subcategory (after dash)
         """
 
-        print(
-            f'{bracket_color}[{category_color}{category}{bracket_color}]: {Style.RESET_ALL}{message_color}{message}'
-            f'{Style.RESET_ALL}')
+        if self.terminal_supports_color():
+            if '-' in category and auto_subcategory:
+                main_cat, sub_cat = category.split('-')
+                print(
+                    f'{bracket_color}[{category_color}{main_cat}{Style.RESET_ALL}-{subcategory_color}{sub_cat}'
+                    f'{Style.RESET_ALL}{bracket_color}]:{Style.RESET_ALL} {message_color}{message}{Style.RESET_ALL}')
+            else:
+                print(f'{bracket_color}[{category_color}{category}{Style.RESET_ALL}]:{Style.RESET_ALL} '
+                      f'{message_color}{message}{Style.RESET_ALL}')
+        else:
+            print(f'[{category}]: {message}')
 
     @staticmethod
     def opt(obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
@@ -490,7 +509,6 @@ class Manager:
 
     def _set_env_directive(self, directive: str, value: bool) -> None:
         self.env_directives[directive] = value
-        self.log(f'Directive set: {directive}->{value}', f'core-{Fore.LIGHTYELLOW_EX}env')
 
     def _prepare_env(self) -> None:
         """
@@ -508,6 +526,8 @@ class Manager:
                 if not self._maybe_set_env_directive(k, v) and k not in self.env:
                     self.env[k] = v
         self.load_dotenv()
+        self.log(f'Directives set: ' + '; '.join([f'{k} -> {v}' for k, v in self.env_directives.items()]),
+                 f'core-env')
 
     def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
         """
@@ -523,14 +543,14 @@ class Manager:
                         self.env[binding.key] = parsed
                     else:
                         self.env[binding.key] = (parsed := self.parse_literal(binding.value))
-                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}', f'core-env')
                 else:
                     self.env[binding.key] = binding.value
-                    self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                    self.log(f'Loaded as \'str\': {binding.key}', f'core-env')
                 return
             except (ValueError, SyntaxError):
                 self.env[binding.key] = binding.value
-                self.log(f'Loaded as \'str\': {binding.key}', f'core-{Fore.LIGHTYELLOW_EX}env')
+                self.log(f'Loaded as \'str\': {binding.key}', f'core-env')
 
     def load_dotenv(self) -> None:
         """
@@ -544,7 +564,7 @@ class Manager:
         dotenv_path: str = dotenv.find_dotenv()
         if dotenv_path:
             self.log('Found .env file, loading environment variables listed inside of it.',
-                     f'core-{Fore.LIGHTYELLOW_EX}env')
+                     f'core-env')
             with open(dotenv_path, 'r', encoding='utf8') as fp:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
@@ -572,20 +592,6 @@ class Manager:
 
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
 
-    @staticmethod
-    def debug_static(message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
-        """
-        A special variant of :meth:`Manager.log` that sets the
-        category name as the name of the outer function (the caller).
-
-        :param message: The message to log to the console
-        :param message_color: The optional message color override
-        """
-
-        Manager.log(message,
-                    f'debug-{Fore.LIGHTYELLOW_EX}{Manager.get_last_call_from_callstack()}{Style.RESET_ALL}',
-                    Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
-
     def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
         """
         A special variant of :meth:`Manager.log` that sets the
@@ -597,7 +603,9 @@ class Manager:
         """
 
         if self.debug_mode:
-            self.debug_static(message, message_color)
+            self.log(message,
+                     f'debug-{Manager.get_last_call_from_callstack()}{Style.RESET_ALL}',
+                     Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
 
     _int_word_conv_map: dict = {
         'zero': 0,
@@ -666,7 +674,8 @@ class Manager:
             if verbose:
                 self.log(
                     message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
-                    category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTRED_EX}r{Style.RESET_ALL}]')
+                    category=f'debug-sizeof[{Fore.LIGHTRED_EX}r{Style.RESET_ALL}]' if
+                    self.terminal_supports_color() else 'debug-sizeof[r]')
 
             for type_, handler in all_handlers.items():
                 if isinstance(_object, type_):
@@ -677,7 +686,8 @@ class Manager:
         final_size: int = _sizeof(object_)
         if verbose:
             self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
-                     category=f'debug-{Fore.LIGHTYELLOW_EX}sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]')
+                     category=f'debug-sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]'
+                     if self.terminal_supports_color() else 'debug-sizeof[f]')
         return final_size
 
     def dict_full_path(self,
@@ -1076,7 +1086,7 @@ class Manager:
                     if locale:
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
                         self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
-                                 f'locale-{Fore.LIGHTYELLOW_EX}{dict_.meta.name}')
+                                 f'locale-{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):

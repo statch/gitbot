@@ -15,5 +15,6 @@
   "hidden_commands": ["eval", "dispatch", "load", "unload", "reload"],
   "production_only_cog_subdirs": ["botlists"],
   "log_level": "info",
-  "commit_env_var_name": "HEROKU_SLUG_COMMIT"
+  "commit_env_var_name": "HEROKU_SLUG_COMMIT",
+  "terminal_supports_color": true
 }

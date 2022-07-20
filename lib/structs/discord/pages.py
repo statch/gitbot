@@ -8,6 +8,7 @@ A set of objects used to handle embed pagination inside Discord
 
 import discord
 import asyncio
+import contextlib
 from time import time
 from enum import Enum
 from discord.ext import commands
@@ -188,55 +189,53 @@ class EmbedPages:
 
     async def _add_controls(self):
         if self.message:
-            for control in EmbedPagesControl:
-                await self.message.add_reaction(control.value)
+            with contextlib.suppress(discord.errors.NotFound):
+                for control in EmbedPagesControl:
+                    await self.message.add_reaction(control.value)
 
     async def __loop(self):
-        while True:
-            if not self.should_die:
-                reaction: discord.Reaction
-                user: discord.Member | discord.User
-                try:
-                    Mgr.debug('Running reaction_add event waiter')
-                    reaction, user = await self.bot.wait_for('reaction_add',
-                                                             check=lambda r, u: (r.emoji in ACTIONS and
-                                                                                 u == self.context.author and
-                                                                                 (r.message.channel.id ==
-                                                                                  self.context.channel.id)),
-                                                             timeout=self.timeout)
-                except asyncio.TimeoutError:
-                    Mgr.debug(f'Event timeout with lifetime={self.lifetime} '
-                              f'and time since last action={self.time_since_last_action}')
-                    try:
-                        await self.edit(GitBotCommandState.TIMEOUT)
-                    except discord.errors.NotFound:
-                        pass
-                    finally:
-                        break
-                if self.time_since_last_action < self.action_polling_rate:
-                    await asyncio.sleep(self.action_polling_rate - self.time_since_last_action)
-                action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
-                match action:
-                    case EmbedPagesControl.BACK:
-                        await self.previous_page()
-                    case EmbedPagesControl.NEXT:
-                        await self.next_page()
-                    case EmbedPagesControl.FIRST:
-                        await self.to_first_page()
-                    case EmbedPagesControl.LAST:
-                        await self.to_last_page()
-                    case EmbedPagesControl.STOP:
-                        await self.edit(GitBotCommandState.CLOSED)
-                        Mgr.debug('Stopping embed paginator loop - closed')
-                        break
-                Mgr.debug('Removing control reaction')
-                await reaction.message.remove_reaction(reaction.emoji, user)
-                Mgr.debug(f'Iteration complete with action {action.name}')
-            else:
-                Mgr.debug(f'Timeout with lifetime={self.lifetime} '
+        while not self.should_die:
+            reaction: discord.Reaction
+            user: discord.Member | discord.User
+            try:
+                Mgr.debug('Running reaction_add event waiter')
+                reaction, user = await self.bot.wait_for('reaction_add',
+                                                         check=lambda r, u: (r.emoji in ACTIONS and
+                                                                             u == self.context.author and
+                                                                             (r.message.channel.id ==
+                                                                              self.context.channel.id)),
+                                                         timeout=self.timeout)
+            except asyncio.TimeoutError:
+                Mgr.debug(f'Event timeout with lifetime={self.lifetime} '
                           f'and time since last action={self.time_since_last_action}')
-                await self.edit(GitBotCommandState.TIMEOUT)
-                break
+                try:
+                    await self.edit(GitBotCommandState.TIMEOUT)
+                except discord.errors.NotFound:
+                    pass
+                finally:
+                    return
+            if self.time_since_last_action < self.action_polling_rate:
+                await asyncio.sleep(self.action_polling_rate - self.time_since_last_action)
+            action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
+            match action:
+                case EmbedPagesControl.BACK:
+                    await self.previous_page()
+                case EmbedPagesControl.NEXT:
+                    await self.next_page()
+                case EmbedPagesControl.FIRST:
+                    await self.to_first_page()
+                case EmbedPagesControl.LAST:
+                    await self.to_last_page()
+                case EmbedPagesControl.STOP:
+                    await self.edit(GitBotCommandState.CLOSED)
+                    Mgr.debug('Stopping embed paginator loop - closed')
+                    return
+            Mgr.debug('Removing control reaction')
+            await reaction.message.remove_reaction(reaction.emoji, user)
+            Mgr.debug(f'Iteration complete with action {action.name}')
+        Mgr.debug(f'Timeout with lifetime={self.lifetime} '
+                  f'and time since last action={self.time_since_last_action}')
+        await self.edit(GitBotCommandState.TIMEOUT)
 
     def __add__(self, embed: discord.Embed | GitBotEmbed):
         self.add_page(embed)

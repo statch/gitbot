@@ -255,12 +255,14 @@ class Manager:
 
         return char * (length if isinstance(length, int) else len(length))
 
+    @functools.lru_cache()
     def terminal_supports_color(self) -> bool:
         """
         Check if the current terminal supports color.
         """
 
-        return self.env.terminal_supports_color
+        return self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else \
+            self.env.terminal_supports_color.lower() in ('true', '1', 'yes', 'y')
 
     def log(self,
             message: str,

@@ -44,7 +44,7 @@ class GitHubAPI:
     """
 
     def __init__(self, tokens: tuple, requester: str):
-        requester: str = requester + '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        requester += '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
         self.__tokens: tuple = tokens
         self.__token_cycle: cycle = cycle(t for t in self.__tokens if t is not None)
         self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
@@ -107,7 +107,7 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_tree_file(self, repo: GitHubRepository, path: str):
+    async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list:
         if repo.count('/') != 1:
             return []
         if path[0] == '/':

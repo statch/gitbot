@@ -399,7 +399,13 @@
       "comments": "Comments",
       "detailed": "Detailed"
     },
-    "footer": "This command is powered by the CLOC CLI tool."
+    "footer": {
+      "with_count": {
+        "plural": "{0} entries matching .gitbot.json ignore rules were removed.",
+        "singular": "One entry matching .gitbot.json ignore rules was removed."
+      },
+      "credit": "This command is powered by the CLOC CLI tool."
+    }
   },
   "commits": {
     "embed": {

@@ -15,6 +15,7 @@ import os
 import ast
 import json
 import dotenv
+import base64
 import discord
 import zipfile
 import os.path
@@ -46,7 +47,8 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # no
 from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention
+    from lib.api.github import GitHubAPI
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitBotDotJSON
 
 
 class Manager:
@@ -60,7 +62,7 @@ class Manager:
     def __init__(self, github):
         self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
         self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
-        self.git = github
+        self.git: 'GitHubAPI' = github
         self.ses: aiohttp.ClientSession = self.git.ses
         self._prepare_env()
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
@@ -82,6 +84,13 @@ class Manager:
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
+
+    async def get_repo_gitbot_config(self, repo: str) -> GitBotDotJSON | None:
+        gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot.json')
+        if not gh_res:
+            return
+        if gh_res['encoding'] == 'base64':
+            return json.loads(base64.decodebytes(bytes(gh_res['content'].encode('utf-8'))).decode('utf-8'))
 
     def get_current_commit(self, short: bool = True) -> str:
         """

@@ -3,6 +3,7 @@ import os.path
 import json
 import aiofiles
 import shutil
+import fnmatch
 import subprocess
 from discord.ext import commands
 from typing import Optional
@@ -16,6 +17,9 @@ _25MB_BYTES: int = int(25 * (1024 ** 2))
 
 
 class LinesOfCode(commands.Cog):
+    # I know that using "perl" alone is insecure, but it will only be used in Windows dev environments
+    __perl_command_line__: str = '/bin/perl' if os.name != 'nt' else 'perl'
+
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
@@ -35,11 +39,13 @@ class LinesOfCode(commands.Cog):
         if not r:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
-        processed: Optional[dict] = await self.process_repo(ctx, repo)
+        processed: Optional[tuple[dict, int | None]] | dict = await self.process_repo(ctx, repo)
         if not processed:
             await ctx.error(ctx.l.loc.file_too_big)
             return
         title: str = ctx.fmt('title', f'`{repo}`')
+        count: int | None = processed[1]
+        processed = processed[0]
         embed: GitBotEmbed = GitBotEmbed(
             color=0x00a6ff,
             title=title,
@@ -52,11 +58,31 @@ class LinesOfCode(commands.Cog):
                          + f'**{ctx.l.loc.stats.comments}:** {processed["SUM"]["comment"]}\n'
                          + f'**{ctx.l.loc.stats.detailed}:**\n'
                          + await self.prepare_result_sheet(processed)),
-            footer=ctx.l.loc.footer
+            footer=ctx.l.loc.footer.credit if not count
+            else (ctx.fmt('footer with_count plural', count) if count > 1 else ctx.fmt('footer with_count singular')),
         )
         await ctx.send(embed=embed)
 
-    async def process_repo(self, ctx: GitBotContext, repo: GitHubRepository) -> Optional[dict]:
+    @staticmethod
+    def remove_matches(directory: str, pattern: str) -> int:
+        Mgr.debug(f'Removing files matching pattern "{pattern}" from directory "{directory}"')
+        c_removed: int = 0
+        for root, dirs, files in os.walk(directory):
+            for f in files:
+                if fnmatch.fnmatch(f, pattern):
+                    Mgr.debug(f'Removing file "{f}"')
+                    c_removed += 1
+                    os.remove(os.path.join(root, f))
+            for d in dirs:
+                if fnmatch.fnmatch(d, pattern):
+                    Mgr.debug(f'Removing directory "{d}"')
+                    c_removed += 1
+                    shutil.rmtree(os.path.join(root, d))
+        Mgr.debug(f'Removed {c_removed} entries.')
+        return c_removed
+
+    @staticmethod
+    async def process_repo(ctx: GitBotContext, repo: GitHubRepository) -> Optional[tuple[dict, int | None]]:
         if (not ctx.__nocache__) and (cached := Mgr.loc_cache.get(repo := repo.lower())):
             return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'
@@ -70,12 +96,22 @@ class LinesOfCode(commands.Cog):
             async with aiofiles.open(tmp_zip_path, 'wb') as fp:
                 await fp.write(files)
             await Mgr.unzip_file(tmp_zip_path, tmp_dir_path)
-            output: dict = json.loads(subprocess.check_output(['/bin/perl', 'cloc.pl', '--json', tmp_dir_path]))
+            c_removed: int = 0
+            cfg: dict | None = await Mgr.get_repo_gitbot_config(repo)
+            if cfg and cfg.get('loc'):
+                if isinstance(cfg['loc'], dict) and (ignore := cfg['loc'].get('ignore')):
+                    if isinstance(ignore, str):
+                        ignore = [ignore]
+                    c_removed: int = 0
+                    for pattern in ignore:
+                        c_removed += LinesOfCode.remove_matches(tmp_dir_path, pattern)
+            output: dict = json.loads(subprocess.check_output([LinesOfCode.__perl_command_line__, 'cloc.pl',
+                                                               '--json', tmp_dir_path]))
         except subprocess.CalledProcessError as e:
             Mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
         else:
             Mgr.loc_cache[repo] = output
-            return output
+            return output, c_removed
         finally:
             try:
                 shutil.rmtree(tmp_dir_path)
@@ -83,7 +119,8 @@ class LinesOfCode(commands.Cog):
             except FileNotFoundError:
                 pass
 
-    async def prepare_result_sheet(self, data: dict) -> str:
+    @staticmethod
+    async def prepare_result_sheet(data: dict) -> str:
         result: str = '```py\n{}```'
         threshold: int = 15
         for k, v in data.items():

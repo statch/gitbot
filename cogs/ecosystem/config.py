@@ -71,12 +71,8 @@ class Config(commands.Cog):
                 await ctx.error(ctx.l.generic.nonexistent.qa)
                 return
             lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
-            user_str: str = ctx.fmt('qa list user', (f'[`{user["user"]}`](https://github.com/{user["user"]})'
-                                                     if 'user' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
-            org: str = ctx.fmt('qa list org', (f'[`{user["org"]}`](https://github.com/{user["org"]})'
-                                               if 'org' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
-            repo: str = ctx.fmt('qa list repo', (f'[`{user["repo"]}`](https://github.com/{user["repo"]})'
-                                                 if 'repo' in user else f'`{ctx.l.config.show.base.item_not_set}`'))
+            user_str, org, repo = (ctx.fmt(f'qa list {item}', f'[`{item}`](https://github.com/{item})' if item in user else
+                                           f'`{ctx.l.config.show.base.item_not_set}`') for item in ('user', 'org', 'repo'))
             accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
             qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
             guild_str: str = ''
@@ -90,7 +86,7 @@ class Config(commands.Cog):
                     ac: AutomaticConversionSettings = Mgr.env.autoconv_default
                 else:
                     ac: AutomaticConversionSettings = {k: (v if k not in (_ac := guild.get('autoconv', {}))
-                                               else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
+                                                       else _ac[k]) for k, v in Mgr.env.autoconv_default.items()}
                 codeblock: str = ctx.fmt('codeblock',
                                          f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
                 lines: str = ctx.fmt('gh_lines',

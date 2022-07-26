@@ -107,7 +107,7 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_tree_file(self, repo: GitHubRepository, path: str):
+    async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list:
         if repo.count('/') != 1:
             return []
         if path[0] == '/':

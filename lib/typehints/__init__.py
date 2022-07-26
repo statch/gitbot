@@ -7,6 +7,7 @@ from lib.typehints.db.guild.autoconv import AutomaticConversionSettings
 from lib.typehints.generic import *
 from lib.typehints.locale.help import *
 from lib.typehints.db.guild.release_feed import *
+from lib.typehints.gitbot_dot_json import *
 
 __all__: tuple = (
     'DictSequence',

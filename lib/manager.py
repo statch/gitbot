@@ -100,7 +100,6 @@ class Manager:
 
         :return: The current commit hash
         """
-
         commit: str | None = self.opt(self.env.get(self.env.commit_env_var_name) or self.git_rev_parse_head(),
                                       operator.getitem, slice(7 if short else None))
         return commit if commit else 'unavailable'
@@ -134,7 +133,6 @@ class Manager:
         :param max_n: Max number of labels to render until appending "+(len(labels)-max_n)"
         :return: The rendered labels
         """
-
         if total_n is None:
             total_n: int = len(labels)
 
@@ -170,7 +168,6 @@ class Manager:
         :raises ValueError, SyntaxError: If the value is malformed, then ValueError or SyntaxError is raised
         :return: The parsed literal (an object)
         """
-
         return ast.literal_eval(literal)
 
     @staticmethod
@@ -182,7 +179,6 @@ class Manager:
         :param iterable: The iterable to search for matches
         :return: The closest match
         """
-
         best = 0, ''
         for i in iterable:
             if (m := fuzz.token_set_ratio(i := str(i), to_match)) > best[0]:
@@ -197,7 +193,6 @@ class Manager:
         :param string: The string to convert
         :return: The converted string
         """
-
         return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
 
     @staticmethod
@@ -209,7 +204,6 @@ class Manager:
         :param codeblock: Whether to wrap the hyperlink with backticks
         :return: The created hyperlink
         """
-
         return (f'[{name}](https://github.com/{name.lower()})' if not codeblock
                 else f'[`{name}`](https://github.com/{name.lower()})')
 
@@ -228,7 +222,6 @@ class Manager:
                           or to skip it entirely and append the ending
         :return: The truncated (or unchanged) string
         """
-
         if len(string) > length:
             if full_word:
                 string: str = string[:length - len(ending)]
@@ -249,7 +242,6 @@ class Manager:
         :param ts_format: The format of the timestamp
         :return: The converted timestamp
         """
-
         return f'<t:{int(datetime.datetime.strptime(timestamp, ts_format).timestamp())}>'
 
     @staticmethod
@@ -261,7 +253,6 @@ class Manager:
         :param char: The character to use for the separator line
         :return: The separator line
         """
-
         return char * (length if isinstance(length, int) else len(length))
 
     @functools.lru_cache()
@@ -269,7 +260,6 @@ class Manager:
         """
         Check if the current terminal supports color.
         """
-
         return (self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else
                 self._eval_bool_literal_safe(self.env.terminal_supports_color))
 
@@ -292,7 +282,6 @@ class Manager:
         :param subcategory_color: The color of the subcategory (if any)
         :param auto_subcategory: Whether to automatically color the subcategory (after dash)
         """
-
         if self.terminal_supports_color():
             if '-' in category and auto_subcategory:
                 main_cat, sub_cat = category.split('-')
@@ -316,7 +305,6 @@ class Manager:
         :param kwargs: Optional keyword arguments for op
         :return: The result of the operation or the unchanged object
         """
-
         if isinstance(op, (int, str)):
             return obj[op] if obj else obj
 
@@ -331,7 +319,6 @@ class Manager:
         :param attr: The attribute to get
         :return: The attribute or None if it doesn't exist
         """
-
         if isinstance(attr, str):
             attr: list[str] = attr.split('.')
 
@@ -349,7 +336,6 @@ class Manager:
         :param channel: The channel to check permissions for
         :return: Whether the client can send a message or not
         """
-
         if isinstance(channel, discord.DMChannel):
             return True
         perms: list = list(iter(channel.permissions_for(channel.guild.me)))
@@ -369,7 +355,6 @@ class Manager:
         :param items: The iterable to return the most common item of
         :return: The most common item from the iterable
         """
-
         return max(set(items), key=items.count)
 
     @staticmethod
@@ -381,7 +366,6 @@ class Manager:
         :param keys: The keys to perform the XOR operation with
         :return: The remaining keys
         """
-
         return list(set(dict_.keys()) ^ set(keys))
 
     @staticmethod
@@ -394,7 +378,6 @@ class Manager:
         :param default: The default value to return if no match is found
         :return: The value associated with the pattern, or the default value
         """
-
         compare: Callable = ((lambda k_: bool(pattern.match(k_))) if isinstance(pattern, re.Pattern)
                              else lambda k_: pattern in k_)
         for k, v in dict_.items():
@@ -411,7 +394,6 @@ class Manager:
         :param key: The key to get
         :return: The value associated with the key
         """
-
         return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
 
     @staticmethod
@@ -425,7 +407,6 @@ class Manager:
         :param chunk_size: The size of the chunks (list has len 10, chunk_size is 5 -> 2 lists of 5)
         :return: A generator of chunks sized <= chunk_size
         """
-
         n: int = max(1, chunk_size)
         return (iterable[i:i + n] for i in range(0, len(iterable), n))
 
@@ -437,7 +418,6 @@ class Manager:
         :param literal: The literal to convert
         :return: The converted literal or the literal itself if it's not a boolean
         """
-
         match literal.lower():
             case 'true' | 't' | 'y' | '1' | 'yes':
                 return True
@@ -454,7 +434,6 @@ class Manager:
         :param repo: The repo string
         :return: The parsed repo or the repo argument unchanged
         """
-
         if repo and (match := r.REPOSITORY_NAME_RE.match(repo)):
             return ParsedRepositoryData(**match.groupdict())
         return repo
@@ -468,7 +447,6 @@ class Manager:
         :param frames_back: The number of frames to go back and get the callable name from
         :return: The callable name
         """
-
         frame = inspect.stack()[frames_back][0]
         if 'self' in frame.f_locals:
             return f'{frame.f_locals["self"].__class__.__name__}.{frame.f_code.co_name}'
@@ -482,7 +460,6 @@ class Manager:
         :param mention: The release feed mention value
         :return: The actual mention
         """
-
         if isinstance(mention, str):
             return f'@{mention}'
         return f'<@&{mention}>'
@@ -491,7 +468,6 @@ class Manager:
         """
         Setup the database connection with ENV vars and a more predictable certificate location.
         """
-
         self._ca_cert: str = certifi.where()
         self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
                                                                 appname=self.bot_dev_name,
@@ -509,7 +485,6 @@ class Manager:
         :param overwrite: Whether to overwrite an existing directive
         :return: Whether or not the directive was added or not
         """
-
         if isinstance(value, str):
             value: str | bool = self._eval_bool_literal_safe(value)
 
@@ -528,7 +503,6 @@ class Manager:
         Private function meant to be called at the time of instantiating this class,
         loads .env with defaults from data/env_defaults.json into self.env.
         """
-
         self.env: DictProxy = DictProxy({k: v for k, v in dict(os.environ).items()
                                          if not self._maybe_set_env_directive(k, v)})
         self.env_directives: DictProxy = DictProxy()
@@ -548,7 +522,6 @@ class Manager:
 
         :param binding: The binding to handle
         """
-
         if not self._maybe_set_env_directive(binding.key, binding.value):
             try:
                 if self.env_directives.get('eval_literal'):
@@ -573,7 +546,6 @@ class Manager:
             - Defaults are loaded from env_defaults.json first, so that .env values take precedence
             - With the "eval_literal" directive active, binding values are parsed with AST during runtime
         """
-
         dotenv_path: str = dotenv.find_dotenv()
         if dotenv_path:
             self.log('Found .env file, loading environment variables listed inside of it.',
@@ -589,7 +561,6 @@ class Manager:
         :param github_timestamp: The GitHub timestamp to convert
         :return: The converted timestamp
         """
-
         return self.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
 
     _number_re: re.Pattern = re.compile(r'\d+')
@@ -602,7 +573,6 @@ class Manager:
         :param max_: The max_ number to include in the returned list
         :return: The list of numbers
         """
-
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
 
     def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
@@ -614,7 +584,6 @@ class Manager:
         :param message: The message to log to the console
         :param message_color: The optional message color override
         """
-
         if self.debug_mode:
             self.log(message,
                      f'debug-{Manager.get_last_call_from_callstack()}{Style.RESET_ALL}',
@@ -642,7 +611,6 @@ class Manager:
         :param word: The word to convert
         :return: The converted word or None if invalid
         """
-
         return self._int_word_conv_map.get(word.casefold())
 
     def itow(self, _int: int) -> Optional[str]:
@@ -652,7 +620,6 @@ class Manager:
         :param _int: The integer to convert
         :return: The converted int or None if invalid
         """
-
         for k, v in self._int_word_conv_map.items():
             if v == _int:
                 return k
@@ -668,7 +635,6 @@ class Manager:
         handlers = {SomeContainerClass: iter,
                     OtherContainerClass: OtherContainerClass.get_elements}
         """
-
         if handlers is None:
             handlers: dict = {}
 
@@ -716,7 +682,6 @@ class Manager:
         :param value: The optional value for determining if a key is the right one
         :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
         """
-
         if hasattr(dict_, 'actual'):
             dict_: dict = dict_.actual
 
@@ -738,7 +703,6 @@ class Manager:
         :param codeblock: The codeblock to strip
         :return: The code extracted from the codeblock
         """
-
         match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
                             re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
         if match_:
@@ -753,7 +717,6 @@ class Manager:
         :param zip_path: The location of the ZIP file
         :param output_dir: The output directory to extract ZIP file contents to
         """
-
         if not os.path.exists(output_dir):
             self.debug(f'Creating output directory "{output_dir}"')
             os.mkdir(output_dir)
@@ -768,7 +731,6 @@ class Manager:
         :param to_match: The query to search by
         :return: The best license matched or None if match is less than 80
         """
-
         best: list[tuple[int, DictProxy]] = []
 
         for i in list(self.licenses):
@@ -797,7 +759,6 @@ class Manager:
                then apply recursion until an actionable value (list | str | int | bool) is found in the node
         :return: The loaded JSON wrapped in DictProxy
         """
-
         to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r', encoding='utf8') as fp:
             data: dict | list = json.load(fp)
@@ -824,7 +785,6 @@ class Manager:
         :param ctx: The context to search for links, and then optionally exchange for command data
         :return: The command data requested
         """
-
         combos: tuple[tuple[re.Pattern, tuple | str], ...] = ((r.GITHUB_PULL_REQUEST_URL_RE, 'pr'),
                                                               (r.GITHUB_ISSUE_URL_RE, 'issue'),
                                                               (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
@@ -854,7 +814,6 @@ class Manager:
         :param default: The URL to default to if the email address doesn't have a Gravatar
         :return: The Gravatar URL constructed with the arguments
         """
-
         url: str = f'https://www.gravatar.com/avatar/{hashlib.md5(email.encode("utf8").lower()).hexdigest()}?s={size}'
         if default:
             url += f'&d={quote_plus(default)}'
@@ -875,7 +834,6 @@ class Manager:
         :param alt: The value to return if the status code is different from the code parameter
         :return: The URL if the statuses match, or the alt parameter if not
         """
-
         if (await self.ses.request(method=method, url=url, **kwargs)).status == code:
             return url
         return alt
@@ -888,7 +846,6 @@ class Manager:
         :param items: The list of indexed dicts to check against
         :return: The dict matching the index
         """
-
         if number.startswith('#'):
             number: str = number[1:]
         try:
@@ -906,7 +863,6 @@ class Manager:
         :param seq: The sequence to reverse
         :return: The reversed sequence if not None, else None
         """
-
         if seq:
             return type(seq)(reversed(seq))  # noqa
         self.debug('Sequence is None')
@@ -919,7 +875,6 @@ class Manager:
         :param ext: The extensions to include, None for all
         :return: The mapped directory
         """
-
         if os.path.isdir(path):
             return DirProxy(path=path, ext=ext, **kwargs)
         self.debug(f'Not a directory: "{path}"')
@@ -936,7 +891,6 @@ class Manager:
         :param did_exist: If to return whether if the guild document existed, or if the value is default
         :return: The permission value, by default env[AUTOCONV_DEFAULT]
         """
-
         _did_exist: bool = False
 
         if cached := self.autoconv_cache.get(_id):
@@ -961,7 +915,6 @@ class Manager:
         :param _id: The user object/ID to get the locale for
         :return: The locale associated with the user
         """
-
         locale: LocaleName = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id):
             locale: LocaleName = cached
@@ -991,7 +944,6 @@ class Manager:
         :param unpack: Whether the comparison op should be __in__ or __eq__
         :return: The dictionary with the matching value, if any
         """
-
         matching: list = []
         if len((_key := key.split())) > 1:
             key: list = _key
@@ -1025,7 +977,6 @@ class Manager:
         :param values: The values to use for the formatting string
         :return: The formatted string, or the resource
         """
-
         populated: dict[str, str] = {}
         for rk, rv in resource.items():
             for vn, v in values.items():
@@ -1047,7 +998,6 @@ class Manager:
         :param style: The style of digits to use (emoji.json["digits"][style])
         :return: The created list string
         """
-
         resource: dict = self.e['digits'][style]
         if isinstance(options, dict):
             return '\n'.join([f"{resource[self.itow(i+1)]}** {kv[0].capitalize()}** {kv[1]}"
@@ -1061,7 +1011,6 @@ class Manager:
         :param locale: Any meta attribute of the locale
         :return: The missing keys for the locale and the confidence of the attribute match
         """
-
         locale_data: Optional[tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
         if locale_data:
             missing: list = list(
@@ -1077,7 +1026,6 @@ class Manager:
         :param attribute: The attribute to match
         :return: The locale or None if not matched
         """
-
         for locale in self.locale.languages:
             for lv in locale.values():
                 match_: int = fuzz.token_set_ratio(attribute, lv)
@@ -1116,7 +1064,6 @@ class Manager:
         """
         Fill in locales with missing keys with the Master locale
         """
-
         for locale in self.l:
             if locale != self.locale.master and 'meta' in locale:
                 setattr(self.l, locale.meta.name, self.fix_dict(locale, self.locale.master, locale=True))
@@ -1128,7 +1075,6 @@ class Manager:
         :param match_: The match to generate the replacement for
         :return: The replacement string
         """
-
         if group := match_.group('emoji_name'):
             return self.e.get(group, default)
         return match_.string
@@ -1164,7 +1110,6 @@ class Manager:
         :param ctx: The command invocation Context
         :return: The Formatter object created with the Context
         """
-
         self_: Manager = self
 
         class _Formatter:

@@ -76,7 +76,6 @@ class GitBotEmbed(discord.Embed):
         :param kwargs: The keyword arguments to pass to the embed
         :return: The created embed
         """
-
         resource: DictProxy = functools.reduce(operator.getitem, resource.split(), ctx.l)  # noqa: type valid
         kwargs.setdefault('title', resource.get('title', discord.Embed.Empty))
         kwargs.setdefault('description', resource.get('description', discord.Embed.Empty))
@@ -153,7 +152,6 @@ class GitBotEmbed(discord.Embed):
         :param antispam_threshold: The amount of permitted CONTINUE states
         :return: Optional message and optional callback returns
         """
-
         if not init_message:
             init_message: discord.Message = await self.send(ctx)
 
@@ -194,7 +192,6 @@ class GitBotEmbed(discord.Embed):
         :param callback: The callback to use (same as in :meth:`input_with_timeout`)
         :return: Whether the user confirmed
         """
-
         initial_message: discord.Message = await self.send(ctx)
         await initial_message.add_reaction('<:checkmark:770244084727283732>')
         await initial_message.add_reaction('<:failure:770244076896256010>')

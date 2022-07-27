@@ -40,7 +40,6 @@ class CacheSchema:
         :param value_name: The name of the value (cache key, cache value)
         :raise CacheValidationError: When the action's types don't match the schema ones
         """
-
         raise CacheValidationError(f'Expected type \'{expected.__name__}\' for {value_name},'
                                    f' got: \'{got.__class__.__name__}\' ({repr(got)})')
 

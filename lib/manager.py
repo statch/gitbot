@@ -78,7 +78,7 @@ class Manager:
         self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
         self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
         self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
-        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=dict), maxsize=64, max_age=60 * 7)
+        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, tuple)), maxsize=64, max_age=60 * 7)
         self.locale.master = getattr(self.l, str(self.locale.master))
         self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}

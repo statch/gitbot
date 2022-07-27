@@ -44,8 +44,12 @@ class LinesOfCode(commands.Cog):
             await ctx.error(ctx.l.loc.file_too_big)
             return
         title: str = ctx.fmt('title', f'`{repo}`')
-        count: int | None = processed[1]
-        processed = processed[0]
+        if isinstance(processed, dict):
+            count: int = 0
+        else:
+            count: int = processed[1]
+            processed = processed[0]
+        processed: dict
         embed: GitBotEmbed = GitBotEmbed(
             color=0x00a6ff,
             title=title,
@@ -102,7 +106,6 @@ class LinesOfCode(commands.Cog):
                 if isinstance(cfg['loc'], dict) and (ignore := cfg['loc'].get('ignore')):
                     if isinstance(ignore, str):
                         ignore = [ignore]
-                    c_removed: int = 0
                     for pattern in ignore:
                         c_removed += LinesOfCode.remove_matches(tmp_dir_path, pattern)
             output: dict = json.loads(subprocess.check_output([LinesOfCode.__perl_command_line__, 'cloc.pl',
@@ -110,7 +113,7 @@ class LinesOfCode(commands.Cog):
         except subprocess.CalledProcessError as e:
             Mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
         else:
-            Mgr.loc_cache[repo] = output
+            Mgr.loc_cache[repo] = (output, c_removed)
             return output, c_removed
         finally:
             try:

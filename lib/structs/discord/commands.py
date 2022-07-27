@@ -111,6 +111,5 @@ class GitBotCommandGroup(commands.Group, GitBotCommand):
 
         :param ctx: The context of the command invocation
         """
-
         if not ctx.invoked_subcommand:
             await ctx.invoke(ctx.bot.get_command('help'), command_or_group=self.fullname)

@@ -34,7 +34,7 @@ class Org(commands.Cog):
         else:
             org: dict = await Git.get_org(organization)
         if not org:
-            if hasattr(ctx, 'invoked_with_stored'):
+            if ctx.invoked_with_stored:
                 await Mgr.db.users.delitem(ctx, 'org')
                 await ctx.error(ctx.l.generic.nonexistent.org.qa_changed)
             else:

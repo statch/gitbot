@@ -38,6 +38,7 @@ class GitBotContext(commands.Context):
         self.fmt = Mgr.fmt(self)
         self.l = None  # noqa
         self.data: Optional[dict] = None  # field used by chained invocations and quick access
+        self.invoked_with_stored: bool = False
         super().__init__(**attrs)
 
     @staticmethod

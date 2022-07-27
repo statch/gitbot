@@ -844,7 +844,8 @@ class Manager:
                 return GitCommandData(command, kwargs)
         self.debug(f'No match found for "{ctx.message.content}"')
 
-    def construct_gravatar_url(self, email: str, size: int = 512, default: Optional[str] = None) -> str:
+    @staticmethod
+    def construct_gravatar_url(email: str, size: int = 512, default: Optional[str] = None) -> str:
         """
         Construct a valid Gravatar URL with optional size and default parameters
 

@@ -22,7 +22,7 @@ def set_handler_ctx_attributes(ctx: GitBotContext) -> commands.Context:
 @commands.max_concurrency(6, wait=True)
 async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message]:
     codeblock: Optional[str] = None
-    config: AutomaticConversionSettings = await Mgr.get_autoconv_config(ctx)
+    config: AutomaticConversionSettings = await Mgr.get_autoconv_config(ctx)  # noqa
     match_ = None  # put the match_ name in the namespace
     if (attachment_url := Mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
         Mgr.debug('Responding with cached asset URL')
@@ -33,15 +33,14 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
     elif match_ := (regex.GITHUB_LINES_URL_RE.search(ctx.message.content)
                     or regex.GITLAB_LINES_URL_RE.search(ctx.message.content)):
         Mgr.debug(f'Matched GitHub line URL: "{ctx.message.content}" in MID "{ctx.message.id}"')
-        if config['gh_lines'] == 2:
+        if config.get('gh_lines') == 2:
             Mgr.debug(f'Converting URL in MID {ctx.message.id} into carbon snippet...')
             codeblock: Optional[str] = (await handle_url(ctx,
                                                          ctx.message.content,
                                                          max_line_count=Mgr.env.carbon_len_threshold,
                                                          wrap_in_codeblock=False))[0]
-        elif (await Mgr.get_autoconv_config(ctx))['gh_lines'] == 1:
-            codeblock: Optional[str] = (await handle_url(ctx,
-                                                         ctx.message.content))[0]
+        elif config.get('gh_lines') == 1:
+            codeblock: Optional[str] = (await handle_url(ctx, ctx.message.content))[0]
             if codeblock:
                 Mgr.debug(f'Converting MID {ctx.message.id} into codeblock...')
                 return await ctx.reply(codeblock, mention_author=False)

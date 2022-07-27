@@ -41,7 +41,7 @@ class Repo(commands.Cog):
         else:
             r: Optional[dict] = await Git.get_repo(repo)
         if not r:
-            if hasattr(ctx, 'invoked_with_stored'):
+            if ctx.invoked_with_stored:
                 await Mgr.db.users.delitem(ctx, 'repo')
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:

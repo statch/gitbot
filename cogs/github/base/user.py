@@ -34,7 +34,7 @@ class User(commands.Cog):
         else:
             u: dict = await Git.get_user(user)
         if not u:
-            if hasattr(ctx, 'invoked_with_stored'):
+            if ctx.invoked_with_stored:
                 await Mgr.db.users.delitem(ctx, 'user')
                 await ctx.error(ctx.l.generic.nonexistent.user.qa_changed)
             else:

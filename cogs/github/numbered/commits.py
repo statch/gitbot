@@ -76,7 +76,7 @@ class Commits(commands.Cog):
                              oid: Optional[str] = None):
         ctx.fmt.set_prefix('commit')
         is_stored: bool = False
-        if not hasattr(ctx, 'data'):
+        if not ctx.data:
             if repo and not oid and GIT_OBJECT_ID_RE.match(repo):
                 oid: str = repo
                 repo = None

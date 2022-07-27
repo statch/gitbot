@@ -58,7 +58,6 @@ class GitBotContext(commands.Context):
         """
         Returns a prefixed subset of the context locale.
         """
-
         return Mgr.get_nested_key(self.l, self.fmt.prefix.strip())
 
     async def send(self,
@@ -99,7 +98,6 @@ class GitBotContext(commands.Context):
         """
         Used for root group methods without any additional logic.
         """
-
         parent: Optional[GitBotCommand | GitBotCommandGroup] = (self.command.parent if not
                                                                 isinstance(self.command,
                                                                            GitBotCommandGroup) else self.command)

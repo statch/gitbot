@@ -76,7 +76,6 @@ class EmbedPages:
         """
         The current page number returned as a string (en_default: Page {x}/len(pages))
         """
-
         return f'{self.context.l.glossary.page} {self.current_page + 1}/{len(self.pages)}'
 
     @property
@@ -84,7 +83,6 @@ class EmbedPages:
         """
         The total lifetime of the paginator
         """
-
         return time() - self.start_time
 
     @property
@@ -92,7 +90,6 @@ class EmbedPages:
         """
         The time since the last action was performed
         """
-
         return time() - self.last_action_time
 
     @property
@@ -100,21 +97,18 @@ class EmbedPages:
         """
         Checks if the paginator should end its lifespan and edit its current embed accordingly
         """
-
         return self.time_since_last_action > self.timeout and self.lifetime < self.lifespan
 
     def add_page(self, page: GitBotEmbed | discord.Embed) -> None:
         """
         Add a new page to the paginator.
         """
-
         self.pages.append(page)
 
     def remove_page(self, page: GitBotEmbed | discord.Embed) -> None:
         """
         Remove a page from the paginator.
         """
-
         self.pages.remove(page)
 
     async def start(self, ctx: 'GitBotContext') -> None:
@@ -123,7 +117,6 @@ class EmbedPages:
 
         :param ctx: The context to start the paginator in.
         """
-
         self._ensure_perms(ctx.channel)
         self.start_time = time()
         self.context: GitBotContext = ctx
@@ -141,7 +134,6 @@ class EmbedPages:
 
         :param state: The state to edit the embed with
         """
-
         embed: discord.Embed | GitBotEmbed = self.message.embeds[0]
         if state is GitBotCommandState.CLOSED:
             embed.set_footer(text=f'{self.context.l.generic.closed} | {self.current_page_string}')

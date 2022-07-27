@@ -74,7 +74,6 @@ def normalize_argument(func: Callable,
     :param kwargs: The keyword arguments in the function call
     :return: The function with the arguments normalized
     """
-
     if target in kwargs:
         param: Any = kwargs[target]
         kwargs[target] = normalizing_func(param)

@@ -48,7 +48,7 @@ class UserCollection(AsyncIOMotorCollection):
         if item in ('user', 'repo', 'org'):
             valid: bool = await ({'user': self._git.get_user, 'repo': self._git.get_repo, 'org': self._git.get_org}[item])(value) is not None
         elif item == 'locale':
-            valid: bool = any([l_['name'] == value for l_ in self._mgr.locale.languages])
+            valid: bool = any(l_['name'] == value for l_ in self._mgr.locale.languages)
         if valid:
             query = await self.find_one({"_id": _id})
             if query is not None:
@@ -57,4 +57,3 @@ class UserCollection(AsyncIOMotorCollection):
                 await self.insert_one({"_id": _id, item: value})
             return True
         return False
-

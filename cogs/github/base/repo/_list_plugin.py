@@ -55,10 +55,9 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
             if not (issue := await Mgr.validate_index(num := msg.content, issues)):
                 await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
-            else:
-                ctx.data = await Git.get_issue('', 0, issue, True)
-                await ctx.invoke(ctx.bot.get_command('issue'), repo)
-                return
+            ctx.data = await Git.get_issue('', 0, issue, True)
+            await ctx.invoke(ctx.bot.get_command('issue'), repo)
+            return
         except asyncio.TimeoutError:
             return
 
@@ -105,10 +104,9 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
             if not (pr := await Mgr.validate_index(num := msg.content, prs)):
                 await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
                 continue
-            else:
-                ctx.data = await Git.get_pull_request('', 0, pr)
-                await ctx.invoke(ctx.bot.get_command('pr'), repo)
-                return
+            ctx.data = await Git.get_pull_request('', 0, pr)
+            await ctx.invoke(ctx.bot.get_command('pr'), repo)
+            return
         except asyncio.TimeoutError:
             return
 

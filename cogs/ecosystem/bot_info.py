@@ -115,7 +115,7 @@ class BotInfo(commands.Cog):
         ctx.fmt.set_prefix('stats')
         embed: discord.Embed = discord.Embed(color=Mgr.c.rounded)
         users: int = sum([x.member_count for x in self.bot.guilds])
-        memory: str = '**{:.3f}GB** RAM'.format(process.memory_info()[0] / 2. ** 30)  # memory use in GB... I think
+        memory: str = f'**{process.memory_info()[0] / 2. ** 30:.3f}GB** RAM'  # memory use in GB... I think
         cpu: str = f'**{psutil.cpu_percent()}%** CPU,'
         embed.add_field(name=f"{Mgr.e.stats}  {ctx.lp.title}", value=ctx.lp.body,
                         inline=False)

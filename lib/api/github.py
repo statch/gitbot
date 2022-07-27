@@ -76,7 +76,7 @@ class GitHubAPI:
     @validate_github_name('user')
     async def get_user_repos(self, user: GitHubUser) -> Optional[list[dict]]:
         try:
-            return list([x for x in await self.gh.getitem(f'/users/{user}/repos') if x['private'] is False])
+            return list(r for r in await self.gh.getitem(f'/users/{user}/repos') if r['private'] is False)
         except BadRequest:
             return None
 
@@ -92,7 +92,7 @@ class GitHubAPI:
     @validate_github_name('org', default=[])
     async def get_org_repos(self, org: GitHubOrganization) -> list[dict]:
         try:
-            res = list([x for x in await self.gh.getitem(f'/orgs/{org}/repos') if x['private'] is False])
+            res = list(r for r in await self.gh.getitem(f'/orgs/{org}/repos') if r['private'] is False)
             return res
         except BadRequest:
             return []

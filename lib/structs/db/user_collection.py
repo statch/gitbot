@@ -2,6 +2,10 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from typing import Optional
 from lib.utils.decorators import normalize_identity
 from lib.typehints import Identity
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from lib.manager import Manager
+    from lib.api.github import GitHubAPI
 
 
 class UserCollection(AsyncIOMotorCollection):
@@ -20,8 +24,8 @@ class UserCollection(AsyncIOMotorCollection):
     """
 
     def __init__(self, collection: AsyncIOMotorCollection, github, mgr):
-        self._git = github
-        self._mgr = mgr
+        self._git: 'GitHubAPI' = github
+        self._mgr: 'Manager' = mgr
         super().__init__(collection.database, collection.name)
 
     @normalize_identity()

@@ -86,12 +86,10 @@ class Manager:
         self.__preprocess_locale_emojis()
 
     async def get_repo_gitbot_config(self, repo: str, fallback_to_dot_json: bool = True) -> GitbotRepoConfig | None:
-        gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot')
-        if not gh_res and not fallback_to_dot_json:
+        gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot') or \
+                              (await self.git.get_tree_file(repo, '.gitbot.json') if fallback_to_dot_json else None)
+        if not gh_res:
             return
-        else:
-            if not (gh_res := await self.git.get_tree_file(repo, '.gitbot.json')):
-                return
         if gh_res['encoding'] == 'base64':
             return json.loads(base64.decodebytes(bytes(gh_res['content'].encode('utf-8'))).decode('utf-8'))
 

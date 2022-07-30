@@ -9,6 +9,6 @@ class ReleaseFeedGitBotJSONEntry(TypedDict):
     ignore: str
 
 
-class GitBotDotJSON(TypedDict, total=False):
+class GitbotRepoConfig(TypedDict, total=False):
     loc: LOCGitBotJSONEntry
     release_feed: ReleaseFeedGitBotJSONEntry

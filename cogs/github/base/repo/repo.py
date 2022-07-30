@@ -126,7 +126,7 @@ class Repo(commands.Cog):
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
-            repo: GitHubRepository = "/".join(repo_or_path.split("/", 2)[:2])  # noqa
+            repo: GitHubRepository = '/'.join(repo_or_path.split('/', 2)[:2])  # noqa
             file: str = repo_or_path[len(repo):]
             src: list = await Git.get_tree_file(repo, file)
             is_tree: bool = True
@@ -138,17 +138,20 @@ class Repo(commands.Cog):
             else:
                 await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
-        files: list = sorted([f"{Mgr.e.file}  [{f['name']}]({f['html_url']})" if f['type'] == 'file' else
-                              f"{Mgr.e.folder}  [{f['name']}]({f['html_url']})" for f in src[:15]],
+        if is_tree and not isinstance(src, list):
+            await ctx.error(ctx.fmt('not_a_directory', f'`{ctx.prefix}snippet`'))
+            return
+        files: list = sorted([f'{Mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
+                              f'{Mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in src[:15]],
                              key=lambda fs: 'file' in fs)
         if is_tree:
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
-            link: str = f"https://github.com/{repo_or_path}"
+            link: str = f'https://github.com/{repo_or_path}'
         embed = discord.Embed(
             color=Mgr.c.rounded,
-            title=f"{repo_or_path}" if len(repo_or_path) <= 60 else "/".join(repo_or_path.split("/", 2)[:2]),
+            title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
             description='\n'.join(files),
             url=link
         )

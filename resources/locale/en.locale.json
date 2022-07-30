@@ -270,7 +270,8 @@
       "license": "Licensed under the {0}"
     },
     "files": {
-      "view_more": "View {0} more on GitHub"
+      "view_more": "View {0} more on GitHub",
+      "not_a_directory": "**The path you provided is not of a directory!**\nTo view the contents of a file use the `{0}` command."
     },
     "download": {
       "wait": "Give me a second while I download the file...",

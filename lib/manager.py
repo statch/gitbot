@@ -48,7 +48,7 @@ from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHE
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.api.github import GitHubAPI
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitBotDotJSON
+from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitbotRepoConfig
 
 
 class Manager:
@@ -85,10 +85,13 @@ class Manager:
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
 
-    async def get_repo_gitbot_config(self, repo: str) -> GitBotDotJSON | None:
-        gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot.json')
-        if not gh_res:
+    async def get_repo_gitbot_config(self, repo: str, fallback_to_dot_json: bool = True) -> GitbotRepoConfig | None:
+        gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot')
+        if not gh_res and not fallback_to_dot_json:
             return
+        else:
+            if not (gh_res := await self.git.get_tree_file(repo, '.gitbot.json')):
+                return
         if gh_res['encoding'] == 'base64':
             return json.loads(base64.decodebytes(bytes(gh_res['content'].encode('utf-8'))).decode('utf-8'))
 

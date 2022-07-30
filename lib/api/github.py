@@ -107,15 +107,15 @@ class GitHubAPI:
             return []
 
     @normalize_repository
-    async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list:
+    async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list | None:
         if repo.count('/') != 1:
-            return []
+            return None
         if path[0] == '/':
             path = path[1:]
         try:
             return await self.gh.getitem(f'/repos/{repo}/contents/{path}')
         except BadRequest:
-            return []
+            return None
 
     @github_cached
     @validate_github_name('user', default=[])

@@ -65,7 +65,7 @@ class LinesOfCode(commands.Cog):
             footer=ctx.l.loc.footer.credit if not count
             else (ctx.fmt('footer with_count plural', count) if count > 1 else ctx.fmt('footer with_count singular')),
         )
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed, mention_author=False)
 
     @staticmethod
     def remove_matches(directory: str, pattern: str) -> int:
@@ -103,6 +103,7 @@ class LinesOfCode(commands.Cog):
             c_removed: int = 0
             cfg: dict | None = await Mgr.get_repo_gitbot_config(repo)
             if cfg and cfg.get('loc'):
+                Mgr.debug(f'Found GitBot config for repo "{repo}"')
                 if isinstance(cfg['loc'], dict) and (ignore := cfg['loc'].get('ignore')):
                     if isinstance(ignore, str):
                         ignore = [ignore]

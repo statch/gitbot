@@ -5,7 +5,7 @@
   "test_guild_ids": [],
   "no_typing_commands": [],
   "run_release_feed_worker": true,
-  "release_feed_worker_interval": 30,
+  "release_feed_worker_interval": 10,
   "db_use_tls": true,
   "autoconv_default": {
     "codeblock": false,

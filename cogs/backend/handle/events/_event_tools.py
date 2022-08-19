@@ -109,7 +109,7 @@ async def build_guild_embed(bot: commands.Bot, guild: discord.Guild, state: bool
         title=title,
         color=color,
         footer=f"Now in {len(bot.guilds)} guilds",
-        thumbnail=guild.icon_url
+        thumbnail=guild.icon.url
     )
     embed.add_field(name='Name', value=str(guild))
     try:

@@ -23,7 +23,7 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
     if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
             return None, ctx.fmt('length_limit_exceeded', max_line_count)
-    res: ClientResponse = await Mgr.git.ses.get(url)
+    res: ClientResponse = await Mgr.session.get(url)
     content: str = await res.text(encoding='utf-8')
 
     if '<title>Checking your Browser - GitLab</title>' in content or res.status == 404:

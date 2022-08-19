@@ -106,5 +106,5 @@ class Debug(commands.Cog):
                 await ctx.send('Evaluation successful, no output.')
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Debug(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Debug(bot))

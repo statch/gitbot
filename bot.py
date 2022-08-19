@@ -7,6 +7,7 @@ from lib.structs.discord.context import GitBotContext
 
 intents: discord.Intents = discord.Intents(
     messages=True,
+    message_content=True,
     guilds=True,
     guild_reactions=True
 )
@@ -67,4 +68,4 @@ async def global_check(ctx: GitBotContext) -> bool:
 @bot.before_invoke
 async def before_invoke(ctx: GitBotContext) -> None:
     if str(ctx.command) not in Mgr.env.no_typing_commands:
-        await ctx.channel.trigger_typing()
+        await ctx.channel.typing()

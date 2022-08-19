@@ -10,11 +10,15 @@ import discord
 import enum
 from discord.ext import commands
 from lib.globs import Mgr
-from typing import Optional, Iterable
+from typing import Optional, Any, Sequence
 from lib.typehints import EmbedLike
 from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from typing import TYPE_CHECKING
+from collections.abc import Awaitable, Callable
+if TYPE_CHECKING:
+    from lib.structs.discord.bot import GitBot
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
 
@@ -31,6 +35,8 @@ class MessageFormattingStyle(enum.Enum):
 
 
 class GitBotContext(commands.Context):
+    bot: 'GitBot'
+
     def __init__(self, **attrs):
         self.command: GitBotCommand | GitBotCommandGroup
         self.__nocache__ = False
@@ -61,23 +67,37 @@ class GitBotContext(commands.Context):
         return Mgr.get_nested_key(self.l, self.fmt.prefix.strip())
 
     async def send(self,
-                   content: Optional[str] = None,
+                   content: str | None = None,
                    *,
                    tts: bool = False,
-                   embed: Optional[EmbedLike] = None,
-                   file: Optional[discord.File] = None,
-                   files: Optional[Iterable[discord.File]] = None,
-                   delete_after: Optional[int] = None,
-                   nonce: Optional[int] = None,
-                   allowed_mentions: Optional[discord.AllowedMentions] = None,
-                   reference: Optional[discord.MessageReference] = None,
-                   mention_author: bool = None,
+                   embed: EmbedLike | None = None,
+                   embeds: Sequence[EmbedLike] | None = None,
+                   file: discord.File | None = None,
+                   files: Sequence[discord.File] | None = None,
+                   stickers: Sequence[discord.GuildSticker | discord.StickerItem] | None = None,
+                   delete_after: float | None = None,
+                   nonce: str | int | None = None,
+                   allowed_mentions: discord.AllowedMentions | None = None,
+                   reference: discord.Message | discord.MessageReference | discord.PartialMessage | None = None,
+                   mention_author: bool | None = None,
+                   view: discord.ui.View | None = None,
+                   suppress_embeds: bool = False,
+                   ephemeral: bool = False,
                    style: MessageFormattingStyle | str = MessageFormattingStyle.DEFAULT) -> discord.Message:
         return await super().send(content=self._format_content(content, style), tts=tts,
-                                  embed=embed, file=file,
-                                  files=files, delete_after=delete_after,
+                                  embed=embed, embeds=embeds,
+                                  file=file, files=files,
+                                  stickers=stickers, delete_after=delete_after,
                                   nonce=nonce, allowed_mentions=allowed_mentions,
-                                  reference=reference, mention_author=mention_author)
+                                  reference=reference, mention_author=mention_author,
+                                  view=view, suppress_embeds=suppress_embeds, ephemeral=ephemeral)
+
+    async def invoke(self,
+                     command: GitBotCommand | Callable[['GitBotContext'], Awaitable[Any, ...]],
+                     /,
+                     *args,
+                     **kwargs) -> Any:
+        await super().invoke(command, *args, **kwargs)
 
     async def info(self, *args, **kwargs) -> discord.Message:
         return await self.send(*args, style=MessageFormattingStyle.INFO, **kwargs)

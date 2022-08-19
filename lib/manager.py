@@ -62,8 +62,8 @@ class Manager:
     def __init__(self, github):
         self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
         self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         self.git: 'GitHubAPI' = github
-        self.ses: aiohttp.ClientSession = self.git.ses
         self._prepare_env()
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
         self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
@@ -340,11 +340,11 @@ class Manager:
         if isinstance(channel, discord.DMChannel):
             return True
         perms: list = list(iter(channel.permissions_for(channel.guild.me)))
-        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))
-        if all(req in perms + overwrites for req in [("send_messages", True),
-                                                     ("read_messages", True),
-                                                     ("read_message_history", True)]) \
-                or ("administrator", True) in perms:
+        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))  # weird inspection, keep an eye on this
+        if all(req in perms + overwrites for req in [('send_messages', True),
+                                                     ('read_messages', True),
+                                                     ('read_message_history', True)]) \
+                or ('administrator', True) in perms:
             return True
         return False
 
@@ -555,14 +555,15 @@ class Manager:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
 
-    def github_to_discord_timestamp(self, github_timestamp: str) -> str:
+    @staticmethod
+    def github_to_discord_timestamp(github_timestamp: str) -> str:
         """
         Convert a GitHub-formatted timestamp (%Y-%m-%dT%H:%M:%SZ) to the <t:timestamp> Discord format
 
         :param github_timestamp: The GitHub timestamp to convert
         :return: The converted timestamp
         """
-        return self.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+        return Manager.external_to_discord_timestamp(github_timestamp, "%Y-%m-%dT%H:%M:%SZ")
 
     _number_re: re.Pattern = re.compile(r'\d+')
 
@@ -835,7 +836,7 @@ class Manager:
         :param alt: The value to return if the status code is different from the code parameter
         :return: The URL if the statuses match, or the alt parameter if not
         """
-        if (await self.ses.request(method=method, url=url, **kwargs)).status == code:
+        if (await self.session.request(method=method, url=url, **kwargs)).status == code:
             return url
         return alt
 

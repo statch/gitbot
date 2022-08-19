@@ -157,7 +157,7 @@ class Config(commands.Cog):
                     description=ctx.l.config.feed.embeds.channel.channel_limit_reached_embed.description
                 )
                 embed_limit_reached.set_footer(text=ctx.l.config.feed.channel.embeds.channel_limit_reached_embed.footer,
-                                               icon_url=self.bot.user.avatar_url)
+                                               icon_url=self.bot.user.avatar.url)
                 await ctx.send(embed=embed_limit_reached)
                 return
             for rfi in feed:
@@ -218,7 +218,7 @@ class Config(commands.Cog):
             if res.content.lower() in ('quit', 'cancel'):
                 await ctx.error(ctx.l.config.feed.repo.cancelled)
                 return GitBotCommandState.FAILURE
-            await ctx.trigger_typing()
+            await ctx.typing()
 
             async def _try_convert() -> Optional[dict]:
                 try:
@@ -723,5 +723,5 @@ class Config(commands.Cog):
         await ctx.success(ctx.l.config.delete.all.success)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Config(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Config(bot))

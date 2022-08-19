@@ -45,11 +45,18 @@ class GitHubAPI:
 
     def __init__(self, tokens: tuple, requester: str):
         requester += '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        self.requester: str = requester
         self.__tokens: tuple = tokens
         self.__token_cycle: cycle = cycle(t for t in self.__tokens if t is not None)
         self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
-        self.ses: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.ses, requester=requester, oauth_token=self.__token)
+        self.setup_done: bool = False
+        self.session: aiohttp.ClientSession | None = None
+        self.gh: gh.GitHubAPI | None = None
+
+    async def setup(self):
+        if not self.setup_done:
+            self.session: aiohttp.ClientSession = aiohttp.ClientSession()
+            self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.session, requester=self.requester, oauth_token=self.__token)
 
     @property
     def __token(self) -> str:
@@ -58,7 +65,7 @@ class GitHubAPI:
     async def ghprofile_stats(self, name: str) -> Optional[GhProfileData]:
         if '/' in name or '&' in name:
             return None
-        res = await (await self.ses.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
+        res = await (await self.session.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
         period: dict = dict(res['payload']['period'])
         if not res['success'] or sum([int(v) for v in period.values()]) == 0:
             return None
@@ -67,18 +74,21 @@ class GitHubAPI:
     async def get_ratelimit(self) -> tuple[tuple[dict, ...], int]:
         results: list = []
         for token in self.__tokens:
-            data = await (await self.ses.get('https://api.github.com/rate_limit',
-                                             headers={'Authorization': f'token {token}'})).json()
+            data = await (await self.session.get('https://api.github.com/rate_limit',
+                                                 headers={'Authorization': f'token {token}'})).json()
             results.append(data)
         return tuple(results), len(self.__tokens)
+
+    async def getitem(self, resource: str, default: Any = None) -> Any:
+        try:
+            return await self.gh.getitem(resource)
+        except BadRequest:
+            return default
 
     @github_cached
     @validate_github_name('user')
     async def get_user_repos(self, user: GitHubUser) -> Optional[list[dict]]:
-        try:
-            return list(r for r in await self.gh.getitem(f'/users/{user}/repos') if r['private'] is False)
-        except BadRequest:
-            return None
+        return list(r for r in await self.getitem(f'/users/{user}/repos') if r['private'] is False)
 
     @github_cached
     @validate_github_name('org')
@@ -211,8 +221,8 @@ class GitHubAPI:
                            size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[bool | bytes]:
         if '/' not in repo or repo.count('/') > 1:
             return None
-        res = await self.ses.get(BASE_URL + f'/repos/{repo}/zipball',
-                                 headers={'Authorization': f'token {self.__token}'})
+        res = await self.session.get(BASE_URL + f'/repos/{repo}/zipball',
+                                     headers={'Authorization': f'token {self.__token}'})
         if res.status == 200:
             try:
                 await res.content.readexactly(size_threshold)

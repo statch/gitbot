@@ -1,7 +1,6 @@
 import re
 import discord
 from ._snippet_tools import handle_url, gen_carbon_inmemory  # noqa
-from aiohttp import ClientSession
 from discord.ext import commands
 from lib.utils import regex
 from lib.globs import Mgr
@@ -13,7 +12,6 @@ from lib.structs.discord.context import GitBotContext
 class Snippets(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.ses: ClientSession = ClientSession(loop=self.bot.loop)
 
     @gitbot_group(name='snippet', invoke_without_command=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
@@ -54,5 +52,5 @@ class Snippets(commands.Cog):
             await ctx.error(err)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Snippets(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Snippets(bot))

@@ -121,5 +121,5 @@ class PullRequest(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(PullRequest(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(PullRequest(bot))

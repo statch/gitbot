@@ -17,7 +17,7 @@ class FileDevutils(commands.Cog):
     @staticmethod
     async def get_filehash(attachment: discord.Attachment, hash_type: str) -> str:
         hash_ = hashlib.new(hash_type)
-        async for chunk in (await Mgr.ses.get(attachment.url)).content.iter_chunked(4096):
+        async for chunk in (await Mgr.session.get(attachment.url)).content.iter_chunked(4096):
             hash_.update(chunk)
         return hash_.hexdigest()
 
@@ -87,5 +87,5 @@ class FileDevutils(commands.Cog):
             await result_embed.send(ctx)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(FileDevutils(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(FileDevutils(bot))

@@ -50,5 +50,5 @@ class Logs(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Logs(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Logs(bot))

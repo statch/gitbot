@@ -212,5 +212,5 @@ class Repo(commands.Cog):
         await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Repo(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Repo(bot))

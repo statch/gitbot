@@ -115,13 +115,13 @@ class ReleaseFeedWorker(commands.Cog):
                           text: Optional[str] = None) -> bool:
         try:
             webhook: discord.Webhook = discord.Webhook.from_url('https://discord.com/api/webhooks/' + rfi['hook'],
-                                                                adapter=discord.AsyncWebhookAdapter(Git.ses))
-            await webhook.send(text, embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                                                                session=self.bot.session)
+            await webhook.send(text, embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar.url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
             await Mgr.db.guilds.find_one_and_delete({'_id': guild['_id']})
             return False
         return True
 
 
-def setup(bot: GitBot) -> None:
-    bot.add_cog(ReleaseFeedWorker(bot))
+async def setup(bot: GitBot) -> None:
+    await bot.add_cog(ReleaseFeedWorker(bot))

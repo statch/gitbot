@@ -83,7 +83,7 @@ class BotInfo(commands.Cog):
             color=Mgr.c.rounded,
             description=ctx.l.support.description
         )
-        embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.support.title)
+        embed.set_author(icon_url=self.bot.user.avatar.url, name=ctx.l.support.title)
         await ctx.send(embed=embed)
 
     @gitbot_command(name='invite')
@@ -95,7 +95,7 @@ class BotInfo(commands.Cog):
                         f'=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]('
                         'https://discord.gg/3e5fwpA)'
         )
-        embed.set_author(icon_url=self.bot.user.avatar_url, name=ctx.l.invite.tagline)
+        embed.set_author(icon_url=self.bot.user.avatar.url, name=ctx.l.invite.tagline)
         await ctx.send(embed=embed)
 
     @gitbot_command(name='vote')
@@ -106,7 +106,7 @@ class BotInfo(commands.Cog):
             description='[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]('
                         'https://botsfordiscord.com/bot/761269120691470357)'
         )
-        embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=ctx.l.vote, icon_url=self.bot.user.avatar.url)
         await ctx.send(embed=embed)
 
     @gitbot_command(name='stats')
@@ -127,5 +127,5 @@ class BotInfo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(BotInfo(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(BotInfo(bot))

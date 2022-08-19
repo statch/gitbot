@@ -137,5 +137,5 @@ class LinesOfCode(commands.Cog):
         return result
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(LinesOfCode(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(LinesOfCode(bot))

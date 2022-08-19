@@ -9,11 +9,12 @@ A non-native replacement for the bot object provided in discord.ext.commands
 import os
 import discord
 import logging
+import aiohttp
 from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from lib.globs import Mgr
+from lib.globs import Mgr, Git
 
 __all__: tuple = ('GitBot',)
 
@@ -28,7 +29,9 @@ class GitBot(commands.Bot):
         self.__init_start: float = perf_counter()
         super().__init__(*args, **kwargs)
         self._setup_logging()
-        self.load_cogs()
+        self.session: aiohttp.ClientSession | None = None
+        self.git: Git = Git
+        self.manager: Mgr = Mgr
 
     def _setup_logging(self):
         logging.basicConfig(level=getattr(logging, Mgr.env.log_level.upper(), logging.INFO),
@@ -48,30 +51,35 @@ class GitBot(commands.Bot):
     def group(self, *args, **kwargs):
         return super().group(*args, **kwargs, cls=GitBotCommandGroup)
 
-    def load_extension(self, name: str, *, package=None):
-        super().load_extension(name, package=package)
+    async def load_extension(self, name: str, *, package=None):
+        await super().load_extension(name, package=package)
         self.logger.info(f'Loaded extension: "{name}"')
 
-    def unload_extension(self, name: str, *, package=None):
-        super().unload_extension(name, package=package)
+    async def unload_extension(self, name: str, *, package=None):
+        await super().unload_extension(name, package=package)
         self.logger.info(f'Unloaded extension: "{name}"')
 
-    def reload_extension(self, name: str, *, package=None):
-        super().reload_extension(name, package=package)
+    async def reload_extension(self, name: str, *, package=None):
+        await super().reload_extension(name, package=package)
         self.logger.info(f'Reloaded extension: "{name}"')
 
-    def load_cogs_from_dir(self, dir_: str) -> None:
+    async def load_cogs_from_dir(self, dir_: str) -> None:
         for obj in os.listdir(dir_):
             if os.path.isdir(f'{dir_}/{obj}'):
-                self.load_cogs_from_dir(f'{dir_}/{obj}')
+                await self.load_cogs_from_dir(f'{dir_}/{obj}')
             if obj.endswith('.py') and not obj.startswith('_'):
-                self.load_extension(f'{dir_.replace("/", ".")}.{obj[:-3]}')
+                await self.load_extension(f'{dir_.replace("/", ".")}.{obj[:-3]}')
 
-    def load_cogs(self) -> None:
+    async def load_cogs(self) -> None:
         for subdir in os.listdir('cogs'):
             if os.path.isdir(f'cogs/{subdir}') and (subdir not in Mgr.env.production_only_cog_subdirs
                                                     if not Mgr.env.production else True):
-                self.load_cogs_from_dir(f'cogs/{subdir}')
+                await self.load_cogs_from_dir(f'cogs/{subdir}')
+
+    async def setup_hook(self) -> None:
+        await self.load_cogs()
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
+        await Git.setup()
 
     async def on_ready(self) -> None:
         self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')

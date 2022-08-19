@@ -14,5 +14,5 @@ class TopGGStats(commands.Cog):
         print("Successfully posted stats to top.gg")
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(TopGGStats(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(TopGGStats(bot))

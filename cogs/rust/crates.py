@@ -130,5 +130,5 @@ class Crates(commands.Cog):
             await ctx.error(ctx.l.generic.nonexistent.rust_crate)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Crates(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Crates(bot))

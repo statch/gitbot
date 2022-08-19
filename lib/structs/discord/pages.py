@@ -169,7 +169,7 @@ class EmbedPages:
         else:
             page_str: str = self.current_page_string
 
-        if embed.footer.text == discord.Embed.Empty:
+        if embed.footer.text is None:
             return embed.set_footer(text=page_str)
         embed.set_footer(text=f'{embed.footer.text} | {page_str}')
 
@@ -183,7 +183,7 @@ class EmbedPages:
         if self.message:
             with contextlib.suppress(discord.errors.NotFound):
                 for control in EmbedPagesControl:
-                    await self.message.add_reaction(control.value)
+                    await self.message.add_reaction(control.value)  # noqa
 
     async def __loop(self):
         while not self.should_die:

@@ -127,8 +127,9 @@ class Gist(commands.Cog):
             embed.set_footer(text=footer)
 
         return embed
-
-    async def get_color_from_files(self, files: list) -> int:
+    
+    @staticmethod
+    async def get_color_from_files(files: list) -> int:
         extensions: list = [f['extension'] for f in files]
         most_common: Optional[str] = await Mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
@@ -138,12 +139,13 @@ class Gist(commands.Cog):
                 return int(file['language']['color'][1:], 16)
         return Mgr.c.rounded
 
-    def extension(self, ext: str) -> str:
+    @staticmethod
+    def extension(ext: str) -> str:
         ext: str = ext[1:]
         if ext == 'ts':
             return 'js'
         return ext if ext in DISCORD_MD_LANGS else ''
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Gist(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Gist(bot))

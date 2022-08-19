@@ -28,9 +28,9 @@ class Events(commands.Cog):
             description=f":tada: **Hi! I'm {self.bot.user.name}.**\n\n**My prefix is** `git`\n**Use the command `git "
                         f"--help` to get started.\n\nIf you have any problems, [join the support server!]("
                         f"https://discord.gg/3e5fwpA)**\n\n**Now let's get this party started, shall we?**",
-            thumbnail=self.bot.user.avatar_url,
+            thumbnail=self.bot.user.avatar.url,
             author_name=self.bot.user.name,
-            author_icon_url=self.bot.user.avatar_url,
+            author_icon_url=self.bot.user.avatar.url,
             footer=f'© 2020-{date.today().year} wulf, statch'
         )
         embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild)
@@ -63,9 +63,9 @@ class Events(commands.Cog):
                 embed: GitBotEmbed = GitBotEmbed(
                     color=Mgr.c.rounded,
                     description=ctx.l.events.mention,
-                    thumbnail=self.bot.user.avatar_url,
+                    thumbnail=self.bot.user.avatar.url,
                     author_name=self.bot.user.name,
-                    author_icon_url=self.bot.user.avatar_url,
+                    author_icon_url=self.bot.user.avatar.url,
                     author_url='https://statch.org/gitbot'
                 )
                 await embed.send(message.channel)
@@ -79,5 +79,5 @@ class Events(commands.Cog):
                 return
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Events(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Events(bot))

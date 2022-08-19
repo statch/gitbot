@@ -61,5 +61,5 @@ class Errors(commands.Cog):
                     print(error)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Errors(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Errors(bot))

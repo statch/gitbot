@@ -101,5 +101,5 @@ class Dev(commands.Cog):
                                                 filename=f'commands.{format_.value}'))
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Dev(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Dev(bot))

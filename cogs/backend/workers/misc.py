@@ -34,5 +34,5 @@ class MiscellaneousBackgroundTasks(commands.Cog):
             self.statcord.command_run(ctx)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(MiscellaneousBackgroundTasks(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(MiscellaneousBackgroundTasks(bot))

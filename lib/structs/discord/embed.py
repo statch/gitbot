@@ -42,12 +42,12 @@ class GitBotEmbed(discord.Embed):
 
     def __init__(self,
                  *,
-                 footer: str = discord.Embed.Empty,
-                 footer_icon_url: str = discord.Embed.Empty,
-                 thumbnail: str = discord.Embed.Empty,
+                 footer: str | None = None,
+                 footer_icon_url: str | None = None,
+                 thumbnail: str | None = None,
                  author_name: str = '',
-                 author_url: str = discord.Embed.Empty,
-                 author_icon_url: str = discord.Embed.Empty,
+                 author_url: str | None = None,
+                 author_icon_url: str | None = None,
                  **kwargs):
         kwargs.setdefault('color', 0x2f3136)
         super().__init__(**kwargs)
@@ -77,9 +77,9 @@ class GitBotEmbed(discord.Embed):
         :return: The created embed
         """
         resource: DictProxy = functools.reduce(operator.getitem, resource.split(), ctx.l)  # noqa: type valid
-        kwargs.setdefault('title', resource.get('title', discord.Embed.Empty))
-        kwargs.setdefault('description', resource.get('description', discord.Embed.Empty))
-        kwargs.setdefault('footer', resource.get('footer', discord.Embed.Empty))
+        kwargs.setdefault('title', resource.get('title'))
+        kwargs.setdefault('description', resource.get('description'))
+        kwargs.setdefault('footer', resource.get('footer'))
         embed: 'GitBotEmbed' = cls(**kwargs)
         if 'fields' in resource:
             for field in resource['fields']:
@@ -139,7 +139,7 @@ class GitBotEmbed(discord.Embed):
         -   The callback is expected to accept a message (the init one) and a tuple of the event's returns
         -   It's expected to return a :class:`GitBotCommandState` flag and an optional tuple of arguments
             that are passed up to the root call to prevent the need to do stuff like double validation
-        -   **The flag signifies whether or not the internal loop should end its otherwise perpetual execution**
+        -   **The flag signifies whether the internal loop should end its otherwise perpetual execution**
 
         :param ctx: The context to use
         :param event: The event to listen for

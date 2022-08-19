@@ -10,5 +10,5 @@ class DiscordLabsStats(commands.Cog):
         self.discord_labs = dlabs.Client(bot=self.bot, token=self.token, autopost=True, verbose=True)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(DiscordLabsStats(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(DiscordLabsStats(bot))

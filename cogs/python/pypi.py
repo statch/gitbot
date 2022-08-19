@@ -127,5 +127,5 @@ class PyPI(commands.Cog):
             await ctx.error(ctx.l.generic.nonexistent.python_package)
 
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(PyPI(bot))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(PyPI(bot))

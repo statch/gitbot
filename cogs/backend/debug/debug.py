@@ -5,8 +5,7 @@ import discord
 import datetime as dt
 import ast
 from lib.utils.decorators import restricted, gitbot_command
-from lib.globs import Git, Mgr
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
 
 
@@ -24,8 +23,8 @@ def insert_returns(body):
 
 
 class Debug(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @restricted()
     @gitbot_command(name='dispatch', aliases=['event'], hidden=True)
@@ -46,10 +45,10 @@ class Debug(commands.Cog):
     @restricted()
     @gitbot_command(name='ratelimit', aliases=['rate'], hidden=True)
     async def ratelimit_command(self, ctx: GitBotContext) -> None:
-        data = await Git.get_ratelimit()
+        data = await self.bot.github.get_ratelimit()
         rate = data[0]
         embed: GitBotEmbed = GitBotEmbed(
-            title=f'{Mgr.e.err}  Rate-limiting'
+            title=f'{self.bot.mgr.e.err}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]
         used_gql = sum(g['used'] for g in graphql)
@@ -91,8 +90,8 @@ class Debug(commands.Cog):
                 'discord': discord,
                 'commands': commands,
                 'ctx': ctx,
-                'Git': Git,
-                'Mgr': Mgr,
+                'github': self.bot.github,
+                'mgr': self.bot.mgr,
                 'os': os,
                 'sys': sys,
                 '__import__': __import__
@@ -106,5 +105,5 @@ class Debug(commands.Cog):
                 await ctx.send('Evaluation successful, no output.')
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Debug(bot))

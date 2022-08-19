@@ -4,7 +4,6 @@ import discord
 from enum import Enum
 from discord.ext import commands
 from typing import Optional
-from lib.globs import Mgr
 from lib.structs import GitBotEmbed
 from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup
 from lib.structs.discord.context import GitBotContext
@@ -46,24 +45,24 @@ class Dev(commands.Cog):
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: GitBotContext, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
-        locale_data: Optional[tuple[list[str]], dict, bool] = Mgr.get_missing_keys_for_locale(locale_)
+        locale_data: Optional[tuple[list[str]], dict, bool] = self.bot.mgr.get_missing_keys_for_locale(locale_)
         if not locale_data:
             await ctx.error(ctx.l.generic.nonexistent.locale)
         elif not locale_data[0]:
-            if locale_data[1]['name'] == Mgr.locale.master.meta.name:
+            if locale_data[1]['name'] == self.bot.mgr.locale.master.meta.name:
                 await ctx.error(ctx.fmt('no_master_locale', f'`{locale_data[1]["name"]}`'))
             else:
                 await ctx.send(ctx.l.dev.missing_locales.no_missing_keys)
         else:
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])
-            meta, _ = Mgr.get_locale_meta_by_attribute(locale_)
+            meta, _ = self.bot.mgr.get_locale_meta_by_attribute(locale_)
             missing: list[tuple[str]] = locale_data[0]
             embed: GitBotEmbed = GitBotEmbed(
                 color=0x0384fc,
                 title=ctx.fmt('title', meta['name']),
                 url=f'https://github.com/statch/gitbot/blob/main/data/locale/{meta["name"]}.json',
-                description='\n'.join([f'{Mgr.e.square} {_gen_locale_path(path)}' for path in missing])
+                description='\n'.join([f'{self.bot.mgr.e.square} {_gen_locale_path(path)}' for path in missing])
             )
             await ctx.send(embed=embed)
 
@@ -90,7 +89,7 @@ class Dev(commands.Cog):
                 return
         if ctx.author.id == 548803750634979340 and not direct:
             f_name: str = f'commands.{format_.value}'
-            s_dir: str = f'{Mgr.root_directory}/{f_name }'
+            s_dir: str = f'{self.bot.mgr.root_directory}/{f_name }'
             with open(s_dir, 'w+', encoding='utf8') as exportfile:
                 exportfile.write(command_strings)
             await ctx.success(ctx.fmt('success_direct', f'`{f_name}`', len(commands_)))

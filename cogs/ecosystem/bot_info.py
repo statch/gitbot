@@ -4,11 +4,10 @@ import datetime
 import os
 import psutil
 from discord.ext import commands
-from lib.globs import Mgr
 from os.path import isfile, isdir, join
 from lib.utils.decorators import gitbot_command
 from lib.structs.discord.context import GitBotContext
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 
 
 pid: int = os.getpid()
@@ -35,8 +34,8 @@ LINES_OF_CODE: int = sum((dir_line_count('./cogs'),
 
 
 class BotInfo(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_command(name='uptime', aliases=['up'])
     @commands.cooldown(15, 30, commands.BucketType.member)
@@ -52,9 +51,9 @@ class BotInfo(commands.Cog):
             time_format: str = '**{h}** hours, **{m}** minutes, and **{s}** seconds.'
         uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             title=None,
-            description=f'{Mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
+            description=f'{self.bot.mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
         )
         await ctx.send(embed=embed)
 
@@ -62,8 +61,8 @@ class BotInfo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def ping_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
-            description=f"{Mgr.e.timer}  {ctx.fmt('ping', round(self.bot.latency * 1000))}"
+            color=self.bot.mgr.c.rounded,
+            description=f"{self.bot.mgr.e.timer}  {ctx.fmt('ping', round(self.bot.latency * 1000))}"
         )
         await ctx.send(embed=embed)
 
@@ -80,7 +79,7 @@ class BotInfo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def support_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             description=ctx.l.support.description
         )
         embed.set_author(icon_url=self.bot.user.avatar.url, name=ctx.l.support.title)
@@ -90,7 +89,7 @@ class BotInfo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def invite_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             description=f'[**{ctx.l.invite.invite_verb} {self.bot.user.name}**](https://discord.com/oauth2/authorize?client_id'
                         f'=761269120691470357&scope=bot&permissions=67488832) | [**{ctx.l.invite.server}**]('
                         'https://discord.gg/3e5fwpA)'
@@ -102,7 +101,7 @@ class BotInfo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def vote_command(self, ctx: GitBotContext) -> None:
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             description='[**top.gg**](https://top.gg/bot/761269120691470357/vote) | [**botsfordiscord.com**]('
                         'https://botsfordiscord.com/bot/761269120691470357)'
         )
@@ -113,11 +112,11 @@ class BotInfo(commands.Cog):
     @commands.cooldown(15, 30, commands.BucketType.member)
     async def stats_command(self, ctx: GitBotContext) -> None:
         ctx.fmt.set_prefix('stats')
-        embed: discord.Embed = discord.Embed(color=Mgr.c.rounded)
+        embed: discord.Embed = discord.Embed(color=self.bot.mgr.c.rounded)
         users: int = sum([x.member_count for x in self.bot.guilds])
         memory: str = f'**{process.memory_info()[0] / 2. ** 30:.3f}GB** RAM'  # memory use in GB... I think
         cpu: str = f'**{psutil.cpu_percent()}%** CPU,'
-        embed.add_field(name=f"{Mgr.e.stats}  {ctx.lp.title}", value=ctx.lp.body,
+        embed.add_field(name=f"{self.bot.mgr.e.stats}  {ctx.lp.title}", value=ctx.lp.body,
                         inline=False)
         embed.add_field(name=ctx.lp.system, value=f"{cpu}\n{memory}")
         embed.add_field(name=ctx.lp.people.title,
@@ -127,5 +126,5 @@ class BotInfo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(BotInfo(bot))

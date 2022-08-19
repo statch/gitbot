@@ -1,6 +1,5 @@
 import discord
 from typing import Optional
-from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
 from lib.typehints import GitHubRepository
@@ -25,7 +24,7 @@ class Issue(commands.Cog):
                     await ctx.error(ctx.l.issue.stored_no_number)
                     return
                 num: str = repo
-                stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
+                stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
                 if stored:
                     repo: str = stored
                     issue_number: str = num
@@ -34,7 +33,7 @@ class Issue(commands.Cog):
                     return
 
             try:
-                issue: dict | str = await Git.get_issue(repo, int(issue_number))
+                issue: dict | str = await self.bot.github.get_issue(repo, int(issue_number))
             except ValueError:
                 await ctx.error(ctx.l.issue.second_argument_number)
                 return
@@ -49,7 +48,7 @@ class Issue(commands.Cog):
         if issue['state'].lower() == 'closed':
             em: str = '<:issue_closed:788517938168594452>'
         embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             title=f"{em}  {issue['title']} #{issue_number}",
             url=issue['url']
         )
@@ -63,11 +62,11 @@ class Issue(commands.Cog):
         if body:
             embed.add_field(name=f':notepad_spiral: {ctx.l.issue.glossary[0]}:', value=f"```{body}```", inline=False)
         user: str = ctx.fmt('created_at',
-                            Mgr.to_github_hyperlink(issue['author']['login']),
-                            Mgr.github_to_discord_timestamp(issue['createdAt']))
+                            self.bot.mgr.to_github_hyperlink(issue['author']['login']),
+                            self.bot.mgr.github_to_discord_timestamp(issue['createdAt']))
         closed: str = '\n'
         if issue['closed']:
-            closed: str = '\n' + ctx.fmt('closed_at', Mgr.github_to_discord_timestamp(issue['closedAt'])) + '\n'
+            closed: str = '\n' + ctx.fmt('closed_at', self.bot.mgr.github_to_discord_timestamp(issue['closedAt'])) + '\n'
         assignees: str = ctx.fmt('assignees plural', issue['assigneeCount'])
         if issue['assigneeCount'] == 1:
             assignees: str = ctx.l.issue.assignees.singular

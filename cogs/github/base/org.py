@@ -1,6 +1,5 @@
 import discord
 from typing import Optional
-from lib.globs import Git, Mgr
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubOrganization
@@ -14,7 +13,7 @@ class Org(commands.Cog):
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: GitBotContext, org: Optional[GitHubOrganization] = None) -> None:
         if not org:
-            stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'org')
+            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.org_info_command, organization=stored)
@@ -32,23 +31,23 @@ class Org(commands.Cog):
         if ctx.data:
             org: dict = getattr(ctx, 'data')
         else:
-            org: dict = await Git.get_org(organization)
+            org: dict = await self.bot.github.get_org(organization)
         if not org:
             if ctx.invoked_with_stored:
-                await Mgr.db.users.delitem(ctx, 'org')
+                await self.bot.mgr.db.users.delitem(ctx, 'org')
                 await ctx.error(ctx.l.generic.nonexistent.org.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.org.base)
             return None
 
         embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             title=ctx.fmt('title', organization) if organization[0].isupper() else ctx.fmt('title',
                                                                                            organization.lower()),
             url=org['html_url']
         )
 
-        mem: list = await Git.get_org_members(organization)
+        mem: list = await self.bot.github.get_org_members(organization)
         members: str = ctx.fmt('members', len(mem), f"({org['html_url']}/people)") + '\n'
         if len(mem) == 1:
             members: str = ctx.fmt('one_member', f"({org['html_url']}/people)") + '\n'
@@ -65,7 +64,7 @@ class Org(commands.Cog):
         else:
             location: str = "\n"
 
-        created_at: str = ctx.fmt('created_at', Mgr.github_to_discord_timestamp(org['created_at'])) + '\n'
+        created_at: str = ctx.fmt('created_at', self.bot.mgr.github_to_discord_timestamp(org['created_at'])) + '\n'
         info: str = f"{created_at}{repos}{members}{location}{email}"
         embed.add_field(name=f":mag_right: {ctx.l.org.info.glossary[1]}:", value=info, inline=False)
         blog: tuple = (org['blog'] if 'blog' in org else None, ctx.l.org.info.glossary[3])
@@ -87,8 +86,8 @@ class Org(commands.Cog):
     @org_command_group.command(name='repos', aliases=['r'])
     async def org_repos_command(self, ctx: GitBotContext, org: GitHubOrganization) -> None:
         ctx.fmt.set_prefix('org repos')
-        o: Optional[dict] = await Git.get_org(org)
-        repos: list = await Git.get_org_repos(org)
+        o: Optional[dict] = await self.bot.github.get_org(org)
+        repos: list = await self.bot.github.get_org_repos(org)
         if o is None:
             await ctx.error(ctx.l.generic.nonexistent.org.base)
             return
@@ -99,7 +98,7 @@ class Org(commands.Cog):
             title=ctx.fmt('owner', org) if org[0].isupper() else ctx.fmt('owner', org).lower(),
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             url=f"https://github.com/{org}"
         )
         if (c := len(repos)) > 15:

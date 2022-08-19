@@ -2,22 +2,20 @@ import discord
 import hashlib
 from typing import Optional
 from discord.ext import commands
-from lib.globs import Mgr
+from lib.structs import GitBotEmbed, GitBot
 from lib.utils.decorators import gitbot_group
 from lib.structs.discord.context import GitBotContext
-from lib.structs.discord.embed import GitBotEmbed
 
 
 class FileDevutils(commands.Cog):
     __valid_hash_algos__: tuple = ('md5', 'sha1', 'sha256', 'sha512', 'sha224', 'sha384')
 
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
-    @staticmethod
-    async def get_filehash(attachment: discord.Attachment, hash_type: str) -> str:
+    async def get_filehash(self, attachment: discord.Attachment, hash_type: str) -> str:
         hash_ = hashlib.new(hash_type)
-        async for chunk in (await Mgr.session.get(attachment.url)).content.iter_chunked(4096):
+        async for chunk in (await self.bot.session.get(attachment.url)).content.iter_chunked(4096):
             hash_.update(chunk)
         return hash_.hexdigest()
 
@@ -27,7 +25,7 @@ class FileDevutils(commands.Cog):
                 title=ctx.l.file.generic_algo_related.invalid_algorithm_embed.title,
                 description=ctx.l.file.generic_algo_related.invalid_algorithm_embed.description.format(
                         ' '.join([f'`{a}`' for a in FileDevutils.__valid_hash_algos__])),
-                color=Mgr.c.discord.yellow,
+                color=ctx.bot.mgr.c.discord.yellow,
                 footer=ctx.l.file.generic_algo_related.invalid_algorithm_embed.footer
         )
         return await invalid_algo_embed.send(ctx)
@@ -63,7 +61,7 @@ class FileDevutils(commands.Cog):
             result_embed: GitBotEmbed = GitBotEmbed(
                     title=':mag:  ' + ctx.fmt('result_embed_title', f'`{algorithm}`', f'`{attachment.filename}`'),
                     description=f'```{checksum}```',
-                    color=Mgr.c.discord.green,
+                    color=self.bot.mgr.c.discord.green,
                     url=attachment.url
             )
             await result_embed.send(ctx)
@@ -78,14 +76,14 @@ class FileDevutils(commands.Cog):
             if to_compare == checksum:
                 result_embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx,
                                                                              'file verify result_embed success',
-                                                                             color=Mgr.c.discord.green)
+                                                                             color=self.bot.mgr.c.discord.green)
             else:
                 result_embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx,
                                                                              'file verify result_embed failure',
-                                                                             color=Mgr.c.discord.red)
+                                                                             color=self.bot.mgr.c.discord.red)
                 result_embed.description += f'\n```diff\n+ {checksum}\n- {to_compare}```'
             await result_embed.send(ctx)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(FileDevutils(bot))

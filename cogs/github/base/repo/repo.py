@@ -4,7 +4,6 @@ import io
 from ._list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Optional
-from lib.globs import Git, Mgr
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
@@ -20,7 +19,7 @@ class Repo(commands.Cog):
     @normalize_repository
     async def repo_command_group(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
         if not repo:
-            stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'repo')
+            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.repo_info_command, repo=stored)
@@ -39,17 +38,17 @@ class Repo(commands.Cog):
         if ctx.data:
             r: dict = getattr(ctx, 'data')
         else:
-            r: Optional[dict] = await Git.get_repo(repo)
+            r: Optional[dict] = await self.bot.github.get_repo(repo)
         if not r:
             if ctx.invoked_with_stored:
-                await Mgr.db.users.delitem(ctx, 'repo')
+                await self.bot.mgr.db.users.delitem(ctx, 'repo')
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
 
         embed: GitBotEmbed = GitBotEmbed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else Mgr.c.rounded,
+            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else self.bot.mgr.c.rounded,
             title=repo,
             url=r['url'],
             thumbnail=r['owner']['avatarUrl']
@@ -86,7 +85,7 @@ class Repo(commands.Cog):
         if 'isFork' in r and r['isFork'] is True:
             forked = ctx.fmt('fork_notice', f"[{r['parent']['nameWithOwner']}]({r['parent']['url']})") + '\n'
 
-        created_at = ctx.fmt('created_at', Mgr.github_to_discord_timestamp(r['createdAt'])) + '\n'
+        created_at = ctx.fmt('created_at', self.bot.mgr.github_to_discord_timestamp(r['createdAt'])) + '\n'
 
         languages = ""
         if lang := r['primaryLanguage']:
@@ -107,7 +106,7 @@ class Repo(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: {ctx.l.repo.info.glossary[2]}:", value='\n'.join(link_strings))
 
-        if topics := Mgr.render_label_like_list(r['topics'][0],
+        if topics := self.bot.mgr.render_label_like_list(r['topics'][0],
                                                 name_and_url_knames_if_dict=('topic name', 'url'),
                                                 total_n=r['topics'][1]):
             embed.add_field(name=f':label: {ctx.l.repo.info.glossary[3]}:', value=topics)
@@ -128,10 +127,10 @@ class Repo(commands.Cog):
         if repo_or_path.count('/') > 1:
             repo: GitHubRepository = '/'.join(repo_or_path.split('/', 2)[:2])  # noqa
             file: str = repo_or_path[len(repo):]
-            src: list = await Git.get_tree_file(repo, file)
+            src: list = await self.bot.github.get_tree_file(repo, file)
             is_tree: bool = True
         else:
-            src = await Git.get_repo_files(repo_or_path)
+            src = await self.bot.github.get_repo_files(repo_or_path)
         if not src:
             if is_tree:
                 await ctx.error(ctx.l.generic.nonexistent.path)
@@ -141,8 +140,8 @@ class Repo(commands.Cog):
         if is_tree and not isinstance(src, list):
             await ctx.error(ctx.fmt('not_a_directory', f'`{ctx.prefix}snippet`'))
             return
-        files: list = sorted([f'{Mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
-                              f'{Mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in src[:15]],
+        files: list = sorted([f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
+                              f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in src[:15]],
                              key=lambda fs: 'file' in fs)
         if is_tree:
             link: str = str(src[0]['_links']['html'])
@@ -150,7 +149,7 @@ class Repo(commands.Cog):
         else:
             link: str = f'https://github.com/{repo_or_path}'
         embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
             description='\n'.join(files),
             url=link
@@ -165,20 +164,20 @@ class Repo(commands.Cog):
     @normalize_repository
     async def download_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('repo download')
-        msg: discord.Message = await ctx.send(f"{Mgr.e.github}  {ctx.l.repo.download.wait}")
-        src_bytes: Optional[bytes | bool] = await Git.get_repo_zip(repo)
+        msg: discord.Message = await ctx.send(f"{self.bot.mgr.e.github}  {ctx.l.repo.download.wait}")
+        src_bytes: Optional[bytes | bool] = await self.bot.github.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
-            return await msg.edit(content=f"{Mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
+            return await msg.edit(content=f"{self.bot.mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
         elif src_bytes is False:
             return await msg.edit(
-                content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                content=f"{self.bot.mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
         try:
             await ctx.send(file=discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj))
-            await msg.edit(content=f'{Mgr.e.checkmark}  {ctx.fmt("done", repo)}')
+            await msg.edit(content=f'{self.bot.mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
-                content=f"{Mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                content=f"{self.bot.mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
     @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)

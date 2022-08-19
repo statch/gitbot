@@ -5,36 +5,70 @@ A non-native replacement for the bot object provided in discord.ext.commands
 :copyright: (c) 2020-present statch
 :license: CC BY-NC-ND 4.0, see LICENSE for more details.
 """
-
 import os
 import discord
 import logging
 import aiohttp
+import platform
+import sentry_sdk
+from dotenv import load_dotenv
+from lib.api.github import GitHubAPI
+from lib.api.carbonara import Carbon as _Carbon
+from lib.api.pypi import PyPIAPI
+from lib.api.crates import CratesIOAPI
+from lib.manager import Manager
 from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from lib.globs import Mgr, Git
+
+load_dotenv()
 
 __all__: tuple = ('GitBot',)
 
 
 class GitBot(commands.Bot):
-    runtime_vars: dict[str, str] = {
-        'discord.py-version': discord.__version__,
-        'gitbot-commit': Mgr.get_current_commit(short=False),
-    }
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
-        super().__init__(*args, **kwargs)
-        self._setup_logging()
+        super().__init__(command_prefix=f'{os.getenv("PREFIX")} ', case_insensitive=True,
+                         intents=discord.Intents(messages=True,message_content=True,guilds=True,guild_reactions=True),
+                         help_command=None, guild_ready_timeout=1,
+                         status=discord.Status.online, description='Seamless GitHub-Discord integration.',
+                         fetch_offline_members=False, **kwargs)
         self.session: aiohttp.ClientSession | None = None
-        self.git: Git = Git
-        self.manager: Mgr = Mgr
+        self.github: GitHubAPI | None = None
+        self.carbon: _Carbon | None = None
+        self.pypi: PyPIAPI | None = None
+        self.crates: CratesIOAPI | None = None
+        self.mgr: Manager | None = None
+        self.runtime_vars: dict[str, str] = {}
+
+    def _setup_os_specific(self):
+        if os.name != 'nt':
+            self.logger.info('Installing uvloop...')
+            __import__('uvloop').install()
+        else:
+            self.logger.info('Skipping uvloop install...')
+        self.logger.info(f'Running on {platform.system()} {platform.release()}')
+        if not os.path.exists('./tmp'):
+            os.mkdir('tmp')
+
+    async def _setup_cloc(self) -> None:
+        if not os.path.exists('cloc.pl'):
+            res: aiohttp.ClientResponse = await self.session.get(
+                'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
+            with open('cloc.pl', 'wb') as fp:
+                fp.write(await res.content.read())
+
+    def _setup_sentry(self) -> None:
+        if self.mgr.env.production and (dsn := self.mgr.env.get('sentry_dsn')):
+            sentry_sdk.init(
+                    dsn=dsn,
+                    traces_sample_rate=0.5
+            )
 
     def _setup_logging(self):
-        logging.basicConfig(level=getattr(logging, Mgr.env.log_level.upper(), logging.INFO),
+        logging.basicConfig(level=getattr(logging, self.mgr.env.log_level.upper(), logging.INFO),
                             format='[%(levelname)s:%(name)s]: %(message)s')
         logging.getLogger('asyncio').setLevel(logging.WARNING)
         logging.getLogger('discord.gateway').setLevel(logging.WARNING)
@@ -72,14 +106,26 @@ class GitBot(commands.Bot):
 
     async def load_cogs(self) -> None:
         for subdir in os.listdir('cogs'):
-            if os.path.isdir(f'cogs/{subdir}') and (subdir not in Mgr.env.production_only_cog_subdirs
-                                                    if not Mgr.env.production else True):
+            if os.path.isdir(f'cogs/{subdir}') and (subdir not in self.mgr.env.production_only_cog_subdirs
+                                                    if not self.mgr.env.production else True):
                 await self.load_cogs_from_dir(f'cogs/{subdir}')
 
     async def setup_hook(self) -> None:
-        await self.load_cogs()
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
-        await Git.setup()
+        self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
+                                           aiohttp.ClientSession(), 'gitbot')
+        self.mgr: Manager = Manager(self.github)
+        self.carbon: _Carbon = _Carbon(self.session)
+        self.pypi: PyPIAPI = PyPIAPI(self.session)
+        self.crates: CratesIOAPI = CratesIOAPI(self.session)
+        self.runtime_vars: dict[str, str] = {
+            'discord.py-version': discord.__version__,
+            'gitbot-commit': self.mgr.get_current_commit(short=False),
+        }
+        self._setup_logging()
+        self._setup_sentry()
+        await self._setup_cloc()
+        await self.load_cogs()
 
     async def on_ready(self) -> None:
         self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')

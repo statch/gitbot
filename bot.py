@@ -1,22 +1,9 @@
 import discord
-from lib.globs import Mgr
 from discord.ext import commands
-from lib.utils.decorators import restricted
-from lib.structs.discord.bot import GitBot
 from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.bot import GitBot
 
-intents: discord.Intents = discord.Intents(
-    messages=True,
-    message_content=True,
-    guilds=True,
-    guild_reactions=True
-)
-
-bot: GitBot = GitBot(command_prefix=f'{Mgr.env.prefix} ', case_insensitive=True,
-                     intents=intents, help_command=None,
-                     guild_ready_timeout=1, status=discord.Status.online,
-                     description='Seamless GitHub-Discord integration.',
-                     fetch_offline_members=False)
+bot = GitBot()
 
 
 async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
@@ -40,19 +27,19 @@ async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
 
 
 @bot.command(name='reload', hidden=True)
-@restricted()
+@commands.is_owner()
 async def reload_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'reload')
 
 
 @bot.command(name='load', hidden=True)
-@restricted()
+@commands.is_owner()
 async def load_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'load')
 
 
 @bot.command(name='unload', hidden=True)
-@restricted()
+@commands.is_owner()
 async def unload_command(ctx: GitBotContext, cog: str) -> None:
     await do_cog_op(ctx, cog, 'unload')
 
@@ -66,6 +53,6 @@ async def global_check(ctx: GitBotContext) -> bool:
 
 
 @bot.before_invoke
-async def before_invoke(ctx: GitBotContext) -> None:
-    if str(ctx.command) not in Mgr.env.no_typing_commands:
+async def before_invoke(ctx: GitBotContext):
+    if str(ctx.command) not in bot.mgr.env.no_typing_commands:
         await ctx.channel.typing()

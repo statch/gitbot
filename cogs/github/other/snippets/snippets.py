@@ -3,7 +3,6 @@ import discord
 from ._snippet_tools import handle_url, gen_carbon_inmemory  # noqa
 from discord.ext import commands
 from lib.utils import regex
-from lib.globs import Mgr
 from typing import Optional
 from lib.utils.decorators import gitbot_group
 from lib.structs.discord.context import GitBotContext
@@ -18,10 +17,10 @@ class Snippets(commands.Cog):
     async def snippet_command_group(self, ctx: GitBotContext, *, link_or_codeblock: str) -> None:
         ctx.fmt.set_prefix('snippets')
         if ctx.invoked_subcommand is None:
-            codeblock: Optional[str] = Mgr.extract_content_from_codeblock(link_or_codeblock)
+            codeblock: Optional[str] = self.bot.mgr.extract_content_from_codeblock(link_or_codeblock)
             if codeblock:
-                if len(codeblock.splitlines()) > Mgr.env.carbon_len_threshold:
-                    await ctx.error(ctx.fmt('length_limit_exceeded', Mgr.env.carbon_len_threshold))
+                if len(codeblock.splitlines()) > self.bot.mgr.env.carbon_len_threshold:
+                    await ctx.error(ctx.fmt('length_limit_exceeded', self.bot.mgr.env.carbon_len_threshold))
                     return
                 msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
 
@@ -31,7 +30,7 @@ class Snippets(commands.Cog):
                                  re.search(regex.GITLAB_LINES_URL_RE, link_or_codeblock))):
                 msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
                 text, err = await handle_url(ctx, link_or_codeblock,
-                                             max_line_count=Mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
+                                             max_line_count=self.bot.mgr.env.carbon_len_threshold, wrap_in_codeblock=False)
                 await msg.delete()
                 if text:
                     await ctx.send(file=discord.File(filename='snippet.png',

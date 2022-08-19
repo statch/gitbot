@@ -4,7 +4,6 @@ from lib.utils.decorators import gitbot_command, GitBotCommand, GitBotCommandGro
 from lib.utils import decorators
 from lib.structs import GitBotEmbed
 from lib.structs.discord.pages import EmbedPages
-from lib.globs import Mgr
 from lib.typehints import CommandHelp, CommandGroupHelp
 from lib.structs.discord.context import GitBotContext
 
@@ -30,9 +29,9 @@ class Help(commands.Cog):
                                     content: Optional[CommandHelp | CommandGroupHelp] = None) -> GitBotEmbed:
         content: CommandHelp | CommandGroupHelp = content or command.get_help_content(ctx)
         if not content:
-            return GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=Mgr.c.discord.white)
+            return GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=self.bot.mgr.c.discord.white)
         embed: GitBotEmbed = GitBotEmbed(
-            title=f'{Mgr.e.github}   {ctx.l.glossary.command}: `{command.fullname}`',
+            title=f'{self.bot.mgr.e.github}   {ctx.l.glossary.command}: `{command.fullname}`',
             description=f'```{content["brief"]}```',
             thumbnail=self.bot.user.avatar.url,
             url='https://docs.statch.org'
@@ -41,7 +40,7 @@ class Help(commands.Cog):
             example: str = f'{self.bot.command_prefix}{example} ({ctx.l.glossary.example})'
         embed.add_field(name=f'{ctx.l.glossary.usage}:',
                         value=f'```haskell\n{self.bot.command_prefix}{content["usage"]}' +
-                              (f'\n{Mgr.gen_separator_line(content["usage"], "-")}'
+                              (f'\n{self.bot.mgr.gen_separator_line(content["usage"], "-")}'
                                f'\n{example}```' if example else '```'))
         if content['description'] is not None:
             embed.add_field(name=f'{ctx.l.glossary.description}:', value=f'```{content["description"]}```')
@@ -51,7 +50,7 @@ class Help(commands.Cog):
                                                                                  explainer in argument_explainers))
         if permissions := list(command.get_permissions(ctx)):
             embed.add_field(name=f'{ctx.l.help.required_permissions}:',
-                            value='\n'.join([f'{Mgr.e.circle_green}  {permission}' for permission
+                            value='\n'.join([f'{self.bot.mgr.e.circle_green}  {permission}' for permission
                                              in permissions]))
         if qa_disclaimer := command.get_qa_disclaimer(ctx):
             embed.set_footer(text=qa_disclaimer)
@@ -66,11 +65,11 @@ class Help(commands.Cog):
     async def send_command_group_help(self, ctx: GitBotContext, command_group: GitBotCommandGroup) -> None:
         content: CommandGroupHelp = command_group.get_help_content(ctx)
         if not content:
-            await GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=Mgr.c.discord.white).send(ctx)
+            await GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=self.bot.mgr.c.discord.white).send(ctx)
         else:
             # since a group is basically a command with additional attributes, we can somewhat reuse the same embed
             embed: GitBotEmbed = self.generate_command_help_embed(ctx, command_group, content=content)
-            embed.title = f'{Mgr.e.github}   {ctx.l.glossary.command_group}: `{command_group.fullname}`'
+            embed.title = f'{self.bot.mgr.e.github}   {ctx.l.glossary.command_group}: `{command_group.fullname}`'
             embed.add_field(name=f'{ctx.l.help.commands_inside_group}:',
                             value='\n'.join([f':white_small_square: `{self.bot.command_prefix}{c}`'
                                              for c in content['commands']]))
@@ -80,22 +79,22 @@ class Help(commands.Cog):
         pages: EmbedPages = EmbedPages()
         index_embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx, 'help default',
                                                                     url='https://docs.statch.org',
-                                                                    color=Mgr.c.discord.fuchsia,
+                                                                    color=self.bot.mgr.c.discord.fuchsia,
                                                                     thumbnail=self.bot.user.avatar.url)
         pages + index_embed
-        chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(Mgr.chunks(list(self._get_commands()), 10))
+        chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(self.bot.mgr.chunks(list(self._get_commands()), 10))
         for chunk in chunks:
             embed: GitBotEmbed = GitBotEmbed(
-                title=f'{Mgr.e.github}   Help',
+                title=f'{self.bot.mgr.e.github}   Help',
                 description='',
                 url='https://docs.statch.org',
             )
             for command in chunk:
                 try:
                     content: CommandHelp | CommandGroupHelp = command.get_help_content(ctx)
-                    brief: str = Mgr.truncate(content['brief'], 70 - len(command.fullname), full_word=True)
+                    brief: str = self.bot.mgr.truncate(content['brief'], 70 - len(command.fullname), full_word=True)
                     embed.description += f'`{command.fullname}`: {brief}\n' if type(command) is GitBotCommand \
-                        else f'`{command.fullname}`  {Mgr.e.folder}: {brief}\n'
+                        else f'`{command.fullname}`  {self.bot.mgr.e.folder}: {brief}\n'
                 except (KeyError, TypeError) as e:
                     self.bot.dispatch('error', e)
             pages + embed

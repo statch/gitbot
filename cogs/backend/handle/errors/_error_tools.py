@@ -2,13 +2,12 @@ import discord
 import traceback
 from typing import Optional
 from discord.ext import commands
-from lib.globs import Mgr
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
 
 
 def silenced(ctx: GitBotContext, error) -> bool:
-    return bool(getattr(ctx, f'__silence_{Mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
+    return bool(getattr(ctx, f'__silence_{ctx.bot.mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
 
 
 async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:
@@ -53,10 +52,10 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception) -> Optional
         return await channel.send(embed=embed)
 
 
-def closest_existing_command_from_error(bot: commands.Bot, error: commands.CommandNotFound | str) -> str:
-    return str(Mgr.get_closest_match_from_iterable(
+def closest_existing_command_from_error(bot: GitBot, error: commands.CommandNotFound | str) -> str:
+    return str(bot.mgr.get_closest_match_from_iterable(
         (error := str(error))[error.index('"') + 1:error.rindex('"')],
-        filter(lambda cmd: cmd not in Mgr.env.hidden_commands, map(str, bot.walk_commands()))))
+        filter(lambda cmd: cmd not in bot.mgr.env.hidden_commands, map(str, bot.walk_commands()))))
 
 
 def format_tb(tb) -> str:

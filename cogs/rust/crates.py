@@ -7,15 +7,14 @@ import pandas as pd
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from typing import Optional
-from lib.globs import Crates as CratesAPI, Mgr
 from lib.typehints import CratesIOCrate
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
 
 
 class Crates(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group('crates', invoke_without_command=True, aliases=['crate', 'crates.io'])
     @commands.cooldown(5, 30, commands.BucketType.user)
@@ -28,12 +27,12 @@ class Crates(commands.Cog):
                 f'`git crates downloads {{{ctx.l.help.argument_explainers.rust_crate_name.name}}}` - {ctx.l.crates.default.commands.downloads}'
             ]
             embed: GitBotEmbed = GitBotEmbed(
-                color=Mgr.c.languages.rust,
+                color=self.bot.mgr.c.languages.rust,
                 title=ctx.l.crates.default.title,
                 description=ctx.l.crates.default.description
                 + '\n\n'
                 + '\n'.join(commands_),
-                thumbnail=Mgr.i.crates_logo,
+                thumbnail=self.bot.mgr.i.crates_logo,
                 url='https://crates.io/'
             )
             await ctx.send(embed=embed)
@@ -42,9 +41,9 @@ class Crates(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def crate_info_command(self, ctx: GitBotContext, crate: CratesIOCrate) -> None:
         ctx.fmt.set_prefix('crates info')
-        data: Optional[dict] = await CratesAPI.get_crate_data(crate.lower())
+        data: Optional[dict] = await self.bot.crates.get_crate_data(crate.lower())
         if data:
-            owners: list = await CratesAPI.get_crate_owners(crate.lower())
+            owners: list = await self.bot.crates.get_crate_owners(crate.lower())
             crate_url: str = f'https://crates.io/crates/{data["crate"]["name"]}'
             embed: GitBotEmbed = GitBotEmbed(
                 color=0xe7b34e,
@@ -63,7 +62,7 @@ class Crates(commands.Cog):
                                              f'({owner["url"]})' for owner in owners[:5])) + more_authors + '\n'
 
             created_at: str = ctx.fmt('created_at',
-                                      Mgr.external_to_discord_timestamp(data['crate']['created_at'],
+                                      self.bot.mgr.external_to_discord_timestamp(data['crate']['created_at'],
                                                                         '%Y-%m-%dT%H:%M:%S.%f%z')) + '\n'
 
             all_time_downloads: str = f'```rust\n{data["crate"]["downloads"]} //' \
@@ -80,11 +79,11 @@ class Crates(commands.Cog):
                 embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:",
                                 value='\n'.join(link_strings))
 
-            if rendered_kws := Mgr.render_label_like_list(data['crate']['keywords'],
+            if rendered_kws := self.bot.mgr.render_label_like_list(data['crate']['keywords'],
                                                           url_fmt='https://crates.io/keywords/{0}'):
                 embed.add_field(name=f':label: {ctx.l.crates.info.glossary[3]}:', value=rendered_kws)
 
-            if rendered_ctgs := Mgr.render_label_like_list(data['categories'],
+            if rendered_ctgs := self.bot.mgr.render_label_like_list(data['categories'],
                                                            url_fmt='https://crates.io/categories/{0}',
                                                            name_and_url_slug_knames_if_dict=('category', 'slug')):
                 embed.add_field(name=f':package: {ctx.l.crates.info.glossary[4]}:', value=rendered_ctgs)
@@ -98,7 +97,7 @@ class Crates(commands.Cog):
     @commands.max_concurrency(7)
     async def crate_downloads_command(self, ctx: GitBotContext, project: CratesIOCrate) -> None:
         ctx.fmt.set_prefix('crates downloads')
-        data: Optional[list] = await CratesAPI.get_crate_downloads(project)
+        data: Optional[list] = await self.bot.crates.get_crate_downloads(project)
         if data:
             df: pd.DataFrame = pd.DataFrame({'date': [item['date'] for item in data],
                                              'downloads': [item['downloads'] for item in data]})
@@ -112,13 +111,13 @@ class Crates(commands.Cog):
             last_week_dl: int = sum(item['downloads'] for item in data[-7:])
             last_month_dl: int = sum(item['downloads'] for item in data[-30:])
             embed: GitBotEmbed = GitBotEmbed(
-                color=Mgr.c.rounded,
+                color=self.bot.mgr.c.rounded,
                 title=ctx.fmt('title', project, len(data) - 1),
                 url=f'https://crates.io/crates/{project.replace(".", "-").lower()}',
                 description=f'{ctx.fmt("stats yesterday", yesterday_dl)}\n'
                             f'{ctx.fmt("stats last_week", last_week_dl)}\n'
                             f'{ctx.fmt("stats last_month", last_month_dl)}',
-                thumbnail=Mgr.i.crates_logo,
+                thumbnail=self.bot.mgr.i.crates_logo,
                 footer=ctx.l.crates.downloads.footer
             )
             await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
@@ -130,5 +129,5 @@ class Crates(commands.Cog):
             await ctx.error(ctx.l.generic.nonexistent.rust_crate)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Crates(bot))

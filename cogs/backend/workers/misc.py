@@ -3,7 +3,6 @@ import statcord
 from discord.ext import commands, tasks
 from random import randint
 from itertools import cycle
-from lib.globs import Mgr
 from lib.structs.discord.context import GitBotContext
 
 
@@ -11,8 +10,8 @@ class MiscellaneousBackgroundTasks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.status_changer.start()
-        if Mgr.env.production:
-            self.statcord: statcord.Client = statcord.Client(self.bot, Mgr.env.statcord)
+        if self.bot.mgr.env.production:
+            self.statcord: statcord.Client = statcord.Client(self.bot, self.bot.mgr.env.statcord)
             self.statcord.start_loop()
 
     @tasks.loop(minutes=randint(2, 5))
@@ -30,7 +29,7 @@ class MiscellaneousBackgroundTasks(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command(self, ctx: GitBotContext):
-        if Mgr.env.production:
+        if self.bot.mgr.env.production:
             self.statcord.command_run(ctx)
 
 

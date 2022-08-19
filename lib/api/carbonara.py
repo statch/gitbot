@@ -5,7 +5,7 @@ from carbon import Carbon as _Carbon, CarbonImage, CarbonOptions
 
 class Carbon(_Carbon):
     def __init__(self, ses: aiohttp.ClientSession):
-        super().__init__(session=ses)
+        super().__init__(ses)
 
     async def generate_basic_image(self, code: str, first_line_number: int | NumericStr = 1) -> CarbonImage:
         opts: CarbonOptions = CarbonOptions(

@@ -7,8 +7,7 @@ import fnmatch
 import subprocess
 from discord.ext import commands
 from typing import Optional
-from lib.structs import GitBotEmbed
-from lib.globs import Git, Mgr
+from lib.structs import GitBotEmbed, GitBot
 from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
@@ -20,8 +19,8 @@ class LinesOfCode(commands.Cog):
     # I know that using "perl" alone is insecure, but it will only be used in Windows dev environments
     __perl_command_line__: str = '/bin/perl' if os.name != 'nt' else 'perl'
 
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_command(name='loc-nocache', aliases=['loc-no-cache'], hidden=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
@@ -35,7 +34,7 @@ class LinesOfCode(commands.Cog):
     @commands.max_concurrency(10)
     async def lines_of_code_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('loc')
-        r: Optional[dict] = await Git.get_repo(repo)
+        r: Optional[dict] = await self.bot.github.get_repo(repo)
         if not r:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
@@ -67,54 +66,52 @@ class LinesOfCode(commands.Cog):
         )
         await ctx.reply(embed=embed, mention_author=False)
 
-    @staticmethod
-    def remove_matches(directory: str, pattern: str) -> int:
-        Mgr.debug(f'Removing files matching pattern "{pattern}" from directory "{directory}"')
+    def remove_matches(self, directory: str, pattern: str) -> int:
+        self.bot.mgr.debug(f'Removing files matching pattern "{pattern}" from directory "{directory}"')
         c_removed: int = 0
         for root, dirs, files in os.walk(directory):
             for f in files:
                 if fnmatch.fnmatch(f, pattern):
-                    Mgr.debug(f'Removing file "{f}"')
+                    self.bot.mgr.debug(f'Removing file "{f}"')
                     c_removed += 1
                     os.remove(os.path.join(root, f))
             for d in dirs:
                 if fnmatch.fnmatch(d, pattern):
-                    Mgr.debug(f'Removing directory "{d}"')
+                    self.bot.mgr.debug(f'Removing directory "{d}"')
                     c_removed += 1
                     shutil.rmtree(os.path.join(root, d))
-        Mgr.debug(f'Removed {c_removed} entries.')
+        self.bot.mgr.debug(f'Removed {c_removed} entries.')
         return c_removed
 
-    @staticmethod
-    async def process_repo(ctx: GitBotContext, repo: GitHubRepository) -> Optional[tuple[dict, int | None]]:
-        if (not ctx.__nocache__) and (cached := Mgr.loc_cache.get(repo := repo.lower())):
+    async def process_repo(self, ctx: GitBotContext, repo: GitHubRepository) -> Optional[tuple[dict, int | None]]:
+        if (not ctx.__nocache__) and (cached := self.bot.mgr.loc_cache.get(repo := repo.lower())):
             return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'
         tmp_dir_path: str = tmp_zip_path[:-4]
         try:
             if not os.path.exists('./tmp'):
                 os.mkdir('./tmp')
-            files: Optional[bytes | bool] = await Git.get_repo_zip(repo, size_threshold=_25MB_BYTES)
+            files: Optional[bytes | bool] = await self.bot.github.get_repo_zip(repo, size_threshold=_25MB_BYTES)
             if not files:
                 return None
             async with aiofiles.open(tmp_zip_path, 'wb') as fp:
                 await fp.write(files)
-            await Mgr.unzip_file(tmp_zip_path, tmp_dir_path)
+            await self.bot.mgr.unzip_file(tmp_zip_path, tmp_dir_path)
             c_removed: int = 0
-            cfg: dict | None = await Mgr.get_repo_gitbot_config(repo)
+            cfg: dict | None = await self.bot.mgr.get_repo_gitbot_config(repo)
             if cfg and cfg.get('loc'):
-                Mgr.debug(f'Found GitBot config for repo "{repo}"')
+                self.bot.mgr.debug(f'Found GitBot config for repo "{repo}"')
                 if isinstance(cfg['loc'], dict) and (ignore := cfg['loc'].get('ignore')):
                     if isinstance(ignore, str):
                         ignore = [ignore]
                     for pattern in ignore:
-                        c_removed += LinesOfCode.remove_matches(tmp_dir_path, pattern)
+                        c_removed += self.remove_matches(tmp_dir_path, pattern)
             output: dict = json.loads(subprocess.check_output([LinesOfCode.__perl_command_line__, 'cloc.pl',
                                                                '--json', tmp_dir_path]))
         except subprocess.CalledProcessError as e:
-            Mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
+            self.bot.mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
         else:
-            Mgr.loc_cache[repo] = (output, c_removed)
+            self.bot.mgr.loc_cache[repo] = (output, c_removed)
             return output, c_removed
         finally:
             try:
@@ -137,5 +134,5 @@ class LinesOfCode(commands.Cog):
         return result
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(LinesOfCode(bot))

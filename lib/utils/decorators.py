@@ -5,8 +5,8 @@ from discord.ext import commands
 from typing import Callable, Any, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
-from lib.utils import regex
 from lib.typehints import GitHubRepository
+from lib.utils import regex
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 
 
@@ -118,7 +118,7 @@ def normalize_repository(func: Callable) -> Callable:
 
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
-        def normalize_repo(repo: GitHubRepository) -> str:
+        def normalize_repo(repo: 'GitHubRepository') -> str:
             if not repo:
                 return repo
             repo: str = repo.strip()

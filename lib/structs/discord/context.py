@@ -5,11 +5,9 @@ A non-native replacement for the context object provided in discord.ext.commands
 :copyright: (c) 2020-present statch
 :license: CC BY-NC-ND 4.0, see LICENSE for more details.
 """
-
 import discord
 import enum
 from discord.ext import commands
-from lib.globs import Mgr
 from typing import Optional, Any, Sequence
 from lib.typehints import EmbedLike
 from lib.structs import DictProxy
@@ -18,6 +16,7 @@ from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 from typing import TYPE_CHECKING
 from collections.abc import Awaitable, Callable
 if TYPE_CHECKING:
+    from aiohttp import ClientSession
     from lib.structs.discord.bot import GitBot
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
@@ -36,26 +35,27 @@ class MessageFormattingStyle(enum.Enum):
 
 class GitBotContext(commands.Context):
     bot: 'GitBot'
+    __nocache__: bool = False
+    __autoinvoked__: bool = False
+    __silence_error_calls__: bool = False
 
     def __init__(self, **attrs):
         self.command: GitBotCommand | GitBotCommandGroup
-        self.__nocache__ = False
-        self.__autoinvoked__ = False
-        self.fmt = Mgr.fmt(self)
+        super().__init__(**attrs)
+        self.session: ClientSession = self.bot.session
+        self.fmt = self.bot.mgr.fmt(self)
         self.l = None  # noqa
         self.data: Optional[dict] = None  # field used by chained invocations and quick access
         self.invoked_with_stored: bool = False
-        super().__init__(**attrs)
 
-    @staticmethod
-    def _format_content(content: str, style: MessageFormattingStyle | str) -> str:
+    def _format_content(self, content: str, style: MessageFormattingStyle | str) -> str:
         match MessageFormattingStyle(style):
             case MessageFormattingStyle.ERROR:
-                return f'{Mgr.e.err}  {content}'
+                return f'{self.bot.mgr.e.err}  {content}'
             case MessageFormattingStyle.SUCCESS:
-                return f'{Mgr.e.checkmark}  {content}'
+                return f'{self.bot.mgr.e.checkmark}  {content}'
             case MessageFormattingStyle.INFO:
-                return f'{Mgr.e.github}  {content}'
+                return f'{self.bot.mgr.e.github}  {content}'
             case _:
                 return content
 
@@ -64,7 +64,7 @@ class GitBotContext(commands.Context):
         """
         Returns a prefixed subset of the context locale.
         """
-        return Mgr.get_nested_key(self.l, self.fmt.prefix.strip())
+        return self.bot.mgr.get_nested_key(self.l, self.fmt.prefix.strip())
 
     async def send(self,
                    content: str | None = None,
@@ -106,13 +106,14 @@ class GitBotContext(commands.Context):
         return await self.send(*args, style=MessageFormattingStyle.SUCCESS, **kwargs)
 
     async def error(self, *args, **kwargs) -> discord.Message:
-        return await self.send(*args, style=MessageFormattingStyle.ERROR, **kwargs)
+        if not self.__silence_error_calls__:
+            return await self.send(*args, style=MessageFormattingStyle.ERROR, **kwargs)
 
     async def success_embed(self, text: str, **kwargs) -> discord.Message:
         return await GitBotEmbed.success(text, **kwargs).send(self)
 
     async def prepare(self) -> None:
-        self.l = await Mgr.get_locale(self)  # noqa
+        self.l = await self.bot.mgr.get_locale(self)  # noqa
 
     async def group_help(self, subcommand_check: bool = True):
         """

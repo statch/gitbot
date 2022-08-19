@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.structs.discord.bot import GitBot
 from lib.structs.discord.embed import GitBotEmbed, GitBotCommandState
-from lib.globs import Mgr
 
 
 __all__: tuple = ('EmbedPagesControl', 'ACTIONS', 'EmbedPages')
@@ -138,10 +137,10 @@ class EmbedPages:
         embed: discord.Embed | GitBotEmbed = self.message.embeds[0]
         if state is GitBotCommandState.CLOSED:
             embed.set_footer(text=f'{self.context.l.generic.closed} | {self.current_page_string}')
-            embed.colour = Mgr.c.discord.red
+            embed.colour = self.bot.mgr.c.discord.red
         elif state is GitBotCommandState.TIMEOUT:
             embed.set_footer(text=f'{self.context.l.generic.inactive} | {self.current_page_string}')
-            embed.colour = Mgr.c.discord.yellow
+            embed.colour = self.bot.mgr.c.discord.yellow
         await self.message.edit(embed=embed)
 
     async def next_page(self):
@@ -190,7 +189,7 @@ class EmbedPages:
             reaction: discord.Reaction
             user: discord.Member | discord.User
             try:
-                Mgr.debug('Running reaction_add event waiter')
+                self.bot.mgr.debug('Running reaction_add event waiter')
                 reaction, user = await self.bot.wait_for('reaction_add',
                                                          check=lambda r, u: (r.emoji in ACTIONS and
                                                                              u == self.context.author and
@@ -198,7 +197,7 @@ class EmbedPages:
                                                                               self.context.channel.id)),
                                                          timeout=self.timeout)
             except asyncio.TimeoutError:
-                Mgr.debug(f'Event timeout with lifetime={self.lifetime} '
+                self.bot.mgr.debug(f'Event timeout with lifetime={self.lifetime} '
                           f'and time since last action={self.time_since_last_action}')
                 try:
                     await self.edit(GitBotCommandState.TIMEOUT)
@@ -220,12 +219,12 @@ class EmbedPages:
                     await self.to_last_page()
                 case EmbedPagesControl.STOP:
                     await self.edit(GitBotCommandState.CLOSED)
-                    Mgr.debug('Stopping embed paginator loop - closed')
+                    self.bot.mgr.debug('Stopping embed paginator loop - closed')
                     return
-            Mgr.debug('Removing control reaction')
+            self.bot.mgr.debug('Removing control reaction')
             await reaction.message.remove_reaction(reaction.emoji, user)
-            Mgr.debug(f'Iteration complete with action {action.name}')
-        Mgr.debug(f'Timeout with lifetime={self.lifetime} '
+            self.bot.mgr.debug(f'Iteration complete with action {action.name}')
+        self.bot.mgr.debug(f'Timeout with lifetime={self.lifetime} '
                   f'and time since last action={self.time_since_last_action}')
         await self.edit(GitBotCommandState.TIMEOUT)
 

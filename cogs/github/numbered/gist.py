@@ -1,10 +1,10 @@
 import discord
 import asyncio
 from discord.ext import commands
-from lib.globs import Git, Mgr
 from typing import Optional
 from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubUser
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
@@ -13,8 +13,8 @@ DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
 
 
 class Gist(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_command(name='gist', aliases=['gists'])
     @commands.cooldown(10, 30, commands.BucketType.user)
@@ -23,7 +23,7 @@ class Gist(commands.Cog):
                            user: GitHubUser,
                            ind: Optional[int | str] = None) -> None:
         ctx.fmt.set_prefix('gist')
-        data: dict = await Git.get_user_gists(user)
+        data: dict = await self.bot.github.get_user_gists(user)
         if not data:
             await ctx.error(ctx.l.generic.nonexistent.user.base)
             return
@@ -41,11 +41,11 @@ class Gist(commands.Cog):
             desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
             return f'[{desc}]({gist["url"]})'
 
-        gist_strings: list = [f'{Mgr.e.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
+        gist_strings: list = [f'{self.bot.mgr.e.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
                               enumerate(data['gists']['nodes'])]
 
-        embed: discord.Embed = discord.Embed(
-            color=Mgr.c.rounded,
+        embed: GitBotEmbed = GitBotEmbed(
+            color=self.bot.mgr.c.rounded,
             title=ctx.fmt('title', user),
             description='\n'.join(gist_strings),
             url=data['url']
@@ -104,10 +104,10 @@ class Gist(commands.Cog):
         first_file: dict = gist['files'][0]
 
         created_at: str = ctx.fmt('created_at',
-                                  Mgr.to_github_hyperlink(data['login']),
-                                  Mgr.github_to_discord_timestamp(gist['createdAt'])) + '\n'
+                                  self.bot.mgr.to_github_hyperlink(data['login']),
+                                  self.bot.mgr.github_to_discord_timestamp(gist['createdAt'])) + '\n'
 
-        updated_at: str = ctx.fmt('updated_at', Mgr.github_to_discord_timestamp(gist['updatedAt'])) + '\n'
+        updated_at: str = ctx.fmt('updated_at', self.bot.mgr.github_to_discord_timestamp(gist['updatedAt'])) + '\n'
 
         stargazers = ctx.fmt('stargazers plural', gist['stargazerCount'], f"{gist['url']}/stargazers") if gist[
                                                                                                    'stargazerCount'] != 1 else ctx.fmt('stargazers singular', f"{gist['url']}/stargazers")
@@ -127,17 +127,16 @@ class Gist(commands.Cog):
             embed.set_footer(text=footer)
 
         return embed
-    
-    @staticmethod
-    async def get_color_from_files(files: list) -> int:
+
+    async def get_color_from_files(self, files: list) -> int:
         extensions: list = [f['extension'] for f in files]
-        most_common: Optional[str] = await Mgr.get_most_common(extensions)
+        most_common: Optional[str] = await self.bot.mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
-            return Mgr.c.rounded
+            return self.bot.mgr.c.rounded
         for file in files:
             if all([file['extension'] == most_common, file['language'], file['language']['color']]):
                 return int(file['language']['color'][1:], 16)
-        return Mgr.c.rounded
+        return self.bot.mgr.c.rounded
 
     @staticmethod
     def extension(ext: str) -> str:
@@ -147,5 +146,5 @@ class Gist(commands.Cog):
         return ext if ext in DISCORD_MD_LANGS else ''
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Gist(bot))

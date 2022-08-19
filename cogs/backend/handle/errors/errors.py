@@ -1,5 +1,4 @@
 from discord.ext import commands
-from lib.globs import Mgr
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord import pages
 from lib.structs.discord.embed import GitBotEmbed
@@ -20,7 +19,7 @@ class Errors(commands.Cog):
         match type(error):
             case commands.MissingRequiredArgument:
                 missing_arg_embed: GitBotEmbed = GitBotEmbed(
-                    colour=Mgr.c.discord.yellow,
+                    colour=self.bot.mgr.c.discord.yellow,
                     title=ctx.l.errors.missing_required_argument.title,
                     description=ctx.fmt('missing_required_argument description',
                                         f'```haskell\n{ctx.prefix}help {ctx.command.fullname}```'),
@@ -44,17 +43,17 @@ class Errors(commands.Cog):
             case pages.EmbedPagesPermissionError:
                 await GitBotEmbed.from_locale_resource(ctx,
                                                        'errors embed_pages_permission_error',
-                                                       color=Mgr.c.discord.red).send(ctx)
+                                                       color=self.bot.mgr.c.discord.red).send(ctx)
             case commands.CommandNotFound:
                 await respond_to_command_doesnt_exist(ctx, error)
-                if Mgr.env.production:
+                if self.bot.mgr.env.production:
                     await log_error_in_discord(ctx, error)
             case commands.CheckFailure:
                 ...
             case commands.RoleNotFound:
                 await ctx.error(ctx.fmt('role_not_found', error.argument))
             case _:
-                if (not Mgr.env.production) and not getattr(ctx, '__autoinvoked__', False):
+                if (not self.bot.mgr.env.production) and not getattr(ctx, '__autoinvoked__', False):
                     raise error
                 if not ctx.__autoinvoked__:
                     await log_error_in_discord(ctx, error)

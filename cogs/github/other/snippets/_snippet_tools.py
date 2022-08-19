@@ -3,12 +3,11 @@ import io
 from typing import Optional
 from aiohttp import ClientResponse
 from lib.utils import regex
-from lib.globs import Mgr, Carbon
 from lib.structs.discord.context import GitBotContext
 
 
 async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
-    match_: tuple = Mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
+    match_: tuple = ctx.bot.mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
     if match_:
         return await get_text_from_url_and_data(ctx, await compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
@@ -23,7 +22,7 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
     if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
             return None, ctx.fmt('length_limit_exceeded', max_line_count)
-    res: ClientResponse = await Mgr.session.get(url)
+    res: ClientResponse = await ctx.session.get(url)
     content: str = await res.text(encoding='utf-8')
 
     if '<title>Checking your Browser - GitLab</title>' in content or res.status == 404:
@@ -56,8 +55,8 @@ async def _compile_gitlab_link(data: tuple) -> str:
     return f'https://gitlab.com/{data[1]}/-/raw/{data[2]}/{data[3]}'
 
 
-async def gen_carbon_inmemory(code: str, first_line_number: int = 1) -> io.BytesIO:
-    return await (await Carbon.generate_basic_image(code, first_line_number)).memorize()
+async def gen_carbon_inmemory(ctx: GitBotContext, code: str, first_line_number: int = 1) -> io.BytesIO:
+    return await (await ctx.bot.carbon.generate_basic_image(code, first_line_number)).memorize()
 
 
 async def compile_url(match: tuple) -> str:

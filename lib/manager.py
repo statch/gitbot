@@ -21,7 +21,6 @@ import zipfile
 import os.path
 import inspect
 import hashlib
-import aiohttp
 import certifi
 import operator
 import datetime
@@ -59,10 +58,9 @@ class Manager:
     :type github: :class:`lib.net.github.api.GitHubAPI`
     """
 
-    def __init__(self, github):
+    def __init__(self, github: 'GitHubAPI'):
         self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
         self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
-        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         self.git: 'GitHubAPI' = github
         self._prepare_env()
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
@@ -511,8 +509,11 @@ class Manager:
         with open('resources/env_defaults.json', 'r', encoding='utf8') as fp:
             env_defaults: dict = json.loads(fp.read())
             for k, v in env_defaults.items():
+                k: str
                 if not self._maybe_set_env_directive(k, v) and k not in self.env:
                     self.env[k] = v
+                    if isinstance(v, str):
+                        os.environ[k.upper()] = v
         self.load_dotenv()
         self.log(f'Directives set: ' + '; '.join([f'{k} -> {v}' for k, v in self.env_directives.items()]),
                  f'core-env')
@@ -836,7 +837,7 @@ class Manager:
         :param alt: The value to return if the status code is different from the code parameter
         :return: The URL if the statuses match, or the alt parameter if not
         """
-        if (await self.session.request(method=method, url=url, **kwargs)).status == code:
+        if (await self.git.session.request(method=method, url=url, **kwargs)).status == code:
             return url
         return alt
 

@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from typing import Optional
-from lib.globs import Git, Mgr
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
@@ -14,7 +13,7 @@ class User(commands.Cog):
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: GitBotContext, user: Optional[str] = None) -> None:
         if not user:
-            stored: Optional[str] = await Mgr.db.users.getitem(ctx, 'user')
+            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.user_info_command, user=stored)
@@ -32,17 +31,17 @@ class User(commands.Cog):
         if ctx.data:
             u: dict = getattr(ctx, 'data')
         else:
-            u: dict = await Git.get_user(user)
+            u: dict = await self.bot.github.get_user(user)
         if not u:
             if ctx.invoked_with_stored:
-                await Mgr.db.users.delitem(ctx, 'user')
+                await self.bot.mgr.db.users.delitem(ctx, 'user')
                 await ctx.error(ctx.l.generic.nonexistent.user.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.user.base)
             return None
 
         embed = discord.Embed(
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             title=ctx.fmt('title', user) if user[0].isupper() else ctx.fmt('title', user.lower()),
             url=u['url']
         )
@@ -76,7 +75,7 @@ class User(commands.Cog):
         else:
             contrib: str = ""
 
-        joined_at: str = ctx.fmt('joined_at', Mgr.github_to_discord_timestamp(u['createdAt'])) + '\n'
+        joined_at: str = ctx.fmt('joined_at', self.bot.mgr.github_to_discord_timestamp(u['createdAt'])) + '\n'
 
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
@@ -101,8 +100,8 @@ class User(commands.Cog):
     @user_command_group.command(name='repos', aliases=['r'])
     async def user_repos_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
         ctx.fmt.set_prefix('user repos')
-        u: Optional[dict] = await Git.get_user(user)
-        repos = await Git.get_user_repos(user)
+        u: Optional[dict] = await self.bot.github.get_user(user)
+        repos = await self.bot.github.get_user_repos(user)
         if u is None:
             await ctx.error(ctx.l.generic.nonexistent.user.base)
             return
@@ -114,7 +113,7 @@ class User(commands.Cog):
             title=title,
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
-            color=Mgr.c.rounded,
+            color=self.bot.mgr.c.rounded,
             url=f"https://github.com/{user}"
         )
         if (c := len(repos)) > 15:

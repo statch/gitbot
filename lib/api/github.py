@@ -43,20 +43,15 @@ class GitHubAPI:
         A :class:`str` denoting the author of the requests (ex. 'BigNoob420')
     """
 
-    def __init__(self, tokens: tuple, requester: str):
+    def __init__(self, tokens: tuple, session: aiohttp.ClientSession, requester: str):
         requester += '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
         self.requester: str = requester
         self.__tokens: tuple = tokens
         self.__token_cycle: cycle = cycle(t for t in self.__tokens if t is not None)
         self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
         self.setup_done: bool = False
-        self.session: aiohttp.ClientSession | None = None
-        self.gh: gh.GitHubAPI | None = None
-
-    async def setup(self):
-        if not self.setup_done:
-            self.session: aiohttp.ClientSession = aiohttp.ClientSession()
-            self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.session, requester=self.requester, oauth_token=self.__token)
+        self.session: aiohttp.ClientSession = session
+        self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.session, requester=self.requester, oauth_token=self.__token)
 
     @property
     def __token(self) -> str:

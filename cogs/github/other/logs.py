@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from lib.globs import Mgr
 from lib.utils.decorators import gitbot_command
 from lib.structs import GitBotEmbed
 from lib.structs.discord.context import GitBotContext
@@ -18,7 +17,7 @@ class Logs(commands.Cog):
     async def logs_command(self, ctx: GitBotContext) -> None:
         ctx.fmt.set_prefix('logs')
         try:
-            Mgr.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
+            self.bot.mgr.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Logs',
                                                                         reason=f'GitHub Logs setup by {ctx.author}')
         except (discord.errors.HTTPException, discord.errors.Forbidden):
@@ -26,17 +25,17 @@ class Logs(commands.Cog):
             return
         embed: GitBotEmbed = GitBotEmbed(
             color=0x4287f5,
-            title=f'{Mgr.e.github}  Repo Logs',
+            title=f'{self.bot.mgr.e.github}  Repo Logs',
             description=(ctx.l.logs.description
                          + '\n'
-                         + '\n'.join([f'{Mgr.e.square} {instruction}' for instruction in ctx.l.logs.instructions])
+                         + '\n'.join([f'{self.bot.mgr.e.square} {instruction}' for instruction in ctx.l.logs.instructions])
                          + '\n' + ':warning: ' + ctx.l.logs.do_not_share_warning + ' :warning:'),
             footer=ctx.l.logs.footer
         )
         try:
             url_embed: discord.Embed = discord.Embed(
                 color=0x4287f5,
-                title=f'{Mgr.e.github} {ctx.l.logs.dm_title}',
+                title=f'{self.bot.mgr.e.github} {ctx.l.logs.dm_title}',
                 description=f'||{webhook.url + "/github"}||'
             )
             await ctx.author.send(embed=url_embed)

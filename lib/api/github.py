@@ -88,33 +88,23 @@ class GitHubAPI:
     @github_cached
     @validate_github_name('user')
     async def get_user_repos(self, user: GitHubUser) -> Optional[list[dict]]:
-        return list(r for r in await self.getitem(f'/users/{user}/repos') if r['private'] is False)
+        return list(r for r in await self.getitem(f'/users/{user}/repos', []) if r['private'] is False)
 
     @github_cached
     @validate_github_name('org')
     async def get_org(self, org: GitHubOrganization) -> Optional[dict]:
-        try:
-            return await self.gh.getitem(f'/orgs/{org}')
-        except BadRequest:
-            return None
+        return await self.getitem(f'/orgs/{org}')
 
     @github_cached
     @validate_github_name('org', default=[])
     async def get_org_repos(self, org: GitHubOrganization) -> list[dict]:
-        try:
-            res = list(r for r in await self.gh.getitem(f'/orgs/{org}/repos') if r['private'] is False)
-            return res
-        except BadRequest:
-            return []
+        return list(r for r in await self.getitem(f'/orgs/{org}/repos', []) if r['private'] is False)
 
     @normalize_repository
     async def get_repo_files(self, repo: GitHubRepository) -> list[dict]:
         if repo.count('/') != 1:
             return []
-        try:
-            return await self.gh.getitem(f'/repos/{repo}/contents')
-        except BadRequest:
-            return []
+        return await self.getitem(f'/repos/{repo}/contents', [])
 
     @normalize_repository
     async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list | None:
@@ -122,26 +112,21 @@ class GitHubAPI:
             return None
         if path[0] == '/':
             path = path[1:]
-        try:
-            return await self.gh.getitem(f'/repos/{repo}/contents/{path}')
-        except BadRequest:
-            return None
+        return await self.getitem(f'/repos/{repo}/contents/{path}')
 
     @github_cached
     @validate_github_name('user', default=[])
     async def get_user_orgs(self, user: GitHubUser) -> list[dict]:
-        try:
-            return list(await self.gh.getitem(f'/users/{user}/orgs'))
-        except BadRequest:
-            return []
+        return await self.getitem(f'/users/{user}/orgs', [])
 
     @github_cached
     @validate_github_name('org', default=[])
     async def get_org_members(self, org: GitHubOrganization) -> list[dict]:
-        try:
-            return list(await self.gh.getitem(f'/orgs/{org}/public_members'))
-        except BadRequest:
-            return []
+        return await self.getitem(f'/orgs/{org}/public_members', [])
+
+    @github_cached
+    async def get_gist(self, gist_id: str) -> Optional[dict]:
+        return await self.getitem(f'/gists/{gist_id}')
 
     @github_cached
     @validate_github_name('user')
@@ -152,13 +137,6 @@ class GitHubAPI:
             return None
 
         return data['user']
-
-    @github_cached
-    async def get_gist(self, gist_id: str) -> Optional[dict]:
-        try:
-            return dict(await self.gh.getitem(f'/gists/{gist_id}'))
-        except BadRequest:
-            return None
 
     @normalize_repository
     async def get_latest_commit(self, repo: GitHubRepository) -> Optional[dict] | Literal[False]:

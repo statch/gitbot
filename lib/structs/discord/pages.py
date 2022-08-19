@@ -117,16 +117,17 @@ class EmbedPages:
 
         :param ctx: The context to start the paginator in.
         """
-        self._ensure_perms(ctx.channel)
-        self.start_time = time()
-        self.context: GitBotContext = ctx
-        self._edit_embed_footer(self.pages[self.current_page])
-        message: discord.Message = await ctx.send(embed=self.pages[self.current_page])
-        for embed in self.pages[1:]:
-            self._edit_embed_footer(embed)
-        self._set_initial_message_attrs(message)
-        await self._add_controls()
-        await self.__loop()
+        with contextlib.suppress(discord.errors.NotFound):
+            self._ensure_perms(ctx.channel)
+            self.start_time = time()
+            self.context: GitBotContext = ctx
+            self._edit_embed_footer(self.pages[self.current_page])
+            message: discord.Message = await ctx.send(embed=self.pages[self.current_page])
+            for embed in self.pages[1:]:
+                self._edit_embed_footer(embed)
+            self._set_initial_message_attrs(message)
+            await self._add_controls()
+            await self.__loop()
 
     async def edit(self, state: GitBotCommandState | int) -> None:
         """
@@ -181,9 +182,8 @@ class EmbedPages:
 
     async def _add_controls(self):
         if self.message:
-            with contextlib.suppress(discord.errors.NotFound):
-                for control in EmbedPagesControl:
-                    await self.message.add_reaction(control.value)  # noqa
+            for control in EmbedPagesControl:
+                await self.message.add_reaction(control.value)  # noqa
 
     async def __loop(self):
         while not self.should_die:

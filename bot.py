@@ -1,8 +1,21 @@
+# coding: utf-8
+
+"""
+GitBot - the developer toolkit for Discord
+~~~~~~~~~~~~~~~~~~~
+A developer toolkit for the Discord era, with a focus on sleek design and powerful features.
+:copyright: (c) 2020-present statch
+:license: CC BY-NC-ND 4.0, see LICENSE for more details.
+"""
+
 import discord
+from os import getenv
+from dotenv import load_dotenv
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.bot import GitBot
 
+# all of the configuration is handled inside the class, there is no real need to pass anything here
 bot = GitBot()
 
 
@@ -56,3 +69,8 @@ async def global_check(ctx: GitBotContext) -> bool:
 async def before_invoke(ctx: GitBotContext):
     if str(ctx.command) not in bot.mgr.env.no_typing_commands:
         await ctx.channel.typing()
+
+
+if __name__ == '__main__':
+    load_dotenv()
+    bot.run(getenv('BOT_TOKEN'))

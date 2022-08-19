@@ -16,14 +16,14 @@ def bot():
     pass
 
 
-@bot.command('start', help='Start the bot using launcher.py')
+@bot.command('start', help='Start the bot using bot.py')
 @click.option('--no-new-window',
               is_flag=True, help='Don\'t start the bot in a new terminal window, even if possible', default=False)
 def start(no_new_window: bool = False):
     if sys.platform == 'win32' and not no_new_window:
-        subprocess.call(f'start {PYTHON_COMMAND_LINE} launcher.py', shell=True)
+        subprocess.call(f'start {PYTHON_COMMAND_LINE} bot.py', shell=True)
     else:
-        subprocess.call([PYTHON_COMMAND_LINE, 'launcher.py'])
+        subprocess.call([PYTHON_COMMAND_LINE, 'bot.py'])
 
 
 @cli.group('dev', help='Commands related to the development of the bot')

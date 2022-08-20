@@ -10,6 +10,7 @@ import discord
 import logging
 import aiohttp
 import platform
+import aiofiles
 import sentry_sdk
 from dotenv import load_dotenv
 from lib.api.github import GitHubAPI
@@ -31,7 +32,8 @@ class GitBot(commands.Bot):
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
         super().__init__(command_prefix=f'{os.getenv("PREFIX")} ', case_insensitive=True,
-                         intents=discord.Intents(messages=True,message_content=True,guilds=True,guild_reactions=True),
+                         intents=discord.Intents(messages=True, message_content=True, guilds=True,
+                                                 guild_reactions=True),
                          help_command=None, guild_ready_timeout=1,
                          status=discord.Status.online, description='Seamless GitHub-Discord integration.',
                          fetch_offline_members=False, **kwargs)
@@ -43,29 +45,33 @@ class GitBot(commands.Bot):
         self.mgr: Manager | None = None
         self.runtime_vars: dict[str, str] = {}
 
-    def _setup_os_specific(self):
+    def _setup_uvloop(self):
         if os.name != 'nt':
             self.logger.info('Installing uvloop...')
             __import__('uvloop').install()
         else:
-            self.logger.info('Skipping uvloop install...')
-        self.logger.info(f'Running on {platform.system()} {platform.release()}')
-        if not os.path.exists('./tmp'):
-            os.mkdir('tmp')
+            self.logger.info('Skipping uvloop install.')
 
     async def _setup_cloc(self) -> None:
         if not os.path.exists('cloc.pl'):
+            self.logger.info(f'CLOC script not found, downloading...')
             res: aiohttp.ClientResponse = await self.session.get(
-                'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
-            with open('cloc.pl', 'wb') as fp:
-                fp.write(await res.content.read())
+                    'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
+            async with aiofiles.open('cloc.pl', 'wb') as fp:
+                await fp.write(await res.content.read())
+            self.logger.info(f'CLOC script downloaded.')
+        else:
+            self.logger.info(f'CLOC script found, skipping download.')
 
     def _setup_sentry(self) -> None:
         if self.mgr.env.production and (dsn := self.mgr.env.get('sentry_dsn')):
+            self.logger.info('Setting up Sentry...')
             sentry_sdk.init(
                     dsn=dsn,
                     traces_sample_rate=0.5
             )
+        else:
+            self.logger.info('Sentry not enabled/not configured - skipping.')
 
     def _setup_logging(self):
         logging.basicConfig(level=getattr(logging, self.mgr.env.log_level.upper(), logging.INFO),
@@ -73,6 +79,15 @@ class GitBot(commands.Bot):
         logging.getLogger('asyncio').setLevel(logging.WARNING)
         logging.getLogger('discord.gateway').setLevel(logging.WARNING)
         self.logger: logging.Logger = logging.getLogger('main')
+
+    async def _setup_services(self) -> None:
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
+        self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
+                                           aiohttp.ClientSession(), 'gitbot')
+        self.mgr: Manager = Manager(self.github)
+        self.carbon: _Carbon = _Carbon(self.session)
+        self.pypi: PyPIAPI = PyPIAPI(self.session)
+        self.crates: CratesIOAPI = CratesIOAPI(self.session)
 
     async def get_context(self, message: discord.Message, *, cls=GitBotContext) -> GitBotContext:
         ctx: GitBotContext = await super().get_context(message, cls=cls)
@@ -85,17 +100,28 @@ class GitBot(commands.Bot):
     def group(self, *args, **kwargs):
         return super().group(*args, **kwargs, cls=GitBotCommandGroup)
 
-    async def load_extension(self, name: str, *, package=None):
-        await super().load_extension(name, package=package)
-        self.logger.info(f'Loaded extension: "{name}"')
+    def _set_runtime_vars(self) -> None:
+        self.runtime_vars: dict[str, str] = {
+            'discord.py-version': discord.__version__,
+            'gitbot-commit': self.mgr.get_current_commit(short=False),
+        }
 
-    async def unload_extension(self, name: str, *, package=None):
-        await super().unload_extension(name, package=package)
-        self.logger.info(f'Unloaded extension: "{name}"')
+    async def setup_hook(self) -> None:
+        if not os.path.exists('./tmp'):
+            os.mkdir('tmp')
+        await self._setup_services()
+        self._setup_logging()
+        self._set_runtime_vars()
+        self._setup_sentry()
+        self._setup_uvloop()
+        await self._setup_cloc()
+        await self.load_cogs()
 
-    async def reload_extension(self, name: str, *, package=None):
-        await super().reload_extension(name, package=package)
-        self.logger.info(f'Reloaded extension: "{name}"')
+    async def on_ready(self) -> None:
+        self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')
+        self.logger.info(f'The bot is ready!')
+        self.logger.info(f'Running on {platform.system()} {platform.release()}')
+        self.logger.info(f'Runtime vars:\n' + '\n'.join(f'- {k}: {v}' for k, v in self.runtime_vars.items()))
 
     async def load_cogs_from_dir(self, dir_: str) -> None:
         for obj in os.listdir(dir_):
@@ -110,24 +136,14 @@ class GitBot(commands.Bot):
                                                     if not self.mgr.env.production else True):
                 await self.load_cogs_from_dir(f'cogs/{subdir}')
 
-    async def setup_hook(self) -> None:
-        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
-        self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
-                                           aiohttp.ClientSession(), 'gitbot')
-        self.mgr: Manager = Manager(self.github)
-        self.carbon: _Carbon = _Carbon(self.session)
-        self.pypi: PyPIAPI = PyPIAPI(self.session)
-        self.crates: CratesIOAPI = CratesIOAPI(self.session)
-        self.runtime_vars: dict[str, str] = {
-            'discord.py-version': discord.__version__,
-            'gitbot-commit': self.mgr.get_current_commit(short=False),
-        }
-        self._setup_logging()
-        self._setup_sentry()
-        await self._setup_cloc()
-        await self.load_cogs()
+    async def load_extension(self, name: str, *, package=None):
+        await super().load_extension(name, package=package)
+        self.logger.info(f'Loaded extension: "{name}"')
 
-    async def on_ready(self) -> None:
-        self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')
-        self.logger.info(f'The bot is ready!')
-        self.logger.info(f'Runtime vars:\n' + '\n'.join(f'- {k}: {v}' for k, v in self.runtime_vars.items()))
+    async def unload_extension(self, name: str, *, package=None):
+        await super().unload_extension(name, package=package)
+        self.logger.info(f'Unloaded extension: "{name}"')
+
+    async def reload_extension(self, name: str, *, package=None):
+        await super().reload_extension(name, package=package)
+        self.logger.info(f'Reloaded extension: "{name}"')

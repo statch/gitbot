@@ -7,4 +7,3 @@ This directory includes the most essential building blocks of GitBot's entire se
 - `/typehints` - holds all the custom typehints used throughout the project, most importantly TypedDicts used for annotating database returns, but also certain locale values
 - `/utils` - miscellaneous decorators, RegEx patterns, etc.
 - `manager.py` - the centerpiece of the entire library, holds utility, locale, database, and network functions
-- `globs.py` - a simple file whose only purpose is to initialize a few objects to be used in other places

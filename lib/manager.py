@@ -337,6 +337,8 @@ class Manager:
         """
         if isinstance(channel, discord.DMChannel):
             return True
+        if isinstance(channel, discord.Thread):
+            return False
         perms: list = list(iter(channel.permissions_for(channel.guild.me)))
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))  # weird inspection, keep an eye on this
         if all(req in perms + overwrites for req in [('send_messages', True),

@@ -14,7 +14,7 @@ import aiofiles
 import sentry_sdk
 from dotenv import load_dotenv
 from lib.api.github import GitHubAPI
-from lib.api.carbonara import Carbon as _Carbon
+from lib.api.carbonara import Carbon
 from lib.api.pypi import PyPIAPI
 from lib.api.crates import CratesIOAPI
 from lib.manager import Manager
@@ -39,7 +39,7 @@ class GitBot(commands.Bot):
                          fetch_offline_members=False, **kwargs)
         self.session: aiohttp.ClientSession | None = None
         self.github: GitHubAPI | None = None
-        self.carbon: _Carbon | None = None
+        self.carbon: Carbon | None = None
         self.pypi: PyPIAPI | None = None
         self.crates: CratesIOAPI | None = None
         self.mgr: Manager | None = None
@@ -85,7 +85,7 @@ class GitBot(commands.Bot):
         self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
                                            aiohttp.ClientSession(), 'gitbot')
         self.mgr: Manager = Manager(self.github)
-        self.carbon: _Carbon = _Carbon(self.session)
+        self.carbon: Carbon = Carbon(self.session)
         self.pypi: PyPIAPI = PyPIAPI(self.session)
         self.crates: CratesIOAPI = CratesIOAPI(self.session)
 

@@ -11,7 +11,7 @@ BASE_URL_CRATES: str = 'https://crates.io/api/v1'
 
 
 class CratesIOAPI:
-    def __init__(self, ses: aiohttp.ClientSession = aiohttp.ClientSession()):
+    def __init__(self, ses: aiohttp.ClientSession):
         self.ses: aiohttp.ClientSession = ses
 
     async def get_crate_data(self, crate: str) -> dict | None:

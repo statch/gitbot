@@ -29,6 +29,14 @@ __all__: tuple = ('GitBot',)
 
 
 class GitBot(commands.Bot):
+    session: aiohttp.ClientSession | None = None
+    github: GitHubAPI | None = None
+    carbon: Carbon | None = None
+    pypi: PyPIAPI | None = None
+    crates: CratesIOAPI | None = None
+    mgr: Manager | None = None
+    runtime_vars: dict[str, str] = {}
+
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
         super().__init__(command_prefix=f'{os.getenv("PREFIX")} ', case_insensitive=True,
@@ -37,13 +45,6 @@ class GitBot(commands.Bot):
                          help_command=None, guild_ready_timeout=1,
                          status=discord.Status.online, description='Seamless GitHub-Discord integration.',
                          fetch_offline_members=False, **kwargs)
-        self.session: aiohttp.ClientSession | None = None
-        self.github: GitHubAPI | None = None
-        self.carbon: Carbon | None = None
-        self.pypi: PyPIAPI | None = None
-        self.crates: CratesIOAPI | None = None
-        self.mgr: Manager | None = None
-        self.runtime_vars: dict[str, str] = {}
 
     def _setup_uvloop(self):
         if os.name != 'nt':
@@ -116,6 +117,11 @@ class GitBot(commands.Bot):
         self._setup_uvloop()
         await self._setup_cloc()
         await self.load_cogs()
+
+    async def close(self) -> None:
+        await super().close()
+        await self.session.close()
+        await self.github.session.close()
 
     async def on_ready(self) -> None:
         self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')

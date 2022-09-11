@@ -37,11 +37,11 @@ class Config(commands.Cog):
                                    item: Literal['gh_url', 'codeblock']) -> bool:
         guild: GitBotGuild = await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
         config: AutomaticConversionSettings = guild.get('autoconv', ctx.bot.mgr.env.autoconv_default)
-        config[item] = (state := not (config.get(item, self.bot.mgr.env.autoconv_default[item])))  # noqa cause PyCharm is high
+        config[item] = (state := not (config.get(item, ctx.bot.mgr.env.autoconv_default[item])))  # noqa item is str
         if guild:
             await ctx.bot.mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
         else:
-            await ctx.bot.mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))
+            await ctx.bot.mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))  # noqa _id is int
         ctx.bot.mgr.autoconv_cache[ctx.guild.id] = config
         await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
         return state
@@ -173,8 +173,8 @@ class Config(commands.Cog):
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
                 await self.bot.mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, feed=[ReleaseFeedItem(cid=channel.id,
-                                                                                                   hook=hook.url[33:],
-                                                                                                   repos=[])]))
+                                                                                                            hook=hook.url[33:],
+                                                                                                            repos=[])]))
                 success: bool = True
         if success:
             embed: GitBotEmbed = GitBotEmbed(

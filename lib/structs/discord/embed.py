@@ -9,8 +9,6 @@ A non-native replacement for the embed object provided in discord.ext.commands
 import enum
 import discord
 import asyncio
-import functools
-import operator
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
 from lib.structs.proxies.dict_proxy import DictProxy
@@ -76,7 +74,7 @@ class GitBotEmbed(discord.Embed):
         :param kwargs: The keyword arguments to pass to the embed
         :return: The created embed
         """
-        resource: DictProxy = functools.reduce(operator.getitem, resource.split(), ctx.l)  # noqa: type valid
+        resource: DictProxy = ctx.bot.mgr.get_nested_key(ctx.l, resource)
         kwargs.setdefault('title', resource.get('title'))
         kwargs.setdefault('description', resource.get('description'))
         kwargs.setdefault('footer', resource.get('footer'))
@@ -95,17 +93,17 @@ class GitBotEmbed(discord.Embed):
         if _embed := ctx.message.embeds[0] if ctx.message.embeds else None:
             match state:
                 case GitBotCommandState.SUCCESS:
-                    self._input_with_timeout_update(0x57f287,
+                    self._input_with_timeout_update(ctx.bot.mgr.c.discord.green,
                                                     '<:checkmark:770244084727283732>',
                                                     ctx.l.generic.completed,
                                                     _embed)
                 case GitBotCommandState.FAILURE:
-                    self._input_with_timeout_update(0xed4245,
+                    self._input_with_timeout_update(ctx.bot.mgr.c.discord.red,
                                                     '<:failure:770244076896256010>',
                                                     ctx.l.generic.failure,
                                                     _embed)
                 case GitBotCommandState.TIMEOUT:
-                    self._input_with_timeout_update(0xfee75c, ':warning:', ctx.l.generic.inactive, _embed)
+                    self._input_with_timeout_update(ctx.bot.mgr.c.yellow, ':warning:', ctx.l.generic.inactive, _embed)
             await ctx.message.edit(embed=_embed)
 
     def _input_with_timeout_update(self,

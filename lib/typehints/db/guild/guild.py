@@ -16,6 +16,6 @@ class GitBotGuild(TypedDict, total=False):
     feed ReleaseFeed: A list of ReleaseFeedItem
     """
 
-    _id: GuildID
+    _id: GuildID | int
     feed: ReleaseFeed
     autoconv: AutomaticConversionSettings

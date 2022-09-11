@@ -72,7 +72,7 @@ class GitBot(commands.Bot):
                     traces_sample_rate=0.5
             )
         else:
-            self.logger.info('Sentry not enabled/not configured - skipping.')
+            self.logger.info('Sentry not enabled/configured - skipping.')
 
     def _setup_logging(self):
         logging.basicConfig(level=getattr(logging, self.mgr.env.log_level.upper(), logging.INFO),

@@ -52,7 +52,6 @@ class BotInfo(commands.Cog):
         uptime_stamp: str = time_format.format(d=days, h=hours, m=minutes, s=seconds)
         embed: discord.Embed = discord.Embed(
             color=self.bot.mgr.c.rounded,
-            title=None,
             description=f'{self.bot.mgr.e.timer}  {ctx.fmt("uptime", uptime_stamp)}'
         )
         await ctx.send(embed=embed)

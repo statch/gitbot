@@ -82,7 +82,7 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
         await handle_none(ctx, 'pull request', stored, lstate)
         return
 
-    pr_strings: list[str] = [make_string(repo, pr, 'pull') for pr in prs]
+    pr_strings: list[str] = [make_string(ctx, repo, pr, 'pull') for pr in prs]
 
     embed: GitBotEmbed = GitBotEmbed(
             color=ctx.bot.mgr.c.rounded,

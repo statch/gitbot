@@ -27,13 +27,13 @@ class Crates(commands.Cog):
                 f'`git crates downloads {{{ctx.l.help.argument_explainers.rust_crate_name.name}}}` - {ctx.l.crates.default.commands.downloads}'
             ]
             embed: GitBotEmbed = GitBotEmbed(
-                color=self.bot.mgr.c.languages.rust,
-                title=ctx.l.crates.default.title,
-                description=ctx.l.crates.default.description
-                + '\n\n'
-                + '\n'.join(commands_),
-                thumbnail=self.bot.mgr.i.crates_logo,
-                url='https://crates.io/'
+                    color=self.bot.mgr.c.languages.rust,
+                    title=ctx.l.crates.default.title,
+                    description=ctx.l.crates.default.description
+                                + '\n\n'
+                                + '\n'.join(commands_),
+                    thumbnail=self.bot.mgr.i.crates_logo,
+                    url='https://crates.io/'
             )
             await ctx.send(embed=embed)
 
@@ -46,24 +46,25 @@ class Crates(commands.Cog):
             owners: list = await self.bot.crates.get_crate_owners(crate.lower())
             crate_url: str = f'https://crates.io/crates/{data["crate"]["name"]}'
             embed: GitBotEmbed = GitBotEmbed(
-                color=0xe7b34e,
-                title=f'{data["crate"]["name"]} `{data["crate"]["newest_version"]}`',
-                url=data['crate'].get('homepage', crate_url),
-                thumbnail=owners[0]['avatar']
+                    color=0xe7b34e,
+                    title=f'{data["crate"]["name"]} `{data["crate"]["newest_version"]}`',
+                    url=data['crate'].get('homepage', crate_url),
+                    thumbnail=owners[0]['avatar']
             )
 
             if (crate_desc := data['crate']['description']) is not None and len(crate_desc) != 0:
                 embed.add_field(name=f":notepad_spiral: {ctx.l.crates.info.glossary[0]}:",
                                 value=f"```{crate_desc.strip()}```")
 
-            more_authors: str = f' {ctx.fmt("more_authors", f"[{len(owners) - 5}]({crate_url})")}' if len(owners) > 5 else ''
+            more_authors: str = f' {ctx.fmt("more_authors", f"[{len(owners) - 5}]({crate_url})")}' if len(
+                owners) > 5 else ''
             authors: str = ctx.fmt('authors',
                                    ', '.join(f'[{owner["name"]}{" `(team)`" if owner["kind"] == "team" else ""}]'
                                              f'({owner["url"]})' for owner in owners[:5])) + more_authors + '\n'
 
             created_at: str = ctx.fmt('created_at',
                                       self.bot.mgr.external_to_discord_timestamp(data['crate']['created_at'],
-                                                                        '%Y-%m-%dT%H:%M:%S.%f%z')) + '\n'
+                                                                                 '%Y-%m-%dT%H:%M:%S.%f%z')) + '\n'
 
             all_time_downloads: str = f'```rust\n{data["crate"]["downloads"]} //' \
                                       f' {ctx.l.crates.info.all_time_downloads}```\n'
@@ -80,12 +81,13 @@ class Crates(commands.Cog):
                                 value='\n'.join(link_strings))
 
             if rendered_kws := self.bot.mgr.render_label_like_list(data['crate']['keywords'],
-                                                          url_fmt='https://crates.io/keywords/{0}'):
+                                                                   url_fmt='https://crates.io/keywords/{0}'):
                 embed.add_field(name=f':label: {ctx.l.crates.info.glossary[3]}:', value=rendered_kws)
 
             if rendered_ctgs := self.bot.mgr.render_label_like_list(data['categories'],
-                                                           url_fmt='https://crates.io/categories/{0}',
-                                                           name_and_url_slug_knames_if_dict=('category', 'slug')):
+                                                                    url_fmt='https://crates.io/categories/{0}',
+                                                                    name_and_url_slug_knames_if_dict=(
+                                                                    'category', 'slug')):
                 embed.add_field(name=f':package: {ctx.l.crates.info.glossary[4]}:', value=rendered_ctgs)
 
             await embed.send(ctx)
@@ -111,14 +113,14 @@ class Crates(commands.Cog):
             last_week_dl: int = sum(item['downloads'] for item in data[-7:])
             last_month_dl: int = sum(item['downloads'] for item in data[-30:])
             embed: GitBotEmbed = GitBotEmbed(
-                color=self.bot.mgr.c.rounded,
-                title=ctx.fmt('title', project, len(data) - 1),
-                url=f'https://crates.io/crates/{project.replace(".", "-").lower()}',
-                description=f'{ctx.fmt("stats yesterday", yesterday_dl)}\n'
-                            f'{ctx.fmt("stats last_week", last_week_dl)}\n'
-                            f'{ctx.fmt("stats last_month", last_month_dl)}',
-                thumbnail=self.bot.mgr.i.crates_logo,
-                footer=ctx.l.crates.downloads.footer
+                    color=self.bot.mgr.c.rounded,
+                    title=ctx.fmt('title', project, len(data) - 1),
+                    url=f'https://crates.io/crates/{project.replace(".", "-").lower()}',
+                    description=f'{ctx.fmt("stats yesterday", yesterday_dl)}\n'
+                                f'{ctx.fmt("stats last_week", last_week_dl)}\n'
+                                f'{ctx.fmt("stats last_month", last_month_dl)}',
+                    thumbnail=self.bot.mgr.i.crates_logo,
+                    footer=ctx.l.crates.downloads.footer
             )
             await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
                                                                                             format='png',

@@ -5,12 +5,12 @@ from discord.ext import commands
 from lib.utils import regex
 from typing import Optional
 from lib.utils.decorators import gitbot_group
-from lib.structs.discord.context import GitBotContext
+from lib.structs import GitBotContext, GitBot
 
 
 class Snippets(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group(name='snippet', invoke_without_command=True)
     @commands.cooldown(3, 60, commands.BucketType.user)
@@ -24,7 +24,7 @@ class Snippets(commands.Cog):
                     return
                 msg: discord.Message = await ctx.info(ctx.l.snippets.generating)
 
-                await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(codeblock)))
+                await ctx.send(file=discord.File(filename='snippet.png', fp=await gen_carbon_inmemory(ctx, codeblock)))
                 await msg.delete()
             elif bool(match_ := (re.search(regex.GITHUB_LINES_URL_RE, link_or_codeblock) or
                                  re.search(regex.GITLAB_LINES_URL_RE, link_or_codeblock))):
@@ -51,5 +51,5 @@ class Snippets(commands.Cog):
             await ctx.error(err)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Snippets(bot))

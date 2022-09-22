@@ -103,7 +103,7 @@ class GitBotEmbed(discord.Embed):
                                                     ctx.l.generic.failure,
                                                     _embed)
                 case GitBotCommandState.TIMEOUT:
-                    self._input_with_timeout_update(ctx.bot.mgr.c.yellow, ':warning:', ctx.l.generic.inactive, _embed)
+                    self._input_with_timeout_update(ctx.bot.mgr.c.discord.yellow, ':warning:', ctx.l.generic.inactive, _embed)
             await ctx.message.edit(embed=_embed)
 
     def _input_with_timeout_update(self,
@@ -197,7 +197,7 @@ class GitBotEmbed(discord.Embed):
             ctx=ctx,
             event='reaction_add',
             timeout=30,
-            timeout_check=lambda r, m: all([r.custom_emoji,
+            timeout_check=lambda r, m: all([r.is_custom_emoji(),
                                             r.emoji.id in (770244076896256010, 770244084727283732),
                                             m.id == ctx.author.id,
                                             r.message.id == initial_message.id]),
@@ -205,6 +205,6 @@ class GitBotEmbed(discord.Embed):
             init_message=initial_message
         )
         if (result and result[0] and isinstance(result[0][0], discord.Reaction)
-                and result[0][0].custom_emoji and result[0][0].emoji.id == 770244084727283732):
+                and result[0][0].is_custom_emoji() and result[0][0].emoji.id == 770244084727283732):
             return True
         return False

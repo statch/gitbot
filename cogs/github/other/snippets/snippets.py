@@ -34,7 +34,7 @@ class Snippets(commands.Cog):
                 await msg.delete()
                 if text:
                     await ctx.send(file=discord.File(filename='snippet.png',
-                                                     fp=await gen_carbon_inmemory(text, match_.group('first_line_number'))))
+                                                     fp=await gen_carbon_inmemory(ctx, text, match_.group('first_line_number'))))
                 else:
                     await ctx.error(err)
             else:

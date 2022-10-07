@@ -64,7 +64,8 @@ class PyPI(commands.Cog):
                 if (v := parse_version(tag_name)) and first_release[0] is None or first_release[0] > v:
                     first_release = v, release
             first_uploaded_at: str = f''
-            if first_release[1] is not None:
+            first_release: tuple[..., list | ...] | list[..., list | ...]
+            if first_release[1]:
                 first_uploaded_at: str = ctx.fmt('first_upload',
                                                  self.bot.mgr.external_to_discord_timestamp(
                                                          first_release[1][0]["upload_time"],

@@ -9,7 +9,7 @@ dnspython==2.2.1
 psutil==5.9.2
 dblpy==0.4.0
 dlabs.py
-statcord.py==3.1.0
+statcord.py==3.1.1
 beautifulsoup4==4.11.1
 colorama==0.4.5
 requests==2.28.1

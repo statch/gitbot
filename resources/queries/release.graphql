@@ -6,7 +6,7 @@ query($Name: String!, $Owner: String!) {
     primaryLanguage {
       color
     }
-    releases(last: 1) {
+    releases(first: 1) {
       nodes {
         isDraft
         releaseAssets {

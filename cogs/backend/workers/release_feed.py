@@ -48,10 +48,10 @@ class ReleaseFeedWorker(commands.Cog):
                             changed: bool = True
                             update.append(TagNameUpdateData(rfi, repo, t))
                             self.bot.mgr.debug(f'New release found for repo "{repo["name"]}" (tag: {repo["tag"]})'
-                                      f' in GID {guild["_id"]}')
+                                               f' in GID {guild["_id"]}')
                         else:
                             self.bot.mgr.debug(f'No new release for repo "{repo["name"]}" (tag: {repo["tag"]})'
-                                      f' in GID {guild["_id"]}')
+                                               f' in GID {guild["_id"]}')
                     else:
                         self.bot.mgr.debug(f'Missing repo detected in GID {guild["_id"]} ("{repo["name"]}")')
                         await self.handle_missing_feed_repo(guild, rfi, repo)

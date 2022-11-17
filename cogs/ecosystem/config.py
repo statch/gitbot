@@ -380,14 +380,16 @@ class Config(commands.Cog):
             await ctx.error(ctx.fmt('failure', locale), delete_after=7)
 
         def _format(locale_: dict):
-            formatted: str = f'{self.bot.mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}'
+            formatted: str = f'{self.bot.mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}' + \
+                             (f' ({self.bot.mgr.get_localization_percentage(locale_["name"])}%)'
+                              if locale_['name'] != self.bot.mgr.locale.master.meta.name else '')
             return formatted if ctx.l.meta.name != locale_['name'] else f'**{formatted}**'
 
         languages: list = [_format(l_) for l_ in self.bot.mgr.locale.languages]
         embed: discord.Embed = discord.Embed(
             color=self.bot.mgr.c.rounded,
             title=f'{self.bot.mgr.e.github}  {ctx.l.config.locale.title}',
-            description=f"{ctx.fmt('description', f'`git config --lang {{{ctx.l.help.argument_explainers.locale.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
+            description=f"{ctx.fmt('description', f'`git config lang {{{ctx.l.help.argument_explainers.locale.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
                 languages)
         )
         await ctx.send(embed=embed)

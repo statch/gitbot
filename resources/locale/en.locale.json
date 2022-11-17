@@ -656,7 +656,7 @@
         "footer": "Simply pick an option next time!"
       },
       "title": "Bot Language",
-      "description": "Here you can change the language of the Bot.\nSimply type {0}\nAll translations are provided by our [community](https://github.com/statch/gitbot/tree/main/resources/locale)",
+      "description": "Here you can change the language of GitBot.\nSimply type {0}\nAll translations are provided by our [community](https://github.com/statch/gitbot/tree/main/resources/locale)",
       "cancelled": "Language change **cancelled.**"
     },
     "delete": {

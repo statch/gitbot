@@ -5,4 +5,4 @@ cogs:
 root:
   - ./*
 locale:
-  - data/locale/**/*
+  - resources/locale/**/*

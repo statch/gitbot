@@ -1,4 +1,5 @@
 from discord.ext import commands
+from lib.structs import GitBot
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord import pages
 from lib.structs.discord.embed import GitBotEmbed
@@ -6,8 +7,8 @@ from ._error_tools import respond_to_command_doesnt_exist, log_error_in_discord,
 
 
 class Errors(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: GitBotContext, error) -> None:
@@ -32,10 +33,10 @@ class Errors(commands.Cog):
                 await ctx.error(ctx.l.errors.max_concurrency_reached)
             case commands.BotMissingPermissions:
                 await ctx.error(ctx.fmt('bot_missing_permissions',
-                                        ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
+                                        ', '.join([f'`{m}`' for m in error.missing_permissions]).replace('_', ' ')))
             case commands.MissingPermissions:
                 await ctx.error(ctx.fmt('missing_permissions',
-                                        ', '.join([f'`{m}`' for m in error.missing_perms]).replace('_', ' ')))
+                                        ', '.join([f'`{m}`' for m in error.missing_permissions]).replace('_', ' ')))
             case commands.ChannelNotFound:
                 await ctx.error(ctx.fmt('channel_not_found', error.argument))
             case commands.NoPrivateMessage:
@@ -60,5 +61,5 @@ class Errors(commands.Cog):
                     print(error)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Errors(bot))

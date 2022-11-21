@@ -1,14 +1,15 @@
 import discord
 from discord.ext import commands
 from typing import Optional
+from lib.structs import GitBot
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
 
 
 class User(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: GitBotContext, user: Optional[str] = None) -> None:
@@ -50,11 +51,11 @@ class User(commands.Cog):
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
-        occupation: str = (ctx.l.user.info.company + '\n').format(u['company']) if "company" in u and u[
-            "company"] is not None else ctx.l.user.info.no_company + '\n'
-        orgs: str = ctx.l.user.info.orgs.plural.format(orgs_c) + '\n' if orgs_c != 0 else ctx.l.user.info.orgs.no_orgs
+        occupation: str = (ctx.l.user.info.company + '\n').format(u['company']) if 'company' in u and u[
+            'company'] is not None else ctx.l.user.info.no_company + '\n'
+        orgs: str = ctx.l.user.info.orgs.plural.format(orgs_c) if orgs_c != 0 else ctx.l.user.info.orgs.no_orgs + '\n'
         if orgs_c == 1:
-            orgs: str = f"{ctx.l.user.info.orgs.singular}\n"
+            orgs: str = f'{ctx.l.user.info.orgs.singular}\n'
         followers: str = ctx.l.user.info.followers.no_followers if u[
                                                             'followers'] == 0 else ctx.fmt('followers plural', u['followers'], u['url'] + '?tab=followers')
 
@@ -123,5 +124,5 @@ class User(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(User(bot))

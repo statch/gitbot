@@ -27,6 +27,7 @@ import datetime
 import functools
 import subprocess
 import dotenv.parser
+from copy import deepcopy
 from sys import getsizeof
 from itertools import chain
 from fuzzywuzzy import fuzz
@@ -80,8 +81,10 @@ class Manager:
         self.locale.master = getattr(self.l, str(self.locale.master))
         self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
+        self.localization_percentages: dict[str, float | None] = {l_['name']: None for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
+        self.__preprocess_localization_percentages()
 
     async def get_repo_gitbot_config(self, repo: str, fallback_to_dot_json: bool = True) -> GitbotRepoConfig | None:
         gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot') or \
@@ -288,7 +291,7 @@ class Manager:
                     f'{bracket_color}[{category_color}{main_cat}{Style.RESET_ALL}-{subcategory_color}{sub_cat}'
                     f'{Style.RESET_ALL}{bracket_color}]:{Style.RESET_ALL} {message_color}{message}{Style.RESET_ALL}')
             else:
-                print(f'{bracket_color}[{category_color}{category}{Style.RESET_ALL}]:{Style.RESET_ALL} '
+                print(f'{bracket_color}[{category_color}{category}{Style.RESET_ALL}{bracket_color}]:{Style.RESET_ALL} '
                       f'{message_color}{message}{Style.RESET_ALL}')
         else:
             print(f'[{category}]: {message}')
@@ -1037,6 +1040,44 @@ class Manager:
                 if lv == attribute or match_ > 80:
                     return locale, match_ == 100
 
+    def get_all_dict_paths(self, d: dict, __path: list[str] | None = None) -> list[list[str]]:
+        """
+        Get all paths in a dictionary
+
+        :param d: The dictionary to get the paths from
+        :return: A list of paths
+        """
+        __path: list = [] if __path is None else __path
+        paths: list = []
+        for k, v in d.items():
+            if isinstance(v, dict):
+                paths.extend(self.get_all_dict_paths(v, __path + [k]))
+            else:
+                paths.append(__path + [k])
+        return paths
+
+    def get_localization_percentage(self, locale: str) -> float:
+        """
+        Get the localization percentage of a locale
+
+        :param locale: The locale to get the percentage for
+        :return: The percentage
+        """
+        locale: DictProxy | None = getattr(self.l, locale, None)
+        if locale:
+            if self.localization_percentages.get(locale.meta['name']) is not None:
+                return self.localization_percentages[locale.meta['name']]
+            ml_copy: dict = deepcopy(self.locale.master.actual)
+            del ml_copy['meta']
+            ml_paths: list = self.get_all_dict_paths(ml_copy)
+            non_localized: int = 0
+            for k in ml_paths:
+                if self.get_nested_key(locale, k) == self.get_nested_key(ml_copy, k):
+                    non_localized += 1
+            result: float = round((1 - (non_localized / len(ml_paths))) * 100, 2)
+            self.localization_percentages[locale.meta['name']] = result
+            return result
+
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
         """
         Add missing keys to the dictionary
@@ -1046,10 +1087,9 @@ class Manager:
         :param locale: Whether the dictionaries are locales (logging)
         :return: The fixed dict
         """
-
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
-                if k not in node:
+                if k not in node or (locale is True and node[k] == ref[k]):
                     if locale:
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
                         self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
@@ -1107,6 +1147,16 @@ class Manager:
 
         for locale in self.l:
             _preprocess(locale)
+
+    def __preprocess_localization_percentages(self):
+        """
+        Preprocess localization percentages
+        """
+        for locale in self.l:
+            if locale != self.locale.master:
+                pc: float = self.get_localization_percentage(locale.meta.name)
+                self.localization_percentages[locale.meta.name] = pc
+                self.log(f'Locale is {pc}% localized', f'locale-{locale.meta.name}')
 
     def fmt(self, ctx: 'GitBotContext'):
         """

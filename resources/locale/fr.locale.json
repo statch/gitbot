@@ -1,612 +1,578 @@
 {
-    "meta": {
-      "name": "fr",
-      "full_name": "french",
-      "localized_name": "français",
-      "flag": ":flag_fr:"
+  "meta": {
+    "name": "fr",
+    "full_name": "french",
+    "localized_name": "français",
+    "flag": ":flag_fr:"
+  },
+  "errors": {
+    "missing_required_argument": {
+      "title": "Vous n'avez pas fourni tous les arguments !",
+      "description": "Pour exécuter cette commande, vous devez transmettre tous les arguments requis.\n**Pour en savoir plus, saisissez :**\n{0}",
+      "footer": "Ça ne fonctionne toujours pas? Demandez de l'aide dans le serveur de support !"
     },
-    "errors": {
-      "missing_required_argument": {
-        "title": "Vous n'avez pas fourni tous les arguments !",
-        "description": "Pour exécuter cette commande, vous devez transmettre tous les arguments requis.\n**Pour en savoir plus, saisissez :**\n{0}",
-        "footer": "Ça ne fonctionne toujours pas? Demandez de l'aide dans le serveur de support !"
+    "command_on_cooldown": "**Vous avez atteint le temps de recharge !** Veuillez réessayer dans {0}s",
+    "max_concurrency_reached": "Cette commande connaît un trafic exceptionnel. **Veuillez réessayer dans quelques secondes.**",
+    "missing_permissions": "**Il vous manque les permissions requises pour effectuer cette opération !** Vous avez besoin de {0}",
+    "no_private_message": "Cette commande ne peut être utilisée que **à l'intérieur d'un serveur !**",
+    "command_not_found": {
+      "title": "Cette commande n'existe pas !",
+      "description": "La **commande existante la plus proche** est : {0}",
+      "footer": "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'assistance."
+    },
+    "embed_pages_permission_error": {
+      "title": "Je n'ai pas les permissions requises !",
+      "description": "Cette commande nécessite un peu de magie pour fonctionner (modifier les messages et supprimer les réactions).\n**Je dois pouvoir gérer les messages et ajouter des réactions**",
+      "footer": "Ajustez mes permissions et réessayez."
+    },
+    "bot_missing_permissions": "**Je n'ai pas les permissions nécessaires pour faire cela !**\nJ'ai besoin de : {0}",
+    "channel_not_found": "Je n'arrive pas à trouver le salon `{0}`...\n**Existe-t-il et en ai-je l'accès ?**",
+    "role_not_found": "Je n'arrive pas à trouver un rôle `{0}`...",
+    "checks": {
+      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again."
+    }
+  },
+  "events": {
+    "mention": ":tada: **Salut ! Je suis GitBot.**\nMon préfixe est `git`\nTapez `git --help` pour obtenir la liste de toutes mes commandes."
+  },
+  "generic": {
+    "nonexistent": {
+      "user": {
+        "base": "Cet utilisateur **n'existe pas !**",
+        "qa": "Vous n'avez pas configuré d'accès rapide à un utilisateur ! **Tapez** `git config` **pour le faire.**",
+        "qa_changed": "L'utilisateur que vous aviez enregistré a changé de nom ou a supprimé son compte. Veuillez le **ré-ajouter** en utilisant `git --config user`"
       },
-      "command_on_cooldown": "**Vous avez atteint le temps de recharge !** Veuillez réessayer dans {0}s",
-      "max_concurrency_reached": "Cette commande connaît un trafic exceptionnel. **Veuillez réessayer dans quelques secondes.**",
-      "missing_permissions": "**Il vous manque les permissions requises pour effectuer cette opération !** Vous avez besoin de {0}",
-      "no_private_message": "Cette commande ne peut être utilisée que **à l'intérieur d'un serveur !**",
-      "command_not_found": {
-        "title": "Cette commande n'existe pas !",
-        "description": "La **commande existante la plus proche** est : {0}",
-        "footer": "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'assistance."
+      "repo": {
+        "base": "Ce dépôt **n'existe pas !**",
+        "qa": "Vous n'avez pas d'accès rapide à un dépôt configuré ! **Tapez** `git config` **pour le faire.**",
+        "qa_changed": "Le dépôt que vous aviez enregistré a changé de nom ou a été supprimé. Veuillez les **ré-ajouter** en utilisant `git --config repo`",
+        "saved_repo_unavailable": "Vous avez appelé la commande avec votre dépôt stocké, mais il n'est pas disponible. **Veuillez le rajouter.**",
+        "no_pulls_with_state": "Ce dépôt n'a aucune **{0} demande de tirage (pull request) !**",
+        "no_issues_with_state": "Ce dépôt n'a aucun **{0} problème !**",
+        "no_pulls_with_state_qa": "Votre dépôt enregistré n'a aucune **{0} demande de tirage (pull request) !**",
+        "no_issues_with_state_qa": "Votre dépôt enregistré ne présente aucun **{0} problème !**"
       },
-      "embed_pages_permission_error": {
-        "title": "Je n'ai pas les permissions requises !",
-        "description": "Cette commande nécessite un peu de magie pour fonctionner (modifier les messages et supprimer les réactions).\n**Je dois pouvoir gérer les messages et ajouter des réactions**",
-        "footer": "Ajustez mes permissions et réessayez."
+      "org": {
+        "base": "Cette organisation **n'existe pas !**",
+        "qa": "Vous n'avez pas configuré d'accès rapide à une organisation ! **Tapez** `git config` **pour le faire.**",
+        "qa_changed": "L'organisation que vous aviez enregistrée a changé de nom ou a été supprimée. Veuillez la **ré-ajouter** en utilisant `git --config org`"
       },
-      "bot_missing_permissions": "**Je n'ai pas les permissions nécessaires pour faire cela !**\nJ'ai besoin de : {0}",
-      "channel_not_found": "Je n'arrive pas à trouver le salon `{0}`...\n**Existe-t-il et en ai-je l'accès ?**",
-      "role_not_found": "Je n'arrive pas à trouver un rôle `{0}`..."
-    },
-    "events": {
-      "mention": ":tada: **Salut ! Je suis GitBot.**\nMon préfixe est `git`\nTapez `git --help` pour obtenir la liste de toutes mes commandes."
-    },
-    "generic": {
-      "nonexistent": {
-        "user": {
-          "base": "Cet utilisateur **n'existe pas !**",
-          "qa": "Vous n'avez pas configuré d'accès rapide à un utilisateur ! **Tapez** `git config` **pour le faire.**",
-          "qa_changed": "L'utilisateur que vous aviez enregistré a changé de nom ou a supprimé son compte. Veuillez le **ré-ajouter** en utilisant `git --config user`"
-        },
-        "repo": {
-          "base": "Ce dépôt **n'existe pas !**",
-          "qa": "Vous n'avez pas d'accès rapide à un dépôt configuré ! **Tapez** `git config` **pour le faire.**",
-          "qa_changed": "Le dépôt que vous aviez enregistré a changé de nom ou a été supprimé. Veuillez les **ré-ajouter** en utilisant `git --config repo`",
-          "saved_repo_unavailable": "Vous avez appelé la commande avec votre dépôt stocké, mais il n'est pas disponible. **Veuillez le rajouter.**",
-          "no_pulls_with_state": "Ce dépôt n'a aucune **{0} demande de tirage (pull request) !**",
-          "no_issues_with_state": "Ce dépôt n'a aucun **{0} problème !**",
-          "no_pulls_with_state_qa": "Votre dépôt enregistré n'a aucune **{0} demande de tirage (pull request) !**",
-          "no_issues_with_state_qa": "Votre dépôt enregistré ne présente aucun **{0} problème !**"
-        },
-        "org": {
-          "base": "Cette organisation **n'existe pas !**",
-          "qa": "Vous n'avez pas configuré d'accès rapide à une organisation ! **Tapez** `git config` **pour le faire.**",
-          "qa_changed": "L'organisation que vous aviez enregistrée a changé de nom ou a été supprimée. Veuillez la **ré-ajouter** en utilisant `git --config org`"
-        },
-        "repos": {
-          "user": "Cet utilisateur n'a pas de **dépôts publics !**",
-          "org": "Cette organisation n'a pas de **dépôts publics !**"
-        },
-        "gist": "Cet utilisateur n'a pas de **gists publics !**",
-        "path": "Ce chemin **n'existe pas !**",
-        "user_or_org": "Cet utilisateur ou cette organisation **n'existe pas !**",
-        "pr_number": "La demande de tirage (pull request) avec ce numéro **n'existe pas !**",
-        "issue_number": "Le problème avec ce numéro **n'existe pas !**",
-        "qa": "**Vous n'avez configuré aucun accès rapide à cette donnée !** Utilisez `git config` pour le faire",
-        "locale": "Ce local n'existe pas !",
-        "python_package": "Le package Python portant ce nom n'existe pas sur PyPI !",
-        "rust_crate": "Le crate Rust portant ce nom n'existe pas sur crates.io !",
-        "release_feed": "Ce serveur **n'a pas de flux de publication !** (Utilisez cette commande après en avoir ajouté un)",
-        "commit": "Le commit avec cet OID **n'existe pas** dans {0} !",
-        "ref": "La branche appelée {0} **n'existe pas** dans {1} !",
-        "command": "**Je n'ai pas trouvé cette commande !** Revérifier l'orthographe ?",
-        "group": "**Je n'ai pas trouvé ce groupe de commandes !** Revérifier l'orthographe ?",
-        "command_or_group": "**Je n'ai pas trouvé cette commande/ce groupe !** Revérifier l'orthographe ?",
-        "release_feed_with_mention": "Ce serveur n'a pas de **flux de publication avec une mention configurée !**"
-      },
-      "issue": {
-        "invalid_state": "`{0}` n'est pas un **état de problème valide !** (Essayez `open` ou `closed`)"
-      },
-      "pr": {
-        "invalid_state": "`{0}` n'est pas un **état de demande d'extraction valide !** (Essayez `open`, `closed` ou `merged`)"
-      },
-      "invalid_index": "{0} n'est pas un nombre valide **de la liste !**",
-      "unspecified": "**Quelque chose s'est mal passé,** veuillez le signaler sur le serveur d'assistance.",
-      "inactive": "La commande a expiré - ce message n'est plus actif !",
-      "completed": "La commande est terminée - ce message n'est plus actif",
-      "closed": "Cette commande a été fermée - vous ne pouvez plus interagir avec elle",
-      "failure": "La commande ne s'est pas terminée - ce message n'est plus actif"
-    },
-    "enum": {
-      "generic": {
-        "switch": {
-          "true": "On",
-          "false": "Off"
-        }
-      },
-      "autoconv": {
-        "gh_lines": {
-          "0": "Off",
-          "1": "Texte clair",
-          "2": "Image Carbon"
-        }
-      }
-    },
-    "glossary": {
-      "page": "Page",
-      "example": "Exemple",
-      "usage": "Usage",
-      "description": "Description",
-      "arguments": "Arguments",
-      "command": "Commande",
-      "command_group": "Groupe de commande",
-      "github_repo_term": "dépôt",
-      "gitlab_repo_term": "projet",
-      "website": "site web"
-    },
-    "permissions": {
-      "manage_webhooks": "Gérer les webhooks",
-      "manage_channels": "Gérer les salons",
-      "manage_guild": "Gérer le serveur"
-    },
-    "legal": {
-      "title": "GitBot Juridique",
-      "description": "**Merci d'être un utilisateur de GitBot !**\nSi vous souhaitez consulter les documents juridiques régissant votre utilisation de GitBot, consultez [**la page juridique.**](https://statch.org/gitbot/legal.html)",
-      "footer": "Pour toute autre question, veuillez rejoindre le serveur d'assistance."
-    },
-    "uptime": "**Je suis en ligne depuis :**\n{0}",
-    "invite": {
-      "server": "Serveur d'assistance",
-      "invite_verb": "Inviter",
-      "tagline": "Invitez-moi sur votre serveur !"
-    },
-    "ping": "**Mon ping est de :**\n**{0}** millisecondes",
-    "vote": "Votez pour GitBot!",
-    "stats": {
-      "title": "Statistiques du robot",
-      "body": "Statistiques générales concernant le fonctionnement du Bot.",
-      "system": "Utilisation du système",
-      "people": {
-        "title": "Personnes",
-        "body": "Je suis dans **{0}** serveurs,\net j'ai **{1}** utilisateurs"
-      },
-      "code": {
-        "title": "Code",
-        "body": "Je suis composé de **{0}** lignes de code,\nexécutant sur **{1}**"
-      }
-    },
-    "license": {
-      "error": "Je n'ai pas trouvé de licence correspondant au nom que vous avez fourni !",
-      "description": "Description",
-      "implementation": "Implémentation",
-      "conditions": "Conditions",
-      "limitations": "Limitations",
-      "permissions": "Permissions",
-      "none": "Aucun"
-    },
-    "info": {
-      "no_info": "Je n'ai pas pu récupérer d'informations concernant le lien que vous avez fourni !"
-    },
-    "snippets": {
-      "length_limit_exceeded": "Je ne peux pas afficher **plus de {0} lignes**, désolé !",
-      "no_content": "Il **n'y a pas de contenu** sur ces lignes !",
-      "private_or_inaccessible": "Ce {0} est **privé ou autrement inaccessible.**",
-      "nonexistent": "Ce {0} **n'existe pas !**",
-      "no_lines_mentioned": "Le lien doit être un URL GitHub ou GitLab **mentionnant des lignes !**",
-      "generating": "Génération de l'image Carbon..."
-    },
-    "user": {
       "repos": {
-        "no_public": "Cet utilisateur n'a pas de **dépôts publics !**",
-        "more": "Afficher {0} autres sur Github",
-        "owner": "Dépôts de {0}"
+        "user": "Cet utilisateur n'a pas de **dépôts publics !**",
+        "org": "Cette organisation n'a pas de **dépôts publics !**"
       },
-      "info": {
-        "glossary": [
-          "Bio",
-          "Info",
-          "Liens",
-          "Site web"
-        ],
-        "title": "Profile de {0}",
-        "joined_at": "A rejoint GitHub le {0}",
-        "company": "Travaille à {0}",
-        "no_company": "Ne fait pas partie d'une entreprise",
-        "orgs": {
-          "plural": "Appartient à {0} organisations",
-          "singular": "Appartient à une organisation",
-          "no_orgs": "N'appartient à aucune organisation"
-        },
-        "followers": {
-          "plural": "A [{0} abonnés]({1})",
-          "singular": "A seulement [un abonné]({0})",
-          "no_followers": "N'est suivi par personne"
-        },
-        "linking_word": "et",
-        "following": {
-          "plural": "suit [{0} utilisateurs]({1})",
-          "singular": "suit seulement [une personne]({0})",
-          "no_following": "ne suit personne pour le moment"
-        },
-        "repos": {
-          "plural": "Possède un total de [{0} dépôts]({1})",
-          "singular": "N'a qu'[un dépôt]({0})",
-          "no_repos": "N'a pas encore de dépôts"
-        },
-        "contributions": "{0} contributions cette année, {1} aujourd'hui"
-      }
-    },
-    "org": {
-      "repos": {
-        "owner": "Dépôts de {0}",
-        "more": "Afficher {0} autres sur Github"
-      },
-      "info": {
-        "glossary": [
-          "Description",
-          "Info",
-          "Liens",
-          "Site web"
-        ],
-        "title": "Profile de {0}",
-        "created_at": "Créé le {0}",
-        "members": "A [{0} membres publics]({1})",
-        "one_member": "N'a qu'[un membre public]({0})",
-        "repos": {
-          "plural": "Possède un total de [{0} dépôts]({1})",
-          "singular": "N'a qu'[un dépôt]({0})",
-          "no_repos": "N'a pas encore de dépôts"
-        },
-        "location": "Est basé à {0}"
-      }
-    },
-    "repo": {
-      "info": {
-        "glossary": [
-          "Description",
-          "Info",
-          "Liens",
-          "Sujets",
-          "Page d'accueil"
-        ],
-        "created_at": "Créé le {0}",
-        "issues": {
-          "plural": "A [{0} problèmes ouverts]({1})",
-          "singular": "N'a qu'[un problème ouvert]({0})",
-          "no_issues": "N'a pas de problèmes ouverts"
-        },
-        "forks": {
-          "plural": "A été forké [{0} fois]({1})",
-          "singular": "A été forké [une seule fois]({0})",
-          "no_forks": "Personne n'a encore forké ce dépôt"
-        },
-        "languages": {
-          "main": "Écrit principalement en {0}",
-          "with_num": "Rédigé en {0} langages, principalement {1}"
-        },
-        "watchers": {
-          "plural": "A [{0} spectateurs]({1})",
-          "singular": "N'a qu'[un observateur]({0})",
-          "no_watchers": "N'a pas d'observateurs"
-        },
-        "linking_word": "et",
-        "stargazers": {
-          "plural": "[{0} déposeurs d'étoile]({1})",
-          "singular": "[un déposeur d'étoile]({0})",
-          "no_stargazers": "pas de déposeur d'étoile"
-        },
-        "fork_notice": "Ce dépôt est un fork de {0}",
-        "license": "Licence sous le {0}"
-      },
-      "files": {
-        "view_more": "Afficher {0} autres sur GitHub",
-        "not_a_directory": "**Le chemin que vous avez fourni n'est pas celui d'un répertoire !**\nPour afficher le contenu d'un fichier, utilisez la commande `{0}`."
-      },
-      "download": {
-        "wait": "Donnez-moi une seconde pendant que je télécharge le fichier...",
-        "file_too_big": "Ce fichier est trop volumineux, **veuillez le télécharger directement ici :**\n{0}",
-        "done": "Voici le code source de **{0} !**"
-      },
-      "issues": {
-        "title": "{0} derniers problèmes dans {1}",
-        "footer_tip": "Vous pouvez rapidement inspecter un problème spécifique de la liste en tapant son numéro !\nVous pouvez taper Annuler pour quitter."
-      },
-      "pulls": {
-        "title": "Dernières {0} pull requests dans {1}",
-        "footer_tip": "Vous pouvez rapidement inspecter un PR spécifique de la liste en tapant son numéro !\nVous pouvez taper `Cancel` pour quitter."
-      }
-    },
-    "gist": {
-      "glossary": [
-        "Contenu",
-        "Info"
-      ],
-      "title": "Gists de {0}",
-      "created_at": "Créé par {0} le {1}",
-      "updated_at": "Dernière mise à jour le {0}",
-      "stargazers": {
-        "plural": "A [{0} déposeurs d'étoile]({1})",
-        "singular": "A [un déposeur d'étoile]{0}",
-        "no_stargazers": "N'a pas de déposeur d'étoile"
-      },
-      "linking_word": "et",
-      "comments": {
-        "plural": "[{0} commentaires]({1})",
-        "singular": "[un commentaire]({0})",
-        "no_comments": "pas de commentaires"
-      },
-      "no_list": "Vous n'avez pas vu la liste essentielle car cet utilisateur n'a qu'un seul gist.",
-      "footer": "Les dix derniers gists de {0}.\nPour inspecter un gist spécifique, envoyez simplement son numéro dans ce salon.",
-      "index_error": "Veuillez choisir un nombre **entre 1 et {0}**",
-      "content_notice": "Le contenu est un aperçu du premier fichier du gist",
-      "timeout": {
-        "title": "Temps écoulé",
-        "tip": "Pour choisir une option, envoyez simplement un numéro la prochaine fois !"
-      }
+      "gist": "Cet utilisateur n'a pas de **gists publics !**",
+      "path": "Ce chemin **n'existe pas !**",
+      "user_or_org": "Cet utilisateur ou cette organisation **n'existe pas !**",
+      "pr_number": "La demande de tirage (pull request) avec ce numéro **n'existe pas !**",
+      "issue_number": "Le problème avec ce numéro **n'existe pas !**",
+      "qa": "**Vous n'avez configuré aucun accès rapide à cette donnée !** Utilisez `git config` pour le faire",
+      "locale": "Ce local n'existe pas !",
+      "python_package": "Le package Python portant ce nom n'existe pas sur PyPI !",
+      "rust_crate": "Le crate Rust portant ce nom n'existe pas sur crates.io !",
+      "release_feed": "Ce serveur **n'a pas de flux de publication !** (Utilisez cette commande après en avoir ajouté un)",
+      "commit": "Le commit avec cet OID **n'existe pas** dans {0} !",
+      "ref": "La branche appelée {0} **n'existe pas** dans {1} !",
+      "command": "**Je n'ai pas trouvé cette commande !** Revérifier l'orthographe ?",
+      "group": "**Je n'ai pas trouvé ce groupe de commandes !** Revérifier l'orthographe ?",
+      "command_or_group": "**Je n'ai pas trouvé cette commande/ce groupe !** Revérifier l'orthographe ?",
+      "release_feed_with_mention": "Ce serveur n'a pas de **flux de publication avec une mention configurée !**"
     },
     "issue": {
-      "glossary": [
-        "Corps",
-        "Info",
-        "Étiquettes"
-      ],
-      "stored_no_number": "Si vous souhaitez accéder aux problèmes du dépôt stocké, veuillez indiquer un **numéro de problème !**",
-      "second_argument_number": "Le deuxième argument doit être un problème **numéro !**",
-      "created_at": "Créé par {0} le {1}",
-      "closed_at": "Fermé le {0}",
-      "comments": {
-        "plural": "A {0} commentaires",
-        "singular": "A un commentaire",
-        "no_comments": "N'a pas de commentaires"
-      },
-      "linking_word": "et",
-      "assignees": {
-        "plural": "{0} cessionnaires",
-        "singular": "un cessionnaire",
-        "no_assignees": "pas de cessionnaire"
-      },
-      "participants": {
-        "plural": "{0} personnes ont participé à ce problème",
-        "singular": "Une personne a participé à ce problème"
-      }
+      "invalid_state": "`{0}` n'est pas un **état de problème valide !** (Essayez `open` ou `closed`)"
     },
     "pr": {
+      "invalid_state": "`{0}` n'est pas un **état de demande d'extraction valide !** (Essayez `open`, `closed` ou `merged`)"
+    },
+    "invalid_index": "{0} n'est pas un nombre valide **de la liste !**",
+    "unspecified": "**Quelque chose s'est mal passé,** veuillez le signaler sur le serveur d'assistance.",
+    "inactive": "La commande a expiré - ce message n'est plus actif !",
+    "completed": "La commande est terminée - ce message n'est plus actif",
+    "closed": "Cette commande a été fermée - vous ne pouvez plus interagir avec elle",
+    "failure": "La commande ne s'est pas terminée - ce message n'est plus actif"
+  },
+  "enum": {
+    "generic": {
+      "switch": {
+        "true": "On",
+        "false": "Off"
+      }
+    },
+    "autoconv": {
+      "gh_lines": {
+        "0": "Off",
+        "1": "Texte clair",
+        "2": "Image Carbon"
+      }
+    }
+  },
+  "glossary": {
+    "page": "Page",
+    "example": "Exemple",
+    "usage": "Usage",
+    "description": "Description",
+    "arguments": "Arguments",
+    "command": "Commande",
+    "command_group": "Groupe de commande",
+    "github_repo_term": "dépôt",
+    "gitlab_repo_term": "projet",
+    "website": "site web"
+  },
+  "permissions": {
+    "manage_webhooks": "Gérer les webhooks",
+    "manage_channels": "Gérer les salons",
+    "manage_guild": "Gérer le serveur"
+  },
+  "legal": {
+    "title": "GitBot Juridique",
+    "description": "**Merci d'être un utilisateur de GitBot !**\nSi vous souhaitez consulter les documents juridiques régissant votre utilisation de GitBot, consultez [**la page juridique.**](https://statch.org/gitbot/legal.html)",
+    "footer": "Pour toute autre question, veuillez rejoindre le serveur d'assistance."
+  },
+  "uptime": "**Je suis en ligne depuis :**\n{0}",
+  "invite": {
+    "server": "Serveur d'assistance",
+    "invite_verb": "Inviter",
+    "tagline": "Invitez-moi sur votre serveur !"
+  },
+  "ping": "**Mon ping est de :**\n**{0}** millisecondes",
+  "vote": "Votez pour GitBot!",
+  "stats": {
+    "title": "Statistiques du robot",
+    "body": "Statistiques générales concernant le fonctionnement du Bot.",
+    "system": "Utilisation du système",
+    "people": {
+      "title": "Personnes",
+      "body": "Je suis dans **{0}** serveurs,\net j'ai **{1}** utilisateurs"
+    },
+    "code": {
+      "title": "Code",
+      "body": "Je suis composé de **{0}** lignes de code,\nexécutant sur **{1}**"
+    }
+  },
+  "license": {
+    "error": "Je n'ai pas trouvé de licence correspondant au nom que vous avez fourni !",
+    "description": "Description",
+    "implementation": "Implémentation",
+    "conditions": "Conditions",
+    "limitations": "Limitations",
+    "permissions": "Permissions",
+    "none": "Aucun"
+  },
+  "info": {
+    "no_info": "Je n'ai pas pu récupérer d'informations concernant le lien que vous avez fourni !"
+  },
+  "snippets": {
+    "length_limit_exceeded": "Je ne peux pas afficher **plus de {0} lignes**, désolé !",
+    "no_content": "Il **n'y a pas de contenu** sur ces lignes !",
+    "private_or_inaccessible": "Ce {0} est **privé ou autrement inaccessible.**",
+    "nonexistent": "Ce {0} **n'existe pas !**",
+    "no_lines_mentioned": "Le lien doit être un URL GitHub ou GitLab **mentionnant des lignes !**",
+    "generating": "Génération de l'image Carbon..."
+  },
+  "user": {
+    "repos": {
+      "no_public": "Cet utilisateur n'a pas de **dépôts publics !**",
+      "more": "Afficher {0} autres sur Github",
+      "owner": "Dépôts de {0}"
+    },
+    "info": {
       "glossary": [
+        "Bio",
         "Info",
-        "Participants",
-        "Cessionnaires",
-        "Réviseurs",
-        "Étiquettes"
+        "Liens",
+        "Site web"
       ],
-      "stored_no_number": "Si vous souhaitez accéder aux PR du référentiel stocké, veuillez transmettre un **numéro de demande d'extraction !**",
-      "second_argument_number": "Le deuxième argument doit être une pull request **numéro !**",
-      "created_at": "Créé par {0} le {1}",
-      "closed_at": "Fermé le {0}",
-      "comments": {
-        "plural": "A {0} commentaires",
-        "singular": "A un commentaire",
-        "no_comments": "N'a pas de commentaires"
+      "title": "Profile de {0}",
+      "joined_at": "A rejoint GitHub le {0}",
+      "company": "Travaille à {0}",
+      "no_company": "Ne fait pas partie d'une entreprise",
+      "orgs": {
+        "plural": "Appartient à {0} organisations",
+        "singular": "Appartient à une organisation",
+        "no_orgs": "N'appartient à aucune organisation"
       },
-      "linking_word_1": "et",
-      "reviews": {
-        "plural": "{0} relectures",
-        "singular": "une relecture",
-        "no_reviews": "pas de relecture"
+      "followers": {
+        "plural": "A [{0} abonnés]({1})",
+        "singular": "A seulement [un abonné]({0})",
+        "no_followers": "N'est suivi par personne"
       },
-      "files": {
-        "plural": "[{0} fichiers]({1}) ont été modifiés",
-        "singular": "[Un fichier]({0}) a été modifié"
+      "linking_word": "et",
+      "following": {
+        "plural": "suit [{0} utilisateurs]({1})",
+        "singular": "suit seulement [une personne]({0})",
+        "no_following": "ne suit personne pour le moment"
       },
-      "linking_word_2": "dans",
-      "commits": {
-        "plural": "{0} commits",
-        "singular": "un commit"
+      "repos": {
+        "plural": "Possède un total de [{0} dépôts]({1})",
+        "singular": "N'a qu'[un dépôt]({0})",
+        "no_repos": "N'a pas encore de dépôts"
       },
-      "additions": {
-        "plural": "Mis à jour avec {0} ajouts",
-        "singular": "Mis à jour avec un nouvel ajout",
-        "no_additions": "Mis à jour avec plusieurs nouveaux ajouts"
-      },
-      "linking_word_3": "et",
-      "deletions": {
-        "plural": "{0} suppressions",
-        "singular": "une suppression",
-        "no_deletions": "aucune suppression"
-      },
-      "more_items": "et {0} de plus",
-      "fork": "Ce pull request provient d'un fork.",
-      "no_participants": "Pas de participants",
-      "no_assignees": "Pas de cessionnaire",
-      "no_reviewers": "Pas de relecteur"
+      "contributions": "{0} contributions cette année, {1} aujourd'hui"
+    }
+  },
+  "org": {
+    "repos": {
+      "owner": "Dépôts de {0}",
+      "more": "Afficher {0} autres sur Github"
     },
-    "loc": {
-      "file_too_big": "Désolé, je ne peux pas traiter ce dépôt car il est **trop volumineux !**",
-      "title": "Lignes de code dans {0}",
-      "description": "Un total de **{0}** lignes dans **{1}** fichiers.",
-      "stats": {
-        "code": "Code",
-        "blank": "Vide",
-        "comments": "Commentaires",
-        "detailed": "Détaillé"
+    "info": {
+      "glossary": [
+        "Description",
+        "Info",
+        "Liens",
+        "Site web"
+      ],
+      "title": "Profile de {0}",
+      "created_at": "Créé le {0}",
+      "members": "A [{0} membres publics]({1})",
+      "one_member": "N'a qu'[un membre public]({0})",
+      "repos": {
+        "plural": "Possède un total de [{0} dépôts]({1})",
+        "singular": "N'a qu'[un dépôt]({0})",
+        "no_repos": "N'a pas encore de dépôts"
       },
-      "footer": {
-        "with_count": {
-          "plural": "{0} entrées correspondant aux règles d'ignorance de .gitbot.json ont été supprimées.",
-          "singular": "Une entrée correspondant aux règles d'ignorance de .gitbot.json a été supprimée."
-        },
-        "credit": "Cette commande est alimentée par l'outil CLOC CLI."
-      }
+      "location": "Est basé à {0}"
+    }
+  },
+  "repo": {
+    "info": {
+      "glossary": [
+        "Description",
+        "Info",
+        "Liens",
+        "Sujets",
+        "Page d'accueil"
+      ],
+      "created_at": "Créé le {0}",
+      "issues": {
+        "plural": "A [{0} problèmes ouverts]({1})",
+        "singular": "N'a qu'[un problème ouvert]({0})",
+        "no_issues": "N'a pas de problèmes ouverts"
+      },
+      "forks": {
+        "plural": "A été forké [{0} fois]({1})",
+        "singular": "A été forké [une seule fois]({0})",
+        "no_forks": "Personne n'a encore forké ce dépôt"
+      },
+      "languages": {
+        "main": "Écrit principalement en {0}",
+        "with_num": "Rédigé en {0} langages, principalement {1}"
+      },
+      "watchers": {
+        "plural": "A [{0} spectateurs]({1})",
+        "singular": "N'a qu'[un observateur]({0})",
+        "no_watchers": "N'a pas d'observateurs"
+      },
+      "linking_word": "et",
+      "stargazers": {
+        "plural": "[{0} déposeurs d'étoile]({1})",
+        "singular": "[un déposeur d'étoile]({0})",
+        "no_stargazers": "pas de déposeur d'étoile"
+      },
+      "fork_notice": "Ce dépôt est un fork de {0}",
+      "license": "Licence sous le {0}"
     },
+    "files": {
+      "view_more": "Afficher {0} autres sur GitHub",
+      "not_a_directory": "**Le chemin que vous avez fourni n'est pas celui d'un répertoire !**\nPour afficher le contenu d'un fichier, utilisez la commande `{0}`."
+    },
+    "download": {
+      "wait": "Donnez-moi une seconde pendant que je télécharge le fichier...",
+      "file_too_big": "Ce fichier est trop volumineux, **veuillez le télécharger directement ici :**\n{0}",
+      "done": "Voici le code source de **{0} !**"
+    },
+    "issues": {
+      "title": "{0} derniers problèmes dans {1}",
+      "footer_tip": "Vous pouvez rapidement inspecter un problème spécifique de la liste en tapant son numéro !\nVous pouvez taper Annuler pour quitter."
+    },
+    "pulls": {
+      "title": "Dernières {0} pull requests dans {1}",
+      "footer_tip": "Vous pouvez rapidement inspecter un PR spécifique de la liste en tapant son numéro !\nVous pouvez taper `Cancel` pour quitter."
+    }
+  },
+  "gist": {
+    "glossary": [
+      "Contenu",
+      "Info"
+    ],
+    "title": "Gists de {0}",
+    "created_at": "Créé par {0} le {1}",
+    "updated_at": "Dernière mise à jour le {0}",
+    "stargazers": {
+      "plural": "A [{0} déposeurs d'étoile]({1})",
+      "singular": "A [un déposeur d'étoile]{0}",
+      "no_stargazers": "N'a pas de déposeur d'étoile"
+    },
+    "linking_word": "et",
+    "comments": {
+      "plural": "[{0} commentaires]({1})",
+      "singular": "[un commentaire]({0})",
+      "no_comments": "pas de commentaires"
+    },
+    "no_list": "Vous n'avez pas vu la liste essentielle car cet utilisateur n'a qu'un seul gist.",
+    "footer": "Les dix derniers gists de {0}.\nPour inspecter un gist spécifique, envoyez simplement son numéro dans ce salon.",
+    "index_error": "Veuillez choisir un nombre **entre 1 et {0}**",
+    "content_notice": "Le contenu est un aperçu du premier fichier du gist",
+    "timeout": {
+      "title": "Temps écoulé",
+      "tip": "Pour choisir une option, envoyez simplement un numéro la prochaine fois !"
+    }
+  },
+  "issue": {
+    "glossary": [
+      "Corps",
+      "Info",
+      "Étiquettes"
+    ],
+    "stored_no_number": "Si vous souhaitez accéder aux problèmes du dépôt stocké, veuillez indiquer un **numéro de problème !**",
+    "second_argument_number": "Le deuxième argument doit être un problème **numéro !**",
+    "created_at": "Créé par {0} le {1}",
+    "closed_at": "Fermé le {0}",
+    "comments": {
+      "plural": "A {0} commentaires",
+      "singular": "A un commentaire",
+      "no_comments": "N'a pas de commentaires"
+    },
+    "linking_word": "et",
+    "assignees": {
+      "plural": "{0} cessionnaires",
+      "singular": "un cessionnaire",
+      "no_assignees": "pas de cessionnaire"
+    },
+    "participants": {
+      "plural": "{0} personnes ont participé à ce problème",
+      "singular": "Une personne a participé à ce problème"
+    }
+  },
+  "pr": {
+    "glossary": [
+      "Info",
+      "Participants",
+      "Cessionnaires",
+      "Réviseurs",
+      "Étiquettes"
+    ],
+    "stored_no_number": "Si vous souhaitez accéder aux PR du référentiel stocké, veuillez transmettre un **numéro de demande d'extraction !**",
+    "second_argument_number": "Le deuxième argument doit être une pull request **numéro !**",
+    "created_at": "Créé par {0} le {1}",
+    "closed_at": "Fermé le {0}",
+    "comments": {
+      "plural": "A {0} commentaires",
+      "singular": "A un commentaire",
+      "no_comments": "N'a pas de commentaires"
+    },
+    "linking_word_1": "et",
+    "reviews": {
+      "plural": "{0} relectures",
+      "singular": "une relecture",
+      "no_reviews": "pas de relecture"
+    },
+    "files": {
+      "plural": "[{0} fichiers]({1}) ont été modifiés",
+      "singular": "[Un fichier]({0}) a été modifié"
+    },
+    "linking_word_2": "dans",
     "commits": {
-      "embed": {
-        "title": "Derniers commits en {0}",
-        "footer": "Tapez le numéro du commit que vous souhaitez afficher.\nVous pouvez taper 'cancel' pour quitter cette boîte de dialogue"
+      "plural": "{0} commits",
+      "singular": "un commit"
+    },
+    "additions": {
+      "plural": "Mis à jour avec {0} ajouts",
+      "singular": "Mis à jour avec un nouvel ajout",
+      "no_additions": "Mis à jour avec plusieurs nouveaux ajouts"
+    },
+    "linking_word_3": "et",
+    "deletions": {
+      "plural": "{0} suppressions",
+      "singular": "une suppression",
+      "no_deletions": "aucune suppression"
+    },
+    "more_items": "et {0} de plus",
+    "fork": "Ce pull request provient d'un fork.",
+    "no_participants": "Pas de participants",
+    "no_assignees": "Pas de cessionnaire",
+    "no_reviewers": "Pas de relecteur"
+  },
+  "loc": {
+    "file_too_big": "Désolé, je ne peux pas traiter ce dépôt car il est **trop volumineux !**",
+    "title": "Lignes de code dans {0}",
+    "description": "Un total de **{0}** lignes dans **{1}** fichiers.",
+    "stats": {
+      "code": "Code",
+      "blank": "Vide",
+      "comments": "Commentaires",
+      "detailed": "Détaillé"
+    },
+    "footer": {
+      "with_count": {
+        "plural": "{0} entrées correspondant aux règles d'ignorance de .gitbot.json ont été supprimées.",
+        "singular": "Une entrée correspondant aux règles d'ignorance de .gitbot.json a été supprimée."
       },
-      "no_match": "Ce n'est pas un **numéro/OID valide de la liste !** Réessayez !",
-      "empty": "Je **n'ai pas pu récupérer les derniers commits** de ce référentiel !"
+      "credit": "Cette commande est alimentée par l'outil CLOC CLI."
+    }
+  },
+  "commits": {
+    "embed": {
+      "title": "Derniers commits en {0}",
+      "footer": "Tapez le numéro du commit que vous souhaitez afficher.\nVous pouvez taper 'cancel' pour quitter cette boîte de dialogue"
     },
-    "commit": {
-      "fields": {
-        "info": {
-          "name": "Info",
-          "pushed_at": "Poussé par {0} sur {1}",
-          "committed_at": "Commis par {0} le {1}",
-          "signature": {
-            "valid": {
-              "github": "Signé avec une signature valide émise par GitHub",
-              "user": "Signé d'une signature valide par {0}"
-            },
-            "invalid": "Signé avec une signature invalide"
+    "no_match": "Ce n'est pas un **numéro/OID valide de la liste !** Réessayez !",
+    "empty": "Je **n'ai pas pu récupérer les derniers commits** de ce référentiel !"
+  },
+  "commit": {
+    "fields": {
+      "info": {
+        "name": "Info",
+        "pushed_at": "Poussé par {0} sur {1}",
+        "committed_at": "Commis par {0} le {1}",
+        "signature": {
+          "valid": {
+            "github": "Signé avec une signature valide émise par GitHub",
+            "user": "Signé d'une signature valide par {0}"
           },
-          "committed_via_web": "Ce commit a été fait via l'interface web",
-          "checks": {
-            "completed": {
-              "singular": "Une vérification effectuée",
-              "plural": "{0} vérifications effectuées",
-              "no_completed_checks": "aucune vérification effectuée"
-            },
-            "linking_word": "et",
-            "queued": {
-              "singular": "un en file d'attente",
-              "plural": "{0} en file d'attente",
-              "no_queued_checks": "aucune vérification en file d'attente"
-            },
-            "in_progress": {
-              "singular": "une vérification en cours",
-              "plural": "{0} vérifications en cours",
-              "no_in_progress_checks": "aucune vérification en cours"
-            }
+          "invalid": "Signé avec une signature invalide"
+        },
+        "committed_via_web": "Ce commit a été fait via l'interface web",
+        "checks": {
+          "completed": {
+            "singular": "Une vérification effectuée",
+            "plural": "{0} vérifications effectuées",
+            "no_completed_checks": "aucune vérification effectuée"
+          },
+          "linking_word": "et",
+          "queued": {
+            "singular": "un en file d'attente",
+            "plural": "{0} en file d'attente",
+            "no_queued_checks": "aucune vérification en file d'attente"
+          },
+          "in_progress": {
+            "singular": "une vérification en cours",
+            "plural": "{0} vérifications en cours",
+            "no_in_progress_checks": "aucune vérification en cours"
           }
-        },
-        "changes": {
-          "name": "Changements",
-          "files": {
-            "plural": "{0} fichiers modifiés avec :",
-            "singular": "Un fichier modifié avec :"
-          },
-          "additions": {
-            "plural": "{0} ajouts",
-            "singular": "un ajout",
-            "no_additions": "pas d'ajout"
-          },
-          "deletions": {
-            "plural": "{0} suppressions",
-            "singular": "une suppression",
-            "no_deletions": "pas de suppression"
-          }
-        },
-        "message": {
-          "name": "Message de validation",
-          "empty": "Aucune description supplémentaire fournie"
-        },
-        "oid": "OID Git complet"
-      }
-    },
-    "logs": {
-      "dm_title": "URL du webhook",
-      "dm_failed": "**Je ne peux pas vous envoyer de DM**, nous ne pouvons donc pas continuer. Processus abandonné, webhook supprimé.",
-      "description": "Pour configurer les journaux de référentiel, vous devez ajouter un webhook au référentiel de votre choix.\nPour ce faire, **suivez les instructions détaillées ci-dessous.**",
-      "instructions": [
-        "Accédez à votre dépôt et ouvrez les paramètres",
-        "Sélectionnez `Webhooks` sur la gauche",
-        "Cliquez sur `Add webhook`",
-        "Collez l'URL que vous venez de recevoir dans vos DM comme `Payload URL`",
-        "Remplacez `Type de contenu` par `application/json`",
-        "Sélectionnez `send me everything`",
-        "Cliquez sur `Add webhook`"
-      ],
-      "footer": "Et c'est tout! Vous recevrez désormais une notification chaque fois qu'il y a un nouvel événement !",
-      "webhook_failed": "**Échec de la création du webhook.** Essayez de vérifier mes permissions !",
-      "do_not_share_warning": "**Ne partagez pas l'URL du webhook**"
-    },
-    "config": {
-      "default": {
-        "brief_1": "**Dans cette section, vous pouvez configurer divers aspects de votre expérience**",
-        "title": "**Accès rapide**",
-        "brief_2": "Ces commandes vous permettent d'enregistrer un utilisateur, un référentiel ou une organisation afin d'y accéder rapidement avec une courte commande.",
-        "commands": {
-          "user": "Accéder à un utilisateur enregistré avec `git user`",
-          "org": "Accéder à une organisation enregistrée avec `git org`",
-          "repo": "Accéder à un référentiel enregistré avec `git repo`",
-          "locale": "Changer la langue du bot",
-          "feed": "S'abonner aux nouvelles versions d'un référentiel"
-        },
-        "deletion": "**Vous pouvez supprimer les données stockées en tapant** `git config --delete`",
-        "footer": "Pour voir ce que vous avez enregistré, utilisez git config --show",
-        "embed_title": "Configuration GitBot"
-      },
-      "show": {
-        "base": {
-          "title": "Votre Configuration GitBot",
-          "qa": {
-            "heading": "**Accès rapide :**",
-            "list": {
-              "user": "Utilisateur(s) : {0}",
-              "org": "Organisation(s) : {0}",
-              "repo": "Dépôt(s) : {0}"
-            }
-          },
-          "guild": {
-            "heading": "**Paramètres du serveur :**",
-            "list": {
-              "feed": "Flux de publication :",
-              "autoconv": {
-                "heading": "Conversions automatiques:",
-                "gh_lines": "Conversion de lien de ligne GitHub : {0}",
-                "gh_url": "Résolution d'URL GitHub : {0}",
-                "codeblock": "Blocs de code Carbon : {0}"
-              }
-            }
-          },
-          "accessibility": {
-            "heading": "**Accessibilité:**",
-            "list": {
-              "locale": "Langue: {0}"
-            }
-          },
-          "item_not_set": "Pas encore défini",
-          "item_not_configured": "Pas configuré",
-          "footer": "Pour afficher les dépôts de flux de publication, saisissez {0}"
-        },
-        "feed": {
-          "title": "Flux de publication de ce serveur",
-          "footer": "Vous pouvez ajouter un flux avec {0}",
-          "no_repos": "Pas de repôts"
         }
       },
-      "autoconv": {
-        "default": {
-          "title": "Conversions automatiques",
-          "description": "**Ces paramètres vous permettent de personnaliser la façon dont GitBot convertit certains de vos messages**"
+      "changes": {
+        "name": "Changements",
+        "files": {
+          "plural": "{0} fichiers modifiés avec :",
+          "singular": "Un fichier modifié avec :"
         },
-        "toggles": {
-          "gh_url": {
-            "true": "Conversion automatique du lien GitHub **activée**",
-            "false": "Conversion automatique du lien GitHub **désactivée**"
-          },
-          "codeblock": {
-            "true": "Conversion automatique du bloc de code Carbon **activé**",
-            "false": "Conversion automatique du bloc de code Carbon **désactivé**"
+        "additions": {
+          "plural": "{0} ajouts",
+          "singular": "un ajout",
+          "no_additions": "pas d'ajout"
+        },
+        "deletions": {
+          "plural": "{0} suppressions",
+          "singular": "une suppression",
+          "no_deletions": "pas de suppression"
+        }
+      },
+      "message": {
+        "name": "Message de validation",
+        "empty": "Aucune description supplémentaire fournie"
+      },
+      "oid": "OID Git complet"
+    }
+  },
+  "logs": {
+    "dm_title": "URL du webhook",
+    "dm_failed": "**Je ne peux pas vous envoyer de DM**, nous ne pouvons donc pas continuer. Processus abandonné, webhook supprimé.",
+    "description": "Pour configurer les journaux de référentiel, vous devez ajouter un webhook au référentiel de votre choix.\nPour ce faire, **suivez les instructions détaillées ci-dessous.**",
+    "instructions": [
+      "Accédez à votre dépôt et ouvrez les paramètres",
+      "Sélectionnez `Webhooks` sur la gauche",
+      "Cliquez sur `Add webhook`",
+      "Collez l'URL que vous venez de recevoir dans vos DM comme `Payload URL`",
+      "Remplacez `Type de contenu` par `application/json`",
+      "Sélectionnez `send me everything`",
+      "Cliquez sur `Add webhook`"
+    ],
+    "footer": "Et c'est tout! Vous recevrez désormais une notification chaque fois qu'il y a un nouvel événement !",
+    "webhook_failed": "**Échec de la création du webhook.** Essayez de vérifier mes permissions !",
+    "do_not_share_warning": "**Ne partagez pas l'URL du webhook**"
+  },
+  "config": {
+    "default": {
+      "brief_1": "**Dans cette section, vous pouvez configurer divers aspects de votre expérience**",
+      "title": "**Accès rapide**",
+      "brief_2": "Ces commandes vous permettent d'enregistrer un utilisateur, un référentiel ou une organisation afin d'y accéder rapidement avec une courte commande.",
+      "commands": {
+        "user": "Accéder à un utilisateur enregistré avec `git user`",
+        "org": "Accéder à une organisation enregistrée avec `git org`",
+        "repo": "Accéder à un référentiel enregistré avec `git repo`",
+        "locale": "Changer la langue du bot",
+        "feed": "S'abonner aux nouvelles versions d'un référentiel"
+      },
+      "deletion": "**Vous pouvez supprimer les données stockées en tapant** `git config --delete`",
+      "footer": "Pour voir ce que vous avez enregistré, utilisez git config --show",
+      "embed_title": "Configuration GitBot"
+    },
+    "show": {
+      "base": {
+        "title": "Votre Configuration GitBot",
+        "qa": {
+          "heading": "**Accès rapide :**",
+          "list": {
+            "user": "Utilisateur(s) : {0}",
+            "org": "Organisation(s) : {0}",
+            "repo": "Dépôt(s) : {0}"
           }
         },
-        "gh_lines": {
-          "embed": {
-            "title": "Conversion de lien de ligne GitHub",
-            "description": "Vous pouvez définir ce que vous voulez qu'il se passe lorsqu'un lien de ligne GitHub est envoyé dans le chat en répondant simplement avec un numéro correspondant à l'option que vous souhaitez choisir !",
-            "options": {
-              "off": "Pas de réponse automatique",
-              "codeblock": "Convertir les liens de ligne GitHub en blocs de code en texte clair",
-              "carbon": "Convertir les liens de ligne en images [Carbon](https://carbon.now.sh/)"
-            },
-            "footer": "Vous pouvez taper \"annuler\" pour quitter"
-          },
-          "timeout_embed": {
-            "title": "Temps écoulé",
-            "footer": "Envoyez simplement le numéro d'option la prochaine fois !"
-          },
-          "results": {
-            "0": "Conversion automatique des liens de ligne GitHub **désactivée !**",
-            "1": "Les liens de ligne GitHub seront désormais automatiquement convertis **en blocs de code !**",
-            "2": "Les liens de ligne GitHub seront désormais automatiquement convertis **en images Carbon !**"
-          },
-          "cancelled": "Changement de paramètre de conversion de lien de ligne GitHub **annulé !**",
-          "invalid_response": "**Ce n'est pas un paramètre valide !** Réessayez en envoyant un nombre !"
-        }
+        "guild": {
+          "heading": "**Paramètres du serveur :**",
+          "list": {
+            "feed": "Flux de publication :",
+            "autoconv": {
+              "heading": "Conversions automatiques:",
+              "gh_lines": "Conversion de lien de ligne GitHub : {0}",
+              "gh_url": "Résolution d'URL GitHub : {0}",
+              "codeblock": "Blocs de code Carbon : {0}"
+            }
+          }
+        },
+        "accessibility": {
+          "heading": "**Accessibilité:**",
+          "list": {
+            "locale": "Langue: {0}"
+          }
+        },
+        "item_not_set": "Pas encore défini",
+        "item_not_configured": "Pas configuré",
+        "footer": "Pour afficher les dépôts de flux de publication, saisissez {0}"
       },
       "feed": {
-        "no_perms": "**Il me manque les permissions requises dans ce salon !**\nJ'ai besoin de `gérer les webhooks` et `gérer les salons`",
-        "no_arg": "Veuillez transmettre un référentiel que vous souhaitez suivre !",
-        "already_logged": "Les versions de ce dépôt sont ** déjà enregistrées ! **",
-        "success": "Les nouvelles versions de **{0}** seront désormais enregistrées.",
-        "not_a_feed": "{0} n'est **pas un flux de publication !** Réessayer ?",
-        "default": {
-          "title": "Flux de version du référentiel",
-          "description": "Les commandes de ce groupe vous permettent d'être informé des nouvelles versions d'un référentiel dans des salons désignés.\n**Pour ajouter un salon de flux de version :**\n{emoji_square}{0}\n**Pour ajouter un dépôt à un salon :**\n{emoji_square}{1}"
+        "title": "Flux de publication de ce serveur",
+        "footer": "Vous pouvez ajouter un flux avec {0}",
+        "no_repos": "Pas de repôts"
+      }
+    },
+    "autoconv": {
+      "default": {
+        "title": "Conversions automatiques",
+        "description": "**Ces paramètres vous permettent de personnaliser la façon dont GitBot convertit certains de vos messages**"
+      },
+      "toggles": {
+        "gh_url": {
+          "true": "Conversion automatique du lien GitHub **activée**",
+          "false": "Conversion automatique du lien GitHub **désactivée**"
         },
-        "channel": {
-          "already_taken": "Ce salon est déjà configuré en tant que flux de publication !",
-          "invalid_channel": "**Ce n'est pas un salon valide !** Réessayez.",
-          "success_embed": {
-            "title": "Succès !",
-            "description": "{0} a été **ajouté en tant que flux de version.**\nUtilisez {1} pour ajouter un référentiel au nouveau flux.",
-            "footer": "Vous pouvez le supprimer avec {0}"
+        "codeblock": {
+          "true": "Conversion automatique du bloc de code Carbon **activé**",
+          "false": "Conversion automatique du bloc de code Carbon **désactivé**"
+        }
+      },
+      "gh_lines": {
+        "embed": {
+          "title": "Conversion de lien de ligne GitHub",
+          "description": "Vous pouvez définir ce que vous voulez qu'il se passe lorsqu'un lien de ligne GitHub est envoyé dans le chat en répondant simplement avec un numéro correspondant à l'option que vous souhaitez choisir !",
+          "options": {
+            "off": "Pas de réponse automatique",
+            "codeblock": "Convertir les liens de ligne GitHub en blocs de code en texte clair",
+            "carbon": "Convertir les liens de ligne en images [Carbon](https://carbon.now.sh/)"
           },
-          "channel_limit_reached_embed": {
-            "title": "Limite du salon de flux de publication atteinte !",
-            "description": "Ce serveur a atteint la **limite de 5 salons de flux de publication.** Vous pouvez supprimer un salon précédemment ajouté en tapant `git config delete feed channel`",
-            "footer": "Vous avez besoin de la permission 'Gérer les salons' pour le faire."
-          }
+          "footer": "Vous pouvez taper \"annuler\" pour quitter"
         },
         "repo": {
           "channel_list_embed": {
@@ -627,48 +593,112 @@
           "cancelled": "Ajout d'un référentiel au flux de publication **annulé.**",
           "already_logged": "Les versions de {0} **déjà enregistrées** dans {1} !"
         },
-        "mention": {
-          "embed": {
-            "title": "Définir une mention pour les versions dans {0}",
-            "description": "Définissez la mention à envoyer avec le message lors de la création d'une version, afin d'attirer l'attention de toute personne intéressée.\n\n**Envoyez la mention correcte pour la définir.** Vous pouvez également :\n{emoji_square} saisir \"everyone\" ou \"here\" pour ces mentions\n{emoji_square} envoyer l'identifiant d'un rôle pour le définir sans mentionner le rôle lui-même",
-            "footer": "Vous pouvez taper `cancel` pour quitter"
-          },
-          "cancelled": "Définition d'une mention pour les sorties dans {0} **annulé.**",
-          "invalid": "Ce n'est pas une mention/ID valide ! **Réessayer.**",
-          "success": "Les nouvelles versions de {0} seront désormais envoyées avec {1} !"
+        "results": {
+          "0": "Conversion automatique des liens de ligne GitHub **désactivée !**",
+          "1": "Les liens de ligne GitHub seront désormais automatiquement convertis **en blocs de code !**",
+          "2": "Les liens de ligne GitHub seront désormais automatiquement convertis **en images Carbon !**"
+        },
+        "cancelled": "Changement de paramètre de conversion de lien de ligne GitHub **annulé !**",
+        "invalid_response": "**Ce n'est pas un paramètre valide !** Réessayez en envoyant un nombre !"
+      }
+    },
+    "feed": {
+      "no_perms": "**Il me manque les permissions requises dans ce salon !**\nJ'ai besoin de `gérer les webhooks` et `gérer les salons`",
+      "no_arg": "Veuillez transmettre un référentiel que vous souhaitez suivre !",
+      "already_logged": "Les versions de ce dépôt sont ** déjà enregistrées ! **",
+      "success": "Les nouvelles versions de **{0}** seront désormais enregistrées.",
+      "not_a_feed": "{0} n'est **pas un flux de publication !** Réessayer ?",
+      "default": {
+        "title": "Flux de version du référentiel",
+        "description": "Les commandes de ce groupe vous permettent d'être informé des nouvelles versions d'un référentiel dans des salons désignés.\n**Pour ajouter un salon de flux de version :**\n{emoji_square}{0}\n**Pour ajouter un dépôt à un salon :**\n{emoji_square}{1}"
+      },
+      "channel": {
+        "already_taken": "Ce salon est déjà configuré en tant que flux de publication !",
+        "invalid_channel": "**Ce n'est pas un salon valide !** Réessayez.",
+        "success_embed": {
+          "title": "Succès !",
+          "description": "{0} a été **ajouté en tant que flux de version.**\nUtilisez {1} pour ajouter un référentiel au nouveau flux.",
+          "footer": "Vous pouvez le supprimer avec {0}"
+        },
+        "channel_limit_reached_embed": {
+          "title": "Limite du salon de flux de publication atteinte !",
+          "description": "Ce serveur a atteint la **limite de 5 salons de flux de publication.** Vous pouvez supprimer un salon précédemment ajouté en tapant `git config delete feed channel`",
+          "footer": "Vous avez besoin de la permission 'Gérer les salons' pour le faire."
         }
       },
-      "qa_set": {
-        "user": "Accès rapide à un utilisateur défini sur {0}",
-        "org": "Accès rapide à une organisation défini sur {0}",
-        "repo": "Accès rapide à un dépôt défini sur {0}"
-      },
-      "locale": {
-        "success": "Langage du bot défini sur **{0}**.",
-        "failure": "`{0}` n'est pas une **langue valide et prise en charge** !",
-        "match_confirmation_embed": {
-          "title": "Confirmer la langue",
-          "description": "La langue que vous avez demandé ne correspondait pas entièrement à celles disponibles, mais elle était **très proche de `{0}`**. Vouliez-vous choisir celle-là ?",
-          "footer": "Réagissez avec un emoji approprié pour choisir une option !"
+      "repo": {
+        "channel_list_embed": {
+          "title": "Choisissez un flux de publication :",
+          "footer": "Pour en choisir un, envoyez simplement son numéro/mention ci-dessous !"
         },
         "timeout_embed": {
           "title": "Temps écoulé",
-          "footer": "Choisissez simplement une option la prochaine fois !"
+          "footer": "Envoyez simplement un numéro de salon/une mention la prochaine fois !"
         },
-        "title": "Langue du bot",
-        "description": "Ici, vous pouvez changer la langue du Bot.\nTapez simplement {0}\nToutes les traductions sont fournies par notre [communauté](https://github.com/statch/gitbot/tree/main/resources/locale)",
-        "cancelled": "Changement de langue **annulé**."
+        "channel_at_limit_embed": {
+          "title": "Limite du nombre de dépôt de flux de publication atteinte !",
+          "description": "Désolé, {0} est à la limite de 10 dépôts.\n**Vous pouvez essayer :**\n{emoji_square} ajouter {1} à un autre flux de versions\n{emoji_square} supprimer un autre dépôt pour faire de la placew",
+          "footer": "Tapez {0} pour supprimer un dépôt de ce flux"
+        },
+        "invalid_channel": "{0} n'est pas un **numéro de chaîne/mention** valide de la liste ! Envoyez-en un autre ou tapez `cancel` pour quitter.",
+        "success": "Les nouvelles versions de {0} seront désormais enregistrées dans {1} !",
+        "cancelled": "Ajout d'un référentiel au flux de publication **annulé.**",
+        "already_logged": "{0} versions sont **déjà enregistrées** dans {1} !"
       },
-      "delete": {
+      "mention": {
+        "embed": {
+          "title": "Définir une mention pour les versions dans {0}",
+          "description": "Définissez la mention à envoyer avec le message lors de la création d'une version, afin d'attirer l'attention de toute personne intéressée.\n\n**Envoyez la mention correcte pour la définir.** Vous pouvez également :\n{emoji_square} saisir \"everyone\" ou \"here\" pour ces mentions\n{emoji_square} envoyer l'identifiant d'un rôle pour le définir sans mentionner le rôle lui-même",
+          "footer": "Vous pouvez taper `cancel` pour quitter"
+        },
+        "cancelled": "Définition d'une mention pour les sorties dans {0} **annulé.**",
+        "invalid": "Ce n'est pas une mention/ID valide ! **Réessayer.**",
+        "success": "Les nouvelles versions de {0} seront désormais envoyées avec {1} !"
+      }
+    },
+    "qa_set": {
+      "user": "Accès rapide à un utilisateur défini sur {0}",
+      "org": "Accès rapide à une organisation défini sur {0}",
+      "repo": "Accès rapide à un dépôt défini sur {0}"
+    },
+    "locale": {
+      "success": "Langage du bot défini sur **{0}**.",
+      "failure": "`{0}` n'est pas une **langue valide et prise en charge** !",
+      "match_confirmation_embed": {
+        "title": "Confirmer la langue",
+        "description": "La langue que vous avez demandé ne correspondait pas entièrement à celles disponibles, mais elle était **très proche de `{0}`**. Vouliez-vous choisir celle-là ?",
+        "footer": "Réagissez avec un emoji approprié pour choisir une option !"
+      },
+      "timeout_embed": {
+        "title": "Temps écoulé",
+        "footer": "Choisissez simplement une option la prochaine fois !"
+      },
+      "title": "Langue du bot",
+      "description": "Ici, vous pouvez changer la langue du Bot.\nTapez simplement {0}\nToutes les traductions sont fournies par notre [communauté](https://github.com/statch/gitbot/tree/main/resources/locale)",
+      "cancelled": "Changement de langue **annulé**."
+    },
+    "delete": {
+      "default": {
+        "title": "Supprimer les données d'accès rapide",
+        "description": "**Vous pouvez supprimer les données d'accès rapide stockées en exécutant les commandes suivantes :**",
+        "commands": {
+          "user": "supprimer l'accès rapide aux utilisateurs",
+          "org": "supprimer l'accès rapide aux organisations",
+          "repo": "supprimer l'accès rapide aux dépôts",
+          "feed": "afficher les options concernant la suppression des données du flux de publication",
+          "all": "supprimer toutes vos données d'accès rapide"
+        }
+      },
+      "feed": {
+        "no_channel": "Vous n'avez pas configuré de canal de flux de publication !",
+        "nothing_deleted": "Vous n'avez pas configuré de flux de publication, donc **rien n'a été supprimé.**",
         "default": {
-          "title": "Supprimer les données d'accès rapide",
-          "description": "**Vous pouvez supprimer les données d'accès rapide stockées en exécutant les commandes suivantes :**",
+          "title": "Supprimer les données du flux de publication",
+          "description": "**Vous pouvez supprimer les données de flux de publication stockées en exécutant les commandes suivantes :**",
           "commands": {
-            "user": "supprimer l'accès rapide aux utilisateurs",
-            "org": "supprimer l'accès rapide aux organisations",
-            "repo": "supprimer l'accès rapide aux dépôts",
-            "feed": "afficher les options concernant la suppression des données du flux de publication",
-            "all": "supprimer toutes vos données d'accès rapide"
+            "repo": "se désabonner d'un dépôt spécifique",
+            "all": "se désabonner de tous les dépôts",
+            "total": "se désabonner de toutes les versions et supprimer le webhook du flux"
           }
         },
         "feed": {
@@ -729,7 +759,7 @@
               }
             }
           },
-          "mention": {
+          "single": {
             "embed": {
               "title": "Supprimer une mention d'un flux de publication",
               "description": "Tapez le **nom/ID de salon** d'un flux pour supprimer la mention qui lui est associée !",
@@ -757,7 +787,47 @@
           "success": "Toutes vos données stockées ont été **supprimées avec succès**.",
           "not_saved": "Il semble que **vous n'avez rien stocké !**"
         }
+      },
+      "user": {
+        "success": "Saved **user deleted.**",
+        "not_saved": "You don't have a user saved!"
+      },
+      "org": {
+        "success": "Saved **organization deleted.**",
+        "not_saved": "You don't have an organization saved!"
+      },
+      "repo": {
+        "success": "Saved **repo deleted.**",
+        "not_saved": "You don't have a repo saved!"
+      },
+      "locale": "Bot language reset to **English**.",
+      "all": {
+        "success": "All of your stored data was **successfully deleted.**",
+        "not_saved": "It appears that **you don't have anything stored!**"
       }
+    }
+  },
+  "support": {
+    "title": "GitBot Support Server",
+    "description": "If you have any problems, feel free to join the [support server.](https://discord.statch.org)"
+  },
+  "help": {
+    "required_permissions": "Required Permissions",
+    "commands_inside_group": "Commands inside this group",
+    "no_arguments_footer": "This command doesn't take any arguments. You're good to go!",
+    "default": {
+      "title": "GitBot Help",
+      "description": "Here you'll find a list of all the commands that GitBot has to offer.\n**You can use `git help [command]` to get more information about a specific command.**",
+      "fields": [
+        {
+          "name": "Argument style",
+          "value": "When a command accepts input, it will be shown in one of the following ways:\n{emoji_square}  `[argument]` - for **optional** arguments\n{emoji_square}  `<argument>` - for **required** arguments"
+        },
+        {
+          "name": "Quick-access",
+          "value": "Some commands utilize your saved users, repos, orgs, etc. to make their syntax shorter. If that's the case - it will be mentioned in the command's help footer, and you can skip the corresponding argument."
+        }
+      ]
     },
     "support": {
       "title": "Serveur de support GitBot",
@@ -1337,234 +1407,685 @@
           "required_permissions": []
         }
       },
-      "argument_explainers": {
-        "repo_with_branch": {
-          "name": "repo-with-branch",
-          "content": "The repo and branch separated by a `/` character (ex. `statch/gitbot/v3`). If the branch is omitted, the default one is used (`statch/gitbot/main`)"
-        },
-        "repo": {
-          "name": "repo",
-          "content": "The name of the repository in the `owner/name` format (ex. `statch/gitbot`)"
-        },
-        "repo_or_subcommand": {
-          "name": "repo-or-subcommand",
-          "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
-        },
-        "user_or_subcommand": {
-          "name": "user-or-subcommand",
-          "content": "Either a GitHub username, or another subcommand from this group"
-        },
-        "user": {
-          "name": "user",
-          "content": "The name of a GitHub user (ex. `itsmewulf`)"
-        },
-        "org": {
-          "name": "org",
-          "content": "The name of a GitHub organization (ex. `statch`)"
-        },
-        "subcommand": {
-          "name": "subcommand",
-          "content": "The name of another command in this group"
-        },
-        "locale": {
-          "name": "language",
-          "content": "A GitBot-supported language to use (ex. `portuguese`)"
-        },
-        "channel": {
-          "name": "channel",
-          "content": "The name, mention or ID of a channel in this server (ex. `#general`)"
-        },
-        "oid": {
-          "name": "oid",
-          "content": "A Git object ID (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) that corresponds to an object - a commit, tree, blob, tag, etc."
-        },
-        "org_or_subcommand": {
-          "name": "org-or-subcommand",
-          "content": "Either an organization name, or another subcommand from this group"
-        },
-        "codeblock_or_lines": {
-          "name": "codeblock-or-lines",
-          "content": "Either a codeblock, or a GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
-        },
-        "lines": {
-          "name": "lines",
-          "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
-        },
-        "rust_crate_name": {
-          "name": "rust-package-name",
-          "content": "The name of a Rust crate (ex. `tokio`)"
-        },
-        "python_package_name": {
-          "name": "python-package-name",
-          "content": "The name of a Python package (ex. `py-carbon`)"
-        },
-        "issue_state": {
-          "name": "issue-state",
-          "content": "The state of the issue (eg. `open` or `closed`)"
-        },
-        "pr_state": {
-          "name": "pr-state",
-          "content": "A pull request state (eg. `open`, `closed`, or `merged`)"
-        },
-        "pr_number": {
-          "name": "pr-number",
-          "content": "A GitHub pull request number"
-        },
-        "issue_number": {
-          "name": "issue-number",
-          "content": "A GitHub issue number"
-        },
-        "gist_list_number": {
-          "name": "gist-list-number",
-          "content": "A number corresponding to a gist from the list"
-        },
-        "command": {
-          "name": "command",
-          "content": "The name of one of GitBot's commands"
-        },
-        "license_name": {
-          "name": "license-name",
-          "content": "The name of an open-source license (ex. `MIT`)"
-        },
-        "hashing_algorithm": {
-          "name": "hashing-algorithm",
-          "content": "The name of a GitBot-supported hashing algorithm (ex. `sha256`)"
-        },
-        "checksum": {
-          "name": "checksum",
-          "content": "A checksum (hash) generated via the specified hashing algorithm"
-        },
-        "file": {
-          "name": "file",
-          "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
-        }
+      "config_delete": {
+        "brief": "A command group responsible for deleting GitBot config values",
+        "usage": "config delete [subcommand]",
+        "example": null,
+        "description": "Commands in this group allow you to reset config fields to their default values or delete items from feeds",
+        "qa_resource": null,
+        "required_permissions": []
       },
-      "qa_disclaimers": {
-        "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
-        "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
-        "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
+      "config_delete_repo": {
+        "brief": "Delete your quick-access repository",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget\" your saved repo, so commands will no longer use the shortened syntax",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed": {
+        "brief": "A command group responsible for deleting saved feed channels or repos logged in these channels",
+        "usage": "config delete feed [subcommand]",
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed_channel": {
+        "brief": "A command responsible for deleting a release feed channel",
+        "usage": "config delete feed channel <channel>",
+        "example": null,
+        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive.",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_guild",
+          "manage_channels"
+        ]
+      },
+      "config_delete_feed_repo": {
+        "brief": "A command used to delete a repo from a release feed",
+        "usage": "config delete feed repo <repo>",
+        "example": null,
+        "description": "This command allows you to delete a repository from a specific release feed channel. Once deleted, new releases of this repo will no longer arrive in this feed. Other feeds following this repo won't be affected.",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_guild",
+          "manage_channels"
+        ]
+      },
+      "config_delete_language": {
+        "brief": "Reset your GitBot language to default",
+        "usage": null,
+        "example": null,
+        "description": "This command will reset GitBot's language to English",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_user": {
+        "brief": "Delete your quick-access user",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget: your saved user, so commands will no longer use the shortened syntax",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_all": {
+        "brief": "Delete all config values bound to your GitBot profile",
+        "usage": null,
+        "example": null,
+        "description": "This command doesn't affect server settings. ",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_org": {
+        "brief": "Delete your quick-access organization",
+        "usage": null,
+        "example": null,
+        "description": "This command will tell GitBot to \"forget\" your saved org, so commands will no longer use the shortened syntax",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_org": {
+        "brief": "Set a quick-access organization",
+        "usage": "config org <org>",
+        "example": "config org statch",
+        "description": "Setting this will allow you to use certain commands that take in an organization in a shorter way (ex. git org statch -> git org)",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_autoconv": {
+        "brief": "A command group for configuring GitBot's automatic behaviors",
+        "usage": "config autoconv [subcommand]",
+        "example": null,
+        "description": "Subcommands in this group control server-wide settings that affect GitBot's autonomy - mainly automatically converting GitHub links to information, creating Carbon images from codeblocks and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_autoconv_link": {
+        "brief": "Toggle automatic GitHub link resolving",
+        "usage": null,
+        "example": null,
+        "description": "This command toggles the automatic resolving of links sent in chat (except for line links). GitBot will reply to messages with links it understands with information about what's on the other end of that URL",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "config_autoconv_lines": {
+        "brief": "Toggle automatic GitHub Line link resolving",
+        "usage": null,
+        "example": null,
+        "description": "This command, not to be confused with general URL resolving, manages only the line aspect of URLs. When a link containing line mentions (ex. #L9-L42) is sent in chat, GitBot will attempt to convert it into either a codeblock, or an image, based on your selection",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "config_autoconv_codeblock": {
+        "brief": "Toggle automatic codeblock to Carbon image conversion",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "commit": {
+        "brief": "Get info on a commit",
+        "usage": "commit [repo] [oid]",
+        "example": "commit statch/gitbot 3546fa7faada2c61d0a0edf3ec09e1fc28ed7677",
+        "description": "Get detailed info about a GitHub commit. If you have a quick-access repo set, you can use this command with only the oid argument, or without arguments altogether - it will default to your saved repo and the latest commit. You can also pass just the repo - the latest commit will be returned",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "logs": {
+        "brief": "Get commit feeds in the current channel",
+        "usage": null,
+        "example": null,
+        "description": "This command creates a webhook (a fancy name for a not-so-fancy thing), that's then sent to you along with instructions to get the feed up and running. You add the URL from the instructions into repo(s) of choice, and you get all the commits right as they happen!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_webhooks"
+        ]
+      },
+      "org": {
+        "brief": "Get info about a GitHub organization",
+        "usage": "org [org_or_subcommand]",
+        "example": "org statch",
+        "description": "This command group allows you to view info about an org, its repos, and more!",
+        "qa_resource": "org",
+        "required_permissions": []
+      },
+      "org_info": {
+        "brief": "Get info about a GitHub organization",
+        "usage": "org info <org>",
+        "example": "org info statch",
+        "description": "Get detailed information about an org - when it was created, who the members are, how many repos it has, and more!",
+        "qa_resource": "org",
+        "required_permissions": []
+      },
+      "org_repos": {
+        "brief": "Get a list of an organization's repos",
+        "usage": "org repos <org>",
+        "example": "org repos statch",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "legal": {
+        "brief": "The GitBot Privacy Policy and TOS",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "support": {
+        "brief": "Get support if you ran into a problem, or simply want to chat!",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "snippet": {
+        "brief": "Convert a codeblock or a GitHub line link into a Carbon image",
+        "usage": "snippet <codeblock_or_lines>",
+        "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "snippet_raw": {
+        "brief": "Get the content of a GitHub line link in the form of a codeblock",
+        "usage": "snippet raw <lines>",
+        "example": "snippet raw https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi": {
+        "brief": "Get info about PyPI packages",
+        "usage": "pypi [subcommand]",
+        "example": null,
+        "description": "This command group allows you to view info about PyPI packages such as creation date, downloads and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi_downloads": {
+        "brief": "Get a 3-month download chart for a PyPI package",
+        "usage": "pypi downloads <python_package_name>",
+        "example": "pypi downloads httpcats",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pypi_info": {
+        "brief": "Get info about a PyPI package",
+        "usage": "pypi info <python_package_name>",
+        "example": "pypi info httpcats",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_issues": {
+        "brief": "Get issues in a GitHub repo",
+        "usage": "repo issues [repo] [issue_state]",
+        "example": "repo issues statch/gitbot closed",
+        "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_info": {
+        "brief": "Get info about a GitHub repo",
+        "usage": "repo info <repo>",
+        "example": "repo info statch/gitbot",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_pulls": {
+        "brief": "Get pull requests in a GitHub repo",
+        "usage": "repo pulls [repo] [pr_state]",
+        "example": "repo pulls statch/gitbot merged",
+        "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_files": {
+        "brief": "View a GitHub repo's file structure ",
+        "usage": "repo files <repo>",
+        "example": "repo files statch/gitbot",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_commits": {
+        "brief": "Get latest commits from a GitHub repository",
+        "description": null,
+        "usage": "repo commits [repo_with_branch]",
+        "example": "repo commits statch/gitbot",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "invite": {
+        "brief": "Invite the bot to your server!",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "pr": {
+        "brief": "Get info about a Pull Request",
+        "usage": "pr [repo] <pr_number>",
+        "example": "pr statch/gitbot 39",
+        "description": null,
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "vote": {
+        "brief": "Vote for GitBot!",
+        "usage": null,
+        "example": null,
+        "description": "Voting massively helps GitBot reach as many devs as possible!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "stats": {
+        "brief": "Get some bot statistics",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "uptime": {
+        "brief": "Get the bot's current uptime",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "user": {
+        "brief": "Get info about a GitHub user",
+        "usage": "user [user_or_subcommand]",
+        "example": "user itsmewulf",
+        "description": "Commands inside this group allow you to view info about a user, their repos, and more!",
+        "qa_resource": "user",
+        "required_permissions": []
+      },
+      "user_info": {
+        "brief": "Get info about a GitHub user",
+        "usage": "user info <user>",
+        "example": "user info itsmewulf",
+        "description": "Get detailed info about a GitHub user - contributions, orgs, repos, and more!",
+        "qa_resource": "user",
+        "required_permissions": []
+      },
+      "user_repos": {
+        "brief": "Get a GitHub user's repos",
+        "usage": "user repos <user>",
+        "example": "user repos itsmewulf",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "gist": {
+        "brief": "Get a gist authored by a GitHub user",
+        "usage": "gist <user> [gist_list_number]",
+        "example": "gist itsmewulf",
+        "description": "This command shows you a list of a user's latest gists, from which you can pick one to inspect by sending its number. You can also use it with both a username and a number corresponding to a gist from the list to skip the dialog.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "loc": {
+        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "usage": "loc <repo>",
+        "example": "loc statch/gitbot",
+        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "repo_loc": {
+        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "usage": "repo loc <repo>",
+        "example": "repo loc statch/gitbot",
+        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "issue": {
+        "brief": "Inspect a GitHub issue",
+        "usage": "issue [repo] <issue_number>",
+        "example": "issue statch/gitbot 53",
+        "description": "Find out what an issue is about, the participants, labels, and a whole lot more!",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "help": {
+        "brief": "Find out about GitBot's commands!",
+        "usage": "help [command]",
+        "example": "help user",
+        "description": "This is the command you're using right now!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "license": {
+        "brief": "Get info about a license",
+        "usage": "license <license_name>",
+        "example": "license MIT",
+        "description": "Find out what an open-source license is all about - its permissions, conditions, limitations, and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "ping": {
+        "brief": "The bot's current ping",
+        "usage": null,
+        "example": null,
+        "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed_mention": {
+        "brief": "Configure a mention for new repo releases",
+        "usage": "config feed mention <channel>",
+        "example": null,
+        "description": "Pick who (roles/everyone/here) to ping when a new release comes out in a release feed!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "crates": {
+        "brief": "Get info about crates.io crates",
+        "usage": "crates [subcommand]",
+        "example": null,
+        "description": "This command group allows you to view info about Rust crates published to crates.io, such as creation date, authors, downloads and more!",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_downloads": {
+        "brief": "Get download stats of a crates.io crate",
+        "usage": "crates downloads <rust_crate_name>",
+        "example": "crates downloads tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "crates_info": {
+        "brief": "Get info about a crates.io crate",
+        "usage": "crates info <rust_crate_name>",
+        "example": "crates info tokio",
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_delete_feed_mention": {
+        "brief": "Delete a mention from a release feed",
+        "usage": null,
+        "example": null,
+        "description": "Too pingy? Delete the mention you previously configured for a release feed and enjoy the silence!",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
+      },
+      "file": {
+        "brief": "A command group with utilities for dealing with files!",
+        "usage": "file [subcommand]",
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "file_hash": {
+        "brief": "Get the hash of a file",
+        "usage": "file hash [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Get a file hash of the provided file generated via the specified algorithm",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "file_verify": {
+        "brief": "Verify the integrity of a file",
+        "usage": "file verify <checksum> [hashing_algorithm] <file>",
+        "example": null,
+        "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
-    "dev": {
-      "default": {
-        "title": "GitBot Development Commands",
-        "description": "Commands in this group are meant to be used by **GitBot's maintainers** and **contributors** to its GitHub repository.",
-        "footer": "If you'd like to contribute yourself, click the link in this embed's title.",
-        "commands": {
-          "missing_locales": "get a list of missing (non-translated) keys for a locale"
-        }
+    "argument_explainers": {
+      "repo_with_branch": {
+        "name": "repo-with-branch",
+        "content": "The repo and branch separated by a `/` character (ex. `statch/gitbot/v3`). If the branch is omitted, the default one is used (`statch/gitbot/main`)"
       },
-      "missing_locales": {
-        "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
-        "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
-        "title": "Missing keys in `{0}`"
+      "repo": {
+        "name": "repo",
+        "content": "The name of the repository in the `owner/name` format (ex. `statch/gitbot`)"
       },
-      "export_commands": {
-        "success_direct": "The command file **has been saved to** {0} ({1} commands)",
-        "success_download": "**Here's the command file!** ({1} commands)"
+      "repo_or_subcommand": {
+        "name": "repo-or-subcommand",
+        "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
+      },
+      "user_or_subcommand": {
+        "name": "user-or-subcommand",
+        "content": "Either a GitHub username, or another subcommand from this group"
+      },
+      "user": {
+        "name": "user",
+        "content": "The name of a GitHub user (ex. `itsmewulf`)"
+      },
+      "org": {
+        "name": "org",
+        "content": "The name of a GitHub organization (ex. `statch`)"
+      },
+      "subcommand": {
+        "name": "subcommand",
+        "content": "The name of another command in this group"
+      },
+      "locale": {
+        "name": "language",
+        "content": "A GitBot-supported language to use (ex. `portuguese`)"
+      },
+      "channel": {
+        "name": "channel",
+        "content": "The name, mention or ID of a channel in this server (ex. `#general`)"
+      },
+      "oid": {
+        "name": "oid",
+        "content": "A Git object ID (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) that corresponds to an object - a commit, tree, blob, tag, etc."
+      },
+      "org_or_subcommand": {
+        "name": "org-or-subcommand",
+        "content": "Either an organization name, or another subcommand from this group"
+      },
+      "codeblock_or_lines": {
+        "name": "codeblock-or-lines",
+        "content": "Either a codeblock, or a GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+      },
+      "lines": {
+        "name": "lines",
+        "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+      },
+      "rust_crate_name": {
+        "name": "rust-package-name",
+        "content": "The name of a Rust crate (ex. `tokio`)"
+      },
+      "python_package_name": {
+        "name": "python-package-name",
+        "content": "The name of a Python package (ex. `py-carbon`)"
+      },
+      "issue_state": {
+        "name": "issue-state",
+        "content": "The state of the issue (eg. `open` or `closed`)"
+      },
+      "pr_state": {
+        "name": "pr-state",
+        "content": "A pull request state (eg. `open`, `closed`, or `merged`)"
+      },
+      "pr_number": {
+        "name": "pr-number",
+        "content": "A GitHub pull request number"
+      },
+      "issue_number": {
+        "name": "issue-number",
+        "content": "A GitHub issue number"
+      },
+      "gist_list_number": {
+        "name": "gist-list-number",
+        "content": "A number corresponding to a gist from the list"
+      },
+      "command": {
+        "name": "command",
+        "content": "The name of one of GitBot's commands"
+      },
+      "license_name": {
+        "name": "license-name",
+        "content": "The name of an open-source license (ex. `MIT`)"
+      },
+      "hashing_algorithm": {
+        "name": "hashing-algorithm",
+        "content": "The name of a GitBot-supported hashing algorithm (ex. `sha256`)"
+      },
+      "checksum": {
+        "name": "checksum",
+        "content": "A checksum (hash) generated via the specified hashing algorithm"
+      },
+      "file": {
+        "name": "file",
+        "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
       }
     },
-    "pypi": {
-      "default": {
-        "title": "Python Package Index Commands",
-        "description": "Commands in this group are related to PyPI,\nthe package index for Python.\nBelow you can find a list of the commands in this group.",
-        "commands": {
-          "info": "Get information about a package",
-          "downloads": "Get download stats of a package"
-        }
-      },
-      "info": {
-        "glossary": [
-          "Summary",
-          "Info",
-          "Links",
-          "Homepage",
-          "Documentation",
-          "Bugtracker"
-        ],
-        "author": "Created by {0}",
-        "first_upload": "First release uploaded at {0}",
-        "requires_python": "Requires Python version {0}",
-        "license": "Licensed under the {0} license"
-      },
-      "downloads": {
-        "title": "{0} downloads over the last {1} days",
-        "footer": "PyPi project statistics are provided by pypistats.org",
-        "glossary": [
-          "Date",
-          "Downloads"
-        ],
-        "stats": {
-          "yesterday": "Yesterday: **{0}**",
-          "last_week": "Last Week: **{0}**",
-          "last_month": "Last Month: **{0}**"
-        }
+    "qa_disclaimers": {
+      "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
+      "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
+      "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
+    }
+  },
+  "dev": {
+    "default": {
+      "title": "GitBot Development Commands",
+      "description": "Commands in this group are meant to be used by **GitBot's maintainers** and **contributors** to its GitHub repository.",
+      "footer": "If you'd like to contribute yourself, click the link in this embed's title.",
+      "commands": {
+        "missing_locales": "get a list of missing (non-translated) keys for a locale"
       }
     },
-    "crates": {
-      "default": {
-        "title": "Crates.io Commands",
-        "description": "Commands in this group are related to [crates.io](https://crates.io),\nthe Rust package index.\nBelow you can find a list of the commands in this group.",
-        "commands": {
-          "info": "Get information about a crate",
-          "downloads": "Crate downloads"
-        }
-      },
-      "info": {
-        "glossary": [
-          "Description",
-          "Info",
-          "Links",
-          "Keywords",
-          "Categories"
-        ],
-        "authors": "Authored by {0}",
-        "more_authors": "and {0} more",
-        "all_time_downloads": "All-time downloads!",
-        "created_at": "Created at {0}",
-        "license": "Licensed under the {0} license"
-      },
-      "downloads": {
-        "title": "{0} downloads over the last {1} days",
-        "footer": "Project statistics are fetched directly from crates.io",
-        "glossary": [
-          "Date",
-          "Downloads"
-        ],
-        "stats": {
-          "yesterday": "Yesterday: **{0}**",
-          "last_week": "Last Week: **{0}**",
-          "last_month": "Last Month: **{0}**"
-        }
+    "missing_locales": {
+      "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
+      "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
+      "title": "Missing keys in `{0}`"
+    },
+    "export_commands": {
+      "success_direct": "The command file **has been saved to** {0} ({1} commands)",
+      "success_download": "**Here's the command file!** ({1} commands)"
+    }
+  },
+  "pypi": {
+    "default": {
+      "title": "Python Package Index Commands",
+      "description": "Commands in this group are related to PyPI,\nthe package index for Python.\nBelow you can find a list of the commands in this group.",
+      "commands": {
+        "info": "Get information about a package",
+        "downloads": "Get download stats of a package"
       }
     },
-    "file": {
-      "generic_algo_related": {
-        "invalid_algorithm_embed": {
-          "title": "Invalid hashing algorithm!",
-          "description": "**Please use one of the following:**\n{0}",
-          "footer": "If you'd like a specific algorithm to be supported, please contact the devs in the support server."
-        }
-      },
-      "hash": {
-        "using_sha256_default": "No algorithm specified, **using SHA256...**",
-        "no_file": "You need to send this command **along with a file to hash!**",
-        "result_embed_title": "{0} checksum of {1}"
-      },
-      "verify": {
-        "using_sha256_default": "No algorithm specified, **assuming SHA256...**",
-        "no_file": "You need to send this command **along with a file to verify!**",
-        "result_embed": {
-          "success": {
-            "title": "{emoji_checkmark}  Good to go!",
-            "description": "The checksums **match!**"
-          },
-          "failure": {
-            "title": "{emoji_failure}  Uh oh!",
-            "description": "The checksums **don't match!**"
-          }
+    "info": {
+      "glossary": [
+        "Summary",
+        "Info",
+        "Links",
+        "Homepage",
+        "Documentation",
+        "Bugtracker"
+      ],
+      "author": "Created by {0}",
+      "first_upload": "First release uploaded at {0}",
+      "requires_python": "Requires Python version {0}",
+      "license": "Licensed under the {0} license"
+    },
+    "downloads": {
+      "title": "{0} downloads over the last {1} days",
+      "footer": "PyPi project statistics are provided by pypistats.org",
+      "glossary": [
+        "Date",
+        "Downloads"
+      ],
+      "stats": {
+        "yesterday": "Yesterday: **{0}**",
+        "last_week": "Last Week: **{0}**",
+        "last_month": "Last Month: **{0}**"
+      }
+    }
+  },
+  "crates": {
+    "default": {
+      "title": "Crates.io Commands",
+      "description": "Commands in this group are related to [crates.io](https://crates.io),\nthe Rust package index.\nBelow you can find a list of the commands in this group.",
+      "commands": {
+        "info": "Get information about a crate",
+        "downloads": "Crate downloads"
+      }
+    },
+    "info": {
+      "glossary": [
+        "Description",
+        "Info",
+        "Links",
+        "Keywords",
+        "Categories"
+      ],
+      "authors": "Authored by {0}",
+      "more_authors": "and {0} more",
+      "all_time_downloads": "All-time downloads!",
+      "created_at": "Created at {0}",
+      "license": "Licensed under the {0} license"
+    },
+    "downloads": {
+      "title": "{0} downloads over the last {1} days",
+      "footer": "Project statistics are fetched directly from crates.io",
+      "glossary": [
+        "Date",
+        "Downloads"
+      ],
+      "stats": {
+        "yesterday": "Yesterday: **{0}**",
+        "last_week": "Last Week: **{0}**",
+        "last_month": "Last Month: **{0}**"
+      }
+    }
+  },
+  "file": {
+    "generic_algo_related": {
+      "invalid_algorithm_embed": {
+        "title": "Invalid hashing algorithm!",
+        "description": "**Please use one of the following:**\n{0}",
+        "footer": "If you'd like a specific algorithm to be supported, please contact the devs in the support server."
+      }
+    },
+    "hash": {
+      "using_sha256_default": "No algorithm specified, **using SHA256...**",
+      "no_file": "You need to send this command **along with a file to hash!**",
+      "result_embed_title": "{0} checksum of {1}"
+    },
+    "verify": {
+      "using_sha256_default": "No algorithm specified, **assuming SHA256...**",
+      "no_file": "You need to send this command **along with a file to verify!**",
+      "result_embed": {
+        "success": {
+          "title": "{emoji_checkmark}  Good to go!",
+          "description": "The checksums **match!**"
+        },
+        "failure": {
+          "title": "{emoji_failure}  Uh oh!",
+          "description": "The checksums **don't match!**"
         }
       }
     }
   }
+}
   

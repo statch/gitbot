@@ -1,10 +1,13 @@
 import re
 import functools
 import inspect
+import discord
 from discord.ext import commands
 from typing import Callable, Any, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
+    from lib.typehints import ReleaseFeed
+from lib.structs.enums import CheckFailureCode
 from lib.typehints import GitHubRepository
 from lib.utils import regex
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
@@ -21,7 +24,25 @@ def _inject_aliases(name: str, **attrs) -> dict:
     return attrs
 
 
-def restricted() -> commands.Command:
+def bot_can_manage_release_feed_channels():
+    """
+    Check if the bot can manage release feed channels
+    """
+
+    async def pred(ctx: 'GitBotContext') -> bool:
+        rf: Optional['ReleaseFeed'] = (await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})).get('feed', None)
+        if rf:
+            for rfi in rf:
+                channel: discord.TextChannel = await ctx.bot.fetch_channel(rfi['cid'])
+                if not channel.permissions_for(ctx.guild.me).manage_channels:
+                    ctx.check_failure_code = CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE
+                    return False
+        return True
+
+    return commands.check(pred)
+
+
+def restricted():
     """
     Allow only wulf to use commands with this decorator
     """

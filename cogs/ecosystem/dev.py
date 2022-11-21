@@ -4,7 +4,7 @@ import discord
 from enum import Enum
 from discord.ext import commands
 from typing import Optional
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup
 from lib.structs.discord.context import GitBotContext
 
@@ -19,8 +19,8 @@ class ExportFileType(Enum):
 
 
 class Dev(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group('dev', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
@@ -45,19 +45,19 @@ class Dev(commands.Cog):
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: GitBotContext, locale_: str) -> None:
         ctx.fmt.set_prefix('dev missing_locales')
-        locale_data: Optional[tuple[list[str]], dict, bool] = self.bot.mgr.get_missing_keys_for_locale(locale_)
-        if not locale_data:
+        mk_data: Optional[tuple[list[str]], dict, bool] = self.bot.mgr.get_missing_keys_for_locale(locale_)
+        if not mk_data:
             await ctx.error(ctx.l.generic.nonexistent.locale)
-        elif not locale_data[0]:
-            if locale_data[1]['name'] == self.bot.mgr.locale.master.meta.name:
-                await ctx.error(ctx.fmt('no_master_locale', f'`{locale_data[1]["name"]}`'))
+        elif not mk_data[0]:
+            if mk_data[1]['name'] == self.bot.mgr.locale.master.meta.name:
+                await ctx.error(ctx.fmt('no_master_locale', f'`{mk_data[1]["name"]}`'))
             else:
                 await ctx.send(ctx.l.dev.missing_locales.no_missing_keys)
-        else:
+        elif len(mk_data[0]) < 80:
             def _gen_locale_path(steps) -> str:
                 return ' **->** '.join([f'`{step}`' for step in steps])
             meta, _ = self.bot.mgr.get_locale_meta_by_attribute(locale_)
-            missing: list[tuple[str]] = locale_data[0]
+            missing: list[tuple[str]] = mk_data[0]
             embed: GitBotEmbed = GitBotEmbed(
                 color=0x0384fc,
                 title=ctx.fmt('title', meta['name']),
@@ -65,6 +65,9 @@ class Dev(commands.Cog):
                 description='\n'.join([f'{self.bot.mgr.e.square} {_gen_locale_path(path)}' for path in missing])
             )
             await ctx.send(embed=embed)
+        else:
+            await ctx.send(file=discord.File(fp=io.StringIO(json.dumps(mk_data[0], indent=2).encode('utf8')),
+                                             filename=f'{locale_}_missing_keys.json'))
 
     @dev_command_group.command('export-commands', hidden=True)
     @commands.cooldown(1, 600, commands.BucketType.guild)
@@ -100,5 +103,5 @@ class Dev(commands.Cog):
                                                 filename=f'commands.{format_.value}'))
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Dev(bot))

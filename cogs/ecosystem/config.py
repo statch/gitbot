@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from lib.utils.decorators import normalize_repository, gitbot_group
+from lib.utils.decorators import normalize_repository, gitbot_group, bot_can_manage_release_feed_channels
 from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitHubUser, GitBotGuild,
                            ReleaseFeedItem, ReleaseFeed,
@@ -136,7 +136,8 @@ class Config(commands.Cog):
 
     @config_release_feed_group.command('channel')
     @commands.has_guild_permissions(manage_channels=True)
-    @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
+    @bot_can_manage_release_feed_channels()
+    @commands.bot_has_guild_permissions(manage_webhooks=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def feed_channel_command(self, ctx: GitBotContext, channel) -> None:
         ctx.fmt.set_prefix('config feed channel')
@@ -166,8 +167,8 @@ class Config(commands.Cog):
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
                 await self.bot.mgr.db.guilds.update_one(guild, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
-                                                                                         hook=hook.url[33:],
-                                                                                         repos=[])}})
+                                                                                                  hook=hook.url[33:],
+                                                                                                  repos=[])}})
                 success: bool = True
         else:
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
@@ -189,7 +190,8 @@ class Config(commands.Cog):
 
     @config_release_feed_group.command('repo', aliases=['repository'])
     @commands.has_guild_permissions(manage_channels=True)
-    @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
+    @bot_can_manage_release_feed_channels()
+    @commands.bot_has_guild_permissions(manage_webhooks=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @normalize_repository
     async def feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
@@ -267,7 +269,8 @@ class Config(commands.Cog):
 
     @config_release_feed_group.command('mention', aliases=['ping'])
     @commands.has_guild_permissions(manage_channels=True)
-    @commands.bot_has_guild_permissions(manage_webhooks=True, manage_channels=True)
+    @bot_can_manage_release_feed_channels()
+    @commands.bot_has_guild_permissions(manage_webhooks=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     async def config_release_feed_mention(self, ctx: GitBotContext, channel: discord.TextChannel):
         ctx.fmt.set_prefix('config feed mention')

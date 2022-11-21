@@ -1,5 +1,5 @@
 from discord.ext import commands
-from lib.structs import GitBot
+from lib.structs import GitBot, CheckFailureCode
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord import pages
 from lib.structs.discord.embed import GitBotEmbed
@@ -50,7 +50,9 @@ class Errors(commands.Cog):
                 if self.bot.mgr.env.production:
                     await log_error_in_discord(ctx, error)
             case commands.CheckFailure:
-                ...
+                match ctx.check_failure_code:
+                    case CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE:
+                        await ctx.error(ctx.l.errors.checks.bot_cant_manage_release_feed_channels)
             case commands.RoleNotFound:
                 await ctx.error(ctx.fmt('role_not_found', error.argument))
             case _:

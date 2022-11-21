@@ -27,7 +27,10 @@
     },
     "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}",
     "channel_not_found": "I can't seem to find a channel named `{0}`...\n**Does it exist and do I have access?**",
-    "role_not_found": "I can't seem to find a role named `{0}`..."
+    "role_not_found": "I can't seem to find a role named `{0}`...",
+    "checks": {
+      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again."
+    }
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."

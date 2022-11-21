@@ -1040,15 +1040,14 @@ class Manager:
                 if lv == attribute or match_ > 80:
                     return locale, match_ == 100
 
-    def get_all_dict_paths(self, d: dict, __path: list[str] = None) -> list[list[str]]:
+    def get_all_dict_paths(self, d: dict, __path: list[str] | None = None) -> list[list[str]]:
         """
         Get all paths in a dictionary
 
         :param d: The dictionary to get the paths from
         :return: A list of paths
         """
-        if __path is None:
-            __path: list = []
+        __path: list = [] if __path is None else __path
         paths: list = []
         for k, v in d.items():
             if isinstance(v, dict):
@@ -1071,12 +1070,11 @@ class Manager:
             ml_copy: dict = deepcopy(self.locale.master.actual)
             del ml_copy['meta']
             ml_paths: list = self.get_all_dict_paths(ml_copy)
-            key_count: int = len(self.get_all_dict_paths(ml_copy))
             non_localized: int = 0
             for k in ml_paths:
                 if self.get_nested_key(locale, k) == self.get_nested_key(ml_copy, k):
                     non_localized += 1
-            result: float = round((1 - (non_localized / key_count)) * 100, 2)
+            result: float = round((1 - (non_localized / len(ml_paths))) * 100, 2)
             self.localization_percentages[locale.meta['name']] = result
             return result
 
@@ -1089,10 +1087,9 @@ class Manager:
         :param locale: Whether the dictionaries are locales (logging)
         :return: The fixed dict
         """
-
         def recursively_fix(node: AnyDict, ref: AnyDict) -> AnyDict:
             for k, v in ref.items():
-                if k not in node:
+                if k not in node or (locale is True and node[k] == ref[k]):
                     if locale:
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
                         self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
@@ -1159,7 +1156,7 @@ class Manager:
             if locale != self.locale.master:
                 pc: float = self.get_localization_percentage(locale.meta.name)
                 self.localization_percentages[locale.meta.name] = pc
-                self.log(f'Locale "{locale.meta.name}" is {pc}% localized', 'locale')
+                self.log(f'Locale is {pc}% localized', f'locale-{locale.meta.name}')
 
     def fmt(self, ctx: 'GitBotContext'):
         """

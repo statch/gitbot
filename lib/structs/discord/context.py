@@ -13,11 +13,11 @@ from lib.typehints import EmbedLike
 from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from collections.abc import Awaitable, Callable
 if TYPE_CHECKING:
     from aiohttp import ClientSession
-    from lib.structs.discord.bot import GitBot
+    from lib.structs import CheckFailureCode, GitBot
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
 
@@ -35,6 +35,8 @@ class MessageFormattingStyle(enum.Enum):
 
 class GitBotContext(commands.Context):
     bot: 'GitBot'
+    command: GitBotCommand | GitBotCommandGroup
+    check_failure_code: Union[int, 'CheckFailureCode'] | None = None
     __nocache__: bool = False
     __autoinvoked__: bool = False
     __silence_error_calls__: bool = False

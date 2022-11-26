@@ -53,7 +53,8 @@ class Errors(commands.Cog):
                     case CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE:
                         await ctx.error(ctx.l.errors.checks.bot_cant_manage_release_feed_channels)
                     case CheckFailureCode.NO_GUILD_RELEASE_FEEDS:
-                        await ctx.error(ctx.fmt('checks guild_has_no_release_feeds', f'{ctx.prefix} config feed channel {{channel}}'))
+                        await ctx.error(ctx.fmt('checks guild_has_no_release_feeds',
+                                                f'{ctx.prefix}config feed channel {{channel}}'))
             case commands.RoleNotFound:
                 await ctx.error(ctx.fmt('role_not_found', error.argument))
             case _:

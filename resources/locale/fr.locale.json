@@ -29,7 +29,8 @@
     "channel_not_found": "Je n'arrive pas à trouver le salon `{0}`...\n**Existe-t-il et en ai-je l'accès ?**",
     "role_not_found": "Je n'arrive pas à trouver un rôle `{0}`...",
     "checks": {
-      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again."
+      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again.",
+      "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
     }
   },
   "events": {

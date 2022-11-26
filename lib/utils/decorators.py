@@ -30,13 +30,28 @@ def bot_can_manage_release_feed_channels():
     """
 
     async def pred(ctx: 'GitBotContext') -> bool:
-        rf: Optional['ReleaseFeed'] = (await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})).get('feed', None)
+        rf: Optional['ReleaseFeed'] = (await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}).get('feed', None)
         if rf:
             for rfi in rf:
                 channel: discord.TextChannel = await ctx.bot.fetch_channel(rfi['cid'])
                 if not channel.permissions_for(ctx.guild.me).manage_channels:
                     ctx.check_failure_code = CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE
                     return False
+        return True
+
+    return commands.check(pred)
+
+
+def guild_has_release_feeds():
+    """
+    Check if the guild has any release feeds
+    """
+
+    async def pred(ctx: 'GitBotContext') -> bool:
+        rf: Optional['ReleaseFeed'] = (await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}).get('feed', None)
+        if not rf:
+            ctx.check_failure_code = CheckFailureCode.NO_GUILD_RELEASE_FEEDS
+            return False
         return True
 
     return commands.check(pred)

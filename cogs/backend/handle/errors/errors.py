@@ -19,14 +19,13 @@ class Errors(commands.Cog):
             error: BaseException = error.__cause__
         match type(error):
             case commands.MissingRequiredArgument:
-                missing_arg_embed: GitBotEmbed = GitBotEmbed(
+                await GitBotEmbed(
                     colour=self.bot.mgr.c.discord.yellow,
                     title=ctx.l.errors.missing_required_argument.title,
                     description=ctx.fmt('missing_required_argument description',
                                         f'```haskell\n{ctx.prefix}help {ctx.command.fullname}```'),
                     footer=ctx.l.errors.missing_required_argument.footer
-                )
-                await missing_arg_embed.send(ctx)
+                ).send(ctx)
             case commands.CommandOnCooldown:
                 await ctx.error(ctx.fmt(f'command_on_cooldown {error.retry_after:.2f}'))
             case commands.MaxConcurrencyReached:
@@ -53,6 +52,8 @@ class Errors(commands.Cog):
                 match ctx.check_failure_code:
                     case CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE:
                         await ctx.error(ctx.l.errors.checks.bot_cant_manage_release_feed_channels)
+                    case CheckFailureCode.NO_GUILD_RELEASE_FEEDS:
+                        await ctx.error(ctx.fmt('checks guild_has_no_release_feeds', f'{ctx.prefix} config feed channel {{channel}}'))
             case commands.RoleNotFound:
                 await ctx.error(ctx.fmt('role_not_found', error.argument))
             case _:

@@ -1,6 +1,4 @@
-import discord
-from discord.ext import commands
-from lib.utils.decorators import normalize_repository, gitbot_group, bot_can_manage_release_feed_channels
+from lib.utils.decorators import *
 from lib.typehints import (GitHubRepository, GitHubOrganization,
                            GitHubUser, GitBotGuild,
                            ReleaseFeedItem, ReleaseFeed,
@@ -191,6 +189,7 @@ class Config(commands.Cog):
     @config_release_feed_group.command('repo', aliases=['repository'])
     @commands.has_guild_permissions(manage_channels=True)
     @bot_can_manage_release_feed_channels()
+    @guild_has_release_feeds()
     @commands.bot_has_guild_permissions(manage_webhooks=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
     @normalize_repository
@@ -234,9 +233,9 @@ class Config(commands.Cog):
                 if len(selected_rfi['repos']) < 10:
                     if (repo_ := repo_.lower()) not in map(lambda r: r['name'], selected_rfi['repos']):
                         await self.bot.mgr.db.guilds.update_one(guild,
-                                                       {'$push':
-                                                        {f'feed.{guild["feed"].index(selected_rfi)}.repos':
-                                                         ReleaseFeedRepo(name=repo_.lower(), tag=tag)}})
+                                                                {'$push':
+                                                                 {f'feed.{guild["feed"].index(selected_rfi)}.repos':
+                                                                  ReleaseFeedRepo(name=repo_.lower(), tag=tag)}})
                         await ctx.success(ctx.fmt('success',
                                                   f'`{repo_}`',
                                                   mention))

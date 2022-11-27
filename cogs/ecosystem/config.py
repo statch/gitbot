@@ -650,8 +650,8 @@ class Config(commands.Cog):
                 description=(ctx.lp.embed.description
                              + f'\n{self.bot.mgr.gen_separator_line(20)}\n'
                              + self.bot.mgr.option_display_list_format([f'<#{rfi["cid"]}> - '
-                                                               f'{self.bot.mgr.release_feed_mention_to_actual(rfi["mention"])}'
-                                                               for rfi in rfis_with_mention])),
+                                                                       f'{self.bot.mgr.release_feed_mention_to_actual(rfi["mention"])}'
+                                                                        for rfi in rfis_with_mention])),
                 footer=ctx.lp.embed.footer
         )
 

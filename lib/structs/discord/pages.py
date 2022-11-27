@@ -164,11 +164,8 @@ class EmbedPages:
             await self.message.edit(embed=self.pages[self.current_page])
 
     def _edit_embed_footer(self, embed: discord.Embed | GitBotEmbed) -> None:
-        if embed in self.pages:
-            page_str: str = f'{self.context.l.glossary.page} {self.pages.index(embed) + 1}/{len(self.pages)}'
-        else:
-            page_str: str = self.current_page_string
-
+        page_str: str = (f'{self.context.l.glossary.page} {self.pages.index(embed) + 1}/{len(self.pages)}'
+                         if embed in self.pages else self.current_page_string)
         if embed.footer.text is None:
             return embed.set_footer(text=page_str)
         embed.set_footer(text=f'{embed.footer.text} | {page_str}')
@@ -198,7 +195,7 @@ class EmbedPages:
                                                          timeout=self.timeout)
             except asyncio.TimeoutError:
                 self.bot.mgr.debug(f'Event timeout with lifetime={self.lifetime} '
-                          f'and time since last action={self.time_since_last_action}')
+                                   f'and time since last action={self.time_since_last_action}')
                 try:
                     await self.edit(GitBotCommandState.TIMEOUT)
                 except discord.errors.NotFound:
@@ -225,7 +222,7 @@ class EmbedPages:
             await reaction.message.remove_reaction(reaction.emoji, user)
             self.bot.mgr.debug(f'Iteration complete with action {action.name}')
         self.bot.mgr.debug(f'Timeout with lifetime={self.lifetime} '
-                  f'and time since last action={self.time_since_last_action}')
+                           f'and time since last action={self.time_since_last_action}')
         await self.edit(GitBotCommandState.TIMEOUT)
 
     def __add__(self, embed: discord.Embed | GitBotEmbed):

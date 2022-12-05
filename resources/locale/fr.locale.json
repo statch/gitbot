@@ -260,7 +260,7 @@
         "with_num": "Rédigé en {0} langages, principalement {1}"
       },
       "watchers": {
-        "plural": "A [{0} spectateurs]({1})",
+        "plural": "A [{0} observateurs]({1})",
         "singular": "N'a qu'[un observateur]({0})",
         "no_watchers": "N'a pas d'observateurs"
       },
@@ -575,24 +575,9 @@
           },
           "footer": "Vous pouvez taper \"annuler\" pour quitter"
         },
-        "repo": {
-          "channel_list_embed": {
-            "title": "Choisissez un flux de publication :",
-            "footer": "Pour en choisir un, envoyez simplement son numéro/mention ci-dessous !"
-          },
-          "timeout_embed": {
-            "title": "Temps écoulé",
-            "footer": "Envoyez simplement un ID de salon/une mention la prochaine fois !"
-          },
-          "channel_at_limit_embed": {
-            "title": "Limite du nombre de dépôt de flux de publication atteinte !",
-            "description": "Désolé, {0} est à la limite de 10 dépôts.\n**Vous pouvez essayer :**\n{emoji_square} ajouter {1} à un autre flux de versions\n{emoji_square} supprimer un autre dépôt pour faire de la placew",
-            "footer": "Tapez {0} pour supprimer un dépôt de ce flux"
-          },
-          "invalid_channel": "{0} n'est pas un **ID de salon/mention** valide de la liste ! Envoyez-en un autre ou tapez `cancel` pour quitter.",
-          "success": "Les nouvelles versions de {0} seront désormais enregistrées dans {1} !",
-          "cancelled": "Ajout d'un référentiel au flux de publication **annulé.**",
-          "already_logged": "Les versions de {0} **déjà enregistrées** dans {1} !"
+        "timeout_embed": {
+          "title": "Temps écoulé",
+          "footer": "Envoyez simplement un ID de salon/une mention la prochaine fois !"
         },
         "results": {
           "0": "Conversion automatique des liens de ligne GitHub **désactivée !**",
@@ -702,730 +687,227 @@
             "total": "se désabonner de toutes les versions et supprimer le webhook du flux"
           }
         },
-        "feed": {
-          "no_channel": "Vous n'avez pas configuré de canal de flux de publication !",
-          "nothing_deleted": "Vous n'avez pas configuré de flux de publication, donc **rien n'a été supprimé.**",
-          "default": {
-            "title": "Supprimer les données du flux de publication",
-            "description": "**Vous pouvez supprimer les données de flux de publication stockées en exécutant les commandes suivantes :**",
-            "commands": {
-              "repo": "se désabonner d'un dépôt spécifique",
-              "all": "se désabonner de tous les dépôts",
-              "total": "se désabonner de toutes les versions et supprimer le webhook du flux"
-            }
-          },
-          "repo": {
-            "not_present_in_feed": "Ce dépôt **n'est enregistré** dans aucun de vos flux de publication !",
-            "multiple": {
-              "embed": {
-                "title": "Libérer les flux avec {0} présents",
-                "description": "Répondez avec le(s) **nom/ID(s) de salon** pour supprimer {0}.",
-                "footer": "Vous pouvez taper `cancel` pour quitter"
-              },
-              "cancelled": "Suppression du dépôt **annulée !**",
-              "success": {
-                "title": "Flux de publication mis à jour !",
-                "description": "{0} **a été supprimé** des flux suivants :",
-                "optional_footer": "Seuls {0} flux ont été mis à jour, car certains n'étaient pas valides"
-              },
-              "no_feeds_mentioned": "Vous n'avez mentionné aucun **flux existant ni leur numéro !** Réessayez ou quittez en saisissant `cancel`."
+        "repo": {
+          "not_present_in_feed": "Ce dépôt **n'est enregistré** dans aucun de vos flux de publication !",
+          "multiple": {
+            "embed": {
+              "title": "Libérer les flux avec {0} présents",
+              "description": "Répondez avec le(s) **nom/ID(s) de salon** pour supprimer {0}.",
+              "footer": "Vous pouvez taper `cancel` pour quitter"
             },
-            "single": {
-              "embed": {
-                "title": "Suppression de {0} d'un flux de versions",
-                "description": "Voulez-vous vraiment supprimer {0} de {1} ?"
-              },
-              "cancelled": "Rien n'a changé, {0} versions sont **toujours enregistrées**.",
-              "success": "{0} versions ne seront plus enregistrées {1}"
-            }
-          },
-          "all": {
-            "success": "Tous les flux de versions ont été **fermés avec succès**."
-          },
-          "total": {
-            "success": "Le canal de flux de publication a été **fermé avec succès**."
-          },
-          "channel": {
-            "not_a_feed": "{0} n'est **pas configuré en tant que flux de publication !**",
-            "invalid_channel": "Ce n'est **pas un salon valide !** Réessayez.",
-            "flow": {
-              "confirmation": {
-                "embed": {
-                  "title": "Êtes-vous sûr?",
-                  "description": "**Voulez-vous vraiment supprimer {0} de vos flux de versions ?**\n{1} versions des dépôts y sont enregistrées à partir de maintenant ; ceci est irréversible.",
-                  "footer": "Réagissez avec l'emote appropriée pour choisir quoi faire."
-                },
-                "success": "Terminé. {0} **a été supprimé de vos flux de versions.**",
-                "cancelled": "**Action annulée.** {0} n'a pas été supprimé."
-              }
-            }
+            "cancelled": "Suppression du dépôt **annulée !**",
+            "success": {
+              "title": "Flux de publication mis à jour !",
+              "description": "{0} **a été supprimé** des flux suivants :",
+              "optional_footer": "Seuls {0} flux ont été mis à jour, car certains n'étaient pas valides"
+            },
+            "no_feeds_mentioned": "Vous n'avez mentionné aucun **flux existant ni leur numéro !** Réessayez ou quittez en saisissant `cancel`."
           },
           "single": {
             "embed": {
-              "title": "Supprimer une mention d'un flux de publication",
-              "description": "Tapez le **nom/ID de salon** d'un flux pour supprimer la mention qui lui est associée !",
-              "footer": "Vous pouvez taper `cancel` pour quitter"
+              "title": "Suppression de {0} d'un flux de versions",
+              "description": "Voulez-vous vraiment supprimer {0} de {1} ?"
             },
-            "cancelled": "Suppression d'une mention d'un flux de publication **annulé**.",
-            "invalid": "Ce n'est pas un salon/numéro de salon valide dans la liste ! **Réessayer**.",
-            "success": "La mention {0} pour {1} a été **supprimée**."
+            "cancelled": "Rien n'a changé, {0} versions sont **toujours enregistrées**.",
+            "success": "{0} versions ne seront plus enregistrées {1}"
           }
         },
-        "user": {
-          "success": "Enregistré **utilisateur supprimé**.",
-          "not_saved": "Vous n'avez pas d'utilisateur enregistré !"
-        },
-        "org": {
-          "success": "Enregistré **organisation supprimée**.",
-          "not_saved": "Vous n'avez pas enregistré d'organisation !"
-        },
-        "repo": {
-          "success": "Enregistré **dépôt supprimé**.",
-          "not_saved": "Vous n'avez pas de dépôt enregistré !"
-        },
-        "locale": "La langue du bot a été réinitialisée en **anglais**.",
         "all": {
-          "success": "Toutes vos données stockées ont été **supprimées avec succès**.",
-          "not_saved": "Il semble que **vous n'avez rien stocké !**"
+          "success": "Tous les flux de versions ont été **fermés avec succès**."
+        },
+        "total": {
+          "success": "Le canal de flux de publication a été **fermé avec succès**."
+        },
+        "channel": {
+          "not_a_feed": "{0} n'est **pas configuré en tant que flux de publication !**",
+          "invalid_channel": "Ce n'est **pas un salon valide !** Réessayez.",
+          "flow": {
+            "confirmation": {
+              "embed": {
+                "title": "Êtes-vous sûr?",
+                "description": "**Voulez-vous vraiment supprimer {0} de vos flux de versions ?**\n{1} versions des dépôts y sont enregistrées à partir de maintenant ; ceci est irréversible.",
+                "footer": "Réagissez avec l'emote appropriée pour choisir quoi faire."
+              },
+              "success": "Terminé. {0} **a été supprimé de vos flux de versions.**",
+              "cancelled": "**Action annulée.** {0} n'a pas été supprimé."
+            }
+          }
+        },
+        "mention": {
+          "embed": {
+            "title": "Supprimer une mention d'un flux de publication",
+            "description": "Tapez le **nom/ID de salon** d'un flux pour supprimer la mention qui lui est associée !",
+            "footer": "Vous pouvez taper `cancel` pour quitter"
+          },
+          "cancelled": "Suppression d'une mention d'un flux de publication **annulé**.",
+          "invalid": "Ce n'est pas un salon/numéro de salon valide dans la liste ! **Réessayer**.",
+          "success": "La mention {0} pour {1} a été **supprimée**."
         }
       },
       "user": {
-        "success": "Saved **user deleted.**",
-        "not_saved": "You don't have a user saved!"
+        "success": "Enregistré **utilisateur supprimé**.",
+        "not_saved": "Vous n'avez pas d'utilisateur enregistré !"
       },
       "org": {
-        "success": "Saved **organization deleted.**",
-        "not_saved": "You don't have an organization saved!"
+        "success": "Enregistré **organisation supprimée**.",
+        "not_saved": "Vous n'avez pas enregistré d'organisation !"
       },
       "repo": {
-        "success": "Saved **repo deleted.**",
-        "not_saved": "You don't have a repo saved!"
+        "success": "Enregistré **dépôt supprimé**.",
+        "not_saved": "Vous n'avez pas de dépôt enregistré !"
       },
-      "locale": "Bot language reset to **English**.",
+      "locale": "La langue du bot a été réinitialisée en **anglais**.",
       "all": {
-        "success": "All of your stored data was **successfully deleted.**",
-        "not_saved": "It appears that **you don't have anything stored!**"
+        "success": "Toutes vos données stockées ont été **supprimées avec succès**.",
+        "not_saved": "Il semble que **vous n'avez rien stocké !**"
       }
     }
   },
   "support": {
-    "title": "GitBot Support Server",
-    "description": "If you have any problems, feel free to join the [support server.](https://discord.statch.org)"
+    "title": "Serveur de support de GitBot",
+    "description": "Si vous rencontrez des problèmes, n'hésitez pas à rejoindre le [serveur d'assistance](https://discord.statch.org)."
   },
   "help": {
-    "required_permissions": "Required Permissions",
-    "commands_inside_group": "Commands inside this group",
-    "no_arguments_footer": "This command doesn't take any arguments. You're good to go!",
+    "required_permissions": "Permissions requises",
+    "commands_inside_group": "Commandes à l'intérieur de ce groupe",
+    "no_arguments_footer": "Cette commande ne prend aucun argument. Vous êtes prêt à partir !",
     "default": {
-      "title": "GitBot Help",
-      "description": "Here you'll find a list of all the commands that GitBot has to offer.\n**You can use `git help [command]` to get more information about a specific command.**",
+      "title": "Aide GitBot",
+      "description": "Vous trouverez ici une liste de toutes les commandes proposées par GitBot.\n**Vous pouvez utiliser `git help [commande]` pour obtenir plus d'informations sur une commande spécifique.**",
       "fields": [
         {
-          "name": "Argument style",
-          "value": "When a command accepts input, it will be shown in one of the following ways:\n{emoji_square}  `[argument]` - for **optional** arguments\n{emoji_square}  `<argument>` - for **required** arguments"
+          "name": "Style d'argumentation",
+          "value": "Lorsqu'une commande accepte une entrée, elle s'affiche de l'une des manières suivantes :\n{emoji_square} `[argument]` - pour les arguments **optionnels**\n{emoji_square} `<argument>` - pour les arguments **obligatoires**"
         },
         {
-          "name": "Quick-access",
-          "value": "Some commands utilize your saved users, repos, orgs, etc. to make their syntax shorter. If that's the case - it will be mentioned in the command's help footer, and you can skip the corresponding argument."
+          "name": "Accès rapide",
+          "value": "Certaines commandes utilisent vos utilisateurs, dépôts, organisations, etc. enregistrés pour raccourcir leur syntaxe. Si tel est le cas, cela sera mentionné dans le pied de page d'aide de la commande et vous pouvez ignorer l'argument correspondant."
         }
       ]
     },
-    "support": {
-      "title": "Serveur de support GitBot",
-      "description": "Si vous rencontrez des problèmes, n'hésitez pas à rejoindre le [serveur d'assistance](https://discord.statch.org)."
+    "no_help_for_command": {
+      "title": "Oh oh !",
+      "description": "Cette commande existe, **mais il n'y a pas encore d'aide pour elle !**\nSi vous ne savez toujours pas comment l'utiliser, vous pouvez rejoindre le [serveur d'assistance](https://discord.statch.org) et **demander de l'aide**."
     },
-    "help": {
-      "required_permissions": "Permissions requises",
-      "commands_inside_group": "Commandes à l'intérieur de ce groupe",
-      "no_arguments_footer": "Cette commande ne prend aucun argument. Vous êtes prêt à partir !",
-      "default": {
-        "title": "Aide GitBot",
-        "description": "Vous trouverez ici une liste de toutes les commandes proposées par GitBot.\n**Vous pouvez utiliser `git help [commande]` pour obtenir plus d'informations sur une commande spécifique.**",
-        "fields": [
-          {
-            "name": "Style d'argumentation",
-            "value": "Lorsqu'une commande accepte une entrée, elle s'affiche de l'une des manières suivantes :\n{emoji_square}  `[argument]` - pour les arguments **optionnels**\n{emoji_square}  `<argument>` - pour les arguments **obligatoires**"
-          },
-          {
-            "name": "Accès rapide",
-            "value": "Certaines commandes utilisent vos utilisateurs, dépôts, organisations, etc. enregistrés pour raccourcir leur syntaxe. Si tel est le cas, cela sera mentionné dans le pied de page de la fenêtre d'aide de la commande et vous pouvez ignorer l'argument correspondant."
-          }
+    "commands": {
+      "repo": {
+        "brief": "Obtenir des informations sur un dépôt GitHub",
+        "description": "Ce groupe de commandes fournit de nombreuses commandes utiles allant des informations et statistiques générales au téléchargement et à l'inspection du code d'un référentiel.",
+        "usage": "repo [repo_or_subcommand]",
+        "example": null,
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "repo_download": {
+        "brief": "Télécharger le code d'un dépôt GitHub",
+        "description": null,
+        "usage": "download <repo>",
+        "example": "download statch/gitbot",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "commits": {
+        "brief": "Obtenez les derniers commits d'un référentiel GitHub",
+        "description": null,
+        "usage": "commits [repo_with_branch]",
+        "example": "commits statch/gitbot",
+        "qa_resource": "repo",
+        "required_permissions": []
+      },
+      "config": {
+        "brief": "Un groupe de commandes chargé de définir et d'afficher les options de GitBot",
+        "usage": "config [subcommand]",
+        "example": null,
+        "description": "Certains des paramètres sont à l'échelle du serveur, donc pour les ajuster, vous aurez besoin d'autorisations spécifiques",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_show": {
+        "brief": "Afficher vos options GitBot enregistrées",
+        "usage": null,
+        "example": null,
+        "description": "Si utilisé à l'intérieur d'un serveur, affiche également les options à l'échelle du serveur",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_show_feed": {
+        "brief": "Afficher les dépôts qui sont enregistrés dans les flux de publication du serveur",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_repo": {
+        "brief": "Définir un accès rapide à un dépôt",
+        "usage": "config repo <repo>",
+        "example": "config repo statch/gitbot",
+        "description": "Cela vous permettra de créer une commande pour créer un accès rapide à un dépôt (ex. git repo statch/gitbot -> git repo)",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_lang": {
+        "brief": "Définir la langue de GitBot (pour vous)",
+        "usage": "config lang [locale]",
+        "example": "config lang portuguese",
+        "description": "Si cette commande est utilisée sans nom de langue, elle affichera une liste des langues disponibles parmi lesquelles choisir",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed": {
+        "brief": "Un groupe de commandes utilisé pour créer et gérer les flux de publication du dépôt",
+        "usage": "config feed [subcommand]",
+        "example": null,
+        "description": "Vous pouvez utiliser les commandes de ce groupe pour définir des salons en tant que \"flux\" de version, leur ajouter des dépôts, puis être averti chaque fois qu'une nouvelle version est créée !",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "config_feed_repo": {
+        "brief": "Ajouter un dépôt à un flux de version",
+        "usage": "config feed repo <repo>",
+        "example": "config feed repo statch/gitbot",
+        "description": "Cette commande affichera une liste de vos flux de publication et vous demandera de choisir le flux auquel le dépôt doit être ajouté.",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
         ]
       },
-      "no_help_for_command": {
-        "title": "Oh oh !",
-        "description": "Cette commande existe, **mais il n'y a pas encore d'aide pour elle !**\nSi vous ne savez toujours pas comment l'utiliser, vous pouvez rejoindre le [serveur d'assistance](https://discord.statch.org) et **demander de l'aide**."
+      "config_feed_channel": {
+        "brief": "Ajouter un nouveau flux de version",
+        "usage": "config feed channel <channel>",
+        "example": null,
+        "description": "Cette commande vous permettra d'ajouter un salon en tant que flux de publication, puis d'ajouter des dépôts et d'attendre les nouvelles versions. Vous pouvez en avoir jusqu'à 5 sur votre serveur !",
+        "qa_resource": null,
+        "required_permissions": [
+          "manage_channels"
+        ]
       },
-      "commands": {
-        "repo": {
-          "brief": "Obtenir des informations sur un dépôt GitHub",
-          "description": "Ce groupe de commandes fournit de nombreuses commandes utiles allant des informations et statistiques générales au téléchargement et à l'inspection du code d'un référentiel.",
-          "usage": "repo [repo_or_subcommand]",
-          "example": null,
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "repo_download": {
-          "brief": "Télécharger le code d'un dépôt GitHub",
-          "description": null,
-          "usage": "download <repo>",
-          "example": "download statch/gitbot",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "commits": {
-          "brief": "Obtenez les derniers commits d'un référentiel GitHub",
-          "description": null,
-          "usage": "commits [repo_with_branch]",
-          "example": "commits statch/gitbot",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "config": {
-          "brief": "Un groupe de commandes chargé de définir et d'afficher les options de GitBot",
-          "usage": "config [subcommand]",
-          "example": null,
-          "description": "Certains des paramètres sont à l'échelle du serveur, donc pour les ajuster, vous aurez besoin d'autorisations spécifiques",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_show": {
-          "brief": "Afficher vos options GitBot enregistrées",
-          "usage": null,
-          "example": null,
-          "description": "Si utilisé à l'intérieur d'un serveur, affiche également les options à l'échelle du serveur",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_show_feed": {
-          "brief": "Afficher les dépôts qui sont enregistrés dans les flux de publication du serveur",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_repo": {
-          "brief": "Définir un accès rapide à un dépôt",
-          "usage": "config repo <repo>",
-          "example": "config repo statch/gitbot",
-          "description": "Cela vous permettra de créer une commande pour créer un accès rapide à un dépôt (ex. git repo statch/gitbot -> git repo)",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_lang": {
-          "brief": "Définir la langue de GitBot (pour vous)",
-          "usage": "config lang [locale]",
-          "example": "config lang portuguese",
-          "description": "Si cette commande est utilisée sans nom de langue, elle affichera une liste des langues disponibles parmi lesquelles choisir",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_feed": {
-          "brief": "Un groupe de commandes utilisé pour créer et gérer les flux de publication du dépôt",
-          "usage": "config feed [subcommand]",
-          "example": null,
-          "description": "Vous pouvez utiliser les commandes de ce groupe pour définir des salons en tant que \"flux\" de version, leur ajouter des dépôts, puis être averti chaque fois qu'une nouvelle version est créée !",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_feed_repo": {
-          "brief": "Ajouter un dépôt à un flux de version",
-          "usage": "config feed repo <repo>",
-          "example": "config feed repo statch/gitbot",
-          "description": "Cette commande affichera une liste de vos flux de publication et vous demandera de choisir le flux auquel le dépôt doit être ajouté.",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "config_feed_channel": {
-          "brief": "Ajouter un nouveau flux de version",
-          "usage": "config feed channel <channel>",
-          "example": null,
-          "description": "Cette commande vous permettra d'ajouter un salon en tant que flux de publication, puis d'ajouter des dépôts et d'attendre les nouvelles versions. Vous pouvez en avoir jusqu'à 5 sur votre serveur !",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "config_user": {
-          "brief": "Définir un accès rapide à un utilisateur",
-          "usage": "config user <user>",
-          "example": "config user itsmewulf",
-          "description": "Définir cela vous permettra d'utiliser certaines commandes qui vous permettront d'accéder plus rapidement au profil d'un utilisateur (ex. git user itsmewulf -> git user)",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete": {
-          "brief": "Un groupe de commandes responsable de la suppression des valeurs de configuration GitBot",
-          "usage": "config delete [subcommand]",
-          "example": null,
-          "description": "Les commandes de ce groupe vous permettent de réinitialiser les champs de configuration à leurs valeurs par défaut ou de supprimer des éléments des flux",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_repo": {
-          "brief": "Supprimer votre accès rapide à un dépôt",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande indiquera à GitBot d'\"oublier\" votre dépôt enregistré, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_feed": {
-          "brief": "Un groupe de commandes responsable de la suppression des salons de flux enregistrés ou des dépôts enregistrés dans ces salons",
-          "usage": "config delete feed [subcommand]",
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_feed_channel": {
-          "brief": "Une commande responsable de la suppression d'un salon de flux de publication",
-          "usage": "config delete feed channel <channel>",
-          "example": null,
-          "description": "Vous pouvez utiliser cette commande pour supprimer un salon de flux de publication précédemment ajouté. La suppression d'un flux signifie que les versions des dépôts précédemment liées à ce flux n'arriveront plus.",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_guild",
-            "manage_channels"
-          ]
-        },
-        "config_delete_feed_repo": {
-          "brief": "Une commande utilisée pour supprimer un dépôt d'un flux de publication",
-          "usage": "config delete feed repo <repo>",
-          "example": null,
-          "description": "Cette commande vous permet de supprimer un dépôt d'un canal de flux de version spécifique. Une fois supprimées, les nouvelles versions de ce dépôt n'arriveront plus dans ce flux. Les autres flux suivant de ce dépôt ne seront pas affectés.",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_guild",
-            "manage_channels"
-          ]
-        },
-        "config_delete_language": {
-          "brief": "Réinitialisez votre langue GitBot par défaut",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande réinitialisera la langue de GitBot en anglais",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_user": {
-          "brief": "Supprimer votre accès rapide à un utilisateur",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande indiquera à GitBot d'\"oublier : votre utilisateur enregistré, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_all": {
-          "brief": "Supprimez toutes les valeurs de configuration liées à votre profil GitBot",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande n'affecte pas les paramètres du serveur.",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_org": {
-          "brief": "Supprimer votre accès rapide à une organisation",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande indiquera à GitBot d'\"oublier\" votre organisation enregistrée, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_org": {
-          "brief": "Définir un accès rapide à une organisation",
-          "usage": "config org <org>",
-          "example": "config org statch",
-          "description": "Définir cela vous permettra d'utiliser certaines commandes qui prennent en charge une organisation de manière plus courte (ex. git org statch -> git org)",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_autoconv": {
-          "brief": "Un groupe de commandes pour configurer les comportements automatiques de GitBot",
-          "usage": "config autoconv [subcommand]",
-          "example": null,
-          "description": "Les sous-commandes de ce groupe contrôlent les paramètres à l'échelle du serveur qui affectent l'autonomie de GitBot - principalement la conversion automatique des liens GitHub en informations, la création d'images Carbon à partir de blocs de code et plus encore !",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_autoconv_link": {
-          "brief": "Basculer la résolution automatique des liens GitHub",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande active/désactive la résolution automatique des liens envoyés dans le chat (sauf pour les liens de ligne). GitBot répondra aux messages avec des liens qu'il comprend avec des informations sur ce qui se trouve à l'autre bout de cette URL",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "config_autoconv_lines": {
-          "brief": "Basculer la résolution automatique des liens GitHub Line",
-          "usage": null,
-          "example": null,
-          "description": "Cette commande, à ne pas confondre avec la résolution générale d'URL, ne gère que l'aspect ligne des URL. Lorsqu'un lien contenant des mentions de ligne (ex. #L9-L42) est envoyé dans le chat, GitBot tentera de le convertir soit en un bloc de code, soit en une image, en fonction de votre sélection",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "config_autoconv_codeblock": {
-          "brief": "Toggle automatic codeblock to Carbon image conversion",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "commit": {
-          "brief": "Get info on a commit",
-          "usage": "commit [repo] [oid]",
-          "example": "commit statch/gitbot 3546fa7faada2c61d0a0edf3ec09e1fc28ed7677",
-          "description": "Get detailed info about a GitHub commit. If you have a quick-access repo set, you can use this command with only the oid argument, or without arguments altogether - it will default to your saved repo and the latest commit. You can also pass just the repo - the latest commit will be returned",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "logs": {
-          "brief": "Get commit feeds in the current channel",
-          "usage": null,
-          "example": null,
-          "description": "This command creates a webhook (a fancy name for a not-so-fancy thing), that's then sent to you along with instructions to get the feed up and running. You add the URL from the instructions into repo(s) of choice, and you get all the commits right as they happen!",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_webhooks"
-          ]
-        },
-        "org": {
-          "brief": "Get info about a GitHub organization",
-          "usage": "org [org_or_subcommand]",
-          "example": "org statch",
-          "description": "This command group allows you to view info about an org, its repos, and more!",
-          "qa_resource": "org",
-          "required_permissions": []
-        },
-        "org_info": {
-          "brief": "Get info about a GitHub organization",
-          "usage": "org info <org>",
-          "example": "org info statch",
-          "description": "Get detailed information about an org - when it was created, who the members are, how many repos it has, and more!",
-          "qa_resource": "org",
-          "required_permissions": []
-        },
-        "org_repos": {
-          "brief": "Get a list of an organization's repos",
-          "usage": "org repos <org>",
-          "example": "org repos statch",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "legal": {
-          "brief": "The GitBot Privacy Policy and TOS",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "support": {
-          "brief": "Get support if you ran into a problem, or simply want to chat!",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "snippet": {
-          "brief": "Convert a codeblock or a GitHub line link into a Carbon image",
-          "usage": "snippet <codeblock_or_lines>",
-          "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "snippet_raw": {
-          "brief": "Get the content of a GitHub line link in the form of a codeblock",
-          "usage": "snippet raw <lines>",
-          "example": "snippet raw https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "pypi": {
-          "brief": "Get info about PyPI packages",
-          "usage": "pypi [subcommand]",
-          "example": null,
-          "description": "This command group allows you to view info about PyPI packages such as creation date, downloads and more!",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "pypi_downloads": {
-          "brief": "Get a 3-month download chart for a PyPI package",
-          "usage": "pypi downloads <python_package_name>",
-          "example": "pypi downloads httpcats",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "pypi_info": {
-          "brief": "Get info about a PyPI package",
-          "usage": "pypi info <python_package_name>",
-          "example": "pypi info httpcats",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "repo_issues": {
-          "brief": "Get issues in a GitHub repo",
-          "usage": "repo issues [repo] [issue_state]",
-          "example": "repo issues statch/gitbot closed",
-          "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "repo_info": {
-          "brief": "Get info about a GitHub repo",
-          "usage": "repo info <repo>",
-          "example": "repo info statch/gitbot",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "repo_pulls": {
-          "brief": "Get pull requests in a GitHub repo",
-          "usage": "repo pulls [repo] [pr_state]",
-          "example": "repo pulls statch/gitbot merged",
-          "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "repo_files": {
-          "brief": "View a GitHub repo's file structure ",
-          "usage": "repo files <repo>",
-          "example": "repo files statch/gitbot",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "repo_commits": {
-          "brief": "Get latest commits from a GitHub repository",
-          "description": null,
-          "usage": "repo commits [repo_with_branch]",
-          "example": "repo commits statch/gitbot",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "invite": {
-          "brief": "Invite the bot to your server!",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "pr": {
-          "brief": "Get info about a Pull Request",
-          "usage": "pr [repo] <pr_number>",
-          "example": "pr statch/gitbot 39",
-          "description": null,
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "vote": {
-          "brief": "Vote for GitBot!",
-          "usage": null,
-          "example": null,
-          "description": "Voting massively helps GitBot reach as many devs as possible!",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "stats": {
-          "brief": "Get some bot statistics",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "uptime": {
-          "brief": "Get the bot's current uptime",
-          "usage": null,
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "user": {
-          "brief": "Get info about a GitHub user",
-          "usage": "user [user_or_subcommand]",
-          "example": "user itsmewulf",
-          "description": "Commands inside this group allow you to view info about a user, their repos, and more!",
-          "qa_resource": "user",
-          "required_permissions": []
-        },
-        "user_info": {
-          "brief": "Get info about a GitHub user",
-          "usage": "user info <user>",
-          "example": "user info itsmewulf",
-          "description": "Get detailed info about a GitHub user - contributions, orgs, repos, and more!",
-          "qa_resource": "user",
-          "required_permissions": []
-        },
-        "user_repos": {
-          "brief": "Get a GitHub user's repos",
-          "usage": "user repos <user>",
-          "example": "user repos itsmewulf",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "gist": {
-          "brief": "Get a gist authored by a GitHub user",
-          "usage": "gist <user> [gist_list_number]",
-          "example": "gist itsmewulf",
-          "description": "This command shows you a list of a user's latest gists, from which you can pick one to inspect by sending its number. You can also use it with both a username and a number corresponding to a gist from the list to skip the dialog.",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "loc": {
-          "brief": "Lines-of-code breakdown of a GitHub repo",
-          "usage": "loc <repo>",
-          "example": "loc statch/gitbot",
-          "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "repo_loc": {
-          "brief": "Lines-of-code breakdown of a GitHub repo",
-          "usage": "repo loc <repo>",
-          "example": "repo loc statch/gitbot",
-          "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "issue": {
-          "brief": "Inspect a GitHub issue",
-          "usage": "issue [repo] <issue_number>",
-          "example": "issue statch/gitbot 53",
-          "description": "Find out what an issue is about, the participants, labels, and a whole lot more!",
-          "qa_resource": "repo",
-          "required_permissions": []
-        },
-        "help": {
-          "brief": "Find out about GitBot's commands!",
-          "usage": "help [command]",
-          "example": "help user",
-          "description": "This is the command you're using right now!",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "license": {
-          "brief": "Get info about a license",
-          "usage": "license <license_name>",
-          "example": "license MIT",
-          "description": "Find out what an open-source license is all about - its permissions, conditions, limitations, and more!",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "ping": {
-          "brief": "The bot's current ping",
-          "usage": null,
-          "example": null,
-          "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_feed_mention": {
-          "brief": "Configure a mention for new repo releases",
-          "usage": "config feed mention <channel>",
-          "example": null,
-          "description": "Pick who (roles/everyone/here) to ping when a new release comes out in a release feed!",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "crates": {
-          "brief": "Get info about crates.io crates",
-          "usage": "crates [subcommand]",
-          "example": null,
-          "description": "This command group allows you to view info about Rust crates published to crates.io, such as creation date, authors, downloads and more!",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "crates_downloads": {
-          "brief": "Get download stats of a crates.io crate",
-          "usage": "crates downloads <rust_crate_name>",
-          "example": "crates downloads tokio",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "crates_info": {
-          "brief": "Get info about a crates.io crate",
-          "usage": "crates info <rust_crate_name>",
-          "example": "crates info tokio",
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "config_delete_feed_mention": {
-          "brief": "Delete a mention from a release feed",
-          "usage": null,
-          "example": null,
-          "description": "Too pingy? Delete the mention you previously configured for a release feed and enjoy the silence!",
-          "qa_resource": null,
-          "required_permissions": [
-            "manage_channels"
-          ]
-        },
-        "file": {
-          "brief": "A command group with utilities for dealing with files!",
-          "usage": "file [subcommand]",
-          "example": null,
-          "description": null,
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "file_hash": {
-          "brief": "Get the hash of a file",
-          "usage": "file hash [hashing_algorithm] <file>",
-          "example": null,
-          "description": "Get a file hash of the provided file generated via the specified algorithm",
-          "qa_resource": null,
-          "required_permissions": []
-        },
-        "file_verify": {
-          "brief": "Verify the integrity of a file",
-          "usage": "file verify <checksum> [hashing_algorithm] <file>",
-          "example": null,
-          "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
-          "qa_resource": null,
-          "required_permissions": []
-        }
+      "config_user": {
+        "brief": "Définir un accès rapide à un utilisateur",
+        "usage": "config user <user>",
+        "example": "config user itsmewulf",
+        "description": "Définir cela vous permettra d'utiliser certaines commandes qui vous permettront d'accéder plus rapidement au profil d'un utilisateur (ex. git user itsmewulf -> git user)",
+        "qa_resource": null,
+        "required_permissions": []
       },
       "config_delete": {
-        "brief": "A command group responsible for deleting GitBot config values",
+        "brief": "Un groupe de commandes responsable de la suppression des valeurs de configuration GitBot",
         "usage": "config delete [subcommand]",
         "example": null,
-        "description": "Commands in this group allow you to reset config fields to their default values or delete items from feeds",
+        "description": "Les commandes de ce groupe vous permettent de réinitialiser les champs de configuration à leurs valeurs par défaut ou de supprimer des éléments des flux",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_delete_repo": {
-        "brief": "Delete your quick-access repository",
+        "brief": "Supprimer votre accès rapide à un dépôt",
         "usage": null,
         "example": null,
-        "description": "This command will tell GitBot to \"forget\" your saved repo, so commands will no longer use the shortened syntax",
+        "description": "Cette commande indiquera à GitBot d'\"oublier\" votre dépôt enregistré, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_delete_feed": {
-        "brief": "A command group responsible for deleting saved feed channels or repos logged in these channels",
+        "brief": "Un groupe de commandes responsable de la suppression des salons de flux enregistrés ou des dépôts enregistrés dans ces salons",
         "usage": "config delete feed [subcommand]",
         "example": null,
         "description": null,
@@ -1433,10 +915,10 @@
         "required_permissions": []
       },
       "config_delete_feed_channel": {
-        "brief": "A command responsible for deleting a release feed channel",
+        "brief": "Une commande responsable de la suppression d'un salon de flux de publication",
         "usage": "config delete feed channel <channel>",
         "example": null,
-        "description": "You can use this command to delete a previously added release feed channel. Deleting a feed means that releases from repos previously bound to that feed will no longer arrive.",
+        "description": "Vous pouvez utiliser cette commande pour supprimer un salon de flux de publication précédemment ajouté. La suppression d'un flux signifie que les versions des dépôts précédemment liées à ce flux n'arriveront plus.",
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",
@@ -1444,10 +926,10 @@
         ]
       },
       "config_delete_feed_repo": {
-        "brief": "A command used to delete a repo from a release feed",
+        "brief": "Une commande utilisée pour supprimer un dépôt d'un flux de publication",
         "usage": "config delete feed repo <repo>",
         "example": null,
-        "description": "This command allows you to delete a repository from a specific release feed channel. Once deleted, new releases of this repo will no longer arrive in this feed. Other feeds following this repo won't be affected.",
+        "description": "Cette commande vous permet de supprimer un dépôt d'un canal de flux de version spécifique. Une fois supprimées, les nouvelles versions de ce dépôt n'arriveront plus dans ce flux. Les autres flux suivant de ce dépôt ne seront pas affectés.",
         "qa_resource": null,
         "required_permissions": [
           "manage_guild",
@@ -1455,68 +937,68 @@
         ]
       },
       "config_delete_language": {
-        "brief": "Reset your GitBot language to default",
+        "brief": "Réinitialisez votre langue GitBot par défaut",
         "usage": null,
         "example": null,
-        "description": "This command will reset GitBot's language to English",
+        "description": "Cette commande réinitialisera la langue de GitBot en anglais",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_delete_user": {
-        "brief": "Delete your quick-access user",
+        "brief": "Supprimer votre accès rapide à un utilisateur",
         "usage": null,
         "example": null,
-        "description": "This command will tell GitBot to \"forget: your saved user, so commands will no longer use the shortened syntax",
+        "description": "Cette commande indiquera à GitBot d'\"oublier : votre utilisateur enregistré, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_delete_all": {
-        "brief": "Delete all config values bound to your GitBot profile",
+        "brief": "Supprimez toutes les valeurs de configuration liées à votre profil GitBot",
         "usage": null,
         "example": null,
-        "description": "This command doesn't affect server settings. ",
+        "description": "Cette commande n'affecte pas les paramètres du serveur.",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_delete_org": {
-        "brief": "Delete your quick-access organization",
+        "brief": "Supprimer votre accès rapide à une organisation",
         "usage": null,
         "example": null,
-        "description": "This command will tell GitBot to \"forget\" your saved org, so commands will no longer use the shortened syntax",
+        "description": "Cette commande indiquera à GitBot d'\"oublier\" votre organisation enregistrée, de sorte que les commandes n'utiliseront plus la syntaxe raccourcie",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_org": {
-        "brief": "Set a quick-access organization",
+        "brief": "Définir un accès rapide à une organisation",
         "usage": "config org <org>",
         "example": "config org statch",
-        "description": "Setting this will allow you to use certain commands that take in an organization in a shorter way (ex. git org statch -> git org)",
+        "description": "Définir cela vous permettra d'utiliser certaines commandes qui prennent en charge une organisation de manière plus courte (ex. git org statch -> git org)",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_autoconv": {
-        "brief": "A command group for configuring GitBot's automatic behaviors",
+        "brief": "Un groupe de commandes pour configurer les comportements automatiques de GitBot",
         "usage": "config autoconv [subcommand]",
         "example": null,
-        "description": "Subcommands in this group control server-wide settings that affect GitBot's autonomy - mainly automatically converting GitHub links to information, creating Carbon images from codeblocks and more!",
+        "description": "Les sous-commandes de ce groupe contrôlent les paramètres à l'échelle du serveur qui affectent l'autonomie de GitBot - principalement la conversion automatique des liens GitHub en informations, la création d'images Carbon à partir de blocs de code et plus encore !",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_autoconv_link": {
-        "brief": "Toggle automatic GitHub link resolving",
+        "brief": "Basculer la résolution automatique des liens GitHub",
         "usage": null,
         "example": null,
-        "description": "This command toggles the automatic resolving of links sent in chat (except for line links). GitBot will reply to messages with links it understands with information about what's on the other end of that URL",
+        "description": "Cette commande active/désactive la résolution automatique des liens envoyés dans le chat (sauf pour les liens de ligne). GitBot répondra aux messages avec des liens qu'il comprend avec des informations sur ce qui se trouve à l'autre bout de cette URL",
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
         ]
       },
       "config_autoconv_lines": {
-        "brief": "Toggle automatic GitHub Line link resolving",
+        "brief": "Basculer la résolution automatique des liens GitHub Line",
         "usage": null,
         "example": null,
-        "description": "This command, not to be confused with general URL resolving, manages only the line aspect of URLs. When a link containing line mentions (ex. #L9-L42) is sent in chat, GitBot will attempt to convert it into either a codeblock, or an image, based on your selection",
+        "description": "Cette commande, à ne pas confondre avec la résolution générale d'URL, ne gère que l'aspect ligne des URL. Lorsqu'un lien contenant des mentions de ligne (ex. #L9-L42) est envoyé dans le chat, GitBot tentera de le convertir soit en un bloc de code, soit en une image, en fonction de votre sélection",
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
@@ -2089,4 +1571,3 @@
     }
   }
 }
-  

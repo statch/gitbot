@@ -84,7 +84,7 @@ class Manager:
         self.localization_percentages: dict[str, float | None] = {l_['name']: None for l_ in self.locale['languages']}
         self.__fix_missing_locales()
         self.__preprocess_locale_emojis()
-        self.__preprocess_localization_percentages()
+        # self.__preprocess_localization_percentages()  // TODO: re-enable this once resolved
 
     async def get_repo_gitbot_config(self, repo: str, fallback_to_dot_json: bool = True) -> GitbotRepoConfig | None:
         gh_res: dict | None = await self.git.get_tree_file(repo, '.gitbot') or \
@@ -1057,6 +1057,7 @@ class Manager:
         return paths
 
     def get_localization_percentage(self, locale: str) -> float:
+        # TODO some locale items are not supposed to be translated and others sound the same in the target language, this feature is not ready yet
         """
         Get the localization percentage of a locale
 
@@ -1068,7 +1069,6 @@ class Manager:
             if self.localization_percentages.get(locale.meta['name']) is not None:
                 return self.localization_percentages[locale.meta['name']]
             ml_copy: dict = deepcopy(self.locale.master.actual)
-            del ml_copy['meta']
             ml_paths: list = self.get_all_dict_paths(ml_copy)
             non_localized: int = 0
             for k in ml_paths:
@@ -1092,7 +1092,7 @@ class Manager:
                 if k not in node or (locale is True and node[k] == ref[k]):
                     if locale:
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
-                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
+                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched. (might be same)',
                                  f'locale-{dict_.meta.name}')
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():

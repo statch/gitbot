@@ -4,10 +4,11 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedItem, ReleaseFeed,
                            ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
-from typing import Optional, Literal
+from typing import Optional, Literal, Tuple, List, Any
 from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 from lib.structs.discord.context import GitBotContext
+from structs.discord.embed import GitBotCommandState
 
 
 class Config(commands.Cog):
@@ -382,9 +383,7 @@ class Config(commands.Cog):
             await ctx.error(ctx.fmt('failure', locale), delete_after=7)
 
         def _format(locale_: dict):
-            formatted: str = f'{self.bot.mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()}' + \
-                             (f' ({self.bot.mgr.get_localization_percentage(locale_["name"])}%)'
-                              if locale_['name'] != self.bot.mgr.locale.master.meta.name else '')
+            formatted: str = f'{self.bot.mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()} ([{locale_["author"]["name"]}]({locale_["author"]["url"]}))'
             return formatted if ctx.l.meta.name != locale_['name'] else f'**{formatted}**'
 
         languages: list = [_format(l_) for l_ in self.bot.mgr.locale.languages]
@@ -576,7 +575,8 @@ class Config(commands.Cog):
                 footer=ctx.l.config.delete.feed.repo.multiple.embed.footer
             )
 
-            async def _callback(_, res: discord.Message) -> tuple[int, Optional[list[int]]]:
+            async def _callback(_, res: discord.Message) -> tuple[GitBotCommandState, None] | tuple[
+                GitBotCommandState, list[int]] | tuple[GitBotCommandState, list[Any]]:
                 if res.content.lower() in ('quit', 'cancel'):
                     await ctx.error(ctx.l.config.delete.feed.repo.multiple.cancelled)
                     return GitBotCommandState.FAILURE, None
@@ -655,7 +655,8 @@ class Config(commands.Cog):
                 footer=ctx.lp.embed.footer
         )
 
-        async def _callback(_, res: discord.Message) -> tuple[int, Optional[int]]:
+        async def _callback(_, res: discord.Message) -> tuple[GitBotCommandState, None] | tuple[
+            GitBotCommandState, int]:
             if res.content.lower() in ('quit', 'cancel'):
                 await ctx.error(ctx.lp.cancelled)
                 return GitBotCommandState.FAILURE, None

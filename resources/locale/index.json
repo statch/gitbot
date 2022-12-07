@@ -5,13 +5,21 @@
       "name": "en",
       "full_name": "english",
       "localized_name": "english",
-      "flag": ":flag_um:"
+      "flag": ":flag_um:",
+      "author": {
+        "name": "wulf @ statch",
+        "url": "https://statch.org"
+      }
     },
     {
       "name": "fr",
       "full_name": "french",
       "localized_name": "français",
-      "flag": ":flag_fr:"
+      "flag": ":flag_fr:",
+      "author": {
+        "name": "Thomas BLANC",
+        "url": "https://tarkhubal.github.io/"
+      }
     }
   ]
 }

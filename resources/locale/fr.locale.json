@@ -29,8 +29,8 @@
     "channel_not_found": "Je n'arrive pas à trouver le salon `{0}`...\n**Existe-t-il et en ai-je l'accès ?**",
     "role_not_found": "Je n'arrive pas à trouver un rôle `{0}`...",
     "checks": {
-      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again.",
-      "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
+      "bot_cant_manage_release_feed_channels": "**Je ne peux pas gérer (chacun des) salons de flux de publication** configurés sur ce serveur ! Définissez les bonnes permissions pour moi et réessayez.",
+      "guild_has_no_release_feeds": "**Ce serveur n'a pas de flux de versions configurés !** Utilisez `{0}` pour en ajouter un."
     }
   },
   "events": {
@@ -271,7 +271,7 @@
         "no_stargazers": "pas de déposeur d'étoile"
       },
       "fork_notice": "Ce dépôt est un fork de {0}",
-      "license": "Licence sous le {0}"
+      "license": "Licence sous {0}"
     },
     "files": {
       "view_more": "Afficher {0} autres sur GitHub",
@@ -1005,7 +1005,7 @@
         ]
       },
       "config_autoconv_codeblock": {
-        "brief": "Toggle automatic codeblock to Carbon image conversion",
+        "brief": "Basculer le bloc de code automatique vers la conversion d'image carbone",
         "usage": null,
         "example": null,
         "description": null,
@@ -1015,41 +1015,41 @@
         ]
       },
       "commit": {
-        "brief": "Get info on a commit",
+        "brief": "Obtenir des informations sur un commit",
         "usage": "commit [repo] [oid]",
         "example": "commit statch/gitbot 3546fa7faada2c61d0a0edf3ec09e1fc28ed7677",
-        "description": "Get detailed info about a GitHub commit. If you have a quick-access repo set, you can use this command with only the oid argument, or without arguments altogether - it will default to your saved repo and the latest commit. You can also pass just the repo - the latest commit will be returned",
+        "description": "Obtenez des informations détaillées sur un commit GitHub. Si vous disposez d'un ensemble d'accès rapide à des dépôts, vous pouvez utiliser cette commande avec uniquement l'argument OID, ou sans aucun argument - il utilisera par défaut votre dépôt enregistré et le dernier commit. Vous pouvez également transmettre uniquement le dépôt - le dernier commit sera renvoyé",
         "qa_resource": "repo",
         "required_permissions": []
       },
       "logs": {
-        "brief": "Get commit feeds in the current channel",
+        "brief": "Obtenir des flux de validation dans le salon actuel",
         "usage": null,
         "example": null,
-        "description": "This command creates a webhook (a fancy name for a not-so-fancy thing), that's then sent to you along with instructions to get the feed up and running. You add the URL from the instructions into repo(s) of choice, and you get all the commits right as they happen!",
+        "description": "Cette commande crée un webhook (un nom fantaisiste pour une chose pas si fantaisiste), qui vous est ensuite envoyé avec des instructions pour que le flux soit opérationnel. Vous ajoutez l'URL des instructions dans le ou les dépôt(s) de votre choix, et vous obtenez tous les commits au fur et à mesure qu'ils se produisent !",
         "qa_resource": null,
         "required_permissions": [
           "manage_webhooks"
         ]
       },
       "org": {
-        "brief": "Get info about a GitHub organization",
+        "brief": "Obtenir des informations sur une organisation GitHub",
         "usage": "org [org_or_subcommand]",
         "example": "org statch",
-        "description": "This command group allows you to view info about an org, its repos, and more!",
+        "description": "Ce groupe de commandes vous permet d'afficher des informations sur une organisation, ses dépôts et bien plus encore !",
         "qa_resource": "org",
         "required_permissions": []
       },
       "org_info": {
-        "brief": "Get info about a GitHub organization",
+        "brief": "Obtenir des informations sur une organisation GitHub",
         "usage": "org info <org>",
         "example": "org info statch",
-        "description": "Get detailed information about an org - when it was created, who the members are, how many repos it has, and more!",
+        "description": "Obtenez des informations détaillées sur une organisation - quand elle a été créée, qui sont ses membres, combien de dépôts elle a, et plus encore !",
         "qa_resource": "org",
         "required_permissions": []
       },
       "org_repos": {
-        "brief": "Get a list of an organization's repos",
+        "brief": "Obtenir une liste des dépôts d'une organisation",
         "usage": "org repos <org>",
         "example": "org repos statch",
         "description": null,
@@ -1057,7 +1057,7 @@
         "required_permissions": []
       },
       "legal": {
-        "brief": "The GitBot Privacy Policy and TOS",
+        "brief": "La politique de confidentialité et les conditions d'utilisation de GitBot",
         "usage": null,
         "example": null,
         "description": null,
@@ -1065,7 +1065,7 @@
         "required_permissions": []
       },
       "support": {
-        "brief": "Get support if you ran into a problem, or simply want to chat!",
+        "brief": "La politique de confidentialité et les conditions d'utilisation de GitBot",
         "usage": null,
         "example": null,
         "description": null,
@@ -1073,7 +1073,7 @@
         "required_permissions": []
       },
       "snippet": {
-        "brief": "Convert a codeblock or a GitHub line link into a Carbon image",
+        "brief": "Convertir un bloc de code ou un lien de ligne GitHub en une image Carbon",
         "usage": "snippet <codeblock_or_lines>",
         "example": "snippet https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
@@ -1081,7 +1081,7 @@
         "required_permissions": []
       },
       "snippet_raw": {
-        "brief": "Get the content of a GitHub line link in the form of a codeblock",
+        "brief": "Obtenir le contenu d'un lien de ligne GitHub sous la forme d'un bloc de code",
         "usage": "snippet raw <lines>",
         "example": "snippet raw https://github.com/statch/gitbot/blob/main/bot.py#L1-L12",
         "description": null,
@@ -1089,15 +1089,15 @@
         "required_permissions": []
       },
       "pypi": {
-        "brief": "Get info about PyPI packages",
+        "brief": "Obtenir des informations sur les packages PyPI",
         "usage": "pypi [subcommand]",
         "example": null,
-        "description": "This command group allows you to view info about PyPI packages such as creation date, downloads and more!",
+        "description": "Ce groupe de commandes vous permet d'afficher des informations sur les packages PyPI tels que la date de création, les téléchargements et plus encore !",
         "qa_resource": null,
         "required_permissions": []
       },
       "pypi_downloads": {
-        "brief": "Get a 3-month download chart for a PyPI package",
+        "brief": "Obtenez un tableau de téléchargement de 3 mois pour un package PyPI",
         "usage": "pypi downloads <python_package_name>",
         "example": "pypi downloads httpcats",
         "description": null,
@@ -1105,7 +1105,7 @@
         "required_permissions": []
       },
       "pypi_info": {
-        "brief": "Get info about a PyPI package",
+        "brief": "Obtenir des informations sur un package PyPI",
         "usage": "pypi info <python_package_name>",
         "example": "pypi info httpcats",
         "description": null,
@@ -1113,15 +1113,15 @@
         "required_permissions": []
       },
       "repo_issues": {
-        "brief": "Get issues in a GitHub repo",
+        "brief": "Obtenir des problèmes dans un référentiel GitHub",
         "usage": "repo issues [repo] [issue_state]",
         "example": "repo issues statch/gitbot closed",
-        "description": "This command allows you to list issues with the given state (\"open\" and \"closed\"; \"open\" is the default) in a specific repository. The command returns a list of the 10 latest issues that match the search criteria.",
+        "description": "Cette commande vous permet de répertorier les problèmes avec l'état donné (\"ouvert\" et \"fermé\" ; \"ouvert\" est la valeur par défaut) dans un dépôt spécifique. La commande renvoie une liste des 10 derniers problèmes qui correspondent aux critères de recherche.",
         "qa_resource": "repo",
         "required_permissions": []
       },
       "repo_info": {
-        "brief": "Get info about a GitHub repo",
+        "brief": "Obtenir des informations sur un dépôt GitHub",
         "usage": "repo info <repo>",
         "example": "repo info statch/gitbot",
         "description": null,
@@ -1129,15 +1129,15 @@
         "required_permissions": []
       },
       "repo_pulls": {
-        "brief": "Get pull requests in a GitHub repo",
+        "brief": "Obtenir des demandes d'extraction dans un référentiel GitHub",
         "usage": "repo pulls [repo] [pr_state]",
         "example": "repo pulls statch/gitbot merged",
-        "description": "This command allows you to list PRs with the given state (\"open\", \"closed\", or \"merged\"; \"open\" is the default\") in a specific repository. A list of the 10 latest PRs that match the search criteria is returned.",
+        "description": "Cette commande vous permet de lister les PR avec l'état donné (\"ouvert\", \"fermé\" ou \"fusionné\" ; \"ouvert\" est la valeur par défaut\") dans un dépôt spécifique. Une liste de les 10 derniers PR correspondant aux critères de recherche sont renvoyés.",
         "qa_resource": "repo",
         "required_permissions": []
       },
       "repo_files": {
-        "brief": "View a GitHub repo's file structure ",
+        "brief": "Afficher la structure de fichiers d'un dépôt GitHub",
         "usage": "repo files <repo>",
         "example": "repo files statch/gitbot",
         "description": null,
@@ -1145,7 +1145,7 @@
         "required_permissions": []
       },
       "repo_commits": {
-        "brief": "Get latest commits from a GitHub repository",
+        "brief": "Obtenez les derniers commits d'un dépôt GitHub",
         "description": null,
         "usage": "repo commits [repo_with_branch]",
         "example": "repo commits statch/gitbot",
@@ -1153,7 +1153,7 @@
         "required_permissions": []
       },
       "invite": {
-        "brief": "Invite the bot to your server!",
+        "brief": "Invitez le bot sur votre serveur !",
         "usage": null,
         "example": null,
         "description": null,
@@ -1161,7 +1161,7 @@
         "required_permissions": []
       },
       "pr": {
-        "brief": "Get info about a Pull Request",
+        "brief": "Obtenir des informations sur une demande d'extraction",
         "usage": "pr [repo] <pr_number>",
         "example": "pr statch/gitbot 39",
         "description": null,
@@ -1169,15 +1169,15 @@
         "required_permissions": []
       },
       "vote": {
-        "brief": "Vote for GitBot!",
+        "brief": "Votez pour GitBot !",
         "usage": null,
         "example": null,
-        "description": "Voting massively helps GitBot reach as many devs as possible!",
+        "description": "Voter massivement aide GitBot à atteindre autant de développeurs que possible !",
         "qa_resource": null,
         "required_permissions": []
       },
       "stats": {
-        "brief": "Get some bot statistics",
+        "brief": "Obtenir des statistiques de bot",
         "usage": null,
         "example": null,
         "description": null,
@@ -1185,7 +1185,7 @@
         "required_permissions": []
       },
       "uptime": {
-        "brief": "Get the bot's current uptime",
+        "brief": "Obtenir la disponibilité actuelle du bot",
         "usage": null,
         "example": null,
         "description": null,
@@ -1193,23 +1193,23 @@
         "required_permissions": []
       },
       "user": {
-        "brief": "Get info about a GitHub user",
+        "brief": "Obtenir des informations sur un utilisateur GitHub",
         "usage": "user [user_or_subcommand]",
         "example": "user itsmewulf",
-        "description": "Commands inside this group allow you to view info about a user, their repos, and more!",
+        "description": "Les commandes de ce groupe vous permettent d'afficher des informations sur un utilisateur, ses dépôts et bien plus encore !",
         "qa_resource": "user",
         "required_permissions": []
       },
       "user_info": {
-        "brief": "Get info about a GitHub user",
+        "brief": "Obtenir des informations sur un utilisateur GitHub",
         "usage": "user info <user>",
         "example": "user info itsmewulf",
-        "description": "Get detailed info about a GitHub user - contributions, orgs, repos, and more!",
+        "description": "Obtenez des informations détaillées sur un utilisateur GitHub - contributions, orgs, dépôts et plus encore !",
         "qa_resource": "user",
         "required_permissions": []
       },
       "user_repos": {
-        "brief": "Get a GitHub user's repos",
+        "brief": "Obtenir les dépôts d'un utilisateur GitHub",
         "usage": "user repos <user>",
         "example": "user repos itsmewulf",
         "description": null,
@@ -1217,81 +1217,81 @@
         "required_permissions": []
       },
       "gist": {
-        "brief": "Get a gist authored by a GitHub user",
+        "brief": "Obtenir un Gist rédigé par un utilisateur GitHub",
         "usage": "gist <user> [gist_list_number]",
         "example": "gist itsmewulf",
-        "description": "This command shows you a list of a user's latest gists, from which you can pick one to inspect by sending its number. You can also use it with both a username and a number corresponding to a gist from the list to skip the dialog.",
+        "description": "Cette commande vous montre une liste des derniers points essentiels d'un utilisateur, à partir de laquelle vous pouvez en choisir un à inspecter en envoyant son numéro. Vous pouvez également l'utiliser avec un nom d'utilisateur et un numéro correspondant à un élément essentiel de la liste pour ignorer la boîte de dialogue.",
         "qa_resource": null,
         "required_permissions": []
       },
       "loc": {
-        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "brief": "Répartition des lignes de code d'un référentiel GitHub",
         "usage": "loc <repo>",
         "example": "loc statch/gitbot",
-        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "description": "Combien de lignes Python ? Combien de commentaires ? Combien d'espace vide ? Vous trouverez les réponses juste ici.",
         "qa_resource": null,
         "required_permissions": []
       },
       "repo_loc": {
-        "brief": "Lines-of-code breakdown of a GitHub repo",
+        "brief": "Répartition des lignes de code d'un référentiel GitHub",
         "usage": "repo loc <repo>",
         "example": "repo loc statch/gitbot",
-        "description": "How many Python lines? How many comments? How much blank space? You'll find the answers right here.",
+        "description": "Combien de lignes Python ? Combien de commentaires ? Combien d'espace vide ? Vous trouverez les réponses juste ici.",
         "qa_resource": null,
         "required_permissions": []
       },
       "issue": {
-        "brief": "Inspect a GitHub issue",
+        "brief": "Inspecter un problème GitHub",
         "usage": "issue [repo] <issue_number>",
         "example": "issue statch/gitbot 53",
-        "description": "Find out what an issue is about, the participants, labels, and a whole lot more!",
+        "description": "Découvrez en quoi consiste un problème, les participants, les labels et bien plus encore !",
         "qa_resource": "repo",
         "required_permissions": []
       },
       "help": {
-        "brief": "Find out about GitBot's commands!",
+        "brief": "Découvrez les commandes de GitBot !",
         "usage": "help [command]",
         "example": "help user",
-        "description": "This is the command you're using right now!",
+        "description": "C'est la commande que vous utilisez en ce moment !",
         "qa_resource": null,
         "required_permissions": []
       },
       "license": {
-        "brief": "Get info about a license",
+        "brief": "Obtenir des informations sur une licence",
         "usage": "license <license_name>",
         "example": "license MIT",
-        "description": "Find out what an open-source license is all about - its permissions, conditions, limitations, and more!",
+        "description": "Découvrez ce qu'est une licence open source - ses autorisations, ses conditions, ses limitations et bien plus encore !",
         "qa_resource": null,
         "required_permissions": []
       },
       "ping": {
-        "brief": "The bot's current ping",
+        "brief": "Le ping actuel du bot",
         "usage": null,
         "example": null,
-        "description": "Ping is the time it takes a message to travel from Discord to GitBot, and vice versa",
+        "description": "Le ping est le temps qu'il faut à un message pour passer de Discord à GitBot, et vice versa",
         "qa_resource": null,
         "required_permissions": []
       },
       "config_feed_mention": {
-        "brief": "Configure a mention for new repo releases",
+        "brief": "Configurer une mention pour les nouvelles versions de dépôt",
         "usage": "config feed mention <channel>",
         "example": null,
-        "description": "Pick who (roles/everyone/here) to ping when a new release comes out in a release feed!",
+        "description": "Choisissez qui (rôles/everyone/here) pour envoyer un ping lorsqu'une nouvelle version sort dans un fil de publication !",
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
         ]
       },
       "crates": {
-        "brief": "Get info about crates.io crates",
+        "brief": "Obtenir des informations sur les crates crates.io",
         "usage": "crates [subcommand]",
         "example": null,
-        "description": "This command group allows you to view info about Rust crates published to crates.io, such as creation date, authors, downloads and more!",
+        "description": "Ce groupe de commandes vous permet d'afficher des informations sur les crates Rust publiées sur crates.io, telles que la date de création, les auteurs, les téléchargements et plus encore !",
         "qa_resource": null,
         "required_permissions": []
       },
       "crates_downloads": {
-        "brief": "Get download stats of a crates.io crate",
+        "brief": "Obtenir les statistiques de téléchargement d'un crate crates.io",
         "usage": "crates downloads <rust_crate_name>",
         "example": "crates downloads tokio",
         "description": null,
@@ -1299,7 +1299,7 @@
         "required_permissions": []
       },
       "crates_info": {
-        "brief": "Get info about a crates.io crate",
+        "brief": "Obtenir des informations sur un crate crates.io",
         "usage": "crates info <rust_crate_name>",
         "example": "crates info tokio",
         "description": null,
@@ -1307,17 +1307,17 @@
         "required_permissions": []
       },
       "config_delete_feed_mention": {
-        "brief": "Delete a mention from a release feed",
+        "brief": "Supprimer une mention d'un flux de publication",
         "usage": null,
         "example": null,
-        "description": "Too pingy? Delete the mention you previously configured for a release feed and enjoy the silence!",
+        "description": "Trop de pings ? Supprimez la mention que vous avez précédemment configurée pour un flux de publication et profitez du silence !",
         "qa_resource": null,
         "required_permissions": [
           "manage_channels"
         ]
       },
       "file": {
-        "brief": "A command group with utilities for dealing with files!",
+        "brief": "Un groupe de commandes avec des utilitaires pour gérer les fichiers !",
         "usage": "file [subcommand]",
         "example": null,
         "description": null,
@@ -1325,18 +1325,18 @@
         "required_permissions": []
       },
       "file_hash": {
-        "brief": "Get the hash of a file",
+        "brief": "Obtenir le hachage d'un fichier",
         "usage": "file hash [hashing_algorithm] <file>",
         "example": null,
-        "description": "Get a file hash of the provided file generated via the specified algorithm",
+        "description": "Obtenir un hachage de fichier du fichier fourni généré via l'algorithme spécifié",
         "qa_resource": null,
         "required_permissions": []
       },
       "file_verify": {
-        "brief": "Verify the integrity of a file",
+        "brief": "Vérifier l'intégrité d'un fichier",
         "usage": "file verify <checksum> [hashing_algorithm] <file>",
         "example": null,
-        "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
+        "description": "Vérifier l'intégrité d'un fichier par rapport à une somme de contrôle générée via l'algorithme spécifié",
         "qa_resource": null,
         "required_permissions": []
       }
@@ -1344,59 +1344,59 @@
     "argument_explainers": {
       "repo_with_branch": {
         "name": "repo-with-branch",
-        "content": "The repo and branch separated by a `/` character (ex. `statch/gitbot/v3`). If the branch is omitted, the default one is used (`statch/gitbot/main`)"
+        "content": "Le dépôt et la branche séparés par un caractère `/` (ex. `statch/gitbot/v3`). Si la branche est omise, celle par défaut est utilisée (`statch/gitbot/main`)"
       },
       "repo": {
         "name": "repo",
-        "content": "The name of the repository in the `owner/name` format (ex. `statch/gitbot`)"
+        "content": "Le nom du dépôt au format `owner/name` (ex. `statch/gitbot`)"
       },
       "repo_or_subcommand": {
         "name": "repo-or-subcommand",
-        "content": "Either a repository name in the `owner/name` format, or another subcommand from this group"
+        "content": "Soit un nom de référentiel au format `owner/name`, soit une autre sous-commande de ce groupe"
       },
       "user_or_subcommand": {
         "name": "user-or-subcommand",
-        "content": "Either a GitHub username, or another subcommand from this group"
+        "content": "Soit un nom d'utilisateur GitHub, soit une autre sous-commande de ce groupe"
       },
       "user": {
         "name": "user",
-        "content": "The name of a GitHub user (ex. `itsmewulf`)"
+        "content": "Le nom d'un utilisateur GitHub (ex. `itsmewulf`)"
       },
       "org": {
         "name": "org",
-        "content": "The name of a GitHub organization (ex. `statch`)"
+        "content": "Le nom d'une organisation GitHub (ex. `statch`)"
       },
       "subcommand": {
         "name": "subcommand",
-        "content": "The name of another command in this group"
+        "content": "Le nom d'une autre commande dans ce groupe"
       },
       "locale": {
         "name": "language",
-        "content": "A GitBot-supported language to use (ex. `portuguese`)"
+        "content": "Un langage supporté par GitBot à utiliser (ex. `french`)"
       },
       "channel": {
         "name": "channel",
-        "content": "The name, mention or ID of a channel in this server (ex. `#general`)"
+        "content": "Le nom, la mention ou l'identifiant d'un canal sur ce serveur (ex. `#general` or `1020992248567042184`)"
       },
       "oid": {
         "name": "oid",
-        "content": "A Git object ID (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) that corresponds to an object - a commit, tree, blob, tag, etc."
+        "content": "Un ID d'objet Git (ex. `3546fa7faada2c61d0a0edf3ec09e1fc28ed7677`) qui correspond à un objet - un commit, un arbre, un blob, un tag, etc."
       },
       "org_or_subcommand": {
         "name": "org-or-subcommand",
-        "content": "Either an organization name, or another subcommand from this group"
+        "content": "Soit un nom d'organisation, soit une autre sous-commande de ce groupe"
       },
       "codeblock_or_lines": {
         "name": "codeblock-or-lines",
-        "content": "Either a codeblock, or a GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+        "content": "Soit un bloc de code, soit un lien de ligne GitHub (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       },
       "lines": {
         "name": "lines",
-        "content": "A GitHub line link (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
+        "content": "Un lien de ligne GitHub (ex. https://github.com/statch/gitbot/blob/main/bot.py#L1-L12)"
       },
       "rust_crate_name": {
         "name": "rust-package-name",
-        "content": "The name of a Rust crate (ex. `tokio`)"
+        "content": "Le nom d'un crate Rust (ex. `tokio`)"
       },
       "python_package_name": {
         "name": "python-package-name",
@@ -1404,170 +1404,174 @@
       },
       "issue_state": {
         "name": "issue-state",
-        "content": "The state of the issue (eg. `open` or `closed`)"
+        "content": "L'état du problème (eg. `open` or `closed`)"
       },
       "pr_state": {
         "name": "pr-state",
-        "content": "A pull request state (eg. `open`, `closed`, or `merged`)"
+        "content": "Un état de demande d'extraction (eg. `open`, `closed`, or `merged`)"
       },
       "pr_number": {
         "name": "pr-number",
-        "content": "A GitHub pull request number"
+        "content": "Un numéro de demande d'extraction GitHub"
       },
       "issue_number": {
         "name": "issue-number",
-        "content": "A GitHub issue number"
+        "content": "Un numéro de problème GitHub"
       },
       "gist_list_number": {
         "name": "gist-list-number",
-        "content": "A number corresponding to a gist from the list"
+        "content": "Un numéro correspondant à un point essentiel de la liste"
       },
       "command": {
         "name": "command",
-        "content": "The name of one of GitBot's commands"
+        "content": "Le nom d'une des commandes de GitBot"
       },
       "license_name": {
         "name": "license-name",
-        "content": "The name of an open-source license (ex. `MIT`)"
+        "content": "Le nom d'une licence open-source (ex. `MIT`)"
       },
       "hashing_algorithm": {
         "name": "hashing-algorithm",
-        "content": "The name of a GitBot-supported hashing algorithm (ex. `sha256`)"
+        "content": "Le nom d'un algorithme de hachage pris en charge par GitBot (ex. `sha256`)"
       },
       "checksum": {
         "name": "checksum",
-        "content": "A checksum (hash) generated via the specified hashing algorithm"
+        "content": "Une somme de contrôle (hachage) générée via l'algorithme de hachage spécifié"
       },
       "file": {
         "name": "file",
-        "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
+        "content": "Outre les paramètres, cette commande **nécessite également qu'un fichier** soit fourni. Tapez simplement votre commande, puis ajoutez un fichier au message !"
       }
     },
     "qa_disclaimers": {
-      "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
-      "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
-      "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
+      "repo": "Cette commande peut être utilisée sans l'argument repo si vous avez un repo enregistré !\nUtilisez git config pour le vérifier !",
+      "user": "Cette commande peut être utilisée sans l'argument user si vous avez un user enregistré !\nUtilisez git config pour le vérifier !",
+      "org": "Cette commande peut être utilisée sans l'argument org si vous avez une organisation enregistrée !\nUtilisez git config pour la vérifier !"
     }
   },
   "dev": {
     "default": {
-      "title": "GitBot Development Commands",
-      "description": "Commands in this group are meant to be used by **GitBot's maintainers** and **contributors** to its GitHub repository.",
-      "footer": "If you'd like to contribute yourself, click the link in this embed's title.",
+      "title": "Commandes de développement GitBot",
+      "description": "Les commandes de ce groupe sont destinées à être utilisées par les **mainteneurs de GitBot** et les **contributeurs** à son dépôt GitHub.",
+      "footer": "Si vous souhaitez contribuer vous-même, cliquez sur le lien dans le titre de cette intégration.",
       "commands": {
-        "missing_locales": "get a list of missing (non-translated) keys for a locale"
+        "missing_locales": "obtenir une liste des clés manquantes (non traduites) pour une langue"
       }
     },
     "missing_locales": {
-      "no_master_locale": "No missing keys for the {0} locale can be found because it's the Master Locale.",
-      "no_missing_keys": "This locale doesn't have any missing keys! :tada:",
-      "title": "Missing keys in `{0}`"
+      "no_master_locale": "Aucune clé manquante pour les paramètres régionaux {0} ne peut être trouvée car il s'agit des paramètres régionaux principaux.",
+      "no_missing_keys": "Cette langue n'a aucune clé manquante ! :tada:",
+      "title": "Clés manquantes dans `{0}`"
     },
     "export_commands": {
-      "success_direct": "The command file **has been saved to** {0} ({1} commands)",
-      "success_download": "**Here's the command file!** ({1} commands)"
+      "success_direct": "Le fichier de commandes **a été enregistré dans** {0} ({1} commandes)",
+      "success_download": "**Voici le fichier de commandes !** ({1} commandes)"
     }
   },
   "pypi": {
     "default": {
-      "title": "Python Package Index Commands",
-      "description": "Commands in this group are related to PyPI,\nthe package index for Python.\nBelow you can find a list of the commands in this group.",
+      "title": "Commandes d'index de package Python",
+      "description": "Les commandes de ce groupe sont liées à PyPI,\nl'index des packages pour Python.\nVous trouverez ci-dessous une liste des commandes de ce groupe.",
       "commands": {
-        "info": "Get information about a package",
-        "downloads": "Get download stats of a package"
+        "info": "Obtenir des informations sur un package",
+        "downloads": "Obtenir les statistiques de téléchargement d'un package"
       }
     },
     "info": {
       "glossary": [
-        "Summary",
-        "Info",
-        "Links",
-        "Homepage",
+        "Sommaire",
+        "Infos",
+        "Liens",
+        "Page d'accueil",
         "Documentation",
-        "Bugtracker"
+        "Suivi des bugs"
       ],
-      "author": "Created by {0}",
-      "first_upload": "First release uploaded at {0}",
-      "requires_python": "Requires Python version {0}",
-      "license": "Licensed under the {0} license"
+      "author": "Créé par {0}",
+      "first_upload": "Première version chargée le {0}",
+      "requires_python": "Nécessite la version {0} de Python",
+      "license": "Sous licence sous la licence {0}"
     },
     "downloads": {
-      "title": "{0} downloads over the last {1} days",
-      "footer": "PyPi project statistics are provided by pypistats.org",
+      "title": "{0} téléchargements au cours des {1} derniers jours",
+      "footer": "Les statistiques du projet PyPi sont fournies par pypistats.org",
       "glossary": [
         "Date",
-        "Downloads"
+        "Téléchargements"
       ],
       "stats": {
-        "yesterday": "Yesterday: **{0}**",
-        "last_week": "Last Week: **{0}**",
-        "last_month": "Last Month: **{0}**"
+        "yesterday": "Hier : **{0}**",
+        "last_week": "La semaine dernière : **{0}**",
+        "last_month": "Le mois dernier : **{0}**"
       }
     }
   },
   "crates": {
     "default": {
-      "title": "Crates.io Commands",
-      "description": "Commands in this group are related to [crates.io](https://crates.io),\nthe Rust package index.\nBelow you can find a list of the commands in this group.",
+      "title": "Commandes crates.io",
+      "description": "Les commandes de ce groupe sont liées à [crates.io](https://crates.io),\nl'index de package Rust.\nVous trouverez ci-dessous une liste des commandes de ce groupe.",
       "commands": {
-        "info": "Get information about a crate",
-        "downloads": "Crate downloads"
+        "info": "Obtenir des informations sur un crate",
+        "downloads": "Téléchargements de crates"
       }
     },
     "info": {
       "glossary": [
         "Description",
         "Info",
-        "Links",
-        "Keywords",
-        "Categories"
+        "Liens",
+        "Mots clés",
+        "Catégories"
       ],
-      "authors": "Authored by {0}",
-      "more_authors": "and {0} more",
-      "all_time_downloads": "All-time downloads!",
-      "created_at": "Created at {0}",
-      "license": "Licensed under the {0} license"
+      "authors": "Rédigé par {0}",
+      "more_authors": "et {0} de plus",
+      "all_time_downloads": "Téléchargements de tous les temps !",
+      "created_at": "Créé le {0}",
+      "license": "Sous la licence {0}"
     },
     "downloads": {
-      "title": "{0} downloads over the last {1} days",
-      "footer": "Project statistics are fetched directly from crates.io",
+      "title": "{0} téléchargements au cours des {1} derniers jours",
+      "footer": "Les statistiques du projet sont extraites directement de crates.io",
       "glossary": [
         "Date",
-        "Downloads"
+        "Téléchargements"
       ],
       "stats": {
-        "yesterday": "Yesterday: **{0}**",
-        "last_week": "Last Week: **{0}**",
-        "last_month": "Last Month: **{0}**"
+        "yesterday": "Hier : **{0}**",
+        "last_week": "La semaine dernière : **{0}**",
+        "last_month": "Le mois dernier : **{0}**"
       }
     }
   },
   "file": {
     "generic_algo_related": {
       "invalid_algorithm_embed": {
-        "title": "Invalid hashing algorithm!",
-        "description": "**Please use one of the following:**\n{0}",
-        "footer": "If you'd like a specific algorithm to be supported, please contact the devs in the support server."
+        "title": "Algorithme de hachage invalide !",
+        "description": "**Veuillez utiliser l'une des options suivantes :**\n{0}",
+        "footer": "Si vous souhaitez qu'un algorithme spécifique soit pris en charge, veuillez contacter les développeurs du serveur de support."
       }
     },
     "hash": {
-      "using_sha256_default": "No algorithm specified, **using SHA256...**",
-      "no_file": "You need to send this command **along with a file to hash!**",
-      "result_embed_title": "{0} checksum of {1}"
+      "using_sha256_default": "Aucun algorithme spécifié, **en utilisant SHA256...**",
+      "no_file": "Vous devez envoyer cette commande **avec un fichier à hacher !**",
+      "result_embed_title": "{0} somme de contrôle de {1}"
     },
     "verify": {
-      "using_sha256_default": "No algorithm specified, **assuming SHA256...**",
-      "no_file": "You need to send this command **along with a file to verify!**",
+      "using_sha256_default": "Aucun algorithme spécifié, **en supposant que se soit SHA256...**",
+      "no_file": "Vous devez envoyer cette commande **avec un fichier à vérifier !**",
       "result_embed": {
         "success": {
-          "title": "{emoji_checkmark}  Good to go!",
-          "description": "The checksums **match!**"
+          "title": "{emoji_checkmark}  C'est bon !",
+          "description": "Les sommes de contrôle **correspondent !**"
         },
         "failure": {
-          "title": "{emoji_failure}  Uh oh!",
-          "description": "The checksums **don't match!**"
+          "title": "{emoji_failure}  Oh oh !",
+          "description": "Les sommes de contrôle **ne correspondent pas !**"
         }
       }
     }
+  },
+  "___translated_by___": {
+    "name": "Thomas BLANC",
+    "url": "https://tarkhubal.github.io/"
   }
 }

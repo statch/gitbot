@@ -4,11 +4,10 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedItem, ReleaseFeed,
                            ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
-from typing import Optional, Literal, Tuple, List, Any
+from typing import Optional, Literal, Any
 from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 from lib.structs.discord.context import GitBotContext
-from structs.discord.embed import GitBotCommandState
 
 
 class Config(commands.Cog):

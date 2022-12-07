@@ -1137,7 +1137,7 @@
         "required_permissions": []
       },
       "repo_files": {
-        "brief": "View a GitHub repo's file structure ",
+        "brief": "View a GitHub repo's file structure",
         "usage": "repo files <repo>",
         "example": "repo files statch/gitbot",
         "description": null,

@@ -1091,9 +1091,10 @@ class Manager:
             for k, v in ref.items():
                 if k not in node or (locale is True and node[k] == ref[k]):
                     if locale:
+                        l_eq: bool = node[k] == ref[k]
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
-                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched. (might be same)',
-                                 f'locale-{dict_.meta.name}')
+                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched.' + (' (==, locales equal)' if l_eq else''),
+                                 f'locale-{dict_.meta.name}', message_color=Fore.LIGHTBLACK_EX if l_eq else Fore.LIGHTRED_EX)
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):

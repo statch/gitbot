@@ -7,13 +7,13 @@ from typing import Optional
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
 
 
 class Repo(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group(name='repo', aliases=['r'], invoke_without_command=True)
     @normalize_repository
@@ -211,5 +211,5 @@ class Repo(commands.Cog):
         await ctx.invoke(self.bot.get_command('loc'), repo=repo)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Repo(bot))

@@ -8,7 +8,7 @@ import subprocess
 from discord.ext import commands
 from typing import Optional
 from lib.structs import GitBotEmbed, GitBot
-from lib.utils.decorators import gitbot_command
+from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.structs.discord.context import GitBotContext
 
@@ -32,6 +32,7 @@ class LinesOfCode(commands.Cog):
     @gitbot_command(name='loc')
     @commands.cooldown(3, 60, commands.BucketType.user)
     @commands.max_concurrency(10)
+    @normalize_repository
     async def lines_of_code_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         ctx.fmt.set_prefix('loc')
         r: Optional[dict] = await self.bot.github.get_repo(repo)

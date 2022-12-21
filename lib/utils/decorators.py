@@ -159,9 +159,7 @@ def normalize_repository(func: Callable) -> Callable:
                 return repo
             repo: str = repo.strip()
             match_: list = re.findall(regex.GITHUB_REPO_GIT_URL_RE, repo) or re.findall(regex.GITHUB_REPO_URL_RE, repo)
-            if match_:
-                return f'{match_[0][0]}/{match_[0][1]}'
-            return repo
+            return match_[0] if match_ else repo
 
         return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)  # noqa
 

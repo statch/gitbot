@@ -7,6 +7,7 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
 from typing import Optional, Literal, Any
 from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
+from lib.utils.decorators import normalize_repository
 from lib.structs.discord.context import GitBotContext
 
 
@@ -501,7 +502,6 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
-    @normalize_repository
     async def delete_feed_group(self, ctx: GitBotContext) -> None:
         await ctx.group_help()
 
@@ -550,6 +550,7 @@ class Config(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
     @commands.cooldown(5, 30, commands.BucketType.guild)
+    @normalize_repository
     async def delete_feed_repo_command(self, ctx: GitBotContext, repo: GitHubRepository):
         ctx.fmt.set_prefix('config delete feed repo')
         guild, feed = await self.get_feed_prerequisites(ctx)

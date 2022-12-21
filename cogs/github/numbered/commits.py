@@ -47,7 +47,7 @@ class Commits(commands.Cog):
             footer=ctx.l.commits.embed.footer
         )
 
-        async def _callback(_, res: discord.Message) -> int:
+        async def _callback(_, res: discord.Message) -> GitBotCommandState:
             if res.content.lower() in ('cancel', 'quit', 'exit'):
                 return GitBotCommandState.FAILURE
             if oid_matched := self.bot.mgr.get_by_key_from_sequence(commits, 'abbreviatedOid', res.content):

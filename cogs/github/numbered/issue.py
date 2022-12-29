@@ -3,12 +3,13 @@ from typing import Optional
 from lib.utils.decorators import normalize_repository, gitbot_command
 from discord.ext import commands
 from lib.typehints import GitHubRepository
+from lib.structs import GitBot
 from lib.structs.discord.context import GitBotContext
 
 
 class Issue(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_command(name='issue', aliases=['i'])
     @commands.cooldown(10, 30, commands.BucketType.user)
@@ -88,5 +89,5 @@ class Issue(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Issue(bot))

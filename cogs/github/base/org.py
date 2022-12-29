@@ -4,11 +4,12 @@ from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubOrganization
 from lib.structs.discord.context import GitBotContext
+from lib.structs import GitBot
 
 
 class Org(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: GitBotContext, org: Optional[GitHubOrganization] = None) -> None:
@@ -108,5 +109,5 @@ class Org(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Org(bot))

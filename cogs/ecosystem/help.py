@@ -2,15 +2,15 @@ from discord.ext import commands
 from typing import Iterator, Optional
 from lib.utils.decorators import gitbot_command, GitBotCommand, GitBotCommandGroup
 from lib.utils import decorators
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.pages import EmbedPages
 from lib.typehints import CommandHelp, CommandGroupHelp
 from lib.structs.discord.context import GitBotContext
 
 
 class Help(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     def _get_commands(self) -> Iterator[GitBotCommand | GitBotCommandGroup]:
         command: GitBotCommand | GitBotCommandGroup
@@ -119,5 +119,5 @@ class Help(commands.Cog):
             await self.send_help(ctx)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(Help(bot))

@@ -3,12 +3,13 @@ import statcord
 from discord.ext import commands, tasks
 from random import randint
 from itertools import cycle
+from lib.structs import GitBot
 from lib.structs.discord.context import GitBotContext
 
 
 class MiscellaneousBackgroundTasks(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
         self.status_changer.start()
         if self.bot.mgr.env.production:
             self.statcord: statcord.Client = statcord.Client(self.bot, self.bot.mgr.env.statcord)
@@ -33,5 +34,5 @@ class MiscellaneousBackgroundTasks(commands.Cog):
             self.statcord.command_run(ctx)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(MiscellaneousBackgroundTasks(bot))

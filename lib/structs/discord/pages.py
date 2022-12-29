@@ -11,7 +11,6 @@ import asyncio
 import contextlib
 from time import time
 from enum import Enum
-from discord.ext import commands
 from typing import Optional, NoReturn, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
@@ -173,7 +172,7 @@ class EmbedPages:
     def _set_initial_message_attrs(self, message: discord.Message):
         self.start_time: float = time()
         self.last_action_time: float = self.start_time
-        self.bot: commands.Bot = self.context.bot
+        self.bot: 'GitBot' = self.context.bot
         self.message: discord.Message = message
 
     async def _add_controls(self):

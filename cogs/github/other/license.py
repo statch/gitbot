@@ -1,12 +1,12 @@
 from discord.ext import commands
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBot
 from lib.utils.decorators import gitbot_command
 from lib.structs.discord.context import GitBotContext
 
 
 class License(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: GitBot):
+        self.bot: GitBot = bot
 
     @gitbot_command(name='license')
     @commands.cooldown(10, 20, commands.BucketType.user)
@@ -33,5 +33,5 @@ class License(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: GitBot) -> None:
     await bot.add_cog(License(bot))

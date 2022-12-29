@@ -71,7 +71,7 @@ class Debug(commands.Cog):
     @restricted()
     @gitbot_command(name='eval', hidden=True)
     async def eval_command(self, ctx: GitBotContext, *, cmd: str) -> None:
-        if ctx.message.author.id == 548803750634979340:
+        if ctx.message.author.id == self.bot.mgr.env.owner_id:
             fn_name = '_eval_expr'
 
             cmd = cmd.strip('` ')

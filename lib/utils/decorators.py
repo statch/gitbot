@@ -63,7 +63,7 @@ def restricted():
     """
 
     def pred(ctx: 'GitBotContext') -> bool:
-        return ctx.author.id == 548803750634979340
+        return ctx.author.id == ctx.bot.mgr.env.owner_id
 
     return commands.check(pred)
 

@@ -27,7 +27,7 @@ class Errors(commands.Cog):
                     footer=ctx.l.errors.missing_required_argument.footer
                 ).send(ctx)
             case commands.CommandOnCooldown:
-                await ctx.error(ctx.fmt(f'command_on_cooldown {error.retry_after:.2f}'))
+                await ctx.error(ctx.fmt('command_on_cooldown', f'`{error.retry_after:.2f}`'))
             case commands.MaxConcurrencyReached:
                 await ctx.error(ctx.l.errors.max_concurrency_reached)
             case commands.BotMissingPermissions:

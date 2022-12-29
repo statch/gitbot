@@ -44,6 +44,7 @@ class Dev(commands.Cog):
     @dev_command_group.command('missing-locales', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: GitBotContext, locale_: str) -> None:
+        return await ctx.info('**This command is under maintenance** :\'( - check back later!')  # TODO: Fix this command
         ctx.fmt.set_prefix('dev missing_locales')
         mk_data: Optional[tuple[list[str]], dict, bool] = self.bot.mgr.get_missing_keys_for_locale(locale_)
         if not mk_data:
@@ -66,7 +67,7 @@ class Dev(commands.Cog):
             )
             await ctx.send(embed=embed)
         else:
-            await ctx.send(file=discord.File(fp=io.StringIO(json.dumps(mk_data[0], indent=2).encode('utf8')),
+            await ctx.send(file=discord.File(fp=io.StringIO(json.dumps(mk_data[0], indent=2)),
                                              filename=f'{locale_}_missing_keys.json'))
 
     @dev_command_group.command('export-commands', hidden=True)
@@ -90,7 +91,7 @@ class Dev(commands.Cog):
                 command_strings: str = json.dumps(commands_)
             case _:
                 return
-        if ctx.author.id == 548803750634979340 and not direct:
+        if ctx.author.id == self.bot.mgr.env.owner_id and not direct:
             f_name: str = f'commands.{format_.value}'
             s_dir: str = f'{self.bot.mgr.root_directory}/{f_name }'
             with open(s_dir, 'w+', encoding='utf8') as exportfile:

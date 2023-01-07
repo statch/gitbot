@@ -60,8 +60,6 @@ class Commits(commands.Cog):
             return GitBotCommandState.CONTINUE
 
         await embed.input_with_timeout(ctx=ctx, event='message', timeout=30,
-                                       timeout_check=lambda m: (m.channel.id == ctx.channel.id and
-                                                                m.author.id == ctx.author.id),
                                        response_callback=_callback)
         if ctx.data:
             await ctx.invoke(self.commit_command, repo=None, oid=None)

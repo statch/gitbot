@@ -262,7 +262,6 @@ class Config(commands.Cog):
             ctx=ctx,
             event='message',
             timeout=30,
-            timeout_check=lambda msg: msg.channel.id == ctx.channel.id and msg.author.id == ctx.author.id,
             response_callback=_callback,
             repo_=repo
         )
@@ -313,7 +312,6 @@ class Config(commands.Cog):
             ctx=ctx,
             event='message',
             timeout=45,
-            timeout_check=lambda msg: msg.channel.id == ctx.channel.id and msg.author.id == ctx.author.id,
             response_callback=_callback,
         )
         if not id_or_enum:
@@ -460,7 +458,6 @@ class Config(commands.Cog):
                 ctx=ctx,
                 event='message',
                 timeout=30,
-                timeout_check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id,
                 response_callback=_callback,
             )
             if not response:
@@ -590,7 +587,6 @@ class Config(commands.Cog):
                 ctx=ctx,
                 event='message',
                 timeout=30,
-                timeout_check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id,
                 response_callback=_callback,
             )
 
@@ -670,7 +666,6 @@ class Config(commands.Cog):
                 ctx=ctx,
                 event='message',
                 timeout=30,
-                timeout_check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id,
                 response_callback=_callback
         )
 

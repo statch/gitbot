@@ -1,8 +1,7 @@
 import discord
-import asyncio
 from typing import Optional, Iterable
 from lib.typehints import GitHubRepository
-from lib.structs import GitBotEmbed
+from lib.structs import GitBotEmbed, GitBotCommandState
 from lib.structs.discord.context import GitBotContext
 
 __all__: tuple = (
@@ -42,23 +41,18 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
             footer=ctx.l.repo.issues.footer_tip
     )
 
-    await ctx.send(embed=embed)
+    async def _callback(_, res: discord.Message):
+        if res.content.lower() == 'cancel':
+            return GitBotCommandState.FAILURE
+        if not (issue := await ctx.bot.mgr.validate_index(num := res.content, issues)):
+            await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=5.5)
+            return GitBotCommandState.CONTINUE
+        ctx.data = await ctx.bot.github.get_issue('', 0, issue, True)
+        await ctx.invoke(ctx.bot.get_command('issue'), repo)
+        return GitBotCommandState.SUCCESS
 
-    while True:
-        try:
-            msg: discord.Message = await ctx.bot.wait_for('message',
-                                                          check=lambda m: m.channel.id == ctx.channel.id and
-                                                                          m.author.id == ctx.author.id, timeout=30)
-            if msg.content.lower() == 'cancel':
-                return
-            if not (issue := await ctx.bot.mgr.validate_index(num := msg.content, issues)):
-                await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
-                continue
-            ctx.data = await ctx.bot.github.get_issue('', 0, issue, True)
-            await ctx.invoke(ctx.bot.get_command('issue'), repo)
-            return
-        except asyncio.TimeoutError:
-            return
+    await embed.input_with_timeout(ctx=ctx, timeout=30,
+                                   event='message', response_callback=_callback)
 
 
 async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
@@ -92,23 +86,18 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
             footer=ctx.l.repo.pulls.footer_tip
     )
 
-    await ctx.send(embed=embed)
+    async def _callback(_, res: discord.Message):
+        if res.content.lower() == 'cancel':
+            return GitBotCommandState.FAILURE
+        if not (pr := await ctx.bot.mgr.validate_index(num := res.content, prs)):
+            await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
+            return GitBotCommandState.CONTINUE
+        ctx.data = await ctx.bot.github.get_pull_request('', 0, pr)
+        await ctx.invoke(ctx.bot.get_command('pr'), repo)
+        return GitBotCommandState.SUCCESS
 
-    while True:
-        try:
-            msg: discord.Message = await ctx.bot.wait_for('message',
-                                                          check=lambda m: m.channel.id == ctx.channel.id and
-                                                                          m.author.id == ctx.author.id, timeout=30)
-            if msg.content.lower() == 'cancel':
-                return
-            if not (pr := await ctx.bot.mgr.validate_index(num := msg.content, prs)):
-                await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
-                continue
-            ctx.data = await ctx.bot.github.get_pull_request('', 0, pr)
-            await ctx.invoke(ctx.bot.get_command('pr'), repo)
-            return
-        except asyncio.TimeoutError:
-            return
+    await embed.input_with_timeout(ctx=ctx, timeout=30,
+                                   event='message', response_callback=_callback)
 
 
 async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -> None:
@@ -119,19 +108,13 @@ async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -
         else:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
     else:
-        if not stored:
-            if item == 'issue':
-                await ctx.error(ctx.l.generic.nonexistent.repo.no_issues_with_state.format(f'`{state}`'))
-            else:
-                await ctx.error(ctx.l.generic.nonexistent.repo.no_pulls_with_state.format(f'`{state}`'))
-        else:
-            if item == 'issue':
-                await ctx.error(ctx.l.generic.nonexistent.repo.no_issues_with_state_qa.format(f'`{state}`'))
-            else:
-                await ctx.error(ctx.l.generic.nonexistent.repo.no_pulls_with_state_qa.format(f'`{state}`'))
+        await ctx.error(ctx.bot.mgr.get_nested_key(ctx.l.generic, f'nonexistent repo no_'
+                                                                  f'{"issues" if item == "issue" else "pulls"}'
+                                                                  f'_with_state{"_qa" if stored else ""}')
+                        .format(f'`{state}`'))
 
 
-def make_string(ctx: GitBotContext, repo: GitHubRepository, item: dict, path: str) -> str:
-    url: str = f'https://github.com/{repo}/{path}/{item["number"]}/'
-    return f'[`#{item["number"]}`]({url}) **|** [' \
-           f'{ctx.bot.mgr.truncate(item["title"], 70)}]({url})'
+def make_string(ctx: GitBotContext, repo: GitHubRepository, issue_or_pr: dict, path: str) -> str:
+    url: str = f'https://github.com/{repo}/{path}/{issue_or_pr["number"]}/'
+    return f'[`#{issue_or_pr["number"]}`]({url}) **|** [' \
+           f'{ctx.bot.mgr.truncate(issue_or_pr["title"], 70)}]({url})'

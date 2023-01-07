@@ -120,8 +120,8 @@ class GitBotEmbed(discord.Embed):
                                  ctx: 'GitBotContext',
                                  event: str,
                                  timeout: int,
-                                 timeout_check: Callable[[Any], bool],
                                  response_callback: GitBotEmbedResponseCallback,
+                                 timeout_check: Callable[[Any], bool] | None = None,
                                  init_message: Optional[discord.Message] = None,
                                  with_antispam: bool = True,
                                  antispam_threshold: int = 5,
@@ -142,7 +142,7 @@ class GitBotEmbed(discord.Embed):
         :param ctx: The context to use
         :param event: The event to listen for
         :param timeout: The timeout to use
-        :param timeout_check: The check for the timeout, typically author and channel wide
+        :param timeout_check: The check for the timeout, typically author and channel ID-based (default)
         :param response_callback: The aforesaid callback
         :param init_message: An existing message to use as the initial one instead of sending a new one
         :param with_antispam: Whether to accept only a certain amount of GitBotCommandState.CONTINUEs
@@ -152,6 +152,11 @@ class GitBotEmbed(discord.Embed):
         """
         if not init_message:
             init_message: discord.Message = await self.send(ctx)
+
+        if not timeout_check:
+            # we freeze these values right here to avoid collisions with new contexts
+            author_id, channel_id = ctx.author.id, ctx.channel.id
+            timeout_check = lambda m: m.author.id == author_id and m.channel.id == channel_id
 
         new_ctx: 'GitBotContext' = await ctx.bot.get_context(init_message)
         missing_slots: set = set(dir(ctx)) ^ set(dir(new_ctx))

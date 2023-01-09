@@ -121,7 +121,15 @@ class Repo(commands.Cog):
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
-    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository) -> None:
+    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository | None = None) -> None:
+        if not repo_or_path:
+            stored: str = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+            if not stored:
+                await self.bot.mgr.db.users.delitem(ctx, 'repo')
+                await ctx.error(ctx.l.generic.nonexistent.repo.qa)
+                return
+            repo_or_path = stored
+
         ctx.fmt.set_prefix('repo files')
         is_tree: bool = False
         if repo_or_path.count('/') > 1:
@@ -156,7 +164,7 @@ class Repo(commands.Cog):
         )
         if len(src) > 15:
             embed.set_footer(text=ctx.fmt('view_more', len(src) - 15))
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, nonce='repo_files')
 
     @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10)

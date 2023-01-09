@@ -71,14 +71,14 @@ class Dev(commands.Cog):
                                              filename=f'{locale_}_missing_keys.json'))
 
     @dev_command_group.command('export-commands', hidden=True)
-    @commands.cooldown(1, 600, commands.BucketType.guild)
-    async def export_commands_command(self, ctx: GitBotContext, format_: str = 'txt', direct: bool = False) -> None:
+    @commands.cooldown(10, 600, commands.BucketType.guild)
+    async def export_commands_command(self, ctx: GitBotContext, format_: str = 'txt') -> None:
+        ctx.fmt.set_prefix('dev export_commands')
         try:
             format_: ExportFileType = ExportFileType(format_.lower())
         except ValueError:
             await ctx.error(ctx.fmt('invalid_format', ','.join([f'`{e.value}`' for e in ExportFileType])))
             return
-        ctx.fmt.set_prefix('dev export_commands')
         command: GitBotCommand | GitBotCommandGroup
         commands_: list[str] = []
         for command in self.bot.walk_commands():
@@ -91,17 +91,9 @@ class Dev(commands.Cog):
                 command_strings: str = json.dumps(commands_)
             case _:
                 return
-        if ctx.author.id == self.bot.mgr.env.owner_id and not direct:
-            f_name: str = f'commands.{format_.value}'
-            s_dir: str = f'{self.bot.mgr.root_directory}/{f_name }'
-            with open(s_dir, 'w+', encoding='utf8') as exportfile:
-                exportfile.write(command_strings)
-            await ctx.success(ctx.fmt('success_direct', f'`{f_name}`', len(commands_)))
-            self.export_commands_command.reset_cooldown(ctx)
-        else:
-            await ctx.success(ctx.fmt('success_download', len(commands_)),
-                              file=discord.File(fp=io.StringIO(command_strings),
-                                                filename=f'commands.{format_.value}'))
+        await ctx.success(ctx.fmt('success', len(commands_)),
+                          file=discord.File(fp=io.StringIO(command_strings),
+                                            filename=f'commands.{format_.value}'))
 
 
 async def setup(bot: GitBot) -> None:

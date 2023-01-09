@@ -1465,8 +1465,8 @@
       "title": "Missing keys in `{0}`"
     },
     "export_commands": {
-      "success_direct": "The command file **has been saved to** {0} ({1} commands)",
-      "success_download": "**Here's the command file!** ({0} commands)"
+      "success": "**Here's the command file!** ({0} commands)",
+      "invalid_format": "**You can't export to that format!**\nPlease choose one of the following: {0}"
     }
   },
   "pypi": {

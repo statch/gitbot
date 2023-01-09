@@ -73,6 +73,8 @@ class Commits(commands.Cog):
                              oid: Optional[str] = None):
         ctx.fmt.set_prefix('commit')
         is_stored: bool = False
+        if oid and oid.lower() in ('last', 'latest', 'newest', 'recent'):
+            oid = None
         if not ctx.data:
             if repo and not oid and GIT_OBJECT_ID_RE.match(repo):
                 oid: str = repo
@@ -105,6 +107,7 @@ class Commits(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 title=f'{self.bot.mgr.e.branch}  {truncated_headline} `{commit["abbreviatedOid"]}`',
                 url=commit['url'],
+                footer=ctx.l.commit.footer_latest if is_stored and not oid else None
             )
             if commit['author']['user'] and commit['author']['user'].get('avatarUrl'):
                 embed.set_thumbnail(url=commit['author']['user']['avatarUrl'])

@@ -475,7 +475,8 @@
         "empty": "No additional description provided"
       },
       "oid": "Full Git OID"
-    }
+    },
+    "footer_latest": "This is the latest commit from your quick-access repo"
   },
   "logs": {
     "dm_title": "Webhook URL",

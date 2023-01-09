@@ -33,6 +33,9 @@ class Issue(commands.Cog):
                     await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                     return
 
+            if issue_number[0] == '#':
+                issue_number = issue_number[1:]
+
             try:
                 issue: dict | str = await self.bot.github.get_issue(repo, int(issue_number))
             except ValueError:

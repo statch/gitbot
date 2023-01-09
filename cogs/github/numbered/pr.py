@@ -42,6 +42,9 @@ class PullRequest(commands.Cog):
                         await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                         return
 
+            if pr_number[0] == '#':
+                pr_number = pr_number[1:]
+
             try:
                 pr: dict | str = await self.bot.github.get_pull_request(repo, int(pr_number))
             except ValueError:

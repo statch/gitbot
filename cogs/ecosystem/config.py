@@ -519,9 +519,9 @@ class Config(commands.Cog):
         ctx.fmt.set_prefix('+flow confirmation')
         embed: GitBotEmbed = GitBotEmbed(
             color=self.bot.mgr.c.cyan,
-            title=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.title,
+            title=ctx.l.config.delete.feed.channel.flow.confirmation.embed.title,
             description=ctx.fmt('embed description', channel.mention, f'`{len(rfi["repos"])}`'),
-            footer=ctx.l.config.delete.feed.channel.explicit.confirmation.embed.footer
+            footer=ctx.l.config.delete.feed.channel.flow.confirmation.embed.footer
         )
 
         async def _callback(_, event):

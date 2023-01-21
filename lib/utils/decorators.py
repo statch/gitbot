@@ -155,7 +155,7 @@ def normalize_repository(func: Callable) -> Callable:
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
         def normalize_repo(repo: 'GitHubRepository') -> str:
-            if not repo:
+            if not repo or not isinstance(repo, str):
                 return repo
             repo: str = repo.strip()
             match_: list = re.findall(regex.GITHUB_REPO_GIT_URL_RE, repo) or re.findall(regex.GITHUB_REPO_URL_RE, repo)

@@ -1,3 +1,4 @@
+import builtins
 import re
 import functools
 import inspect
@@ -7,7 +8,7 @@ from typing import Callable, Any, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.typehints import ReleaseFeed
-from lib.structs.enums import CheckFailureCode
+from lib import structs
 from lib.typehints import GitHubRepository
 from lib.utils import regex
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
@@ -35,7 +36,7 @@ def bot_can_manage_release_feed_channels():
             for rfi in rf:
                 channel: discord.TextChannel = await ctx.bot.fetch_channel(rfi['cid'])
                 if not channel.permissions_for(ctx.guild.me).manage_channels:
-                    ctx.check_failure_code = CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE
+                    ctx.check_failure_code = structs.CheckFailureCode.MISSING_RELEASE_FEED_CHANNEL_PERMISSIONS_GUILDWIDE
                     return False
         return True
 
@@ -50,7 +51,7 @@ def guild_has_release_feeds():
     async def pred(ctx: 'GitBotContext') -> bool:
         rf: Optional['ReleaseFeed'] = (await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}).get('feed', None)
         if not rf:
-            ctx.check_failure_code = CheckFailureCode.NO_GUILD_RELEASE_FEEDS
+            ctx.check_failure_code = structs.CheckFailureCode.NO_GUILD_RELEASE_FEEDS
             return False
         return True
 
@@ -155,11 +156,17 @@ def normalize_repository(func: Callable) -> Callable:
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
         def normalize_repo(repo: 'GitHubRepository') -> str:
-            if not repo or not isinstance(repo, str):
-                return repo
-            repo: str = repo.strip()
-            match_: list = re.findall(regex.GITHUB_REPO_GIT_URL_RE, repo) or re.findall(regex.GITHUB_REPO_URL_RE, repo)
-            return match_[0] if match_ else repo
+            match type(repo):
+                case builtins.str:
+                    repo: str = repo.strip()
+                    match_: list = re.findall(regex.GITHUB_REPO_GIT_URL_RE, repo) or re.findall(regex.GITHUB_REPO_URL_RE, repo)
+                    return match_[0] if match_ else repo
+                case structs.ParsedRepositoryData | builtins.tuple:
+                    return getattr(repo, 'slashname', f'{repo[0]}/{repo[1]}')
+                case builtins.dict:
+                    return repo['full_name']
+                case _:
+                    return repo
 
         return await normalize_argument(func, 'repo', normalize_repo, *args, **kwargs)  # noqa
 

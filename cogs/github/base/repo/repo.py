@@ -175,7 +175,7 @@ class Repo(commands.Cog):
         msg: discord.Message = await ctx.send(f"{self.bot.mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[bytes | bool] = await self.bot.github.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
-            return await msg.edit(content=f"{self.bot.mgr.e.err}  {ctx.l.generic.nonexistent.repo}")
+            return await msg.edit(content=f"{self.bot.mgr.e.err}  {ctx.l.generic.nonexistent.repo.base}")
         elif src_bytes is False:
             return await msg.edit(
                 content=f"{self.bot.mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")

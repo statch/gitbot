@@ -163,7 +163,7 @@ def normalize_repository(func: Callable) -> Callable:
                 case structs.ParsedRepositoryData | builtins.tuple:
                     return getattr(repo, 'slashname', f'{repo[0]}/{repo[1]}')
                 case builtins.dict:
-                    return repo['full_name']
+                    return repo.get('full_name')
                 case _:
                     return repo
 

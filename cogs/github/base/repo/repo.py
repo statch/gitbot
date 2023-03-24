@@ -117,7 +117,7 @@ class Repo(commands.Cog):
         if 'licenseInfo' in r and r['licenseInfo'] is not None and r['licenseInfo']["name"].lower() != 'other':
             embed.set_footer(text=ctx.fmt('license', r["licenseInfo"]["name"]))
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=r['url'])
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
@@ -164,7 +164,7 @@ class Repo(commands.Cog):
         )
         if len(src) > 15:
             embed.set_footer(text=ctx.fmt('view_more', len(src) - 15))
-        await ctx.send(embed=embed, nonce='repo_files')
+        await ctx.send(embed=embed, nonce='repo_files', view_on_url=link)
 
     @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10)

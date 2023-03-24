@@ -90,7 +90,11 @@
     "inactive": "The command timed out - this message is no longer active!",
     "completed": "The command has been completed - this message is no longer active",
     "closed": "This command has been closed - you can't interact with it anymore",
-    "failure": "The command didn't finish - this message is no longer active"
+    "failure": "The command didn't finish - this message is no longer active",
+    "view": {
+      "on_github": "View on GitHub",
+      "more": "View on {0}"
+    }
   },
   "enum": {
     "generic": {

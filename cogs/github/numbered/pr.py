@@ -123,7 +123,7 @@ class PullRequest(commands.Cog):
             embed.add_field(name=f':label: {ctx.l.pr.glossary[4]}:', value=' '.join([f"`{lb}`" for lb in pr['labels']]),
                             inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=pr['url'])
 
 
 async def setup(bot: GitBot) -> None:

@@ -89,7 +89,7 @@ class Issue(commands.Cog):
         if issue['labels']:
             embed.add_field(name=f':label: {ctx.l.issue.glossary[2]}:', value=' '.join([f"`{lb}`" for lb in issue['labels']]))
         embed.set_thumbnail(url=issue['author']['avatarUrl'])
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=issue['url'])
 
 
 async def setup(bot: GitBot) -> None:

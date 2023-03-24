@@ -81,7 +81,7 @@ class Org(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: {ctx.l.org.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=org['html_url'])
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @org_command_group.command(name='repos', aliases=['r'])
@@ -100,13 +100,13 @@ class Org(commands.Cog):
             description='\n'.join(
                 [f':white_small_square: [**{x["name"]}**]({x["html_url"]})' for x in repos[:15]]),
             color=self.bot.mgr.c.rounded,
-            url=f"https://github.com/{org}"
+            url=f'https://github.com/orgs/{org}/repositories'
         )
         if (c := len(repos)) > 15:
             more: str = str(c - 15)
             embed.set_footer(text=ctx.fmt('more', more))
         embed.set_thumbnail(url=o["avatar_url"])
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=f'https://github.com/orgs/{org}/repositories')
 
 
 async def setup(bot: GitBot) -> None:

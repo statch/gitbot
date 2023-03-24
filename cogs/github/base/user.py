@@ -95,7 +95,7 @@ class User(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: {ctx.l.user.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=u['url'])
 
     @commands.cooldown(15, 30, commands.BucketType.user)
     @user_command_group.command(name='repos', aliases=['r'])

@@ -157,7 +157,7 @@ class Commits(commands.Cog):
             embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info)
             embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes)
             embed.add_field(name=f':label: {ctx.l.commit.fields.oid}:', value=f'```\n{commit["oid"]}```')
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view_on_url=commit['url'])
 
 
 async def setup(bot: GitBot) -> None:

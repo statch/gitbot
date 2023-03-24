@@ -30,7 +30,7 @@ class License(commands.Cog):
         embed.add_field(name=ctx.l.license.limitations,
                         value=''.join([f'{self.bot.mgr.e.circle_red}  {x}\n' for x in license_['limitations']]) if len(
                              license_['limitations']) != 0 else ctx.l.license.none)
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view_on_url=license_['html_url'])
 
 
 async def setup(bot: GitBot) -> None:

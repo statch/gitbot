@@ -85,7 +85,21 @@ class GitBotContext(commands.Context):
                    view: discord.ui.View | None = None,
                    suppress_embeds: bool = False,
                    ephemeral: bool = False,
-                   style: MessageFormattingStyle | str = MessageFormattingStyle.DEFAULT) -> discord.Message:
+                   style: MessageFormattingStyle | str = MessageFormattingStyle.DEFAULT,
+                   view_on_url: None | str = None) -> discord.Message:
+        if view_on_url is not None:
+            if view is None:
+                view = discord.ui.View()
+            domain: str = view_on_url.split('/')[2]
+            button: discord.ui.Button = discord.ui.Button(style=discord.ButtonStyle.link, url=view_on_url)
+            match domain:
+                case 'github.com':
+                    button.label = self.l.generic.view.on_github
+                    button.emoji = self.bot.mgr.e.github
+                case _:
+                    button.label = self.l.generic.view.more.format(domain)
+                    button.emoji = self.bot.mgr.e.info
+            view.add_item(button)
         return await super().send(content=self._format_content(content, style), tts=tts,
                                   embed=embed, embeds=embeds,
                                   file=file, files=files,

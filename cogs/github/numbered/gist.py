@@ -48,7 +48,7 @@ class Gist(commands.Cog):
             color=self.bot.mgr.c.rounded,
             title=ctx.fmt('title', user),
             description='\n'.join(gist_strings),
-            url=data['url']
+            url=f'https://gist.github.com/{data["login"]}'
         )
 
         embed.set_footer(text=ctx.fmt('footer', user))
@@ -87,7 +87,8 @@ class Gist(commands.Cog):
                 timeout_embed.set_footer(text=ctx.l.gist.timeout.tip)
                 await base_msg.edit(embed=timeout_embed)
                 return
-        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.content), ctx.l.gist.content_notice))
+        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.content), ctx.l.gist.content_notice),
+                       view_on_url=data['gists']['nodes'][int(msg.content) - 1 if int(msg.content) != 0 else 1]['url'])
 
     async def build_gist_embed(self,
                                ctx: GitBotContext,

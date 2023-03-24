@@ -89,11 +89,11 @@ class PyPI(commands.Cog):
             if 'license' in data['info'] and data['info']['license']:
                 embed.set_footer(text=ctx.fmt('license', data['info']['license']))
 
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view_on_url=data['info']['project_url'])
         else:
             await ctx.error(ctx.l.generic.nonexistent.python_package)
 
-    @pypi_command_group.command('downloads', aliases=['dl'])
+    @pypi_command_group.command('downloads', aliases=['dl', 'stats', 'statistics'])
     @commands.cooldown(3, 30, commands.BucketType.user)
     @commands.max_concurrency(7)
     async def project_downloads_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
@@ -123,7 +123,7 @@ class PyPI(commands.Cog):
                                                                                             format='png',
                                                                                             engine='kaleido')),
                                                            filename=f'{project}-downloads-overall.png'),
-                            mention_author=False)
+                            mention_author=False, view_on_url=f'https://pypistats.org/packages/{project.replace(".", "-").lower()}')
         else:
             await ctx.error(ctx.l.generic.nonexistent.python_package)
 

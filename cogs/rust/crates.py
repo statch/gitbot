@@ -90,7 +90,7 @@ class Crates(commands.Cog):
                                                                     'category', 'slug')):
                 embed.add_field(name=f':package: {ctx.l.crates.info.glossary[4]}:', value=rendered_ctgs)
 
-            await embed.send(ctx)
+            await embed.send(ctx, view_on_url=crate_url)
         else:
             await ctx.error(ctx.l.generic.nonexistent.rust_crate)
 
@@ -126,7 +126,7 @@ class Crates(commands.Cog):
                                                                                             format='png',
                                                                                             engine='kaleido')),
                                                            filename=f'{project}-downloads-overall.png'),
-                            mention_author=False)
+                            mention_author=False, view_on_url=f'https://crates.io/crates/{project.replace(".", "-").lower()}')
         else:
             await ctx.error(ctx.l.generic.nonexistent.rust_crate)
 

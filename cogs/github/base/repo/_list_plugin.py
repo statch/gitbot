@@ -1,7 +1,7 @@
 import discord
 from typing import Optional, Iterable
 from lib.typehints import GitHubRepository
-from lib.structs import GitBotEmbed, GitBotCommandState
+from lib.structs import GitBotEmbed, GitBotCommandState, GitHubInfoSelectMenu
 from lib.structs.discord.context import GitBotContext
 
 __all__: tuple = (
@@ -41,18 +41,13 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
             footer=ctx.l.repo.issues.footer_tip
     )
 
-    async def _callback(_, res: discord.Message):
-        if res.content.lower() == 'cancel':
-            return GitBotCommandState.FAILURE
-        if not (issue := await ctx.bot.mgr.validate_index(num := res.content, issues)):
-            await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=5.5)
-            return GitBotCommandState.CONTINUE
-        ctx.data = await ctx.bot.github.get_issue('', 0, issue, True)
+    async def _callback(_ctx: GitBotContext, selected_issue: dict):
+        ctx.data = await ctx.bot.github.get_issue('', 0, selected_issue, True)
         await ctx.invoke(ctx.bot.get_command('issue'), repo)
-        return GitBotCommandState.SUCCESS
 
-    await embed.input_with_timeout(ctx=ctx, timeout=30,
-                                   event='message', response_callback=_callback)
+    view = discord.ui.View()
+    view.add_item(GitHubInfoSelectMenu(ctx, 'issue', '#{number} - {author login}', '{title}', issues, _callback))
+    await ctx.send(embed=embed, view=view)
 
 
 async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
@@ -86,18 +81,13 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
             footer=ctx.l.repo.pulls.footer_tip
     )
 
-    async def _callback(_, res: discord.Message):
-        if res.content.lower() == 'cancel':
-            return GitBotCommandState.FAILURE
-        if not (pr := await ctx.bot.mgr.validate_index(num := res.content, prs)):
-            await ctx.error(ctx.l.generic.invalid_index.format(f'`{num}`'), delete_after=7)
-            return GitBotCommandState.CONTINUE
-        ctx.data = await ctx.bot.github.get_pull_request('', 0, pr)
+    async def _callback(_ctx: GitBotContext, selected_pr: dict):
+        ctx.data = await ctx.bot.github.get_pull_request('', 0, selected_pr)
         await ctx.invoke(ctx.bot.get_command('pr'), repo)
-        return GitBotCommandState.SUCCESS
 
-    await embed.input_with_timeout(ctx=ctx, timeout=30,
-                                   event='message', response_callback=_callback)
+    view = discord.ui.View()
+    view.add_item(GitHubInfoSelectMenu(ctx, 'pull request', '#{number} - {author login}', '{title}',  prs, _callback))
+    await ctx.send(embed=embed, view=view)
 
 
 async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -> None:

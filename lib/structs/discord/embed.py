@@ -151,7 +151,7 @@ class GitBotEmbed(discord.Embed):
         :return: Optional message and optional callback returns
         """
         if not init_message:
-            init_message: discord.Message = await self.send(ctx)
+            init_message: discord.Message = await self.send(ctx, *args, **kwargs)
 
         if not timeout_check:
             # we freeze these values right here to avoid collisions with new contexts

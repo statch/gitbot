@@ -390,15 +390,16 @@ class Manager:
         return default
 
     @staticmethod
-    def get_nested_key(dict_: AnyDict, key: Iterable[str] | str) -> Any:
+    def get_nested_key(dict_: AnyDict, key: Iterable[str] | str, sep: str = ' ') -> Any:
         """
         Get a nested dictionary key
 
         :param dict_: The dictionary to get the key from
         :param key: The key to get
+        :param sep: The separator to use if key is a string
         :return: The value associated with the key
         """
-        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(), dict_)
+        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(sep=sep), dict_)
 
     @staticmethod
     def chunks(iterable: list | tuple, chunk_size: int) -> Generator[list | tuple, None, None]:
@@ -846,7 +847,7 @@ class Manager:
             return url
         return alt
 
-    async def validate_index(self, number: str, items: list[AnyDict]) -> Optional[dict]:
+    def validate_index(self, number: str| int, items: list[AnyDict]) -> Optional[dict]:
         """
         Validate an index against a list of indexed dicts
 
@@ -854,12 +855,13 @@ class Manager:
         :param items: The list of indexed dicts to check against
         :return: The dict matching the index
         """
-        if number.startswith('#'):
-            number: str = number[1:]
-        try:
-            number: int = int(number)
-        except (TypeError, ValueError):
-            return None
+        if isinstance(number, str):
+            if number.startswith('#'):
+                number: str = number[1:]
+            try:
+                number: int = int(number)
+            except (TypeError, ValueError):
+                return None
         matched = self.opt([i for i in items if i['number'] == number], 0)
         if matched:
             return matched

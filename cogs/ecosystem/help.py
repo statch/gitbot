@@ -1,6 +1,7 @@
 from discord.ext import commands
+from discord import app_commands
 from typing import Iterator, Optional
-from lib.utils.decorators import gitbot_command, GitBotCommand, GitBotCommandGroup
+from lib.utils.decorators import gitbot_hybrid_command, GitBotCommand, GitBotCommandGroup
 from lib.utils import decorators
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.pages import EmbedPages
@@ -100,8 +101,11 @@ class Help(commands.Cog):
             pages + embed
         await pages.start(ctx)
 
-    @gitbot_command('help', aliases=['h', 'halp' 'commands', 'cmds',
-                                     'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
+    @gitbot_hybrid_command('help', aliases=['h', 'halp' 'commands', 'cmds', 'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
+    @app_commands.rename(command_or_group='command')
+    @app_commands.describe(
+            command_or_group='The command you want to get help for. If omitted, the default help page will be shown.'
+    )
     @commands.max_concurrency(2, commands.BucketType.user)
     async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None):
         if command_or_group is not None:
@@ -109,7 +113,7 @@ class Help(commands.Cog):
             if not command_or_group:
                 return await ctx.error(ctx.l.generic.nonexistent.command_or_group)
             match type(command_or_group):  # ah yes, the almighty type() call for checks. Don't kill me.
-                case decorators.GitBotCommand:  # dot-access to avoid name capture pattern error - pep-0634
+                case decorators.GitBotCommand | decorators.GitBotHybridCommand:  # dot-access to avoid name capture pattern error - pep-0634
                     await self.send_command_help(ctx, command_or_group)
                 case decorators.GitBotCommandGroup:
                     await self.send_command_group_help(ctx, command_or_group)
@@ -117,6 +121,15 @@ class Help(commands.Cog):
                     ...
         else:
             await self.send_help(ctx)
+
+    @help_command.autocomplete('command_or_group')
+    async def help_autocomplete(self,
+                                _,
+                                current: str) -> list[app_commands.Choice[str]]:
+        return [
+            app_commands.Choice(name=str(cmd), value=str(cmd))
+            for cmd in self._get_commands() if current.lower() in str(cmd).lower()
+        ][:25]
 
 
 async def setup(bot: GitBot) -> None:

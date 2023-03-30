@@ -117,6 +117,10 @@ class GitBot(commands.Bot):
         self._setup_uvloop()
         await self._setup_cloc()
         await self.load_cogs()
+        test_guild_id: int | None = self.mgr.env.get('test_guild_id')
+        if test_guild := discord.Object(id=test_guild_id) if test_guild_id else None:
+            self.tree.copy_global_to(guild=test_guild)
+        await self.tree.sync(guild=test_guild)
 
     async def close(self) -> None:
         await super().close()

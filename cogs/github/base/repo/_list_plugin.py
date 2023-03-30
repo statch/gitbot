@@ -1,7 +1,6 @@
-import discord
 from typing import Optional, Iterable
 from lib.typehints import GitHubRepository
-from lib.structs import GitBotEmbed, GitBotCommandState, GitHubInfoSelectMenu
+from lib.structs import GitBotEmbed, GitHubInfoSelectView
 from lib.structs.discord.context import GitBotContext
 
 __all__: tuple = (
@@ -45,9 +44,9 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
         ctx.data = await ctx.bot.github.get_issue('', 0, selected_issue, True)
         await ctx.invoke(ctx.bot.get_command('issue'), repo)
 
-    view = discord.ui.View()
-    view.add_item(GitHubInfoSelectMenu(ctx, 'issue', '#{number} - {author login}', '{title}', issues, _callback))
-    await ctx.send(embed=embed, view=view)
+    await ctx.send(embed=embed, view=GitHubInfoSelectView(
+            ctx, 'issue', '#{number} - {author login}', '{title}', issues, _callback
+    ))
 
 
 async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
@@ -85,9 +84,9 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
         ctx.data = await ctx.bot.github.get_pull_request('', 0, selected_pr)
         await ctx.invoke(ctx.bot.get_command('pr'), repo)
 
-    view = discord.ui.View()
-    view.add_item(GitHubInfoSelectMenu(ctx, 'pull request', '#{number} - {author login}', '{title}',  prs, _callback))
-    await ctx.send(embed=embed, view=view)
+    await ctx.send(embed=embed, view=GitHubInfoSelectView(
+            ctx, 'pull request', '#{number} - {author login}', '{title}', prs, _callback
+    ))
 
 
 async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -> None:

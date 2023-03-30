@@ -1,1 +1,1 @@
-from .github_info_select import GitHubInfoSelectMenu
+from .github_info_select import GitHubInfoSelectMenu, GitHubInfoSelectView

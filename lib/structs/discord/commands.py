@@ -113,3 +113,8 @@ class GitBotCommandGroup(commands.Group, GitBotCommand):
         """
         if not ctx.invoked_subcommand:
             await ctx.invoke(ctx.bot.get_command('help'), command_or_group=self.fullname)
+
+
+class GitBotHybridCommand(commands.HybridCommand, GitBotCommand):
+    def __init__(self, func, **attrs):
+        super().__init__(func, **attrs)

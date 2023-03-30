@@ -299,7 +299,7 @@
     },
     "pulls": {
       "title": "Latest {0} pull requests in {1}",
-      "footer_tip": "You can quickly inspect a specific PR from the list by typing selecting it from the list."
+      "footer_tip": "You can quickly inspect a specific PR from the list by selecting it from the list."
     }
   },
   "gist": {

@@ -128,6 +128,13 @@
     "manage_channels": "Manage Channels",
     "manage_guild": "Manage Server"
   },
+  "views": {
+    "select": {
+      "github_info": {
+        "placeholder": "Select {0} to view"
+      }
+    }
+  },
   "legal": {
     "title": "GitBot Legal",
     "description": "**Thanks for being a user of GitBot!**\nIf you wish to take a look at the legal documents governing your use of GitBot, check out [**the legal page.**](https://statch.org/gitbot/legal.html)",
@@ -288,11 +295,11 @@
     },
     "issues": {
       "title": "Latest {0} issues in {1}",
-      "footer_tip": "You can quickly inspect a specific issue from the list by typing its number!\nYou can type cancel to quit."
+      "footer_tip": "You can quickly inspect a specific issue from the list by selecting it from the list."
     },
     "pulls": {
       "title": "Latest {0} pull requests in {1}",
-      "footer_tip": "You can quickly inspect a specific PR from the list by typing its number!\nYou can type cancel to quit."
+      "footer_tip": "You can quickly inspect a specific PR from the list by typing selecting it from the list."
     }
   },
   "gist": {

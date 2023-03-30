@@ -13,3 +13,4 @@ from .discord.commands import *
 from .discord.bot import GitBot
 from .discord.context import GitBotContext
 from .enums import CheckFailureCode
+from .discord.views import *

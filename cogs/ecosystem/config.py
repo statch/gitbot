@@ -228,7 +228,7 @@ class Config(commands.Cog):
                 except commands.BadArgument:
                     return
 
-            if selected_index := (await self.bot.mgr.validate_index(res.content, indexes) or await _try_convert()):
+            if selected_index := (self.bot.mgr.validate_index(res.content, indexes) or await _try_convert()):
                 selected_rfi: ReleaseFeedItem = selected_index['rfi']
                 mention: str = f'<#{selected_rfi["cid"]}>'
                 if len(selected_rfi['repos']) < 10:

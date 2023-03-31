@@ -36,9 +36,11 @@ class GitBot(commands.Bot):
     crates: CratesIOAPI | None = None
     mgr: Manager | None = None
     runtime_vars: dict[str, str] = {}
+    statch_guild: discord.Guild | None = None
 
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
+        self.user_id_blacklist: set = set()
         super().__init__(command_prefix=f'{os.getenv("PREFIX")} ', case_insensitive=True,
                          intents=discord.Intents(messages=True, message_content=True, guilds=True,
                                                  guild_reactions=True),
@@ -107,6 +109,12 @@ class GitBot(commands.Bot):
             'gitbot-commit': self.mgr.get_current_commit(short=False),
         }
 
+    async def setup_statch_specific(self) -> None:
+        self.statch_guild: discord.Guild | None = await self.fetch_guild(737430006271311913, with_counts=False)
+        async for ban in self.statch_guild.bans():
+            self.user_id_blacklist.add(ban.user.id)
+        self.logger.info(f'Fetched {len(self.user_id_blacklist)} blacklisted users.')
+
     async def setup_hook(self) -> None:
         if not os.path.exists('./tmp'):
             os.mkdir('tmp')
@@ -121,6 +129,7 @@ class GitBot(commands.Bot):
         if test_guild := discord.Object(id=test_guild_id) if test_guild_id else None:
             self.tree.copy_global_to(guild=test_guild)
         await self.tree.sync(guild=test_guild)
+        await self.setup_statch_specific()
 
     async def close(self) -> None:
         await super().close()

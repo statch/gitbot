@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from typing import Optional
-from lib.structs import GitBot
+from lib.structs import GitBot, GitBotEmbed
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
@@ -41,7 +41,7 @@ class User(commands.Cog):
                 await ctx.error(ctx.l.generic.nonexistent.user.base)
             return None
 
-        embed = discord.Embed(
+        embed = GitBotEmbed(
             color=self.bot.mgr.c.rounded,
             title=ctx.fmt('title', user) if user[0].isupper() else ctx.fmt('title', user.lower()),
             url=u['url']
@@ -95,6 +95,14 @@ class User(commands.Cog):
         if len(link_strings) != 0:
             embed.add_field(name=f":link: {ctx.l.user.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
+        # for repo in u['pinnedItems']['nodes']:
+        #     embed.add_field(name=f"{self.bot.mgr.e.github_repo} {repo['name']}",
+        #                     value=f'{self.bot.mgr.e.github_star_grey} {repo["stargazerCount"]}'
+        #                           f' {self.bot.mgr.e.github_fork} {repo["forkCount"]}' + (f' {self.bot.mgr.e.dot_sep}'
+        #                                                                                   f' {repo["primaryLanguage"]["name"]}'
+        #                                                                                   if repo["primaryLanguage"] is not None else ''),
+        #                     inline=False)
+        # ^ potentially add pinned repos, but it looks bad, need to find a nicer-looking way to do it
         await ctx.send(embed=embed, view_on_url=u['url'])
 
     @commands.cooldown(15, 30, commands.BucketType.user)

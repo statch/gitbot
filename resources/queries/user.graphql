@@ -1,34 +1,48 @@
 query($Login: String!, $FromTime: DateTime, $ToTime: DateTime) {
-  user(login: $Login) {
-    createdAt
-    company
-    location
-    bio
-    websiteUrl
-    avatarUrl
-    url
-    twitterUsername
-    organizations {
-      totalCount
-    }
-    followers {
-      totalCount
-    }
-    following {
-      totalCount
-    }
-    repositories {
-      totalCount
-    }
-    contributionsCollection(from: $FromTime, to: $ToTime) {
-      contributionCalendar {
-        totalContributions
-        weeks {
-          contributionDays {
-            contributionCount
-          }
+    user(login: $Login) {
+        createdAt
+        company
+        location
+        bio
+        websiteUrl
+        avatarUrl
+        url
+        twitterUsername
+        organizations {
+            totalCount
         }
-      }
+        followers {
+            totalCount
+        }
+        following {
+            totalCount
+        }
+        repositories {
+            totalCount
+        }
+        contributionsCollection(from: $FromTime, to: $ToTime) {
+            contributionCalendar {
+                totalContributions
+                weeks {
+                    contributionDays {
+                        contributionCount
+                    }
+                }
+            }
+        },
+        pinnedItems(first: 3) {
+            nodes {
+                ... on Repository {
+                    name
+                    stargazerCount
+                    createdAt
+                    primaryLanguage {
+                        name
+                    }
+                    forkCount
+                    url
+                }
+            }
+        }
     }
-  }
 }

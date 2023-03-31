@@ -1,10 +1,9 @@
 import discord
-import asyncio
 from discord.ext import commands
 from typing import Optional
 from lib.utils.decorators import gitbot_command
 from lib.typehints import GitHubUser
-from lib.structs import GitBotEmbed, GitBot
+from lib.structs import GitBotEmbed, GitBot, GitHubInfoSelectView
 from lib.structs.discord.context import GitBotContext
 
 DISCORD_MD_LANGS: tuple = ('java', 'js', 'py', 'css', 'cs', 'c',
@@ -20,8 +19,7 @@ class Gist(commands.Cog):
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def gist_command(self,
                            ctx: GitBotContext,
-                           user: GitHubUser,
-                           ind: Optional[int | str] = None) -> None:
+                           user: GitHubUser) -> None:
         ctx.fmt.set_prefix('gist')
         data: dict = await self.bot.github.get_user_gists(user)
         if not data:
@@ -31,14 +29,14 @@ class Gist(commands.Cog):
             if gists == 0:
                 await ctx.error(ctx.l.generic.nonexistent.gist)
             else:
-                await ctx.send(embed=await self.build_gist_embed(ctx, data, 1,
+                await ctx.send(embed=await self.build_gist_embed(ctx, data, data['gists']['nodes'][0],
                                                                  footer=ctx.l.gist.no_list))
             return
 
         def gist_url(gist: dict) -> str:
             if not gist['description']:
                 return gist['url']
-            desc = gist["description"] if len(gist["description"]) < 70 else gist["description"][:67] + '...'
+            desc = self.bot.mgr.truncate(gist['description'], 70)
             return f'[{desc}]({gist["url"]})'
 
         gist_strings: list = [f'{self.bot.mgr.e.square}**{ind + 1} |** {gist_url(gist)}' for ind, gist in
@@ -53,50 +51,21 @@ class Gist(commands.Cog):
 
         embed.set_footer(text=ctx.fmt('footer', user))
 
-        base_msg: discord.Message = await ctx.send(embed=embed)
+        async def callback(_, gist):
+            await ctx.send(embed=await self.build_gist_embed(ctx, data, gist, ctx.l.gist.content_notice),
+                           view_on_url=gist['url'])
 
-        def validate_index(index: int | str) -> tuple[bool, Optional[str]]:
-            if not str(index).isnumeric() or int(index) > len(gist_strings):
-                return False, ctx.fmt('index_error', len(gist_strings))
-            return True, None
-
-        if ind:
-            if (i := validate_index(ind))[0]:
-                await base_msg.delete()
-                await ctx.send(embed=await self.build_gist_embed(ctx, data, int(ind), ctx.l.gist.content_notice))
-                return
-            await ctx.send(i[1], delete_after=7)
-
-        while True:
-            try:
-                msg: discord.Message = await self.bot.wait_for('message',
-                                                               check=lambda m: (m.channel.id == ctx.channel.id
-                                                                                and m.author.id == ctx.author.id),
-
-                                                               timeout=30)
-                success, err_msg = validate_index(msg.content)
-                if not success:
-                    await ctx.error(err_msg, delete_after=7)
-                    continue
-                break
-            except asyncio.TimeoutError:
-                timeout_embed = discord.Embed(
-                    color=0xffd500,
-                    title=ctx.l.gist.timeout.title
-                )
-                timeout_embed.set_footer(text=ctx.l.gist.timeout.tip)
-                await base_msg.edit(embed=timeout_embed)
-                return
-        await ctx.send(embed=await self.build_gist_embed(ctx, data, int(msg.content), ctx.l.gist.content_notice),
-                       view_on_url=data['gists']['nodes'][int(msg.content) - 1 if int(msg.content) != 0 else 1]['url'])
+        await ctx.send(embed=embed,
+                       view=GitHubInfoSelectView(ctx, 'gist', '{description}',
+                                                 ('{0(createdAt)}', self.bot.mgr.github_timestamp_to_international),
+                                                 data['gists']['nodes'], callback, value_key='id'))
 
     async def build_gist_embed(self,
                                ctx: GitBotContext,
                                data: dict,
-                               index: int,
+                               gist: dict,
                                footer: Optional[str] = None) -> discord.Embed:
         ctx.fmt.set_prefix('gist')
-        gist: dict = data['gists']['nodes'][index - 1 if index != 0 else 1]
         embed = discord.Embed(
             color=await self.get_color_from_files(gist['files']),
             title=gist['description'],

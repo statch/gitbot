@@ -16,6 +16,7 @@ import ast
 import json
 import dotenv
 import base64
+import asyncio
 import discord
 import zipfile
 import os.path
@@ -468,6 +469,20 @@ class Manager:
         if isinstance(mention, str):
             return f'@{mention}'
         return f'<@&{mention}>'
+
+    @staticmethod
+    async def just_run(func: Callable, *args, **kwargs) -> Any:
+        """
+        Run a function without a care in the world about whether it's async or not
+
+        :param func: The function to run
+        :param args: The function's positional arguments
+        :param kwargs: The function's keyword arguments
+        """
+
+        if asyncio.iscoroutinefunction(func):
+            return await func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     def _setup_db(self) -> None:
         """

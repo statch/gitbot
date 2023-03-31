@@ -1,20 +1,23 @@
 import discord
 import functools
-from collections.abc import Awaitable
-from typing import TYPE_CHECKING, Callable, Any
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 from string import Formatter
+
 if TYPE_CHECKING:
     from ..context import GitBotContext
 
 
 class GitHubInfoSelectMenu(discord.ui.Select):
     def __init__(self,
-                 ctx: 'GitBotContext', item_name: str, label_fmt: str,
-                 description_fmt: str, data: list[dict], callback: Callable[..., Awaitable[[['GitBotContext', dict], Any]]]) -> None:
+                 ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str, data: list[dict],
+                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] |  Callable[['GitBotContext', dict], Any],
+                 value_key: str | None = None) -> None:
         self.ctx: 'GitBotContext' = ctx
         self.data: list[dict] = data
         self.actual_callback = callback
         self.run_count: int = 0
+        self.value_key: str | None = value_key
         super().__init__(
                 placeholder=ctx.l.views.select.github_info.placeholder.format(item_name),
                 options=[
@@ -23,11 +26,11 @@ class GitHubInfoSelectMenu(discord.ui.Select):
                                                       [fname for _, fname, _, _ in Formatter().parse(label_fmt) if
                                                        fname]}),
                             description=self.ctx.bot.mgr.truncate(
-                                description_fmt.format(**{key: ctx.bot.mgr.get_nested_key(item, key) for key in
-                                                          [fname for _, fname, _, _ in
-                                                           Formatter().parse(description_fmt) if fname]}), 100),
+                                    description_fmt.format(**{key: ctx.bot.mgr.get_nested_key(item, key) for key in
+                                                              [fname for _, fname, _, _ in
+                                                               Formatter().parse(description_fmt) if fname]}), 100),
                             # ^ truncated for max 100 allowed by discord, this field will typically be the title of the issue/pr-like item
-                            value=str(i)
+                            value=str(i) if value_key is None else ctx.bot.mgr.get_nested_key(item, value_key)
                     ) for i, item in enumerate(data)
                 ]
         )
@@ -36,7 +39,10 @@ class GitHubInfoSelectMenu(discord.ui.Select):
         if interaction.user.id != self.ctx.author.id or self.disabled:
             return
         self.ctx.send = functools.partial(self.ctx.send, reference=interaction.message, mention_author=False)  # reply
-        await self.actual_callback(self.ctx, self.data[int(self.values[0])])  # call the callback that handles item
+        await self.ctx.bot.mgr.just_run(self.actual_callback, self.ctx,
+                                        (self.data[int(self.values[0])] if self.value_key is None else
+                                         self.ctx.bot.mgr.get_by_key_from_sequence(self.data,
+                                                                                   self.value_key, self.values[0])))
         self.run_count += 1
         if self.run_count >= 3:
             self.disabled = True
@@ -45,8 +51,9 @@ class GitHubInfoSelectMenu(discord.ui.Select):
 
 class GitHubInfoSelectView(discord.ui.View):
     def __init__(self,
-                 ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str,
-                 data: list[dict], callback: Callable[..., Awaitable[[['GitBotContext', dict], Any]]], *args, **kwargs):
-        super().__init__(*args, **kwargs)
+                 ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str, data: list[dict],
+                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] |  Callable[['GitBotContext', dict], Any],
+                 value_key: str | None = None, **kwargs) -> None:
+        super().__init__(**kwargs)
 
-        self.add_item(GitHubInfoSelectMenu(ctx, item_name, label_fmt, description_fmt, data, callback))
+        self.add_item(GitHubInfoSelectMenu(ctx, item_name, label_fmt, description_fmt, data, callback, value_key))

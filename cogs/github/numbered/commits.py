@@ -1,7 +1,6 @@
-import discord
 from typing import Optional, Literal
 from discord.ext import commands
-from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBotCommandState, GitBot
+from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBot, GitHubInfoSelectView
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
@@ -47,22 +46,11 @@ class Commits(commands.Cog):
             footer=ctx.l.commits.embed.footer
         )
 
-        async def _callback(_, res: discord.Message) -> GitBotCommandState:
-            if res.content.lower() in ('cancel', 'quit', 'exit'):
-                return GitBotCommandState.FAILURE
-            if oid_matched := self.bot.mgr.get_by_key_from_sequence(commits, 'abbreviatedOid', res.content):
-                ctx.data = oid_matched
-                return GitBotCommandState.SUCCESS
-            elif numbers := self.bot.mgr.get_numbers_in_range_in_str(res.content, len(commits)):
-                ctx.data = commits[numbers[0]-1 if numbers[0] != 0 else 0]
-                return GitBotCommandState.SUCCESS
-            await ctx.error(ctx.l.commits.no_match)
-            return GitBotCommandState.CONTINUE
-
-        await embed.input_with_timeout(ctx=ctx, event='message', timeout=30,
-                                       response_callback=_callback)
-        if ctx.data:
+        async def _callback(_, _commit):
+            ctx.data = _commit
             await ctx.invoke(self.commit_command, repo=None, oid=None)
+
+        await ctx.send(embed=embed, view=GitHubInfoSelectView(ctx, 'commit', '{abbreviatedOid} - {author user login}', '{messageHeadline}', commits, _callback, 'oid'))
 
     @gitbot_command('commit')
     @commands.cooldown(5, 40, commands.BucketType.user)

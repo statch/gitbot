@@ -421,9 +421,8 @@
   "commits": {
     "embed": {
       "title": "Latest commits in {0}",
-      "footer": "Type the number of the commit you wish to view.\nYou can type 'cancel' to quit this dialog"
+      "footer": "You can select the commit you with to view from the dropdown."
     },
-    "no_match": "That's not a **valid number/OID from the list!** Try again!",
     "empty": "I **couldn't fetch any latest commits** from this repo!"
   },
   "commit": {

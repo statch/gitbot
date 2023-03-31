@@ -11,6 +11,14 @@ class Commits(commands.Cog):
     def __init__(self, bot: GitBot):
         self.bot: GitBot = bot
 
+    def _commit_status(self, commit_: dict, whitespace: bool = True) -> str:
+        if commit_['status'] is None or commit_['status']['state'] not in ('SUCCESS', 'FAILURE'):
+            return '   ' if whitespace else ''
+        if commit_['status']['state'] == 'SUCCESS':
+            return self.bot.mgr.e.github_checkmark + (' ' if whitespace else '')
+        else:
+            return self.bot.mgr.e.github_cross + (' ' if whitespace else '')
+
     @gitbot_command('commits')
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
@@ -36,10 +44,13 @@ class Commits(commands.Cog):
             return await ctx.error(ctx.l.generic.nonexistent.repo.base)
         if not commits:
             return await ctx.error(ctx.l.commits.empty)
+
+
+
         embed: GitBotEmbed = GitBotEmbed(
             title=self.bot.mgr.e.github + '  ' + ctx.fmt('commits embed title',
                                                 f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`'),
-            description=self.bot.mgr.option_display_list_format([f'[`{c["abbreviatedOid"]}`]({c["url"]}) '
+            description='\n'.join([f'{self._commit_status(c)}[`{c["abbreviatedOid"]}`]({c["url"]}) '
                                                         f'{self.bot.mgr.truncate(c["messageHeadline"], 53)}' for c in commits]),
             url=(f'https://github.com/{parsed.slashname}/commits' if not parsed.branch
                  else f'https://github.com/{parsed.slashname}/commits/{parsed.branch}'),
@@ -140,7 +151,8 @@ class Commits(commands.Cog):
                                                                               '{completed}, {queued}; {in_progress}',
                                                                               completed=completed,
                                                                               queued=queued,
-                                                                              in_progress=in_progress)
+                                                                              in_progress=in_progress) \
+                              + self._commit_status(commit, False)
             info: str = f'{commit_time}{signature}{committed_via_web}{checks}'
             embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info)
             embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes)

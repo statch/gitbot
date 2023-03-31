@@ -7,10 +7,8 @@ A set of objects used to handle embed pagination inside Discord
 """
 
 import discord
-import contextlib
 from time import time
-from enum import Enum
-from typing import Optional, NoReturn, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.structs.discord.bot import GitBot
@@ -18,18 +16,7 @@ from lib.structs.discord.embed import GitBotEmbed, GitBotCommandState
 from lib.structs.discord.views import EmbedPagesControlView
 
 
-__all__: tuple = ('EmbedPagesControl', 'ACTIONS', 'EmbedPages')
-
-
-class EmbedPagesControl(Enum):
-    FIRST = '⏮'
-    BACK = '◀'
-    STOP = '⏹'
-    NEXT = '▶'
-    LAST = '⏭'
-
-
-ACTIONS: set = {e.value for e in EmbedPagesControl}
+__all__: tuple = ('EmbedPages',)
 
 
 class EmbedPagesPermissionError(Exception):
@@ -56,13 +43,6 @@ class EmbedPages:
         self.message: Optional[discord.Message] = None
         self.context: Optional['GitBotContext'] = None
         self.bot: Optional['GitBot'] = None
-
-    @staticmethod
-    def _ensure_perms(channel: discord.TextChannel) -> NoReturn:
-        if not isinstance(channel, discord.DMChannel):
-            permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
-            if not (permissions.administrator or permissions.manage_messages):
-                raise EmbedPagesPermissionError
 
     @property
     def current_page_string(self) -> str:
@@ -110,15 +90,13 @@ class EmbedPages:
 
         :param ctx: The context to start the paginator in.
         """
-        with contextlib.suppress(discord.errors.NotFound):
-            self._ensure_perms(ctx.channel)
-            self.start_time = time()
-            self.context: GitBotContext = ctx
-            self._edit_embed_footer(self.pages[self.current_page])
-            message: discord.Message = await ctx.send(embed=self.pages[self.current_page], view=EmbedPagesControlView(self))
-            for embed in self.pages[1:]:
-                self._edit_embed_footer(embed)
-            self._set_initial_message_attrs(message)
+        self.start_time = time()
+        self.context: GitBotContext = ctx
+        self._edit_embed_footer(self.pages[self.current_page])
+        message: discord.Message = await ctx.send(embed=self.pages[self.current_page], view=EmbedPagesControlView(self))
+        for embed in self.pages[1:]:
+            self._edit_embed_footer(embed)
+        self._set_initial_message_attrs(message)
 
     async def edit(self, state: GitBotCommandState | int) -> None:
         """

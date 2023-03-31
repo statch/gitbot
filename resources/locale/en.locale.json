@@ -421,7 +421,7 @@
   "commits": {
     "embed": {
       "title": "Latest commits in {0}",
-      "footer": "You can select the commit you with to view from the dropdown."
+      "footer": "You can select the commit you wish to view from the dropdown."
     },
     "empty": "I **couldn't fetch any latest commits** from this repo!"
   },

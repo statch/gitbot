@@ -175,17 +175,17 @@ class Repo(commands.Cog):
         msg: discord.Message = await ctx.send(f"{self.bot.mgr.e.github}  {ctx.l.repo.download.wait}")
         src_bytes: Optional[bytes | bool] = await self.bot.github.get_repo_zip(repo)
         if src_bytes is None:  # pylint: disable=no-else-return
-            return await msg.edit(content=f"{self.bot.mgr.e.err}  {ctx.l.generic.nonexistent.repo.base}")
+            return await msg.edit(content=f"{self.bot.mgr.e.error}  {ctx.l.generic.nonexistent.repo.base}")
         elif src_bytes is False:
             return await msg.edit(
-                content=f"{self.bot.mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
         try:
             await ctx.send(file=discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj))
             await msg.edit(content=f'{self.bot.mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
-                content=f"{self.bot.mgr.e.err}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
     @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)

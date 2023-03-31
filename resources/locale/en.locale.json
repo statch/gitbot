@@ -22,7 +22,7 @@
     },
     "embed_pages_permission_error": {
       "title": "I don't have the permissions required!",
-      "description": "This command requires a little magic to work (edit messages and remove reactions).\n**I need to be able to manage messages and add reactions**",
+      "description": "This command requires a little magic to work (edit messages).\n**I need to be able to manage messages!**",
       "footer": "Adjust my permissions and try again."
     },
     "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}",
@@ -799,7 +799,7 @@
     },
     "no_help_for_command": {
       "title": "Uh oh!",
-      "description": "This command does exist, **but there isn't any help for it as of yet!**\nIf you're still unsure how to use it, you can join the [support server](https://discord.statch.org) and **ask for help.**"
+      "description": "This command does exist, **but there isn't any help for it as of yet!**\nIf you're unsure how to use it, you can join the [support server](https://discord.statch.org) and **ask for help.**"
     },
     "commands": {
       "repo": {

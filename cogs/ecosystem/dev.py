@@ -44,7 +44,6 @@ class Dev(commands.Cog):
     @dev_command_group.command('missing-locales', hidden=True)
     @commands.cooldown(10, 60, commands.BucketType.user)
     async def missing_locales_command(self, ctx: GitBotContext, locale_: str) -> None:
-        return await ctx.info('**This command is under maintenance** :\'( - check back later!')  # TODO: Fix this command
         ctx.fmt.set_prefix('dev missing_locales')
         mk_data: Optional[tuple[list[str]], dict, bool] = self.bot.mgr.get_missing_keys_for_locale(locale_)
         if not mk_data:
@@ -94,6 +93,16 @@ class Dev(commands.Cog):
         await ctx.success(ctx.fmt('success', len(commands_)),
                           file=discord.File(fp=io.StringIO(command_strings),
                                             filename=f'commands.{format_.value}'))
+
+    @commands.is_owner()
+    @dev_command_group.command('sync-commands', aliases=['sync'], hidden=True)
+    async def sync_commands_command(self, ctx: GitBotContext) -> None:
+        await self.bot.tree.sync()
+        await ctx.send(embed=GitBotEmbed(
+            color=self.bot.mgr.c.discord.green,
+            title='All done!',
+            description='The bot\'s command tree has been synced.'
+        ))
 
 
 async def setup(bot: GitBot) -> None:

@@ -7,7 +7,6 @@ A set of objects used to handle embed pagination inside Discord
 """
 
 import discord
-import asyncio
 import contextlib
 from time import time
 from enum import Enum
@@ -16,6 +15,7 @@ if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.structs.discord.bot import GitBot
 from lib.structs.discord.embed import GitBotEmbed, GitBotCommandState
+from lib.structs.discord.views import EmbedPagesControlView
 
 
 __all__: tuple = ('EmbedPagesControl', 'ACTIONS', 'EmbedPages')
@@ -41,21 +41,16 @@ class EmbedPages:
     A simple class that handles embed pagination.
 
     :param pages: A list of embeds to paginate.
-    :param timeout: The timeout in seconds (Websocket events + internal)
     :param lifespan: The total lifespan of the command -
                      no matter if an action occurred or not it will close after this time.
     """
 
     def __init__(self,
                  pages: Optional[list[GitBotEmbed | discord.Embed]] = None,
-                 timeout: int = 75,
-                 lifespan: int = 300,
-                 action_polling_rate: float = 0.5):
+                 lifespan: int = 900):
         self.pages: list = pages if pages else []
         self.lifespan: float = lifespan
-        self.timeout: int = timeout
         self.current_page: int = 0
-        self.action_polling_rate: float = action_polling_rate
         self.start_time: Optional[float] = None
         self.last_action_time: Optional[float] = None
         self.message: Optional[discord.Message] = None
@@ -66,7 +61,7 @@ class EmbedPages:
     def _ensure_perms(channel: discord.TextChannel) -> NoReturn:
         if not isinstance(channel, discord.DMChannel):
             permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
-            if not (permissions.administrator or all([permissions.manage_messages, permissions.add_reactions])):
+            if not (permissions.administrator or permissions.manage_messages):
                 raise EmbedPagesPermissionError
 
     @property
@@ -95,7 +90,7 @@ class EmbedPages:
         """
         Checks if the paginator should end its lifespan and edit its current embed accordingly
         """
-        return self.time_since_last_action > self.timeout and self.lifetime < self.lifespan
+        return not self.lifetime < self.lifespan
 
     def add_page(self, page: GitBotEmbed | discord.Embed) -> None:
         """
@@ -120,12 +115,10 @@ class EmbedPages:
             self.start_time = time()
             self.context: GitBotContext = ctx
             self._edit_embed_footer(self.pages[self.current_page])
-            message: discord.Message = await ctx.send(embed=self.pages[self.current_page])
+            message: discord.Message = await ctx.send(embed=self.pages[self.current_page], view=EmbedPagesControlView(self))
             for embed in self.pages[1:]:
                 self._edit_embed_footer(embed)
             self._set_initial_message_attrs(message)
-            await self._add_controls()
-            await self.__loop()
 
     async def edit(self, state: GitBotCommandState | int) -> None:
         """
@@ -166,63 +159,15 @@ class EmbedPages:
         page_str: str = (f'{self.context.l.glossary.page} {self.pages.index(embed) + 1}/{len(self.pages)}'
                          if embed in self.pages else self.current_page_string)
         if embed.footer.text is None:
-            return embed.set_footer(text=page_str)
-        embed.set_footer(text=f'{embed.footer.text} | {page_str}')
+            embed.set_footer(text=page_str)
+        else:
+            embed.set_footer(text=f'{embed.footer.text} | {page_str}')
 
     def _set_initial_message_attrs(self, message: discord.Message):
         self.start_time: float = time()
         self.last_action_time: float = self.start_time
         self.bot: 'GitBot' = self.context.bot
         self.message: discord.Message = message
-
-    async def _add_controls(self):
-        if self.message:
-            for control in EmbedPagesControl:
-                await self.message.add_reaction(control.value)  # noqa
-
-    async def __loop(self):
-        while not self.should_die:
-            reaction: discord.Reaction
-            user: discord.Member | discord.User
-            try:
-                self.bot.mgr.debug('Running reaction_add event waiter')
-                reaction, user = await self.bot.wait_for('reaction_add',
-                                                         check=lambda r, u: (r.emoji in ACTIONS and
-                                                                             u == self.context.author and
-                                                                             (r.message.channel.id ==
-                                                                              self.context.channel.id)),
-                                                         timeout=self.timeout)
-            except asyncio.TimeoutError:
-                self.bot.mgr.debug(f'Event timeout with lifetime={self.lifetime} '
-                                   f'and time since last action={self.time_since_last_action}')
-                try:
-                    await self.edit(GitBotCommandState.TIMEOUT)
-                except discord.errors.NotFound:
-                    pass
-                finally:
-                    return
-            if self.time_since_last_action < self.action_polling_rate:
-                await asyncio.sleep(self.action_polling_rate - self.time_since_last_action)
-            action: EmbedPagesControl = EmbedPagesControl(reaction.emoji)
-            match action:
-                case EmbedPagesControl.BACK:
-                    await self.previous_page()
-                case EmbedPagesControl.NEXT:
-                    await self.next_page()
-                case EmbedPagesControl.FIRST:
-                    await self.to_first_page()
-                case EmbedPagesControl.LAST:
-                    await self.to_last_page()
-                case EmbedPagesControl.STOP:
-                    await self.edit(GitBotCommandState.CLOSED)
-                    self.bot.mgr.debug('Stopping embed paginator loop - closed')
-                    return
-            self.bot.mgr.debug('Removing control reaction')
-            await reaction.message.remove_reaction(reaction.emoji, user)
-            self.bot.mgr.debug(f'Iteration complete with action {action.name}')
-        self.bot.mgr.debug(f'Timeout with lifetime={self.lifetime} '
-                           f'and time since last action={self.time_since_last_action}')
-        await self.edit(GitBotCommandState.TIMEOUT)
 
     def __add__(self, embed: discord.Embed | GitBotEmbed):
         self.add_page(embed)

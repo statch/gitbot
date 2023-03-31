@@ -48,7 +48,7 @@ class Debug(commands.Cog):
         data = await self.bot.github.get_ratelimit()
         rate = data[0]
         embed: GitBotEmbed = GitBotEmbed(
-            title=f'{self.bot.mgr.e.err}  Rate-limiting'
+            title=f'{self.bot.mgr.e.error}  Rate-limiting'
         )
         graphql = [g['resources']['graphql'] for g in rate]
         used_gql = sum(g['used'] for g in graphql)

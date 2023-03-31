@@ -53,7 +53,7 @@ class GitBotContext(commands.Context):
     def _format_content(self, content: str, style: MessageFormattingStyle | str) -> str:
         match MessageFormattingStyle(style):
             case MessageFormattingStyle.ERROR:
-                return f'{self.bot.mgr.e.err}  {content}'
+                return f'{self.bot.mgr.e.error}  {content}'
             case MessageFormattingStyle.SUCCESS:
                 return f'{self.bot.mgr.e.checkmark}  {content}'
             case MessageFormattingStyle.INFO:

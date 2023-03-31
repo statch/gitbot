@@ -101,7 +101,7 @@ class Help(commands.Cog):
             pages + embed
         await pages.start(ctx)
 
-    @gitbot_hybrid_command('help', aliases=['h', 'halp' 'commands', 'cmds', 'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'])
+    @gitbot_hybrid_command('help', aliases=['h', 'halp' 'commands', 'cmds', 'cmd', 'cmdslist', 'cmdlist', 'cmds-list', 'cmd-list'], description='Get information about GitBot\'s commands.')
     @app_commands.rename(command_or_group='command')
     @app_commands.describe(
             command_or_group='The command you want to get help for. If omitted, the default help page will be shown.'

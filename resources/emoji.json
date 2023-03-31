@@ -42,5 +42,10 @@
     }
   },
   "github_cross": "<:github_red_cross:1091475305090265190>",
-  "github_checkmark": "<:github_checkmark:1091476501674872862>"
+  "github_checkmark": "<:github_checkmark:1091476501674872862>",
+  "github_star": "<:github_star:1091489104052621353>",
+  "github_repo": "<:github_repo:1091489977038286960>",
+  "github_fork": "<:github_fork:1091490972682158171>",
+  "github_star_grey": "<:github_star_grey:1091491447867461814>",
+  "dot_sep": "<:dot_grey:1091487881027129405>"
 }

@@ -62,6 +62,9 @@ async def global_check(ctx: GitBotContext) -> bool:
     if not isinstance(ctx.channel, discord.DMChannel) and ctx.guild.unavailable:
         return False
 
+    if ctx.author.id in bot.user_id_blacklist:
+        return False
+
     return True
 
 

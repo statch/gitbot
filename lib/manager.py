@@ -14,6 +14,7 @@ import re
 import os
 import ast
 import json
+import string
 import dotenv
 import base64
 import asyncio
@@ -483,6 +484,45 @@ class Manager:
         if asyncio.iscoroutinefunction(func):
             return await func(*args, **kwargs)
         return func(*args, **kwargs)
+
+    @staticmethod
+    def github_timestamp_to_international(timestamp: str, y_sep: str = '/', t_sep: str = ':') -> str:
+        """
+        Convert a GitHub timestamp to a human-readable international timestamp
+
+        :param timestamp: The GitHub timestamp
+        :param y_sep: The separator to use between the year, month and day
+        :param t_sep: The separator to use between the hour, minute and second
+        :return: The international timestamp
+        """
+        return datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ').strftime(f'%Y{y_sep}%m{y_sep}%d, %H{t_sep}%M{t_sep}%S')
+
+    @staticmethod
+    def advanced_format(template_str: str, source: dict, handlers: tuple[Callable[[str], str], ...] | Callable[[str], str]) -> str:
+        """
+        Format a string using extended syntax.
+        This function formats the string with keys from the dictionary, i.e. {key} will be replaced with source[key].
+        It also supports handlers that manipulate the value before it's inserted into the string, which is done
+        by passing the handler index in the key, i.e. {0(key)} will be replaced with handlers[0](source[key]).
+
+        :param template_str: The string to format
+        :param source: The dictionary to get the keys from
+        :param handlers: The handlers to use
+        :return: The formatted string
+        """
+        if not isinstance(handlers, tuple):
+            handlers = (handlers,)
+        field_handlers: dict[str, int] = {**{f: None for f in [fname for _, fname, _, _ in string.Formatter().parse(template_str) if fname]}}
+        for field in filter(lambda f: '(' in f, field_handlers):
+            handler_index = int(field.split('(')[0])
+            field_handlers[field] = handler_index
+        values: dict[str, str] = {
+            field: Manager.get_nested_key(source, field) for field in field_handlers if field_handlers[field] is None
+        }
+        for field, handler_index in field_handlers.items():
+            if field not in values:
+                values[field] = handlers[handler_index](Manager.get_nested_key(source, field[field.find('(')+1:field.find(')')]))
+        return template_str.format(**values)
 
     def _setup_db(self) -> None:
         """

@@ -2,7 +2,6 @@ import discord
 import functools
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
-from string import Formatter
 
 if TYPE_CHECKING:
     from ..context import GitBotContext
@@ -10,26 +9,26 @@ if TYPE_CHECKING:
 
 class GitHubInfoSelectMenu(discord.ui.Select):
     def __init__(self,
-                 ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str, data: list[dict],
-                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] |  Callable[['GitBotContext', dict], Any],
+                 ctx: 'GitBotContext', item_name: str, label_fmt: str | tuple[str, tuple[Callable[[str], str], ...]],
+                 description_fmt: str | tuple[str, tuple[Callable[[str], str], ...]], data: list[dict],
+                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] | Callable[['GitBotContext', dict], Any],
                  value_key: str | None = None) -> None:
         self.ctx: 'GitBotContext' = ctx
         self.data: list[dict] = data
         self.actual_callback = callback
         self.run_count: int = 0
         self.value_key: str | None = value_key
+        if not isinstance(label_fmt, tuple):
+            label_fmt = (label_fmt, ())
+        if not isinstance(description_fmt, tuple):
+            description_fmt = (description_fmt, ())
         super().__init__(
                 placeholder=ctx.l.views.select.github_info.placeholder.format(item_name),
                 options=[
                     discord.SelectOption(
-                            label=label_fmt.format(**{key: ctx.bot.mgr.get_nested_key(item, key) for key in
-                                                      [fname for _, fname, _, _ in Formatter().parse(label_fmt) if
-                                                       fname]}),
-                            description=self.ctx.bot.mgr.truncate(
-                                    description_fmt.format(**{key: ctx.bot.mgr.get_nested_key(item, key) for key in
-                                                              [fname for _, fname, _, _ in
-                                                               Formatter().parse(description_fmt) if fname]}), 100),
-                            # ^ truncated for max 100 allowed by discord, this field will typically be the title of the issue/pr-like item
+                            label=self.ctx.bot.mgr.truncate(self.ctx.bot.mgr.advanced_format(label_fmt[0], item, label_fmt[1]), 100),
+                            description=self.ctx.bot.mgr.truncate(self.ctx.bot.mgr.advanced_format(description_fmt[0], item, description_fmt[1]), 100),
+                            # ^ truncated for max 100 allowed by discord
                             value=str(i) if value_key is None else ctx.bot.mgr.get_nested_key(item, value_key)
                     ) for i, item in enumerate(data)
                 ]
@@ -52,7 +51,7 @@ class GitHubInfoSelectMenu(discord.ui.Select):
 class GitHubInfoSelectView(discord.ui.View):
     def __init__(self,
                  ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str, data: list[dict],
-                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] |  Callable[['GitBotContext', dict], Any],
+                 callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] | Callable[['GitBotContext', dict], Any],
                  value_key: str | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
 

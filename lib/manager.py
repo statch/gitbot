@@ -401,7 +401,18 @@ class Manager:
         :param sep: The separator to use if key is a string
         :return: The value associated with the key
         """
-        return functools.reduce(operator.getitem, key if not isinstance(key, str) else key.split(sep=sep), dict_)
+        if isinstance(key, str):
+            key = key.split(sep=sep)
+
+        for i, k in enumerate(key):
+            if k.endswith("]"):
+                index_start = k.index("[")
+                index = int(k[index_start + 1:-1])
+                dict_ = dict_[index]
+            else:
+                dict_ = dict_.get(k)
+
+        return dict_
 
     @staticmethod
     def chunks(iterable: list | tuple, chunk_size: int) -> Generator[list | tuple, None, None]:
@@ -498,7 +509,7 @@ class Manager:
         return datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ').strftime(f'%Y{y_sep}%m{y_sep}%d, %H{t_sep}%M{t_sep}%S')
 
     @staticmethod
-    def advanced_format(template_str: str, source: dict, handlers: tuple[Callable[[str], str], ...] | Callable[[str], str]) -> str:
+    def advanced_format(template_str: str, source: dict, handlers: tuple[Callable[[str], str] | str, ...] | Callable[[str], str]) -> str:
         """
         Format a string using extended syntax.
         This function formats the string with keys from the dictionary, i.e. {key} will be replaced with source[key].
@@ -521,7 +532,14 @@ class Manager:
         }
         for field, handler_index in field_handlers.items():
             if field not in values:
-                values[field] = handlers[handler_index](Manager.get_nested_key(source, field[field.find('(')+1:field.find(')')]))
+                handler = handlers[handler_index]
+                inner_fetch: str = Manager.get_nested_key(source, field[field.find('(')+1:field.find(')')])
+                if isinstance(handler, str) and not inner_fetch:
+                    values[field] = Manager.get_nested_key(source, handler)
+                elif inspect.isfunction(handler):
+                    values[field] = handlers[handler_index](inner_fetch)
+                else:
+                    values[field] = inner_fetch
         return template_str.format(**values)
 
     def _setup_db(self) -> None:

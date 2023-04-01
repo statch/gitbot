@@ -69,7 +69,7 @@ class Config(commands.Cog):
                 await ctx.error(ctx.l.generic.nonexistent.qa)
                 return
             lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
-            user_str, org, repo = (ctx.fmt(f'qa list {item}', f'[`{item}`](https://github.com/{item})' if item in user else
+            user_str, org, repo = (ctx.fmt(f'qa list {item}', self.bot.mgr.to_github_hyperlink(user[item], True) if item in user else
                                            f'`{ctx.l.config.show.base.item_not_set}`') for item in ('user', 'org', 'repo'))
             accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
             qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])

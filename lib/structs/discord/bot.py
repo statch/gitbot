@@ -113,7 +113,7 @@ class GitBot(commands.Bot):
         self.statch_guild: discord.Guild | None = await self.fetch_guild(737430006271311913, with_counts=False)
         async for ban in self.statch_guild.bans():
             self.user_id_blacklist.add(ban.user.id)
-        self.logger.info(f'Fetched {len(self.user_id_blacklist)} blacklisted users.')
+        self.logger.info(f'Fetched %i blacklisted users.', len(self.user_id_blacklist))
 
     async def setup_hook(self) -> None:
         if not os.path.exists('./tmp'):

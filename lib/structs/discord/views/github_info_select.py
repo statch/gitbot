@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 
 class GitHubInfoSelectMenu(discord.ui.Select):
     def __init__(self,
-                 ctx: 'GitBotContext', item_name: str, label_fmt: str | tuple[str, tuple[Callable[[str], str], ...]],
-                 description_fmt: str | tuple[str, tuple[Callable[[str], str], ...]], data: list[dict],
+                 ctx: 'GitBotContext', item_name: str, label_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]],
+                 description_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]], data: list[dict],
                  callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] | Callable[['GitBotContext', dict], Any],
                  value_key: str | None = None) -> None:
         self.ctx: 'GitBotContext' = ctx
@@ -50,7 +50,8 @@ class GitHubInfoSelectMenu(discord.ui.Select):
 
 class GitHubInfoSelectView(discord.ui.View):
     def __init__(self,
-                 ctx: 'GitBotContext', item_name: str, label_fmt: str, description_fmt: str, data: list[dict],
+                 ctx: 'GitBotContext', item_name: str, label_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]],
+                 description_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]], data: list[dict],
                  callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] | Callable[['GitBotContext', dict], Any],
                  value_key: str | None = None, **kwargs) -> None:
         super().__init__(**kwargs)

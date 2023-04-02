@@ -56,7 +56,7 @@ class Gist(commands.Cog):
                            view_on_url=gist['url'])
 
         await ctx.send(embed=embed,
-                       view=GitHubInfoSelectView(ctx, 'gist', '{description}',
+                       view=GitHubInfoSelectView(ctx, 'gist', ('{0(description)}', ('files [0] name',)),
                                                  ('{0(createdAt)}', self.bot.mgr.github_timestamp_to_international),
                                                  data['gists']['nodes'], callback, value_key='id'))
 
@@ -66,9 +66,9 @@ class Gist(commands.Cog):
                                gist: dict,
                                footer: Optional[str] = None) -> discord.Embed:
         ctx.fmt.set_prefix('gist')
-        embed = discord.Embed(
+        embed = GitBotEmbed(
             color=await self.get_color_from_files(gist['files']),
-            title=gist['description'],
+            title=gist['description'] if gist['description'] else gist['files'][0]['name'],
             url=gist['url']
         )
         first_file: dict = gist['files'][0]

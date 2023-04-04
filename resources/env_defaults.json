@@ -17,5 +17,6 @@
   "log_level": "info",
   "commit_env_var_name": "HEROKU_SLUG_COMMIT",
   "terminal_supports_color": true,
-  "owner_id": 548803750634979340
+  "owner_id": 548803750634979340,
+  "sync_commands_on_startup": true
 }

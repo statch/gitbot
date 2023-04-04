@@ -7,7 +7,7 @@ from lib.structs.discord.context import GitBotContext
 
 
 def silenced(ctx: GitBotContext, error) -> bool:
-    return bool(getattr(ctx, f'__silence_{ctx.bot.mgr.pascal_to_snake_case(error.__class__.__name__)}_error__', False))
+    return bool(getattr(ctx, f'__silence_{ctx.bot.mgr.to_snake_case(error.__class__.__name__)}_error__', False))
 
 
 async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:

@@ -29,3 +29,17 @@ class CaseInsensitiveDict(dict):
 
     def __setitem__(self, key: Any, value: Any) -> None:
         super().__setitem__(self._casefold(key), value)
+
+
+class CaseInsensitiveSnakeCaseDict(CaseInsensitiveDict):
+    """
+    A subclass of :class:`CaseInsensitiveDict` allowing snake_case operations.
+    """
+
+    def __init__(self, mapping: dict = None, **kwargs):
+        if mapping is not None:
+            mapping = {self._casefold(k): v for k, v in mapping.items()}
+        super().__init__(mapping, **kwargs)
+
+    def _casefold(self, key: Any) -> Any:
+        return super()._casefold(''.join(['_' + i.lower() if i.isupper() else i for i in key]).lstrip('_'))

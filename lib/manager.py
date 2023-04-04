@@ -190,14 +190,14 @@ class Manager:
         return best[1]
 
     @staticmethod
-    def pascal_to_snake_case(string: str) -> str:
+    def to_snake_case(string: str) -> str:
         """
         Convert a PascalCase string to snake_case
 
         :param string: The string to convert
         :return: The converted string
         """
-        return r.PASCAL_CASE_NAME_RE.sub('_', string).lower()
+        return ''.join(['_' + i.lower() if i.isupper() else i for i in string]).lstrip('_')
 
     @staticmethod
     def to_github_hyperlink(name: str, codeblock: bool = False) -> str:

@@ -4,7 +4,6 @@ import re
 
 HELP_PARAMETER_REGEX = re.compile(r'(?P<param_type>[\[<])(?P<param_name>[a-zA-Z-_]+)[]>]')
 GIT_OBJECT_ID_RE: re.Pattern = re.compile(r'\b([a-f0-9]{40})\b')
-PASCAL_CASE_NAME_RE: re.Pattern = re.compile(r'(?<!^)(?=[A-Z])')
 MARKDOWN_EMOJI_RE: re.Pattern = re.compile(r'<?:.*:([0-9]{18})?>?', re.IGNORECASE)
 LOCALE_EMOJI_TEMPLATE_RE: re.Pattern = re.compile(r'{emoji_(?P<emoji_name>[a-zA-Z-_]+)}', re.IGNORECASE)
 DISCORD_CHANNEL_MENTION_RE: re.Pattern = re.compile(r'<#(?P<id>\d{18})>')

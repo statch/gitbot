@@ -1,7 +1,7 @@
 from .simple import *
 from .proxies.dir_proxy import DirProxy
 from .proxies.dict_proxy import DictProxy
-from .dicts.case_insensitive_dict import CaseInsensitiveDict
+from .dicts.case_insensitive_dict import CaseInsensitiveDict, CaseInsensitiveSnakeCaseDict
 from .dicts.fixed_size_ordered_dict import *
 from .dicts.max_age_dict import MaxAgeDict
 from .caches.typedcache import *

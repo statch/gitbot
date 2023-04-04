@@ -7,7 +7,7 @@ from typing import Optional, Callable, Any, Literal
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
 from itertools import cycle
-from lib.structs import DirProxy, GhProfileData, TypedCache, CacheSchema
+from lib.structs import DirProxy, GhProfileData, TypedCache, CacheSchema, CaseInsensitiveSnakeCaseDict
 from lib.utils.decorators import normalize_repository, validate_github_name
 from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
 
@@ -373,4 +373,4 @@ class GitHubAPI:
         data['public_repos'] = data['repositories']['totalCount']
         data['following'] = data['following']['totalCount']
         data['followers'] = data['followers']['totalCount']
-        return data
+        return CaseInsensitiveSnakeCaseDict(data)

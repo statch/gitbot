@@ -148,15 +148,14 @@ class Repo(commands.Cog):
         if is_tree and not isinstance(src, list):
             await ctx.error(ctx.fmt('not_a_directory', f'`{ctx.prefix}snippet`'))
             return
-        files: list = sorted([f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
-                              f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in src[:15]],
-                             key=lambda fs: 'file' in fs)
+        files: list = [f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
+                       f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in sorted(src, key=lambda si: int(si['type'] == 'dir'), reverse=True)[:15]]
         if is_tree:
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
             link: str = f'https://github.com/{repo_or_path}'
-        embed = discord.Embed(
+        embed: GitBotEmbed = GitBotEmbed(
             color=self.bot.mgr.c.rounded,
             title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
             description='\n'.join(files),

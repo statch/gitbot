@@ -128,7 +128,8 @@ class GitBot(commands.Bot):
         test_guild_id: int | None = self.mgr.env.get('test_guild_id')
         if test_guild := discord.Object(id=test_guild_id) if test_guild_id else None:
             self.tree.copy_global_to(guild=test_guild)
-        await self.tree.sync(guild=test_guild)
+        if self.mgr.env.sync_commands_on_startup:
+            await self.tree.sync(guild=test_guild)
         await self.setup_statch_specific()
 
     async def close(self) -> None:

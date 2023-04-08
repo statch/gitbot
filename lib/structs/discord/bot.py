@@ -22,7 +22,7 @@ from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from utils.logging_utils import GitBotLoggingStreamHandler
+from lib.utils.logging_utils import GitBotLoggingStreamHandler
 
 load_dotenv()
 

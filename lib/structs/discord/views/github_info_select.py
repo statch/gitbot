@@ -23,7 +23,7 @@ class GitHubInfoSelectMenu(discord.ui.Select):
         if not isinstance(description_fmt, tuple):
             description_fmt = (description_fmt, ())
         super().__init__(
-                placeholder=ctx.l.views.select.github_info.placeholder.fmt(item_name),
+                placeholder=ctx.l.views.select.github_info.placeholder.format(item_name),
                 options=[
                     discord.SelectOption(
                             label=self.ctx.bot.mgr.truncate(self.ctx.bot.mgr.advanced_format(label_fmt[0], item, label_fmt[1]), 100),

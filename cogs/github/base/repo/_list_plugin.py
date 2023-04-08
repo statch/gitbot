@@ -12,7 +12,7 @@ __all__: tuple = (
 async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo issues')
     if (lstate := state.lower()) not in ('open', 'closed'):
-        await ctx.error(ctx.l.generic.issue.invalid_state.fmt(lstate))
+        await ctx.error(ctx.l.generic.issue.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed'):
         state, lstate = s, s
@@ -52,7 +52,7 @@ async def issue_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None
 async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository] = None, state: str = 'open') -> None:
     ctx.fmt.set_prefix('repo pulls')
     if (lstate := state.lower()) not in ('open', 'closed', 'merged'):
-        await ctx.error(ctx.l.generic.pr.invalid_state.fmt(lstate))
+        await ctx.error(ctx.l.generic.pr.invalid_state.format(lstate))
         return
     if repo and (s := repo.lower()) in ('open', 'closed', 'merged'):
         state, lstate = s, s
@@ -100,7 +100,7 @@ async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -
         await ctx.error(ctx.bot.mgr.get_nested_key(ctx.l.generic, f'nonexistent repo no_'
                                                                   f'{"issues" if item == "issue" else "pulls"}'
                                                                   f'_with_state{"_qa" if stored else ""}')
-                        .fmt(f'`{state}`'))
+                        .format(f'`{state}`'))
 
 
 def make_string(ctx: GitBotContext, repo: GitHubRepository, issue_or_pr: dict, path: str) -> str:

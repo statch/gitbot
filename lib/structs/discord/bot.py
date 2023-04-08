@@ -161,12 +161,12 @@ class GitBot(commands.Bot):
 
     async def load_extension(self, name: str, *, package=None):
         await super().load_extension(name, package=package)
-        self.logger.info(f'Loaded extension: "{name}"')
+        self.logger.info('Loaded extension: "%s"', name)
 
     async def unload_extension(self, name: str, *, package=None):
         await super().unload_extension(name, package=package)
-        self.logger.info(f'Unloaded extension: "{name}"')
+        self.logger.info('Unloaded extension: "%s"', name)
 
     async def reload_extension(self, name: str, *, package=None):
         await super().reload_extension(name, package=package)
-        self.logger.info(f'Reloaded extension: "{name}"')
+        self.logger.info('Reloaded extension: "%s"', name)

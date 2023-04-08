@@ -51,9 +51,9 @@ class User(commands.Cog):
         orgs_c: int = u['organizations']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
-        occupation: str = (ctx.l.user.info.company + '\n').fmt(u['company']) if 'company' in u and u[
+        occupation: str = (ctx.l.user.info.company + '\n').format(u['company']) if 'company' in u and u[
             'company'] is not None else ctx.l.user.info.no_company + '\n'
-        orgs: str = (ctx.l.user.info.orgs.plural.fmt(orgs_c) if orgs_c != 0 else ctx.l.user.info.orgs.no_orgs) + '\n'
+        orgs: str = (ctx.l.user.info.orgs.plural.format(orgs_c) if orgs_c != 0 else ctx.l.user.info.orgs.no_orgs) + '\n'
         if orgs_c == 1:
             orgs: str = f'{ctx.l.user.info.orgs.singular}\n'
         followers: str = ctx.l.user.info.followers.no_followers if u[

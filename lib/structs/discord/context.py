@@ -97,7 +97,7 @@ class GitBotContext(commands.Context):
                     button.label = self.l.generic.view.on_github
                     button.emoji = self.bot.mgr.e.github
                 case _:
-                    button.label = self.l.generic.view.more.fmt(domain)
+                    button.label = self.l.generic.view.more.format(domain)
                     button.emoji = self.bot.mgr.e.info
             view.add_item(button)
         return await super().send(content=self._format_content(content, style), tts=tts,

@@ -1008,7 +1008,7 @@ class Manager:
             for vn, v in values.items():
                 if isinstance(rv, dict):
                     if rk == vn:
-                        res: str = resource[rk]['plural'].fmt(v)
+                        res: str = resource[rk]['plural'].format(v)
                         if v < 2:
                             res: str = resource[rk]['singular'] if v == 1 else self.regex_get(resource[rk], 'no_')
                         populated[rk] = res
@@ -1198,9 +1198,9 @@ class Manager:
                 resource: str = ((self.prefix if not skip_prefix else '') + resource
                                  if not resource.startswith(self.prefix) else resource)
                 try:
-                    return self_.get_nested_key(self.ctx.l, resource).fmt(*args, **kwargs)
+                    return self_.get_nested_key(self.ctx.l, resource).format(*args, **kwargs)
                 except IndexError:
-                    return self_.get_nested_key(self_.locale.master, resource).fmt(*args)
+                    return self_.get_nested_key(self_.locale.master, resource).format(*args)
 
             def set_prefix(self, prefix: str, absolute: bool = True) -> None:
                 if prefix.startswith('+'):

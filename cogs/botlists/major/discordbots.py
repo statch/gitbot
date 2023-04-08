@@ -16,7 +16,7 @@ class DiscordBotsStats(commands.Cog):
                                          headers={'Content-Type': 'application/json', 'Authorization': self.token}) as res:
             res_ = await res.json()
         if res.status != 200:
-            self.bot.logger.error(f'\ndiscord.bots API error:\n\n{res_}\n')
+            self.bot.logger.error('discord.bots API error: %s', res_['error'])
         else:
             self.bot.logger.info('discord.bots stats posted successfully')
 

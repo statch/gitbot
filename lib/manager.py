@@ -35,7 +35,6 @@ from itertools import chain
 from fuzzywuzzy import fuzz
 from collections import deque
 from lib.utils import regex as r
-from colorama import Style, Fore
 from discord.ext import commands
 from urllib.parse import quote_plus
 from collections.abc import Collection
@@ -50,6 +49,7 @@ from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHE
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.api.github import GitHubAPI
+    from lib.structs.discord.bot import GitBot
 from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitbotRepoConfig
 
 
@@ -61,13 +61,13 @@ class Manager:
     :type github: :class:`lib.net.github.api.GitHubAPI`
     """
 
-    def __init__(self, github: 'GitHubAPI'):
+    def __init__(self, bot: 'GitBot', github: 'GitHubAPI'):
         self.lib_root: str = os.path.dirname(os.path.abspath(__file__))
         self.root_directory: str = self.lib_root[:self.lib_root.rindex(os.sep)]
+        self.bot: 'GitBot' = bot
         self.git: 'GitHubAPI' = github
         self._prepare_env()
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
-        self.debug_mode: bool = (not self.env.production) or self.env.get('debug', False)
         self._setup_db()
         self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json',))
         self.e: DictProxy = self.load_json('emoji')
@@ -266,37 +266,6 @@ class Manager:
         """
         return (self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else
                 self._eval_bool_literal_safe(self.env.terminal_supports_color))
-
-    def log(self,
-            message: str,
-            category: str = 'core',
-            bracket_color: Fore = Fore.LIGHTMAGENTA_EX,
-            category_color: Fore = Fore.MAGENTA,
-            message_color: Fore = Fore.LIGHTWHITE_EX,
-            subcategory_color: Fore = Fore.LIGHTYELLOW_EX,
-            auto_subcategory: bool = True) -> None:
-        """
-        Colorful logging function because why not.
-
-        :param message: The message to log
-        :param category: The text in brackets
-        :param bracket_color: The color of the brackets
-        :param category_color: The color of the text in the brackets
-        :param message_color: The color of the message
-        :param subcategory_color: The color of the subcategory (if any)
-        :param auto_subcategory: Whether to automatically color the subcategory (after dash)
-        """
-        if self.terminal_supports_color():
-            if '-' in category and auto_subcategory:
-                main_cat, sub_cat = category.split('-')
-                print(
-                    f'{bracket_color}[{category_color}{main_cat}{Style.RESET_ALL}-{subcategory_color}{sub_cat}'
-                    f'{Style.RESET_ALL}{bracket_color}]:{Style.RESET_ALL} {message_color}{message}{Style.RESET_ALL}')
-            else:
-                print(f'{bracket_color}[{category_color}{category}{Style.RESET_ALL}{bracket_color}]:{Style.RESET_ALL} '
-                      f'{message_color}{message}{Style.RESET_ALL}')
-        else:
-            print(f'[{category}]: {message}')
 
     @staticmethod
     def opt(obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
@@ -594,8 +563,7 @@ class Manager:
                     if isinstance(v, str):
                         os.environ[k.upper()] = v
         self.load_dotenv()
-        self.log(f'Directives set: ' + '; '.join([f'{k} -> {v}' for k, v in self.env_directives.items()]),
-                 f'core-env')
+        self.bot.logger.info('Environment directives set: %s', '; '.join([f'{k} -> {v}' for k, v in self.env_directives.items()]))
 
     def _handle_env_binding(self, binding: dotenv.parser.Binding) -> None:
         """
@@ -610,14 +578,13 @@ class Manager:
                         self.env[binding.key] = parsed
                     else:
                         self.env[binding.key] = (parsed := self.parse_literal(binding.value))
-                    self.log(f'Loaded as \'{type(parsed).__name__}\': {binding.key}', f'core-env')
                 else:
-                    self.env[binding.key] = binding.value
-                    self.log(f'Loaded as \'str\': {binding.key}', f'core-env')
+                    self.env[binding.key] = (parsed := binding.value)
+                self.bot.logger.info('env[%s] loaded as "%s"', binding.key, type(parsed).__name__)
                 return
             except (ValueError, SyntaxError):
                 self.env[binding.key] = binding.value
-                self.log(f'Loaded as \'str\': {binding.key}', f'core-env')
+                self.bot.logger.info('env[%s] loaded as "str"', binding.key)
 
     def load_dotenv(self) -> None:
         """
@@ -629,8 +596,7 @@ class Manager:
         """
         dotenv_path: str = dotenv.find_dotenv()
         if dotenv_path:
-            self.log('Found .env file, loading environment variables listed inside of it.',
-                     f'core-env')
+            self.bot.logger.info('Found .env file, loading environment variables listed inside of it.')
             with open(dotenv_path, 'r', encoding='utf8') as fp:
                 for binding in dotenv.parser.parse_stream(fp):
                     self._handle_env_binding(binding)
@@ -647,6 +613,42 @@ class Manager:
 
     _number_re: re.Pattern = re.compile(r'\d+')
 
+    @staticmethod
+    def sizeof(object_: object, handlers: Optional[dict] = None) -> int:
+        """
+        Return the approximate memory footprint of an object and all of its contents.
+
+        Automatically finds the contents of the following builtin containers and
+        their subclasses: :class:`tuple`, :class:`list`, :class:`deque`, :class:`dict`,
+        :class:`set` and :class:`frozenset`. To search other containers, add handlers to iterate over their contents:
+
+        handlers = {SomeContainerClass: iter,
+                    OtherContainerClass: OtherContainerClass.get_elements}
+        """
+        if handlers is None:
+            handlers: dict = {}
+
+        all_handlers: dict = {tuple: iter, list: iter,
+                              deque: iter, dict: lambda d: chain.from_iterable(d.items()),
+                              set: iter, frozenset: iter}
+        all_handlers.update(handlers)
+        seen: set = set()
+
+        def _sizeof(_object: object) -> int:
+            if id(_object) in seen:
+                return 0
+            seen.add(id(_object))
+            size: int = getsizeof(_object, getsizeof(0))
+
+            for type_, handler in all_handlers.items():
+                if isinstance(_object, type_):
+                    size += sum(map(_sizeof, handler(_object)))
+                    break
+            return size
+
+        final_size: int = _sizeof(object_)
+        return final_size
+
     def get_numbers_in_range_in_str(self, string: str, max_: int = 10) -> list[int]:
         """
         Return a list of numbers from str that are < max_
@@ -656,20 +658,6 @@ class Manager:
         :return: The list of numbers
         """
         return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
-
-    def debug(self, message: str, message_color: Fore = Fore.LIGHTWHITE_EX) -> None:
-        """
-        A special variant of :meth:`Manager.log` that sets the
-        category name as the name of the outer function (the caller)
-        and only fires if the ENV[PRODUCTION] value is False.
-
-        :param message: The message to log to the console
-        :param message_color: The optional message color override
-        """
-        if self.debug_mode:
-            self.log(message,
-                     f'debug-{Manager.get_last_call_from_callstack()}{Style.RESET_ALL}',
-                     Fore.CYAN, Fore.LIGHTCYAN_EX, message_color)
 
     _int_word_conv_map: dict = {
         'zero': 0,
@@ -705,51 +693,6 @@ class Manager:
         for k, v in self._int_word_conv_map.items():
             if v == _int:
                 return k
-
-    def sizeof(self, object_: object, handlers: Optional[dict] = None, verbose: bool = False) -> int:
-        """
-        Return the approximate memory footprint of an object and all of its contents.
-
-        Automatically finds the contents of the following builtin containers and
-        their subclasses: :class:`tuple`, :class:`list`, :class:`deque`, :class:`dict`,
-        :class:`set` and :class:`frozenset`. To search other containers, add handlers to iterate over their contents:
-
-        handlers = {SomeContainerClass: iter,
-                    OtherContainerClass: OtherContainerClass.get_elements}
-        """
-        if handlers is None:
-            handlers: dict = {}
-
-        all_handlers: dict = {tuple: iter, list: iter,
-                              deque: iter, dict: lambda d: chain.from_iterable(d.items()),
-                              set: iter, frozenset: iter}
-        all_handlers.update(handlers)
-        seen: set = set()
-
-        def _sizeof(_object: object) -> int:
-            if id(_object) in seen:
-                return 0
-            seen.add(id(_object))
-            size: int = getsizeof(_object, getsizeof(0))
-
-            if verbose:
-                self.log(
-                    message=f'{hex(id(object_))}[{hex(id(_object))}]: {size} bytes | type: {type(_object).__name__}',
-                    category=f'debug-sizeof[{Fore.LIGHTRED_EX}r{Style.RESET_ALL}]' if
-                    self.terminal_supports_color() else 'debug-sizeof[r]')
-
-            for type_, handler in all_handlers.items():
-                if isinstance(_object, type_):
-                    size += sum(map(_sizeof, handler(_object)))
-                    break
-            return size
-
-        final_size: int = _sizeof(object_)
-        if verbose:
-            self.log(message=f'{hex(id(object_))}: {final_size} bytes | type: {type(object_).__name__}',
-                     category=f'debug-sizeof[{Fore.LIGHTGREEN_EX}f{Style.RESET_ALL}]'
-                     if self.terminal_supports_color() else 'debug-sizeof[f]')
-        return final_size
 
     def dict_full_path(self,
                        dict_: AnyDict,
@@ -788,9 +731,9 @@ class Manager:
         match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
                             re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
         if match_:
-            self.debug('Matched codeblock')
+            self.bot.logger.debug('Matched codeblock')
             return match_.group('content').rstrip('\n')
-        self.debug("Couldn't match codeblock")
+        self.bot.logger.debug("Couldn't match codeblock")
 
     async def unzip_file(self, zip_path: str, output_dir: str) -> None:
         """
@@ -800,10 +743,10 @@ class Manager:
         :param output_dir: The output directory to extract ZIP file contents to
         """
         if not os.path.exists(output_dir):
-            self.debug(f'Creating output directory "{output_dir}"')
+            self.bot.logger.debug('Creating output directory "%s"', output_dir)
             os.mkdir(output_dir)
         with zipfile.ZipFile(zip_path) as _zip:
-            self.debug(f'Extracting zip archive "{zip_path}"')
+            self.bot.logger.debug('Extracting zip archive "%s"', zip_path)
             _zip.extractall(output_dir)
 
     def get_license(self, to_match: str) -> Optional[DictProxy]:
@@ -821,13 +764,13 @@ class Manager:
             _match3: int = fuzz.token_set_ratio(to_match, i['spdx_id'])
             if any([_match1 > 80, _match2 > 80, _match3 > 80]):
                 score: int = sum([_match1, _match2, _match3])
-                self.debug(f'Matched license "{i["name"]}" with one-attribute confidence >80 from "{to_match}"')
+                self.bot.logger.debug('Matched license "%s" with one-attribute confidence >80 from "%s"', i["name"], to_match)
                 best.append((score, i))
         if best:
             pick: tuple[int, DictProxy] = max(best, key=lambda s: s[0])
-            self.debug(f'Found {len(best)} matching licenses, picking the best one with score {pick[0]}')
+            self.bot.logger.debug('Found {0} matching licenses, picking the best one with score {1}', len(best), pick[0])
             return pick[1]
-        self.debug(f'No matching license found for "{to_match}"')
+        self.bot.logger.debug('No matching license found for "%s"', to_match)
         return None
 
     def load_json(self,
@@ -847,7 +790,7 @@ class Manager:
         proxy: DictProxy = DictProxy(data)
 
         if apply_func:
-            self.debug(f'Applying func {apply_func.__name__}')
+            self.bot.logger.debug('Applying func %s', apply_func.__name__)
 
             def _recursive(node: AnyDict) -> None:
                 for k, v in node.items():
@@ -884,7 +827,7 @@ class Manager:
                     kwargs: tuple[dict, ...] = tuple(dict(zip(cmd.clean_params.keys(),
                                                               match.groups())) for cmd in command)
                 return GitCommandData(command, kwargs)
-        self.debug(f'No match found for "{ctx.message.content}"')
+        self.bot.logger.debug('No match found for "%s"', ctx.message.content)
 
     @staticmethod
     def construct_gravatar_url(email: str, size: int = 512, default: Optional[str] = None) -> str:
@@ -948,7 +891,7 @@ class Manager:
         """
         if seq:
             return type(seq)(reversed(seq))  # noqa
-        self.debug('Sequence is None')
+        self.bot.logger.debug('Sequence is None')
 
     def readdir(self, path: str, ext: Optional[str | list | tuple] = None, **kwargs) -> Optional[DirProxy]:
         """
@@ -960,7 +903,7 @@ class Manager:
         """
         if os.path.isdir(path):
             return DirProxy(path=path, ext=ext, **kwargs)
-        self.debug(f'Not a directory: "{path}"')
+        self.bot.logger.debug('Not a directory: "%s"', path)
 
     @normalize_identity(context_resource='guild')
     async def get_autoconv_config(self,
@@ -979,7 +922,7 @@ class Manager:
         if cached := self.autoconv_cache.get(_id):
             _did_exist: bool = True
             permission: AutomaticConversionSettings = cached
-            self.debug(f'Returning cached value for identity "{_id}"')
+            self.bot.logger.debug('Returning cached value for identity "%d"', _id)
         else:
             stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
             if stored:
@@ -1001,7 +944,7 @@ class Manager:
         locale: LocaleName = self.locale.master.meta.name
         if cached := self.locale_cache.get(_id):
             locale: LocaleName = cached
-            self.debug(f'Returning cached value for identity "{_id}"')
+            self.bot.logger.debug('Returning cached value for identity "%d"', _id)
         else:
             if stored := await self.db.users.getitem(_id, 'locale'):
                 locale: str = stored
@@ -1065,7 +1008,7 @@ class Manager:
             for vn, v in values.items():
                 if isinstance(rv, dict):
                     if rk == vn:
-                        res: str = resource[rk]['plural'].format(v)
+                        res: str = resource[rk]['plural'].fmt(v)
                         if v < 2:
                             res: str = resource[rk]['singular'] if v == 1 else self.regex_get(resource[rk], 'no_')
                         populated[rk] = res
@@ -1167,8 +1110,8 @@ class Manager:
                 if k not in node:
                     if locale:
                         self._missing_locale_keys[dict_.meta.name].append(path := self.dict_full_path(ref_, k, v))
-                        self.log(f'missing key "{" -> ".join(path) if path else k}" patched.',
-                                 f'locale-{dict_.meta.name}', message_color=Fore.LIGHTRED_EX)
+                        self.bot.logger.warning('Missing key "%s" patched in locale "%s"',
+                                                ' -> '.join(path) if path else k, dict_.meta.name)
                     node[k] = v if not isinstance(v, dict) else DictProxy(v)
             for k, v in node.items():
                 if isinstance(v, (DictProxy, dict)):
@@ -1231,7 +1174,7 @@ class Manager:
             if locale != self.locale.master:
                 pc: float = self.get_localization_percentage(locale.meta.name)
                 self.localization_percentages[locale.meta.name] = pc
-                self.log(f'Locale is {pc}% localized', f'locale-{locale.meta.name}')
+                self.bot.logger.info('Locale is %s% localized', pc)
 
     def fmt(self, ctx: 'GitBotContext'):
         """
@@ -1255,17 +1198,17 @@ class Manager:
                 resource: str = ((self.prefix if not skip_prefix else '') + resource
                                  if not resource.startswith(self.prefix) else resource)
                 try:
-                    return self_.get_nested_key(self.ctx.l, resource).format(*args, **kwargs)
+                    return self_.get_nested_key(self.ctx.l, resource).fmt(*args, **kwargs)
                 except IndexError:
-                    return self_.get_nested_key(self_.locale.master, resource).format(*args)
+                    return self_.get_nested_key(self_.locale.master, resource).fmt(*args)
 
             def set_prefix(self, prefix: str, absolute: bool = True) -> None:
                 if prefix.startswith('+'):
-                    self_.debug(f'Prefix mode is append, stripping op sign in \'{prefix}\'')
+                    self_.bot.logger.debug('Prefix mode is append, stripping op sign in \'%s\'', prefix)
                     prefix: str = prefix[1:]
                     absolute: bool = False
                 self.prefix: str = prefix.strip() + ' ' if absolute else self.prefix + prefix.strip() + ' '
-                self_.debug(f'Locale formatting prefix set to \'{self.prefix.strip()}\' in '
-                            f'\'{self_.get_last_call_from_callstack()}\'')
+                self_.bot.logger.debug('Locale formatting prefix set to \'%s\' in '
+                                       '\'%s\'', self.prefix.strip(), self_.get_last_call_from_callstack())
 
         return _Formatter(ctx)

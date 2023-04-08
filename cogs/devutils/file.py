@@ -23,7 +23,7 @@ class FileDevutils(commands.Cog):
     async def send_invalid_algorithm_embed(ctx: GitBotContext):
         invalid_algo_embed: GitBotEmbed = GitBotEmbed(
                 title=ctx.l.file.generic_algo_related.invalid_algorithm_embed.title,
-                description=ctx.l.file.generic_algo_related.invalid_algorithm_embed.description.format(
+                description=ctx.l.file.generic_algo_related.invalid_algorithm_embed.description.fmt(
                         ' '.join([f'`{a}`' for a in FileDevutils.__valid_hash_algos__])),
                 color=ctx.bot.mgr.c.discord.yellow,
                 footer=ctx.l.file.generic_algo_related.invalid_algorithm_embed.footer

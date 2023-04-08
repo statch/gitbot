@@ -34,7 +34,7 @@ class Events(commands.Cog):
             footer=f'© 2020-{date.today().year} wulf, statch'
         )
         embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild)
-        self.bot.mgr.log(f'Joined guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds', category='stats')
+        self.bot.logger.info('Joined guild {0} ({0.id}) Now in {1} guilds', guild, len(self.bot.guilds))
 
         if self.bot.mgr.env.production:
             await embed_l.send(await self.bot.fetch_channel(775042132054376448))
@@ -50,7 +50,7 @@ class Events(commands.Cog):
         except KeyError:
             pass
         embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild, False)
-        self.bot.mgr.log(f'Removed from guild {guild} ({guild.id}) Now in {len(self.bot.guilds)} guilds', category='stats')
+        self.bot.logger.info('Removed from guild {0} ({0.id}) Now in {1} guilds', guild, len(self.bot.guilds))
         await embed_l.send(self.bot.get_channel(775042132054376448))
 
     @commands.Cog.listener()

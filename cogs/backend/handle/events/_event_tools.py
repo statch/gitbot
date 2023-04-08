@@ -24,16 +24,16 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
     config: AutomaticConversionSettings = await ctx.bot.mgr.get_autoconv_config(ctx)  # noqa
     match_ = None  # put the match_ name in the namespace
     if (attachment_url := ctx.bot.mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
-        ctx.bot.mgr.debug('Responding with cached asset URL')
+        ctx.bot.logger.debug('Responding with cached asset URL')
         return await ctx.reply(attachment_url, mention_author=False)
     elif (result := ctx.bot.mgr.extract_content_from_codeblock(ctx.message.content)) and config.get('codeblock', False):
-        ctx.bot.mgr.debug(f'Converting codeblock in MID {ctx.message.id} into carbon snippet...')
+        ctx.bot.logger.debug('Converting codeblock in MID %d into carbon snippet...', ctx.message.id)
         codeblock: str = result
     elif match_ := (regex.GITHUB_LINES_URL_RE.search(ctx.message.content)
                     or regex.GITLAB_LINES_URL_RE.search(ctx.message.content)):
-        ctx.bot.mgr.debug(f'Matched GitHub line URL: "{ctx.message.content}" in MID "{ctx.message.id}"')
+        ctx.bot.logger.debug('Matched GitHub line URL: "%s" in MID %d', ctx.message.content, ctx.message.id)
         if config.get('gh_lines') == 2:
-            ctx.bot.mgr.debug(f'Converting URL in MID {ctx.message.id} into carbon snippet...')
+            ctx.bot.logger.debug('Converting URL in MID %d into carbon snippet...', ctx.message.id)
             codeblock: Optional[str] = (await handle_url(ctx,
                                                          ctx.message.content,
                                                          max_line_count=ctx.bot.mgr.env.carbon_len_threshold,
@@ -41,7 +41,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
         elif config.get('gh_lines') == 1:
             codeblock: Optional[str] = (await handle_url(ctx, ctx.message.content))[0]
             if codeblock:
-                ctx.bot.mgr.debug(f'Converting MID {ctx.message.id} into codeblock...')
+                ctx.bot.logger.debug('Converting MID %d into codeblock...', ctx.message.id)
                 return await ctx.reply(codeblock, mention_author=False)
     _1st_lineno: int = 1 if not match_ else match_.group('first_line_number')
     if codeblock and len(codeblock.splitlines()) < ctx.bot.mgr.env.carbon_len_threshold:
@@ -50,7 +50,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
                                                                    fp=await gen_carbon_inmemory(ctx,
                                                                                                 codeblock, _1st_lineno)),
                                                  mention_author=False)
-        ctx.bot.mgr.debug(f'Carbon asset generation elapsed: {time.time() - start}s')
+        ctx.bot.logger.debug('Carbon asset generation elapsed: %ds', time.time() - start)
         ctx.bot.mgr.carbon_attachment_cache[ctx.message.content] = reply.attachments[0].url
         return reply
 
@@ -71,7 +71,7 @@ async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
         else:
             nonce: int = id(ctx)
             for command, kwargs in zip(cmd_data.command, cmd_data.kwargs):
-                ctx.bot.mgr.debug(f'Running output checks with nonce: {nonce} for command "{str(command)}"')
+                ctx.bot.logger.debug('Running output checks with nonce: %d for command "%s"', nonce, str(command))
                 ctx.send = functools.partial(ctx.send, nonce=nonce)
                 await ctx.invoke(command, **kwargs)
                 try:

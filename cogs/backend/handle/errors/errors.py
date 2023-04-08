@@ -62,7 +62,7 @@ class Errors(commands.Cog):
                     raise error
                 if not ctx.__autoinvoked__:
                     await log_error_in_discord(ctx, error)
-                    print(error)
+                    self.bot.logger.error('Error in command %s: %s', str(ctx.command), str(error))
 
 
 async def setup(bot: GitBot) -> None:

@@ -78,7 +78,7 @@ class Commits(commands.Cog):
             if repo and not oid and GIT_OBJECT_ID_RE.match(repo):
                 oid: str = repo
                 repo = None
-                self.bot.mgr.debug(f'oid "{oid}" matched in place of the repo param, switching arguments')
+                self.bot.logger.debug('oid "%s" matched in place of the repo param, switching arguments', oid)
             if not repo:
                 repo: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
                 if not repo:

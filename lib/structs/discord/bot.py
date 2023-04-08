@@ -22,6 +22,7 @@ from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from utils.logging_utils import GitBotLoggingStreamHandler
 
 load_dotenv()
 
@@ -77,17 +78,18 @@ class GitBot(commands.Bot):
             self.logger.info('Sentry not enabled/configured - skipping.')
 
     def _setup_logging(self):
-        logging.basicConfig(level=getattr(logging, self.mgr.env.log_level.upper(), logging.INFO),
-                            format='[%(levelname)s:%(name)s]: %(message)s')
+        logging.basicConfig(level=logging.INFO,
+                            handlers=[GitBotLoggingStreamHandler()])
         logging.getLogger('asyncio').setLevel(logging.WARNING)
         logging.getLogger('discord.gateway').setLevel(logging.WARNING)
-        self.logger: logging.Logger = logging.getLogger('main')
+        logging.getLogger('discord.client').setLevel(logging.INFO)
+        self.logger: logging.Logger = logging.getLogger('bot')
 
     async def _setup_services(self) -> None:
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
         self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
                                            aiohttp.ClientSession(), 'gitbot')
-        self.mgr: Manager = Manager(self.github)
+        self.mgr: Manager = Manager(self, self.github)
         self.carbon: Carbon = Carbon(self.session)
         self.pypi: PyPIAPI = PyPIAPI(self.session)
         self.crates: CratesIOAPI = CratesIOAPI(self.session)
@@ -118,8 +120,9 @@ class GitBot(commands.Bot):
     async def setup_hook(self) -> None:
         if not os.path.exists('./tmp'):
             os.mkdir('tmp')
-        await self._setup_services()
         self._setup_logging()
+        await self._setup_services()
+        self.logger.setLevel(getattr(logging, self.mgr.env.log_level.upper(), self.mgr.env.log_level))
         self._set_runtime_vars()
         self._setup_sentry()
         self._setup_uvloop()

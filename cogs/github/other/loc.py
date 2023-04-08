@@ -68,20 +68,20 @@ class LinesOfCode(commands.Cog):
         await ctx.reply(embed=embed, mention_author=False, view_on_url=['url'])
 
     def remove_matches(self, directory: str, pattern: str) -> int:
-        self.bot.mgr.debug(f'Removing files matching pattern "{pattern}" from directory "{directory}"')
+        self.bot.logger.debug('Removing files matching pattern "%s" from directory "%s"', pattern, directory)
         c_removed: int = 0
         for root, dirs, files in os.walk(directory):
             for f in files:
                 if fnmatch.fnmatch(f, pattern):
-                    self.bot.mgr.debug(f'Removing file "{f}"')
+                    self.bot.logger.debug('Removing file "%s"', f)
                     c_removed += 1
                     os.remove(os.path.join(root, f))
             for d in dirs:
                 if fnmatch.fnmatch(d, pattern):
-                    self.bot.mgr.debug(f'Removing directory "{d}"')
+                    self.bot.logger.debug('Removing directory "%s"', d)
                     c_removed += 1
                     shutil.rmtree(os.path.join(root, d))
-        self.bot.mgr.debug(f'Removed {c_removed} entries.')
+        self.bot.logger.debug('Removed %d entries.', c_removed)
         return c_removed
 
     async def process_repo(self, ctx: GitBotContext, repo: GitHubRepository) -> Optional[tuple[dict, int | None]]:
@@ -101,7 +101,7 @@ class LinesOfCode(commands.Cog):
             c_removed: int = 0
             cfg: dict | None = await self.bot.mgr.get_repo_gitbot_config(repo)
             if cfg and cfg.get('loc'):
-                self.bot.mgr.debug(f'Found GitBot config for repo "{repo}"')
+                self.bot.logger.debug('Found GitBot config for repo "%s"', repo)
                 if isinstance(cfg['loc'], dict) and (ignore := cfg['loc'].get('ignore')):
                     if isinstance(ignore, str):
                         ignore = [ignore]
@@ -110,7 +110,7 @@ class LinesOfCode(commands.Cog):
             output: dict = json.loads(subprocess.check_output([LinesOfCode.__perl_command_line__, 'cloc.pl',
                                                                '--json', tmp_dir_path]))
         except subprocess.CalledProcessError as e:
-            self.bot.mgr.debug(f'the CLOC script failed with exit code {e.returncode}')
+            self.bot.logger.error('the CLOC script failed with exit code %d', e.returncode)
         else:
             self.bot.mgr.loc_cache[repo] = (output, c_removed)
             return output, c_removed

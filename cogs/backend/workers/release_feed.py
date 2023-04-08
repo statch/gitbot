@@ -15,7 +15,7 @@ class ReleaseFeedWorker(commands.Cog):
         if self.bot.mgr.env.run_release_feed_worker:
             self.release_feed_worker.start()
         else:
-            self.bot.mgr.log("Release feed worker is disabled - env.run_release_feed_worker == False")
+            self.bot.logger.info('Release feed worker is disabled - env.run_release_feed_worker == False')
 
     @property
     def pretty_iterno(self):
@@ -33,9 +33,9 @@ class ReleaseFeedWorker(commands.Cog):
     @tasks.loop(minutes=int(environ.get('release_feed_worker_interval', '15')))
     async def release_feed_worker(self) -> None:
         self.iterno += 1
-        self.bot.mgr.debug(f'Starting worker cycle {self.pretty_iterno}')
+        self.bot.logger.debug('Starting worker cycle %s', self.pretty_iterno)
         async for guild in self.bot.mgr.db.guilds.find({'feed': {'$exists': True}}):
-            self.bot.mgr.debug(f'Handling GID {guild["_id"]}')
+            self.bot.logger.debug('Handling GID %d', guild["_id"])
             guild: GitBotGuild
             changed: bool = False
             update: list = []
@@ -47,19 +47,19 @@ class ReleaseFeedWorker(commands.Cog):
                             await self.handle_feed_repo(guild, repo, rfi, res)
                             changed: bool = True
                             update.append(TagNameUpdateData(rfi, repo, t))
-                            self.bot.mgr.debug(f'New release found for repo "{repo["name"]}" (tag: {repo["tag"]})'
-                                               f' in GID {guild["_id"]}')
+                            self.bot.logger.debug('New release found for repo "%s" (tag: %s) in GID %d', repo["name"],
+                                                  repo["tag"], guild["_id"])
                         else:
-                            self.bot.mgr.debug(f'No new release for repo "{repo["name"]}" (tag: {repo["tag"]})'
-                                               f' in GID {guild["_id"]}')
+                            self.bot.logger.debug('No new release for repo "%s" (tag: %s) in GID %d', repo["name"],
+                                                  repo["tag"], guild["_id"])
                     else:
-                        self.bot.mgr.debug(f'Missing repo detected in GID {guild["_id"]} ("{repo["name"]}")')
+                        self.bot.logger.debug('Missing repo detected in GID %d ("%s")', guild["_id"], repo["name"])
                         await self.handle_missing_feed_repo(guild, rfi, repo)
             if changed:
-                self.bot.mgr.debug(f'Changes detected in GID {guild["_id"]}')
+                self.bot.logger.debug('Changes detected in GID %d', guild["_id"])
                 await self.update_tag_names_with_data(guild, update)
             else:
-                self.bot.mgr.debug(f'Finished worker cycle for GID {guild["_id"]} - nothing changed')
+                self.bot.logger.debug('Finished worker cycle for GID %d - nothing changed', guild["_id"])
 
     async def handle_feed_repo(self,
                                guild: GitBotGuild,

@@ -17,7 +17,7 @@ class Logs(commands.Cog):
     async def logs_command(self, ctx: GitBotContext) -> None:
         ctx.fmt.set_prefix('logs')
         try:
-            self.bot.mgr.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
+            self.bot.logger.debug(f'Creating webhook in channel with ID {ctx.channel.id}')
             webhook: discord.Webhook = await ctx.channel.create_webhook(name='GitHub Logs',
                                                                         reason=f'GitHub Logs setup by {ctx.author}')
         except (discord.errors.HTTPException, discord.errors.Forbidden):

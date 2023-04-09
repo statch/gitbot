@@ -2,7 +2,7 @@
 
 _________________
 
-[![CodeFactor](https://www.codefactor.io/repository/github/statch/gitbot/badge/main)](https://www.codefactor.io/repository/github/statch/gitbot/overview/main) [![issues](https://img.shields.io/github/issues/statch/gitbot)](https://github.com/statch/gitbot/issues) ![code size](https://img.shields.io/github/languages/code-size/statch/gitbot) ![visits](https://api.ghprofile.me/view?username=statch-gitbot&style=flat&label=visits) [![discord](https://img.shields.io/discord/737430006271311913.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/3e5fwpA)
+[![CodeFactor](https://www.codefactor.io/repository/github/statch/gitbot/badge/main)](https://www.codefactor.io/repository/github/statch/gitbot/overview/main) [![DeepSource](https://deepsource.io/gh/statch/gitbot.svg/?label=resolved+issues&show_trend=true&token=vkIDiujPHir5MDkMHI972b2e)](https://deepsource.io/gh/statch/gitbot/?ref=repository-badge) [![issues](https://img.shields.io/github/issues/statch/gitbot)](https://github.com/statch/gitbot/issues) ![code size](https://img.shields.io/github/languages/code-size/statch/gitbot) [![discord](https://img.shields.io/discord/737430006271311913.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/3e5fwpA)
 
 #### GitBot is a programmer toolkit for developers to stay productive and connect with their friends on GitHub right from Discord. It features:
 

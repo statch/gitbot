@@ -481,7 +481,8 @@
       },
       "oid": "Full Git OID"
     },
-    "footer_latest": "This is the latest commit from your quick-access repo"
+    "footer_latest": "This is the latest commit from your quick-access repo",
+    "view_diff": "View diff"
   },
   "logs": {
     "dm_title": "Webhook URL",

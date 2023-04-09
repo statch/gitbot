@@ -34,7 +34,7 @@ class PyPI(commands.Cog):
                                 + '\n\n'
                                 + '\n'.join(commands_),
                     thumbnail=self.bot.mgr.i.pip_logo,
-                    url=f'https://pypi.org'
+                    url='https://pypi.org'
             )
             await ctx.send(embed=embed)
 

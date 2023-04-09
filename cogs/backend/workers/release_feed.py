@@ -96,7 +96,7 @@ class ReleaseFeedWorker(commands.Cog):
     async def handle_missing_feed_repo(self, guild: GitBotGuild, rfi: ReleaseFeedItem, repo: ReleaseFeedRepo) -> None:
         embed: discord.Embed = discord.Embed(
             color=0xda4353,
-            title=f'One of your release feed repos was deleted/renamed!',
+            title='One of your release feed repos was deleted/renamed!',
             description=f'A repository previously saved as `{repo["name"]}` was **deleted or renamed** by the owner. '
                         f'Please re-add it under the new name.'
         )

@@ -58,14 +58,14 @@ class GitBot(commands.Bot):
 
     async def _setup_cloc(self) -> None:
         if not os.path.exists('cloc.pl'):
-            self.logger.info(f'CLOC script not found, downloading...')
+            self.logger.info('CLOC script not found, downloading...')
             res: aiohttp.ClientResponse = await self.session.get(
                     'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
             async with aiofiles.open('cloc.pl', 'wb') as fp:
                 await fp.write(await res.content.read())
-            self.logger.info(f'CLOC script downloaded.')
+            self.logger.info('CLOC script downloaded.')
         else:
-            self.logger.info(f'CLOC script found, skipping download.')
+            self.logger.info('CLOC script found, skipping download.')
 
     def _setup_sentry(self) -> None:
         if self.mgr.env.production and (dsn := self.mgr.env.get('sentry_dsn')):
@@ -115,7 +115,7 @@ class GitBot(commands.Bot):
         self.statch_guild: discord.Guild | None = await self.fetch_guild(737430006271311913, with_counts=False)
         async for ban in self.statch_guild.bans():
             self.user_id_blacklist.add(ban.user.id)
-        self.logger.info(f'Fetched %i blacklisted users.', len(self.user_id_blacklist))
+        self.logger.info('Fetched %i blacklisted users.', len(self.user_id_blacklist))
 
     async def setup_hook(self) -> None:
         if not os.path.exists('./tmp'):
@@ -142,9 +142,9 @@ class GitBot(commands.Bot):
 
     async def on_ready(self) -> None:
         self.logger.info(f'Bot bootstrap time: {perf_counter() - self.__init_start:.3f}s')
-        self.logger.info(f'The bot is ready!')
+        self.logger.info('The bot is ready!')
         self.logger.info(f'Running on {platform.system()} {platform.release()}')
-        self.logger.info(f'Runtime vars:\n' + '\n'.join(f'- {k}: {v}' for k, v in self.runtime_vars.items()))
+        self.logger.info('Runtime vars:\n' + '\n'.join(f'- {k}: {v}' for k, v in self.runtime_vars.items()))
 
     async def load_cogs_from_dir(self, dir_: str) -> None:
         for obj in os.listdir(dir_):

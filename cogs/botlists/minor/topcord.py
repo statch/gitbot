@@ -16,7 +16,7 @@ class TopCordStats(commands.Cog):
                                          headers={'Content-Type': 'application/json', 'Authorization': self.token}) as res:
             res_ = await res.json()
         if res.status != 200:
-            self.bot.logger.error(f'topcord API error: %s', str(res_))
+            self.bot.logger.error('topcord API error: %s', str(res_))
         else:
             self.bot.logger.info('Topcord stats posted successfully')
 

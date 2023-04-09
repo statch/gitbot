@@ -1,10 +1,10 @@
+import discord
 from typing import Optional, Literal
 from discord.ext import commands
-from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBot, GitHubInfoSelectView
+from lib.structs import GitBotEmbed, ParsedRepositoryData, GitBot, GitHubInfoSelectView, ViewFileButton, GitBotContext
 from lib.utils.decorators import gitbot_command, normalize_repository
 from lib.typehints import GitHubRepository
 from lib.utils.regex import GIT_OBJECT_ID_RE, REPOSITORY_NAME_RE
-from lib.structs.discord.context import GitBotContext
 
 
 class Commits(commands.Cog):
@@ -157,7 +157,9 @@ class Commits(commands.Cog):
             embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info)
             embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes)
             embed.add_field(name=f':label: {ctx.l.commit.fields.oid}:', value=f'```\n{commit["oid"]}```')
-            await ctx.send(embed=embed, view_on_url=commit['url'])
+            view: discord.ui.View = discord.ui.View()
+            view.add_item(ViewFileButton(ctx, ctx.l.commit.view_diff,commit['url'] + '.diff'))
+            await ctx.send(embed=embed, view_on_url=commit['url'], view=view)
 
 
 async def setup(bot: GitBot) -> None:

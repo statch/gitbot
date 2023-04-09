@@ -7,7 +7,7 @@ from typing import Optional
 from lib.utils.decorators import normalize_repository, gitbot_group
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
-from lib.structs import GitBotEmbed, GitBot
+from lib.structs import GitBotEmbed, GitBot, EmbedPages
 from lib.structs.discord.context import GitBotContext
 
 
@@ -48,10 +48,11 @@ class Repo(commands.Cog):
             return
 
         embed: GitBotEmbed = GitBotEmbed(
-            color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage']['color'] else self.bot.mgr.c.rounded,
-            title=repo,
-            url=r['url'],
-            thumbnail=r['owner']['avatarUrl']
+                color=int(r['primaryLanguage']['color'][1:], 16) if r['primaryLanguage'] and r['primaryLanguage'][
+                    'color'] else self.bot.mgr.c.rounded,
+                title=repo,
+                url=r['url'],
+                thumbnail=r['owner']['avatarUrl']
         )
 
         watch: int = r['watchers']['totalCount']
@@ -62,10 +63,13 @@ class Repo(commands.Cog):
             embed.add_field(name=f":notepad_spiral: {ctx.l.repo.info.glossary[0]}:",
                             value=f"```{re.sub(MARKDOWN_EMOJI_RE, '', r['description']).strip()}```")
 
-        watchers: str = ctx.fmt('watchers plural', watch, f"{r['url']}/watchers") if watch != 1 else ctx.fmt('watchers singular', f"{r['url']}/watchers")
+        watchers: str = ctx.fmt('watchers plural', watch, f"{r['url']}/watchers") if watch != 1 else ctx.fmt(
+            'watchers singular', f"{r['url']}/watchers")
         if watch == 0:
             watchers: str = ctx.l.repo.info.watchers.no_watchers
-        stargazers: str = ctx.l.repo.info.stargazers.no_stargazers + '\n' if star == 0 else ctx.fmt('stargazers plural', star, f"{r['url']}/stargazers") + '\n'
+        stargazers: str = ctx.l.repo.info.stargazers.no_stargazers + '\n' if star == 0 else ctx.fmt('stargazers plural',
+                                                                                                    star,
+                                                                                                    f"{r['url']}/stargazers") + '\n'
         if star == 1:
             stargazers: str = ctx.fmt('stargazers singular', f"{r['url']}/stargazers") + '\n'
 
@@ -78,7 +82,9 @@ class Repo(commands.Cog):
             issues: str = ctx.fmt('issues singular', f"{r['url']}/issues") + '\n'
 
         forks: str = ctx.l.repo.info.forks.no_forks + '\n' if r[
-                                                                  'forkCount'] == 0 else ctx.fmt('forks plural', r['forkCount'], f"{r['url']}/network/members") + '\n'
+                                                                  'forkCount'] == 0 else ctx.fmt('forks plural',
+                                                                                                 r['forkCount'],
+                                                                                                 f"{r['url']}/network/members") + '\n'
         if r['forkCount'] == 1:
             forks: str = ctx.fmt('forks singular', f"{r['url']}/network/members") + '\n'
         forked = ""
@@ -97,7 +103,8 @@ class Repo(commands.Cog):
         info: str = f"{created_at}{issues}{forks}{watchers_stargazers}{forked}{languages}"
         embed.add_field(name=f":mag_right: {ctx.l.repo.info.glossary[1]}:", value=info)
 
-        homepage: tuple = (r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, ctx.l.repo.info.glossary[4])
+        homepage: tuple = (
+        r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, ctx.l.repo.info.glossary[4])
         links: list = [homepage]
         link_strings: list = []
         for lnk in links:
@@ -107,8 +114,8 @@ class Repo(commands.Cog):
             embed.add_field(name=f":link: {ctx.l.repo.info.glossary[2]}:", value='\n'.join(link_strings))
 
         if topics := self.bot.mgr.render_label_like_list(r['topics'][0],
-                                                name_and_url_knames_if_dict=('topic name', 'url'),
-                                                total_n=r['topics'][1]):
+                                                         name_and_url_knames_if_dict=('topic name', 'url'),
+                                                         total_n=r['topics'][1]):
             embed.add_field(name=f':label: {ctx.l.repo.info.glossary[3]}:', value=topics)
 
         if r['graphic']:
@@ -148,22 +155,50 @@ class Repo(commands.Cog):
         if is_tree and not isinstance(src, list):
             await ctx.error(ctx.fmt('not_a_directory', f'`{ctx.prefix}snippet`'))
             return
-        files: list = [f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
-                       f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in sorted(src, key=lambda si: int(si['type'] == 'dir'), reverse=True)[:15]]
         if is_tree:
             link: str = str(src[0]['_links']['html'])
             link = link[:link.rindex('/')]
         else:
             link: str = f'https://github.com/{repo_or_path}'
-        embed: GitBotEmbed = GitBotEmbed(
-            color=self.bot.mgr.c.rounded,
-            title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
-            description='\n'.join(files),
-            url=link
-        )
-        if len(src) > 15:
-            embed.set_footer(text=ctx.fmt('view_more', len(src) - 15))
-        await ctx.send(embed=embed, nonce='repo_files', view_on_url=link)
+        embeds: list = []
+
+        def make_embed(items: list, footer: str | None = None) -> GitBotEmbed:
+            return GitBotEmbed(
+                    color=self.bot.mgr.c.rounded,
+                    title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
+                    description='\n'.join(
+                            f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
+                            f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in items),
+                    url=link,
+                    footer=footer
+            )
+
+        total = len(src)
+        if len(src := sorted(src, key=lambda si: int(si['type'] == 'dir'), reverse=True)) > 200:
+            src = src[:200]
+
+        if len(src) > 20:
+            for chunkno, chunk in enumerate(self.bot.mgr.chunks(src, 20)):
+                if chunkno >= 10:
+                    break
+
+                range_: str = f'{chunkno * 20 + 1}-{min(((chunkno + 1) * 20, len(src)))}/{total}'
+                embeds.append(make_embed(chunk, ctx.fmt('footer', range_)))
+
+            if len(embeds) == 10:
+                remaining = len(src) - ((len(embeds) - 1) * 20)
+                footer = ctx.fmt('footer', f'{len(src) - remaining}-{len(src)}/{total}') + '\n' + ctx.fmt(
+                        'footer_more', total - len(src)
+                )
+                embeds[-1].set_footer(text=footer)
+        else:
+            # If there are less than 20 items, create a single embed
+            embeds.append(make_embed(src))
+
+        if not embeds:
+            await ctx.send(embed=make_embed(src), nonce='repo_files', view_on_url=link)
+        else:
+            await EmbedPages(embeds).start(ctx)
 
     @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10)
@@ -177,14 +212,14 @@ class Repo(commands.Cog):
             return await msg.edit(content=f"{self.bot.mgr.e.error}  {ctx.l.generic.nonexistent.repo.base}")
         elif src_bytes is False:
             return await msg.edit(
-                content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                    content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
         io_obj: io.BytesIO = io.BytesIO(src_bytes)
         try:
             await ctx.send(file=discord.File(filename=f'{repo.replace("/", "-")}.zip', fp=io_obj))
             await msg.edit(content=f'{self.bot.mgr.e.checkmark}  {ctx.fmt("done", repo)}')
         except discord.errors.HTTPException:
             await msg.edit(
-                content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
+                    content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
     @repo_command_group.command(name='issues')
     @commands.cooldown(5, 40, commands.BucketType.user)

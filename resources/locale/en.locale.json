@@ -22,7 +22,7 @@
     },
     "embed_pages_permission_error": {
       "title": "I don't have the permissions required!",
-      "description": "This command requires a little magic to work (edit messages).\n**I need to be able to manage messages!**",
+      "description": "This command requires a little magic to work.\n**I need to be able to manage messages!**",
       "footer": "Adjust my permissions and try again."
     },
     "bot_missing_permissions": "**I don't have the permissions required to do this!**\nI need: {0}",
@@ -285,7 +285,8 @@
       "license": "Licensed under the {0}"
     },
     "files": {
-      "view_more": "View {0} more on GitHub",
+      "footer": "Showing files {0}",
+      "footer_more": "{0} more items can be viewed on GitHub.",
       "not_a_directory": "**The path you provided is not of a directory!**\nTo view the contents of a file use the `{0}` command."
     },
     "download": {

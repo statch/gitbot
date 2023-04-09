@@ -12,5 +12,6 @@ from .discord.embed import *
 from .discord.commands import *
 from .discord.bot import GitBot
 from .discord.context import GitBotContext
+from .discord.pages import *
 from .enums import CheckFailureCode
 from .discord.components import *

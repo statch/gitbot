@@ -93,6 +93,8 @@ class EmbedPages:
         self.start_time = time()
         self.context: GitBotContext = ctx
         self._edit_embed_footer(self.pages[self.current_page])
+        if not ctx.bot_permissions.manage_messages:
+            raise EmbedPagesPermissionError('Bot does not have manage_messages permission')
         message: discord.Message = await ctx.send(embed=self.pages[self.current_page], view=EmbedPagesControlView(self))
         for embed in self.pages[1:]:
             self._edit_embed_footer(embed)

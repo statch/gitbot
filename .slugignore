@@ -8,3 +8,4 @@ migrations/
 .bandit
 .graphqlconfig
 schema.graphql
+CODEOWNERS

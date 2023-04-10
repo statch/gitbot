@@ -143,6 +143,36 @@ def normalize_identity(context_resource: str = 'author') -> Callable:
     return decorator
 
 
+def uses_quick_access(resource: str, parameter_name: str):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            ctx: 'GitBotContext' = args[1]
+            spec: inspect.FullArgSpec = inspect.getfullargspec(func)
+            args: list = list(args)
+            index: int = spec.args.index(parameter_name)
+            passed: str | None = args[index] if index < len(args) else kwargs.get(parameter_name, None)
+            if parameter_name in spec.args and passed is None:
+                stored: str = await ctx.bot.mgr.db.users.getitem(ctx, 'repo')
+                if not stored:
+                    await ctx.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await ctx.error(ctx.l.generic.nonexistent.repo.qa)
+                    return
+                elif not await ctx.bot.github.rest_get_repo(stored):  # check if repo is valid; rate-limit intensive
+                    await ctx.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
+                    return
+                if parameter_name in kwargs:
+                   kwargs[parameter_name] = stored
+                else:
+                    args[index] = stored
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 def normalize_repository(func: Callable) -> Callable:
     """
     Normalize the repo argument to be in the owner/repo-name format if possible.

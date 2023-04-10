@@ -815,6 +815,7 @@ class Manager:
                                                               (r.GITHUB_PULL_REQUESTS_PLAIN_URL_RE, 'repo pulls'),
                                                               (r.GITHUB_ISSUES_PLAIN_URL_RE, 'repo issues'),
                                                               (r.GITHUB_COMMIT_URL_RE, 'commit'),
+                                                              (r.GITHUB_REPO_TREE_RE, 'repo-files-two-arg'),
                                                               (r.GITHUB_REPO_URL_RE, 'repo info'),
                                                               (r.GITHUB_USER_ORG_URL_RE, ('user info', 'org info')))
         for pattern, command_name in combos:

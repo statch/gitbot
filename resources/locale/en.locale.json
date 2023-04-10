@@ -34,19 +34,20 @@
     }
   },
   "events": {
-    "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git --help` for a list of my commands."
+    "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git help` for a list of my commands."
   },
   "generic": {
     "nonexistent": {
       "user": {
         "base": "This user **doesn't exist!**",
         "qa": "You don't have a quick access user configured! **Type** `git config` **to do it.**",
-        "qa_changed": "The user you had saved has changed their name or deleted their account. Please **re-add them** using `git --config user`"
+        "qa_changed": "The user you had saved has changed their name or deleted their account. Please **re-add them** using `git config user`"
       },
       "repo": {
         "base": "This repository **doesn't exist!**",
+        "or_ref": "This repository **doesn't exist** or the ref {0} **doesn't exist within it!**",
         "qa": "You don't have a quick access repo configured! **Type** `git config` **to do it.**",
-        "qa_changed": "The repo you had saved has changed its name or has been deleted. Please **re-add them** using `git --config repo`",
+        "qa_changed": "The repo you had saved has changed its name or has been deleted. Please **re-add it** using `git config repo`",
         "saved_repo_unavailable": "You invoked the command with your stored repo, but it's unavailable. **Please re-add it.**",
         "no_pulls_with_state": "This repo doesn't have any **{0} pull requests!**",
         "no_issues_with_state": "This repo doesn't have any **{0} issues!**",
@@ -56,7 +57,7 @@
       "org": {
         "base": "This organization **doesn't exist!**",
         "qa": "You don't have a quick access organization configured! **Type** `git config` **to do it.**",
-        "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git --config org`"
+        "qa_changed": "The organization you had saved has changed its name or was deleted. Please **re-add it** using `git config org`"
       },
       "repos": {
         "user": "This user doesn't have any **public repos!**",
@@ -514,8 +515,8 @@
         "locale": "Change the Bot's language",
         "feed": "Subscribe to new releases of a repository"
       },
-      "deletion": "**You can delete stored data by typing** `git config --delete`",
-      "footer": "To see what you have saved, use git config --show",
+      "deletion": "**You can delete stored data by typing** `git config delete`",
+      "footer": "To see what you have saved, use git config show",
       "embed_title": "GitBot Config"
     },
     "show": {
@@ -1146,10 +1147,10 @@
       },
       "repo_files": {
         "brief": "View a GitHub repo's file structure",
-        "usage": "repo files <repo>",
+        "usage": "repo files [repo_with_path] [ref]",
         "example": "repo files statch/gitbot",
-        "description": null,
-        "qa_resource": null,
+        "description": "With a saved quick-access repo, you can directly access subdirectories without typing out the full name, e.g. repo files /lib/api (start with a /)",
+        "qa_resource": "repo",
         "required_permissions": []
       },
       "repo_commits": {
@@ -1449,6 +1450,14 @@
       "file": {
         "name": "file",
         "content": "Apart from the parameters, this command also **requires a file** to be provided. Simply type your command, then add a file to the message!"
+      },
+      "ref": {
+        "name": "ref",
+        "content": "A git reference (ex. `main`, a branch, or a commit hash)"
+      },
+      "repo_with_path": {
+        "name": "repo-with-path",
+        "content": "The repo and path separated by a `/` character (ex. `statch/gitbot/lib/api`). The path can be omitted, in which case the root of the repo is used (`statch/gitbot`)"
       }
     },
     "qa_disclaimers": {

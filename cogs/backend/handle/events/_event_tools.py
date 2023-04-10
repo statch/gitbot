@@ -65,6 +65,7 @@ async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Messa
 @commands.max_concurrency(10, wait=True)
 async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
     if (await ctx.bot.mgr.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
+        ctx.bot.logger.debug('Invoking command(s) "%s" with kwargs: %s', str(cmd_data.command), str(cmd_data.kwargs))
         ctx.__autoinvoked__ = True
         if isinstance(cmd_data.command, commands.Command):
             return await ctx.invoke(cmd_data.command, **cmd_data.kwargs)

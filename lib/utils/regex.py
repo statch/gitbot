@@ -22,3 +22,4 @@ GITHUB_REPO_GIT_URL_RE: re.Pattern = re.compile(r'(?:https?://)?github\.com/(?P<
 GITHUB_LINES_URL_RE: re.Pattern = re.compile(r'(?:https?://)?(github)\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/blob/(.+?)/(.+?)#L(?P<first_line_number>\d+)[-~]?L?(?P<second_line_number>\d*)', re.IGNORECASE)
 GITLAB_LINES_URL_RE: re.Pattern = re.compile(r'(?:https?://)?(gitlab)\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/-/blob/(.+?)/(.+?)#L(?P<first_line_number>\d+)-?(?P<second_line_number>\d*)', re.IGNORECASE)
 GITHUB_COMMIT_URL_RE: re.Pattern = re.compile(r'(?:https?://)?github\.com/(?P<repo>[a-zA-Z0-9-_]+/[A-Za-z0-9_.-]+)/commit/(?P<oid>\b([a-f0-9]{40})\b)')
+GITHUB_REPO_TREE_RE: re.Pattern = re.compile(r'(?:https?://)?github\.com/(?P<repo>[\w-]+/[\w-]+)/tree/(?P<ref>[\w-]+)/(?P<path>[\w/-]+)')

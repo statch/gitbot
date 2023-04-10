@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from lib.typehints import ArgumentExplainer, CommandHelp, CommandGroupHelp, LocaleName
 from lib.utils.regex import HELP_PARAMETER_REGEX
 
-__all__: tuple = ('GitBotCommand', 'GitBotCommandGroup')
+__all__: tuple = ('GitBotCommand', 'GitBotCommandGroup', 'GitBotHybridCommand')
 
 
 # not used for now, but may come in handy once I get around to refactoring the help system again

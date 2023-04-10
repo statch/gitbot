@@ -14,24 +14,25 @@ from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
 YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
 BASE_URL: str = 'https://api.github.com'
 DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
-github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, list)), maxsize=64, max_age=450)
 
 
 def github_cached(func: Callable) -> Callable:
     @functools.wraps(func)
     async def wrapper(*args: tuple, **kwargs: dict) -> Any:
         cache_key: str = f'{id(func)}:{args[1] if args else next(iter(kwargs))}'
-        if cached := github_object_cache.get(cache_key):
+        if cached := GitHubAPI.github_object_cache.get(cache_key):
             return cached
         result: Any = await func(*args, **kwargs)
         if isinstance(result, (dict, list)):
-            github_object_cache[cache_key] = result
+            GitHubAPI.github_object_cache[cache_key] = result
         return result
 
     return wrapper
 
 
 class GitHubAPI:
+    github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, list)), maxsize=64, max_age=450)
+
     """
     The main class used to interact with the GitHub API.
 
@@ -96,18 +97,15 @@ class GitHubAPI:
         return list(r for r in await self.getitem(f'/orgs/{org}/repos', []) if r['private'] is False)
 
     @normalize_repository
-    async def get_repo_files(self, repo: GitHubRepository) -> list[dict]:
-        if repo.count('/') != 1:
-            return []
-        return await self.getitem(f'/repos/{repo}/contents', [])
-
-    @normalize_repository
-    async def get_tree_file(self, repo: GitHubRepository, path: str) -> dict | list | None:
+    async def get_tree_file(self, repo: GitHubRepository, path: str | None = None, ref: str | None = None) -> dict | list | None:
         if repo.count('/') != 1:
             return None
-        if path[0] == '/':
-            path = path[1:]
-        return await self.getitem(f'/repos/{repo}/contents/{path}')
+        if path:
+            if path[0] != '/':
+                path = '/' + path
+        else:
+            path = ''
+        return await self.getitem(f'/repos/{repo}/contents{path}' + (f'?ref={ref}' if ref else ''))
 
     @github_cached
     @validate_github_name('user', default=[])
@@ -243,6 +241,16 @@ class GitHubAPI:
             data['graphic'] = data['openGraphImageUrl'] if data['usesCustomOpenGraphImage'] else None
             data['release'] = data['releases']['nodes'][0]['tagName'] if data['releases']['nodes'] else None
             return data
+
+    @normalize_repository
+    @github_cached
+    async def rest_get_repo(self, repo: GitHubRepository) -> Optional[dict]:
+        try:
+            data: dict = await self.gh.getitem(f'/repos/{repo}')
+        except BadRequest:
+            return None
+
+        return data
 
     @normalize_repository
     async def get_pull_request(self,

@@ -4,7 +4,7 @@ import io
 from ._list_plugin import issue_list, pull_request_list  # noqa
 from discord.ext import commands
 from typing import Optional
-from lib.utils.decorators import normalize_repository, gitbot_group
+from lib.utils.decorators import normalize_repository, gitbot_group, uses_quick_access
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.typehints import GitHubRepository
 from lib.structs import GitBotEmbed, GitBot, EmbedPages
@@ -126,29 +126,29 @@ class Repo(commands.Cog):
 
         await ctx.send(embed=embed, view_on_url=r['url'])
 
-    @commands.cooldown(15, 30, commands.BucketType.user)
+    @commands.cooldown(10, 30, commands.BucketType.user)
     @repo_command_group.command(name='files', aliases=['src', 'fs'])
-    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository | None = None) -> None:
-        if not repo_or_path:
-            stored: str = await self.bot.mgr.db.users.getitem(ctx, 'repo')
-            if not stored:
-                await self.bot.mgr.db.users.delitem(ctx, 'repo')
+    @uses_quick_access('repo', 'repo_or_path')
+    async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository | None = None, ref: str | None = None) -> None:
+        ctx.fmt.set_prefix('repo files')
+        if repo_or_path is not None and repo_or_path.startswith('/'):
+            stored_repo: str = await ctx.bot.mgr.db.users.getitem(ctx, 'repo')
+            if not stored_repo:
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                 return
-            repo_or_path = stored
-
-        ctx.fmt.set_prefix('repo files')
-        is_tree: bool = False
-        if repo_or_path.count('/') > 1:
-            repo: GitHubRepository = '/'.join(repo_or_path.split('/', 2)[:2])  # noqa
-            file: str = repo_or_path[len(repo):]
-            src: list = await self.bot.github.get_tree_file(repo, file)
+            repo: str = stored_repo
+            path: str = repo_or_path
             is_tree: bool = True
         else:
-            src = await self.bot.github.get_repo_files(repo_or_path)
+            repo: GitHubRepository = '/'.join(repo_or_path.split('/', 2)[:2])  # noqa
+            is_tree: bool = repo_or_path != repo
+            path: str = repo_or_path[len(repo):] if is_tree else None
+        src: list = await self.bot.github.get_tree_file(repo, path, ref)
         if not src:
             if is_tree:
                 await ctx.error(ctx.l.generic.nonexistent.path)
+            elif ref:
+                await ctx.error(ctx.l.generic.nonexistent.repo.or_ref.format(f'`{ref}`'))
             else:
                 await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
@@ -165,10 +165,10 @@ class Repo(commands.Cog):
         def make_embed(items: list, footer: str | None = None) -> GitBotEmbed:
             return GitBotEmbed(
                     color=self.bot.mgr.c.rounded,
-                    title=f'`{repo_or_path}`' if len(repo_or_path) <= 60 else '/'.join(repo_or_path.split('/', 2)[:2]),
+                    title=f'{self.bot.mgr.e.branch}  `{repo}`' + (f' ({ref})' if ref else ''),
                     description='\n'.join(
-                            f'{self.bot.mgr.e.file}  [{f["name"]}]({f["html_url"]})' if f['type'] == 'file' else
-                            f'{self.bot.mgr.e.folder}  [{f["name"]}]({f["html_url"]})' for f in items),
+                            f'{self.bot.mgr.e.file}  [`{f["name"]}`]({f["html_url"]})' if f['type'] == 'file' else
+                            f'{self.bot.mgr.e.folder}  [`{f["name"]}`]({f["html_url"]})' for f in items) + ('\n' + f'```{path}```' if path else ''),
                     url=link,
                     footer=footer
             )
@@ -191,14 +191,17 @@ class Repo(commands.Cog):
                         'footer_more', total - len(src)
                 )
                 embeds[-1].set_footer(text=footer)
-        else:
-            # If there are less than 20 items, create a single embed
-            embeds.append(make_embed(src))
 
         if not embeds:
-            await ctx.send(embed=make_embed(src), nonce='repo_files', view_on_url=link)
+            await ctx.send(embed=make_embed(src), view_on_url=link)
         else:
             await EmbedPages(embeds).start(ctx)
+
+    @commands.command(name='repo-files-two-arg', hidden=True)
+    @commands.cooldown(10, 30, commands.BucketType.user)
+    async def repo_files_command_two_arg(self, ctx: GitBotContext, repo: str, ref: str, path: str) -> None:
+        # different order due to how groups are captured in the regex
+        await self.repo_files_command(ctx, repo_or_path=repo + (path if path.startswith('/') else '/' + path), ref=ref)
 
     @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10)

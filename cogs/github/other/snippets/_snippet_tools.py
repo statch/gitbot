@@ -56,7 +56,7 @@ async def _compile_gitlab_link(data: tuple) -> str:
 
 
 async def gen_carbon_inmemory(ctx: GitBotContext, code: str, first_line_number: int = 1) -> io.BytesIO:
-    return await (await ctx.bot.carbon.generate_basic_image(code, first_line_number)).memorize()
+    return await (await ctx.bot.carbon.generate_basic_image(code, first_line_number)).memoize()
 
 
 async def compile_url(match: tuple) -> str:

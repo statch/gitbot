@@ -156,8 +156,7 @@ class Repo(commands.Cog):
             await ctx.error(ctx.fmt('not_a_directory', f'`{ctx.prefix}snippet`'))
             return
         if is_tree:
-            link: str = str(src[0]['_links']['html'])
-            link = link[:link.rindex('/')]
+            link = (link := str(src[0]['_links']['html']))[:link.rindex('/')]
         else:
             link: str = f'https://github.com/{repo_or_path}'
         embeds: list = []

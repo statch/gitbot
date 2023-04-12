@@ -57,6 +57,17 @@ class GitBotEmbed(discord.Embed):
     def add_field(self, *, name: str, value: str, inline: bool = False) -> None:
         super().add_field(name=name, value=value, inline=inline)
 
+    def append_footer(self, text: str, icon_url: str | None = None):
+        """
+        Adds text to a new line in the footer.
+
+        :param text: The text to append
+        :param icon_url: The icon URL to use
+        """
+        if self.footer.text is not None:
+            return self.set_footer(text=f'{self.footer.text}\n{text}', icon_url=icon_url or self.footer.icon_url)
+        self.set_footer(text=text, icon_url=icon_url)
+
     @classmethod
     def success(cls, text: str, **kwargs) -> 'GitBotEmbed':
         kwargs.setdefault('description', f'<:checkmark:770244084727283732>  {text}')

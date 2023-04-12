@@ -1,7 +1,7 @@
 from discord.ext import commands
 from discord import app_commands
 from typing import Iterator, Optional
-from lib.utils.decorators import gitbot_hybrid_command, GitBotCommand, GitBotGroup
+from lib.utils.decorators import gitbot_hybrid_command, GitBotCommand, GitBotGroup, GitBotHybridGroup, GitBotHybridCommand
 from lib.utils import decorators
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.pages import EmbedPages
@@ -26,7 +26,7 @@ class Help(commands.Cog):
 
     def generate_command_help_embed(self,
                                     ctx: GitBotContext,
-                                    command: GitBotCommand,
+                                    command: GitBotCommand | GitBotGroup | GitBotHybridGroup | GitBotHybridCommand,
                                     content: Optional[CommandHelp | CommandGroupHelp] = None) -> GitBotEmbed:
         content: CommandHelp | CommandGroupHelp = content or command.get_help_content(ctx)
         if not content:
@@ -57,7 +57,9 @@ class Help(commands.Cog):
             embed.set_footer(text=qa_disclaimer)
         if not argument_explainers:  # since there's no arguments, let's spice this embed up a bit
             embed.color = 0x268BD2
-            embed.set_footer(text=f'{ctx.l.help.no_arguments_footer}', icon_url=self.bot.user.avatar.url)
+            embed.append_footer(text=f'{ctx.l.help.no_arguments_footer}', icon_url=self.bot.user.avatar.url)
+        if isinstance(command, (GitBotHybridGroup, GitBotHybridCommand)):
+            embed.append_footer(text=ctx.l.help.hybrid_disclaimer)
         return embed
 
     async def send_command_help(self, ctx: GitBotContext, command: GitBotCommand) -> None:

@@ -1481,7 +1481,8 @@
       "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
       "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
       "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
-    }
+    },
+    "hybrid_disclaimer": "This is a hybrid command - it can be used both normally and as a slash command."
   },
   "dev": {
     "default": {

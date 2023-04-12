@@ -5,7 +5,8 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
 from typing import Optional, Literal, Any
-from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
+from lib.structs import GitBotEmbed, GitBot
+from structs.enums import GitBotCommandState
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 from lib.utils.decorators import normalize_repository
 from lib.structs.discord.context import GitBotContext
@@ -370,8 +371,11 @@ class Config(commands.Cog):
                         description=ctx.fmt('match_confirmation_embed description', l_[0]['localized_name']),
                         footer=ctx.l.config.locale.match_confirmation_embed.footer
                     )
-                    confirmation_result: bool = await _match_confirmation_embed.confirmation(ctx, _callback)
-                    if not confirmation_result:
+                    confirmation: bool = await _match_confirmation_embed.confirmation(ctx)
+                    if confirmation is None:
+                        return
+                    elif confirmation is False:
+                        await ctx.info(ctx.l.config.locale.cancelled)
                         return
                 await self.bot.mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
                 setattr(ctx, 'l', await self.bot.mgr.get_locale(ctx))
@@ -524,13 +528,12 @@ class Config(commands.Cog):
             footer=ctx.l.config.delete.feed.channel.flow.confirmation.embed.footer
         )
 
-        async def _callback(_, event):
-            if event[0].emoji.id == 770244076896256010:
-                await ctx.info(ctx.fmt('cancelled', channel.mention))
-                return GitBotCommandState.FAILURE
-            return GitBotCommandState.SUCCESS
-
-        if await embed.confirmation(ctx, _callback):
+        confirmation: bool | None = await embed.confirmation(ctx)
+        if confirmation is None:
+            return
+        elif confirmation is False:
+            await ctx.info(ctx.fmt('cancelled', channel.mention))
+        else:
             await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
             await ctx.success(ctx.fmt('success', channel.mention))
 
@@ -615,14 +618,10 @@ class Config(commands.Cog):
                                     self.bot.mgr.to_github_hyperlink(repo, codeblock=True),
                                     f'<#{present_in[0]["cid"]}>')
             )
-
-            async def _callback(_, event):
-                if event[0].emoji.id == 770244076896256010:
-                    await ctx.info(ctx.fmt('cancelled', f'`{repo}`'))
-                    return GitBotCommandState.FAILURE
-                return GitBotCommandState.SUCCESS
-            delete: bool = await embed.confirmation(ctx, _callback)
-            if delete:
+            confirmation: bool | None = await embed.confirmation(ctx)
+            if confirmation is False:
+                await ctx.info(ctx.fmt('cancelled', f'`{repo}`'))
+            elif confirmation is True:
                 rfr: ReleaseFeedRepo = self.bot.mgr.get_by_key_from_sequence(present_in[0]['repos'], 'name', repo.lower())
                 await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id},
                                                {'$pull': {f'feed.{guild["feed"].index(present_in[0])}.repos': rfr}})

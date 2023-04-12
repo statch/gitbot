@@ -139,9 +139,5 @@ class GitBotContext(commands.Context):
                                                                 isinstance(self.command,
                                                                            (GitBotGroup, GitBotHybridGroup))
                                                          else self.command)
-        print(parent)
-        print(self.invoked_subcommand)
-        print(not self.invoked_subcommand or not subcommand_check)
-        print(self.command.fullname)
         if parent and (not self.invoked_subcommand or not subcommand_check):
             return await parent.send_help(self)

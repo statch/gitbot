@@ -6,30 +6,22 @@ A non-native replacement for the embed object provided in discord.ext.commands
 :license: CC BY-NC-ND 4.0, see LICENSE for more details.
 """
 
-import enum
 import discord
 import asyncio
 from lib.utils.regex import MARKDOWN_EMOJI_RE
+from lib.structs.discord.components import ConfirmationView
 from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
 from lib.structs.proxies.dict_proxy import DictProxy
+from lib.structs.enums import GitBotCommandState
+
 if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
 from lib.typehints import EmbedLike
 
-__all__: tuple = ('GitBotEmbed', 'GitBotCommandState')
-
-
-@enum.unique
-class GitBotCommandState(enum.Enum):
-    FAILURE: int = 0
-    CONTINUE: int = 1
-    SUCCESS: int = 2
-    TIMEOUT: int = 3
-    CLOSED: int = 4
-
+__all__: tuple = ('GitBotEmbed',)
 
 GitBotEmbedResponseCallback = Callable[..., Awaitable[tuple[GitBotCommandState | Optional[tuple[Any, ...] | Any],
-                                                            GitBotCommandState]]]
+GitBotCommandState]]]
 
 
 class GitBotEmbed(discord.Embed):
@@ -98,7 +90,7 @@ class GitBotEmbed(discord.Embed):
     async def send(self, messageable: discord.abc.Messageable, *args, **kwargs) -> discord.Message:
         return await messageable.send(embed=self, *args, **kwargs)
 
-    async def edit_with_state(self, ctx: 'GitBotContext', state: int) -> None:
+    async def edit_with_state(self, ctx: 'GitBotContext', state: int | GitBotCommandState) -> None:
         if ctx.author.id != ctx.guild.me.id:
             return
         if _embed := ctx.message.embeds[0] if ctx.message.embeds else None:
@@ -184,7 +176,7 @@ class GitBotEmbed(discord.Embed):
                                              else callback_result[0])
                 return_args = None if not isinstance(callback_result, tuple) else callback_result[1:]
                 if antispam >= antispam_threshold-1 and with_antispam:
-                    state: int = GitBotCommandState.FAILURE
+                    state:  GitBotCommandState = GitBotCommandState.FAILURE
                 if state is GitBotCommandState.CONTINUE:
                     antispam += 1
                     continue
@@ -198,29 +190,14 @@ class GitBotEmbed(discord.Embed):
                 pass
         return None, None
 
-    async def confirmation(self, ctx: 'GitBotContext', callback: GitBotEmbedResponseCallback) -> bool:
+    async def confirmation(self, ctx: 'GitBotContext') -> bool:
         """
         Run a prompt to confirm something.
 
         :param ctx: The invocation context
-        :param callback: The callback to use (same as in :meth:`input_with_timeout`)
         :return: Whether the user confirmed
         """
-        initial_message: discord.Message = await self.send(ctx)
-        await initial_message.add_reaction('<:checkmark:770244084727283732>')
-        await initial_message.add_reaction('<:failure:770244076896256010>')
-        result: tuple[Optional[discord.Message], Optional[tuple[Any, ...] | Any]] = await self.input_with_timeout(
-            ctx=ctx,
-            event='reaction_add',
-            timeout=30,
-            timeout_check=lambda r, m: all([r.is_custom_emoji(),
-                                            r.emoji.id in (770244076896256010, 770244084727283732),
-                                            m.id == ctx.author.id,
-                                            r.message.id == initial_message.id]),
-            response_callback=callback,
-            init_message=initial_message
-        )
-        if (result and result[0] and isinstance(result[0][0], discord.Reaction)
-                and result[0][0].is_custom_emoji() and result[0][0].emoji.id == 770244084727283732):
-            return True
-        return False
+        view: ConfirmationView = ConfirmationView(ctx, self)
+        view.context_to_edit = await ctx.bot.get_context(await self.send(ctx, view=view))
+        await view.wait()
+        return view.value

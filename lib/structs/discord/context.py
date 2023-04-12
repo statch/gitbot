@@ -12,7 +12,7 @@ from typing import Optional, Any, Sequence
 from lib.typehints import EmbedLike
 from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
-from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from lib.structs.discord.commands import GitBotCommand, GitBotGroup, GitBotHybridGroup
 from typing import TYPE_CHECKING, Union
 from collections.abc import Awaitable, Callable
 if TYPE_CHECKING:
@@ -35,14 +35,14 @@ class MessageFormattingStyle(enum.Enum):
 
 class GitBotContext(commands.Context):
     bot: 'GitBot'
-    command: GitBotCommand | GitBotCommandGroup
+    command: GitBotCommand | GitBotGroup
     check_failure_code: Union[int, 'CheckFailureCode'] | None = None
     __nocache__: bool = False
     __autoinvoked__: bool = False
     __silence_error_calls__: bool = False
 
     def __init__(self, **attrs):
-        self.command: GitBotCommand | GitBotCommandGroup
+        self.command: GitBotCommand | GitBotGroup
         super().__init__(**attrs)
         self.session: ClientSession = self.bot.session
         self.fmt = self.bot.mgr.fmt(self)
@@ -135,8 +135,13 @@ class GitBotContext(commands.Context):
         """
         Used for root group methods without any additional logic.
         """
-        parent: Optional[GitBotCommand | GitBotCommandGroup] = (self.command.parent if not
+        parent: Optional[GitBotCommand | GitBotGroup] = (self.command.parent if not
                                                                 isinstance(self.command,
-                                                                           GitBotCommandGroup) else self.command)
+                                                                           (GitBotGroup, GitBotHybridGroup))
+                                                         else self.command)
+        print(parent)
+        print(self.invoked_subcommand)
+        print(not self.invoked_subcommand or not subcommand_check)
+        print(self.command.fullname)
         if parent and (not self.invoked_subcommand or not subcommand_check):
             return await parent.send_help(self)

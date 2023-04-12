@@ -18,5 +18,14 @@
   "commit_env_var_name": "HEROKU_SLUG_COMMIT",
   "terminal_supports_color": true,
   "owner_id": 548803750634979340,
-  "sync_commands_on_startup": true
+  "sync_commands_on_startup": true,
+  "oauth": {
+    "github": {
+      "scopes": [
+        "user:email",
+        "read:user"
+      ],
+      "auth_timeout": 150
+    }
+  }
 }

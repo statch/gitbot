@@ -5,7 +5,7 @@ from enum import Enum
 from discord.ext import commands
 from typing import Optional
 from lib.structs import GitBotEmbed, GitBot
-from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotCommandGroup
+from lib.utils.decorators import gitbot_group, GitBotCommand, GitBotGroup
 from lib.structs.discord.context import GitBotContext
 
 
@@ -78,7 +78,7 @@ class Dev(commands.Cog):
         except ValueError:
             await ctx.error(ctx.fmt('invalid_format', ','.join([f'`{e.value}`' for e in ExportFileType])))
             return
-        command: GitBotCommand | GitBotCommandGroup
+        command: GitBotCommand | GitBotGroup
         commands_: list[str] = []
         for command in self.bot.walk_commands():
             if not command.hidden:

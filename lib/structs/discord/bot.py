@@ -21,7 +21,7 @@ from lib.manager import Manager
 from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
-from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from lib.structs.discord.commands import GitBotCommand, GitBotGroup
 from lib.utils.logging_utils import GitBotLoggingStreamHandler
 
 load_dotenv()
@@ -103,7 +103,7 @@ class GitBot(commands.Bot):
         return super().command(*args, **kwargs, cls=GitBotCommand)
 
     def group(self, *args, **kwargs):
-        return super().group(*args, **kwargs, cls=GitBotCommandGroup)
+        return super().group(*args, **kwargs, cls=GitBotGroup)
 
     def _set_runtime_vars(self) -> None:
         self.runtime_vars: dict[str, str] = {
@@ -133,6 +133,7 @@ class GitBot(commands.Bot):
             self.tree.copy_global_to(guild=test_guild)
         if self.mgr.env.sync_commands_on_startup:
             await self.tree.sync(guild=test_guild)
+            self.logger.info('Synced command tree.')
         await self.setup_statch_specific()
 
     async def close(self) -> None:

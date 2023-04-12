@@ -511,6 +511,10 @@ class Manager:
                     values[field] = inner_fetch
         return template_str.format(**values)
 
+    def build_github_oauth_url(self, user_id: int, secret: str) -> str:
+        return f'https://github.com/login/oauth/authorize?scope={"%20".join(self.env.oauth.github.scopes)}' \
+               f'&client_id={self.env.github_client_id}&state={user_id}:{secret}'
+
     def _setup_db(self) -> None:
         """
         Setup the database connection with ENV vars and a more predictable certificate location.
@@ -559,7 +563,7 @@ class Manager:
             for k, v in env_defaults.items():
                 k: str
                 if not self._maybe_set_env_directive(k, v) and k not in self.env:
-                    self.env[k] = v
+                    self.env[k] = v if not isinstance(v, dict) else DictProxy(v)
                     if isinstance(v, str):
                         os.environ[k.upper()] = v
         self.load_dotenv()
@@ -576,6 +580,8 @@ class Manager:
                 if self.env_directives.get('eval_literal'):
                     if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
                         self.env[binding.key] = parsed
+                    elif isinstance(self.parse_literal(binding.value), dict):
+                        self.env[binding.key] = (parsed := DictProxy(binding.value))
                     else:
                         self.env[binding.key] = (parsed := self.parse_literal(binding.value))
                 else:

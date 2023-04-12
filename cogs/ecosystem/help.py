@@ -1,7 +1,7 @@
 from discord.ext import commands
 from discord import app_commands
 from typing import Iterator, Optional
-from lib.utils.decorators import gitbot_hybrid_command, GitBotCommand, GitBotCommandGroup
+from lib.utils.decorators import gitbot_hybrid_command, GitBotCommand, GitBotGroup
 from lib.utils import decorators
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.pages import EmbedPages
@@ -13,13 +13,13 @@ class Help(commands.Cog):
     def __init__(self, bot: GitBot):
         self.bot: GitBot = bot
 
-    def _get_commands(self) -> Iterator[GitBotCommand | GitBotCommandGroup]:
-        command: GitBotCommand | GitBotCommandGroup
+    def _get_commands(self) -> Iterator[GitBotCommand | GitBotGroup]:
+        command: GitBotCommand | GitBotGroup
         for command in self.bot.walk_commands():
             if not command.hidden:
                 yield command
 
-    def _get_command(self, name: str) -> Optional[GitBotCommand | GitBotCommandGroup]:
+    def _get_command(self, name: str) -> Optional[GitBotCommand | GitBotGroup]:
         if (name := name.strip()).startswith(self.bot.command_prefix):
             name: str = name.strip(self.bot.command_prefix).strip()
         return self.bot.get_command(name)
@@ -63,7 +63,7 @@ class Help(commands.Cog):
     async def send_command_help(self, ctx: GitBotContext, command: GitBotCommand) -> None:
         await ctx.send(embed=self.generate_command_help_embed(ctx, command))
 
-    async def send_command_group_help(self, ctx: GitBotContext, command_group: GitBotCommandGroup) -> None:
+    async def send_command_group_help(self, ctx: GitBotContext, command_group: GitBotGroup) -> None:
         content: CommandGroupHelp = command_group.get_help_content(ctx)
         if not content:
             await GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=self.bot.mgr.c.discord.white).send(ctx)
@@ -83,7 +83,7 @@ class Help(commands.Cog):
                                                                     color=self.bot.mgr.c.brand_colors.neon_bloom,
                                                                     thumbnail=self.bot.user.avatar.url)
         pages + index_embed
-        chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(self.bot.mgr.chunks(list(self._get_commands()), 10))
+        chunks: list[list[GitBotCommand | GitBotGroup]] = list(self.bot.mgr.chunks(list(self._get_commands()), 10))
         for chunk in chunks:
             embed: GitBotEmbed = GitBotEmbed(
                 title=f'{self.bot.mgr.e.github}   Help',
@@ -109,13 +109,13 @@ class Help(commands.Cog):
     @commands.max_concurrency(2, commands.BucketType.user)
     async def help_command(self, ctx: GitBotContext, *, command_or_group: Optional[str] = None):
         if command_or_group is not None:
-            command_or_group: Optional[GitBotCommand | GitBotCommandGroup] = self._get_command(command_or_group)
+            command_or_group: Optional[GitBotCommand | GitBotGroup] = self._get_command(command_or_group)
             if not command_or_group:
                 return await ctx.error(ctx.l.generic.nonexistent.command_or_group)
             match type(command_or_group):  # ah yes, the almighty type() call for checks. Don't kill me.
                 case decorators.GitBotCommand | decorators.GitBotHybridCommand:  # dot-access to avoid name capture pattern error - pep-0634
                     await self.send_command_help(ctx, command_or_group)
-                case decorators.GitBotCommandGroup:
+                case decorators.GitBotGroup | decorators.GitBotHybridGroup:
                     await self.send_command_group_help(ctx, command_or_group)
                 case _:
                     ...

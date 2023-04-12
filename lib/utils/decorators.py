@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from lib.typehints import ReleaseFeed
 from lib import structs
 from lib.utils import regex
-from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup, GitBotHybridCommand
+from lib.structs.discord.commands import GitBotCommand, GitBotGroup, GitBotHybridCommand, GitBotHybridGroup
 
 
 def _inject_aliases(name: str, **attrs) -> dict:
@@ -217,7 +217,7 @@ def gitbot_command(name: str, cls=GitBotCommand, **attrs) -> Callable:
     return decorator
 
 
-def gitbot_group(name: str, cls=GitBotCommandGroup, **attrs) -> Callable:
+def gitbot_group(name: str, cls=GitBotGroup, **attrs) -> Callable:
     """
     A group decorator that automatically injects "-" and "--" aliases.
 
@@ -226,7 +226,7 @@ def gitbot_group(name: str, cls=GitBotCommandGroup, **attrs) -> Callable:
     :param attrs: Additional attributes
     """
 
-    def decorator(func) -> GitBotCommandGroup:
+    def decorator(func) -> GitBotGroup:
         return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator
@@ -242,6 +242,21 @@ def gitbot_hybrid_command(name: str, cls=GitBotHybridCommand, **attrs) -> Callab
     """
 
     def decorator(func) -> GitBotHybridCommand:
+        return cls(func, name=name, **_inject_aliases(name, **attrs))
+
+    return decorator
+
+
+def gitbot_hybrid_group(name: str, cls=GitBotHybridGroup, **attrs) -> Callable:
+    """
+    A hybrid group decorator that automatically injects "-" and "--" aliases.
+
+    :param name: The group name
+    :param cls: The command group class
+    :param attrs: Additional attributes
+    """
+
+    def decorator(func) -> GitBotHybridGroup:
         return cls(func, name=name, **_inject_aliases(name, **attrs))
 
     return decorator

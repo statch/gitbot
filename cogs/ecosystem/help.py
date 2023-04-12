@@ -80,7 +80,7 @@ class Help(commands.Cog):
         pages: EmbedPages = EmbedPages()
         index_embed: GitBotEmbed = GitBotEmbed.from_locale_resource(ctx, 'help default',
                                                                     url='https://docs.statch.org',
-                                                                    color=self.bot.mgr.c.discord.fuchsia,
+                                                                    color=self.bot.mgr.c.brand_colors.neon_bloom,
                                                                     thumbnail=self.bot.user.avatar.url)
         pages + index_embed
         chunks: list[list[GitBotCommand | GitBotCommandGroup]] = list(self.bot.mgr.chunks(list(self._get_commands()), 10))

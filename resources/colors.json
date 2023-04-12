@@ -13,5 +13,9 @@
   "languages": {
     "python": "#3572A5",
     "rust": "#D73824"
+  },
+  "brand_colors": {
+    "neon_bloom": "#FF3388",
+    "ocean_mist": " #00CED1"
   }
 }

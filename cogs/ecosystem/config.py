@@ -208,7 +208,7 @@ class Config(commands.Cog):
         channel_list_embed_description: str = '\n'.join([f'{self.bot.mgr.e.square}**{index + 1} | **<#{rfi["cid"]}>'
                                                          for index, rfi in enumerate(guild['feed'])])
         channel_list_embed: GitBotEmbed = GitBotEmbed(
-            color=self.bot.mgr.c.cyan,
+            color=self.bot.mgr.c.brand_colors.ocean_mist,
             title=ctx.l.config.feed.repo.channel_list_embed.title,
             description=channel_list_embed_description,
             footer=ctx.l.config.feed.repo.channel_list_embed.footer
@@ -283,7 +283,7 @@ class Config(commands.Cog):
             return await ctx.error(ctx.fmt('!config feed not_a_feed', channel.mention))
 
         mention_ask_embed: GitBotEmbed = GitBotEmbed(
-            color=self.bot.mgr.c.cyan,
+            color=self.bot.mgr.c.brand_colors.ocean_mist,
             title=ctx.fmt('embed title', f'`#{channel.name}`'),
             description=ctx.l.config.feed.mention.embed.description,
             footer=ctx.l.config.feed.mention.embed.footer
@@ -518,7 +518,7 @@ class Config(commands.Cog):
             return
         ctx.fmt.set_prefix('+flow confirmation')
         embed: GitBotEmbed = GitBotEmbed(
-            color=self.bot.mgr.c.cyan,
+            color=self.bot.mgr.c.brand_colors.ocean_mist,
             title=ctx.l.config.delete.feed.channel.flow.confirmation.embed.title,
             description=ctx.fmt('embed description', channel.mention, f'`{len(rfi["repos"])}`'),
             footer=ctx.l.config.delete.feed.channel.flow.confirmation.embed.footer
@@ -563,7 +563,7 @@ class Config(commands.Cog):
             ctx.fmt.set_prefix('+multiple')
             options: str = self.bot.mgr.option_display_list_format([f'<#{rfi["cid"]}>' for rfi in present_in])
             embed: GitBotEmbed = GitBotEmbed(
-                color=self.bot.mgr.c.cyan,
+                color=self.bot.mgr.c.brand_colors.ocean_mist,
                 title=ctx.fmt('embed title', f'`{repo.lower()}`'),
                 url=f'https://github.com/{repo.lower()}',
                 description=(ctx.fmt('embed description', f'`{repo}`')
@@ -609,7 +609,7 @@ class Config(commands.Cog):
         else:
             ctx.fmt.set_prefix('+single')
             embed: GitBotEmbed = GitBotEmbed(
-                color=self.bot.mgr.c.cyan,
+                color=self.bot.mgr.c.brand_colors.ocean_mist,
                 title=ctx.fmt('embed title', f'`{repo.lower()}`'),
                 description=ctx.fmt('embed description',
                                     self.bot.mgr.to_github_hyperlink(repo, codeblock=True),
@@ -641,7 +641,7 @@ class Config(commands.Cog):
         if not rfis_with_mention:
             return await ctx.error(ctx.l.generic.nonexistent.release_feed_with_mention)
         selection_embed: GitBotEmbed = GitBotEmbed(
-                color=self.bot.mgr.c.cyan,
+                color=self.bot.mgr.c.brand_colors.ocean_mist,
                 title=ctx.lp.embed.title,
                 description=(ctx.lp.embed.description
                              + f'\n{self.bot.mgr.gen_separator_line(20)}\n'

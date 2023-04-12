@@ -65,7 +65,7 @@ class LinesOfCode(commands.Cog):
             footer=ctx.l.loc.footer.credit if not count
             else (ctx.fmt('footer with_count plural', count) if count > 1 else ctx.fmt('footer with_count singular')),
         )
-        await ctx.reply(embed=embed, mention_author=False, view_on_url=['url'])
+        await ctx.reply(embed=embed, mention_author=False, view_on_url=r['url'])
 
     def remove_matches(self, directory: str, pattern: str) -> int:
         self.bot.logger.debug('Removing files matching pattern "%s" from directory "%s"', pattern, directory)

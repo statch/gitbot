@@ -1,10 +1,13 @@
-
 .font-circular {
   font-family: "Circular Std Bold", sans-serif;
 }
 
 .font-inter {
   font-family: "Inter", sans-serif;
+}
+
+.font-jb-mono {
+    font-family: "JetBrains Mono", monospace;
 }
 
 .text-7xl {

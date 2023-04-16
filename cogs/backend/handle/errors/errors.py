@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import app_commands
 from lib.structs import GitBot, CheckFailureCode
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord import pages
@@ -15,8 +16,11 @@ class Errors(commands.Cog):
         ctx.fmt.set_prefix('errors')
         if silenced(ctx, error):
             return
-        if isinstance(error, commands.CommandInvokeError):
-            error: BaseException = error.__cause__
+        if isinstance(error, (commands.CommandInvokeError, commands.HybridCommandError)):
+            error: BaseException = error.original
+            # below, we're basically peeling back a layer off of another CommandInvokeError, be it from a hybrid command
+            if isinstance(error, (commands.CommandInvokeError, app_commands.CommandInvokeError)):
+                error: BaseException = error.original
         match type(error):
             case commands.MissingRequiredArgument:
                 await GitBotEmbed(

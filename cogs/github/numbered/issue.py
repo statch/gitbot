@@ -48,12 +48,12 @@ class Issue(commands.Cog):
                     await ctx.error(ctx.l.generic.nonexistent.issue_number)
                 return
 
-        em: str = '<:issue_open:788517560164810772>'
+        em: str = self.bot.mgr.e.pr_open
         if issue['state'].lower() == 'closed':
-            em: str = '<:issue_closed:788517938168594452>'
+            em: str = self.bot.mgr.e.pr_closed
         embed: discord.Embed = discord.Embed(
             color=self.bot.mgr.c.rounded,
-            title=f"{em}  {issue['title']} #{issue_number}",
+            title=f'{em}  {self.bot.mgr.truncate(issue["title"], 90)} `#{issue_number}`',
             url=issue['url']
         )
         if all(['body' in issue, issue['body'], len(issue['body'])]):

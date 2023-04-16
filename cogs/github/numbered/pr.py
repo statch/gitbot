@@ -60,7 +60,7 @@ class PullRequest(commands.Cog):
 
         title: str = self.bot.mgr.truncate(pr['title'], 90)
         embed: discord.Embed = discord.Embed(
-                title=f"{self.pr_states[pr['state'].lower()]}  {title} #{pr_number}",
+                title=f'{self.pr_states[pr["state"].lower()]}  {title} `#{pr_number}`',
                 url=pr['url'],
                 color=self.bot.mgr.c.rounded,
         )

@@ -297,11 +297,11 @@
     },
     "issues": {
       "title": "Latest {0} issues in {1}",
-      "footer_tip": "You can quickly inspect a specific issue from the list by selecting it from the list."
+      "footer_tip": "You can quickly inspect a specific issue by selecting it from the list."
     },
     "pulls": {
       "title": "Latest {0} pull requests in {1}",
-      "footer_tip": "You can quickly inspect a specific PR from the list by selecting it from the list."
+      "footer_tip": "You can quickly inspect a specific PR by selecting it from the list."
     }
   },
   "gist": {

@@ -5,7 +5,7 @@ from discord.ext import commands
 from lib.utils import regex
 from typing import Optional
 from lib.utils.decorators import gitbot_group
-from lib.structs import GitBotContext, GitBot
+from lib.structs import GitBotContext, GitBot, GitHubLinesView
 
 
 class Snippets(commands.Cog):
@@ -46,7 +46,7 @@ class Snippets(commands.Cog):
         ctx.fmt.set_prefix('snippets')
         text, err = await handle_url(ctx, link)
         if text:
-            await ctx.send(text)
+            await ctx.send(text, view=GitHubLinesView(ctx, link))
         else:
             await ctx.error(err)
 

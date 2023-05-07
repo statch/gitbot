@@ -20,17 +20,17 @@ class GitHubLinesView(discord.ui.View):
         self._url: str = lines_url
         self.parsed: re.Match = (re.search(GITHUB_LINES_URL_RE, self._url) or
                                  re.search(GITLAB_LINES_URL_RE, self._url))
-        self.l1: int = int(self.parsed.group('first_line_number'))
-        self.l2: int | None = None or self.ctx.bot.mgr.opt(self.ctx.bot.mgr.opt(self.parsed.groups(), 5), int)
+        self.l1: int = max(int(self.parsed.group('first_line_number')), 1)
+        self.l2: int | None = None or (_opt := self.ctx.bot.mgr.opt)(_opt(_opt(self.parsed.groups(), 5), int), max, 1)
         _joint_args: tuple = (self.ctx, self._url, self.l1, self.l2, self.parsed)
         _fmt = ctx.l.views.button.github_lines.view_from_to.format
         self.add_item(GitHubLinesButton(*_joint_args,
                                         forward=False,
-                                        label=_fmt(self.l1 - 25, self.l1 - 1),
+                                        label=_fmt(max(self.l1 - 25, 1), max(self.l1 - 1, 1)),
                                         emoji='⬅️', style=discord.ButtonStyle.gray))
         self.add_item(GitHubLinesButton(*_joint_args,
                                         forward=True,
-                                        label=_fmt(self.l2 + 1, self.l2 + 25),
+                                        label=_fmt(max(self.l2 + 1, 1), max(self.l2 + 25, 1)),
                                         emoji='➡️', style=discord.ButtonStyle.gray))
 
 
@@ -47,8 +47,7 @@ class GitHubLinesButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        previous_l1: int = self.l1
-        previous_l2: int | None = self.l2
+        previous_l1, previous_l2 = self.l1, self.l2
         if self.forward:
             if self.l2 is not None:
                 self.l1: int = self.l2 + 1
@@ -58,6 +57,7 @@ class GitHubLinesButton(discord.ui.Button):
         else:
             self.l2: int = self.l1 - 1
             self.l1 -= 25
+        self.l1, self.l2 = max(self.l1, 1), max(self.l2, 1)
         match self.parsed.group('platform'):
             case 'github':
                 if previous_l2 is None:
@@ -71,4 +71,5 @@ class GitHubLinesButton(discord.ui.Button):
                     self._url = self._url.replace(f'#L{previous_l1}-L{previous_l2}', f'#L{self.l1}-L{self.l2}')
         new_match = self.parsed.groups()[0:4] + (self.l1, self.l2)
         new, _ = await get_text_from_url_and_data(self.ctx, compile_url(new_match), new_match)
-        await interaction.message.reply(new, mention_author=False, view=GitHubLinesView(self.ctx, self._url))
+        if new:
+            await interaction.message.reply(new, mention_author=False, view=GitHubLinesView(self.ctx, self._url))

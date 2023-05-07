@@ -8,12 +8,16 @@ from typing import Optional
 from lib.typehints import AutomaticConversionSettings
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.components import GitHubLinesView
 
 
-def set_handler_ctx_attributes(ctx: GitBotContext) -> commands.Context:
-    ctx.__silence_max_concurrency_error__ = True
-    ctx.__silence_command_on_cooldown_error__ = True
-    return ctx
+def silence_errors(func):
+    @functools.wraps(func)
+    async def wrapper(ctx: GitBotContext, *args, **kwargs):
+        ctx.__silence_max_concurrency_error__ = True
+        ctx.__silence_command_on_cooldown_error__ = True
+        return await func(ctx, *args, **kwargs)
+    return wrapper
 
 
 @commands.command('snippet-no-error', hidden=True)
@@ -42,7 +46,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
             codeblock: Optional[str] = (await handle_url(ctx, ctx.message.content))[0]
             if codeblock:
                 ctx.bot.logger.debug('Converting MID %d into codeblock...', ctx.message.id)
-                return await ctx.reply(codeblock, mention_author=False)
+                return await ctx.reply(codeblock, mention_author=False, view=GitHubLinesView(ctx, ctx.message.content))
     _1st_lineno: int = 1 if not match_ else match_.group('first_line_number')
     if codeblock and len(codeblock.splitlines()) < ctx.bot.mgr.env.carbon_len_threshold:
         start: float = time.time()
@@ -55,8 +59,8 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
         return reply
 
 
+@silence_errors
 async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Message]:
-    set_handler_ctx_attributes(ctx)
     return await ctx.invoke(silent_snippet_command)
 
 
@@ -87,8 +91,8 @@ async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
                     continue
 
 
+@silence_errors
 async def handle_link_message(ctx: GitBotContext) -> Optional[discord.Message]:
-    set_handler_ctx_attributes(ctx)
     ctx.__silence_error_calls__ = True
     ctx.send = functools.partial(ctx.send, reference=ctx.message, mention_author=False)
     return await resolve_url_command(ctx)

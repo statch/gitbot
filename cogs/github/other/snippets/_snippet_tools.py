@@ -9,7 +9,7 @@ from lib.structs.discord.context import GitBotContext
 async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
     match_: tuple = ctx.bot.mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
     if match_:
-        return await get_text_from_url_and_data(ctx, await compile_url(match_), match_, **kwargs)
+        return await get_text_from_url_and_data(ctx, compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
 
 
@@ -47,11 +47,11 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
     return f"```{extension}\n{text.rstrip()}\n```" if wrap_in_codeblock else text.rstrip(), None
 
 
-async def _compile_github_link(data: tuple) -> str:
+def _compile_github_link(data: tuple) -> str:
     return f'https://raw.githubusercontent.com/{data[1]}/{data[2]}/{data[3]}'
 
 
-async def _compile_gitlab_link(data: tuple) -> str:
+def _compile_gitlab_link(data: tuple) -> str:
     return f'https://gitlab.com/{data[1]}/-/raw/{data[2]}/{data[3]}'
 
 
@@ -59,7 +59,7 @@ async def gen_carbon_inmemory(ctx: GitBotContext, code: str, first_line_number: 
     return await (await ctx.bot.carbon.generate_basic_image(code, first_line_number)).memoize()
 
 
-async def compile_url(match: tuple) -> str:
+def compile_url(match: tuple) -> str:
     if match[0] == 'github':
-        return await _compile_github_link(match)
-    return await _compile_gitlab_link(match)
+        return _compile_github_link(match)
+    return _compile_gitlab_link(match)

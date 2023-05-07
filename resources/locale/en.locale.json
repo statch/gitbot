@@ -134,6 +134,12 @@
       "github_info": {
         "placeholder": "Select {0} to view"
       }
+    },
+    "button": {
+      "github_lines": {
+        "view_from_to": "View #L{0}-L{1}",
+        "view": "View #L{0}"
+      }
     }
   },
   "legal": {

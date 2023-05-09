@@ -17,7 +17,7 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
                                      url: str,
                                      data: tuple,
                                      max_line_count: int = 25,
-                                     wrap_in_codeblock: bool = True) -> Optional[tuple]:
+                                     wrap_in_codeblock: bool = True) -> Optional[tuple[str | None, str | None]]:
     ctx.fmt.set_prefix('snippets')
     if data[5]:
         if abs(int(data[4]) - int(data[5])) > max_line_count:
@@ -44,7 +44,9 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
         lines.append(f'{line}\n')
 
     text: str = ''.join(lines)
-    return f"```{extension}\n{text.rstrip()}\n```" if wrap_in_codeblock else text.rstrip(), None
+    if text:
+        return f"```{extension}\n{text.rstrip()}\n```" if wrap_in_codeblock else text.rstrip(), None
+    return '', None
 
 
 def _compile_github_link(data: tuple) -> str:

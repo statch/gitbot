@@ -8,9 +8,7 @@ class CaseInsensitiveDict(dict):
 
     @staticmethod
     def _casefold(key: Any) -> Any:
-        if hasattr(key, 'casefold'):
-            return key.casefold()
-        return key
+        return key.casefold() if hasattr(key, 'casefold') else key
 
     def __contains__(self, key: Any) -> bool:
         return super().__contains__(self._casefold(key))
@@ -42,4 +40,8 @@ class CaseInsensitiveSnakeCaseDict(CaseInsensitiveDict):
         super().__init__(mapping, **kwargs)
 
     def _casefold(self, key: Any) -> Any:
-        return super()._casefold(''.join(['_' + i.lower() if i.isupper() else i for i in key]).lstrip('_'))
+        return super()._casefold(
+            ''.join([f'_{i.lower()}' if i.isupper() else i for i in key]).lstrip(
+                '_'
+            )
+        )

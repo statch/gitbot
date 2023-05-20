@@ -34,9 +34,9 @@ class Logs(commands.Cog):
         )
         try:
             url_embed: discord.Embed = discord.Embed(
-                color=0x4287f5,
+                color=0x4287F5,
                 title=f'{self.bot.mgr.e.github} {ctx.l.logs.dm_title}',
-                description=f'||{webhook.url + "/github"}||'
+                description=f'||{webhook.url}/github||',
             )
             await ctx.author.send(embed=url_embed)
         except discord.errors.HTTPException:

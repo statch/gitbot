@@ -79,10 +79,11 @@ class Dev(commands.Cog):
             await ctx.error(ctx.fmt('invalid_format', ','.join([f'`{e.value}`' for e in ExportFileType])))
             return
         command: GitBotCommand | GitBotCommandGroup
-        commands_: list[str] = []
-        for command in self.bot.walk_commands():
-            if not command.hidden:
-                commands_.append(command.fullname)
+        commands_: list[str] = [
+            command.fullname
+            for command in self.bot.walk_commands()
+            if not command.hidden
+        ]
         match format_:
             case ExportFileType.TEXT:
                 command_strings: str = '\n'.join(commands_)

@@ -150,9 +150,9 @@ class Manager:
             name_kn, url_kn = name_and_url_slug_knames_if_dict
         if url_kn_is_slug and not url_fmt:
             raise ValueError('url_fmt must be specified if urls should be dynamically generated')
-        is_collection_of_dicts: bool = bool(labels) and isinstance(labels[0], dict)
         if labels:
             more: str = f' `+{total_n - max_n}`' if total_n > max_n else ''
+            is_collection_of_dicts: bool = bool(labels) and isinstance(labels[0], dict)
             if not is_collection_of_dicts:
                 l_strings: str = ' '.join([f'[`{l_}`]({url_fmt.format(l_)})' for l_ in labels[:max_n]])
             else:
@@ -197,7 +197,9 @@ class Manager:
         :param string: The string to convert
         :return: The converted string
         """
-        return ''.join(['_' + i.lower() if i.isupper() else i for i in string]).lstrip('_')
+        return ''.join(
+            [f'_{i.lower()}' if i.isupper() else i for i in string]
+        ).lstrip('_')
 
     @staticmethod
     def to_github_hyperlink(name: str, codeblock: bool = False) -> str:
@@ -315,12 +317,17 @@ class Manager:
             return False
         perms: list = list(iter(channel.permissions_for(channel.guild.me)))
         overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))  # weird inspection, keep an eye on this
-        if all(req in perms + overwrites for req in [('send_messages', True),
-                                                     ('read_messages', True),
-                                                     ('read_message_history', True)]) \
-                or ('administrator', True) in perms:
-            return True
-        return False
+        return (
+            all(
+                req in perms + overwrites
+                for req in [
+                    ('send_messages', True),
+                    ('read_messages', True),
+                    ('read_message_history', True),
+                ]
+            )
+            or ('administrator', True) in perms
+        )
 
     @staticmethod
     async def get_most_common(items: list | tuple) -> Any:
@@ -355,10 +362,7 @@ class Manager:
         """
         compare: Callable = ((lambda k_: bool(pattern.match(k_))) if isinstance(pattern, re.Pattern)
                              else lambda k_: pattern in k_)
-        for k, v in dict_.items():
-            if compare(k):
-                return v
-        return default
+        return next((v for k, v in dict_.items() if compare(k)), default)
 
     @staticmethod
     def get_nested_key(dict_: AnyDict, key: Iterable[str] | str, sep: str = ' ') -> Any:
@@ -373,7 +377,7 @@ class Manager:
         if isinstance(key, str):
             key = key.split(sep=sep)
 
-        for i, k in enumerate(key):
+        for k in key:
             if k.endswith("]"):
                 index_start = k.index("[")
                 index = int(k[index_start + 1:-1])
@@ -447,9 +451,7 @@ class Manager:
         :param mention: The release feed mention value
         :return: The actual mention
         """
-        if isinstance(mention, str):
-            return f'@{mention}'
-        return f'<@&{mention}>'
+        return f'@{mention}' if isinstance(mention, str) else f'<@&{mention}>'
 
     @staticmethod
     async def just_run(func: Callable, *args, **kwargs) -> Any:
@@ -571,20 +573,21 @@ class Manager:
 
         :param binding: The binding to handle
         """
-        if not self._maybe_set_env_directive(binding.key, binding.value):
-            try:
-                if self.env_directives.get('eval_literal'):
-                    if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
-                        self.env[binding.key] = parsed
-                    else:
-                        self.env[binding.key] = (parsed := self.parse_literal(binding.value))
+        if self._maybe_set_env_directive(binding.key, binding.value):
+            return
+        try:
+            if self.env_directives.get('eval_literal'):
+                if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
+                    self.env[binding.key] = parsed
                 else:
-                    self.env[binding.key] = (parsed := binding.value)
-                self.bot.logger.info('env[%s] loaded as "%s"', binding.key, type(parsed).__name__)
-                return
-            except (ValueError, SyntaxError):
-                self.env[binding.key] = binding.value
-                self.bot.logger.info('env[%s] loaded as "str"', binding.key)
+                    self.env[binding.key] = (parsed := self.parse_literal(binding.value))
+            else:
+                self.env[binding.key] = (parsed := binding.value)
+            self.bot.logger.info('env[%s] loaded as "%s"', binding.key, type(parsed).__name__)
+            return
+        except (ValueError, SyntaxError):
+            self.env[binding.key] = binding.value
+            self.bot.logger.info('env[%s] loaded as "str"', binding.key)
 
     def load_dotenv(self) -> None:
         """
@@ -594,8 +597,7 @@ class Manager:
             - Defaults are loaded from env_defaults.json first, so that .env values take precedence
             - With the "eval_literal" directive active, binding values are parsed with AST during runtime
         """
-        dotenv_path: str = dotenv.find_dotenv()
-        if dotenv_path:
+        if dotenv_path := dotenv.find_dotenv():
             self.bot.logger.info('Found .env file, loading environment variables listed inside of it.')
             with open(dotenv_path, 'r', encoding='utf8') as fp:
                 for binding in dotenv.parser.parse_stream(fp):
@@ -728,9 +730,10 @@ class Manager:
         :param codeblock: The codeblock to strip
         :return: The code extracted from the codeblock
         """
-        match_: re.Match = (re.search(r.MULTILINE_CODEBLOCK_RE, codeblock) or
-                            re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock))
-        if match_:
+        if match_ := (
+            re.search(r.MULTILINE_CODEBLOCK_RE, codeblock)
+            or re.search(r.SINGLE_LINE_CODEBLOCK_RE, codeblock)
+        ):
             self.bot.logger.debug('Matched codeblock')
             return match_.group('content').rstrip('\n')
         self.bot.logger.debug("Couldn't match codeblock")
@@ -784,7 +787,7 @@ class Manager:
                then apply recursion until an actionable value (list | str | int | bool) is found in the node
         :return: The loaded JSON wrapped in DictProxy
         """
-        to_load = './resources/' + str(name).lower() + '.json' if name[-5:] != '.json' else ''
+        to_load = f'./resources/{name.lower()}.json' if name[-5:] != '.json' else ''
         with open(to_load, 'r', encoding='utf8') as fp:
             data: dict | list = json.load(fp)
         proxy: DictProxy = DictProxy(data)
@@ -879,8 +882,7 @@ class Manager:
                 number: int = int(number)
             except (TypeError, ValueError):
                 return None
-        matched = self.opt([i for i in items if i['number'] == number], 0)
-        if matched:
+        if matched := self.opt([i for i in items if i['number'] == number], 0):
             return matched
 
     async def reverse(self, seq: Optional[Reversible]) -> Optional[Iterable]:
@@ -946,9 +948,8 @@ class Manager:
         if cached := self.locale_cache.get(_id):
             locale: LocaleName = cached
             self.bot.logger.debug('Returning cached value for identity "%d"', _id)
-        else:
-            if stored := await self.db.users.getitem(_id, 'locale'):
-                locale: str = stored
+        elif stored := await self.db.users.getitem(_id, 'locale'):
+            locale: str = stored
         try:
             self.locale_cache[_id] = locale
             return getattr(self.l, locale)
@@ -977,14 +978,15 @@ class Manager:
         for d in seq:
             if isinstance(key, str):
                 if (key in d) and (d[key] == value) if not unpack else (d[key] in value):
-                    if not multiple:
+                    if multiple:
+                        matching.append(d)
+                    else:
                         return d
+            elif (self.get_nested_key(d, key) == value) if not unpack else (self.get_nested_key(d, key) in value):
+                if multiple:
                     matching.append(d)
-            else:
-                if (self.get_nested_key(d, key) == value) if not unpack else (self.get_nested_key(d, key) in value):
-                    if not multiple:
-                        return d
-                    matching.append(d)
+                else:
+                    return d
         return matching
 
     def populate_generic_numbered_resource(self,
@@ -1038,8 +1040,7 @@ class Manager:
         :param locale: Any meta attribute of the locale
         :return: The missing keys for the locale and the confidence of the attribute match
         """
-        locale_data: Optional[tuple[DictProxy, bool]] = self.get_locale_meta_by_attribute(locale)
-        if locale_data:
+        if locale_data := self.get_locale_meta_by_attribute(locale):
             missing: list = list(
                 {item for item in self._missing_locale_keys[locale_data[0]['name']] if item is not None})
             missing.sort(key=lambda path: len(path) * sum(map(len, path)))
@@ -1083,19 +1084,20 @@ class Manager:
         :param locale: The locale to get the percentage for
         :return: The percentage
         """
-        locale: DictProxy | None = getattr(self.l, locale, None)
-        if locale:
-            if self.localization_percentages.get(locale.meta['name']) is not None:
-                return self.localization_percentages[locale.meta['name']]
-            ml_copy: dict = deepcopy(self.locale.master.actual)
-            ml_paths: list = self.get_all_dict_paths(ml_copy)
-            non_localized: int = 0
-            for k in ml_paths:
-                if self.get_nested_key(locale, k) == self.get_nested_key(ml_copy, k):
-                    non_localized += 1
-            result: float = round((1 - (non_localized / len(ml_paths))) * 100, 2)
-            self.localization_percentages[locale.meta['name']] = result
-            return result
+        if not (locale := getattr(self.l, locale, None)):
+            return
+        if self.localization_percentages.get(locale.meta['name']) is not None:
+            return self.localization_percentages[locale.meta['name']]
+        ml_copy: dict = deepcopy(self.locale.master.actual)
+        ml_paths: list = self.get_all_dict_paths(ml_copy)
+        non_localized: int = sum(
+            1
+            for k in ml_paths
+            if self.get_nested_key(locale, k) == self.get_nested_key(ml_copy, k)
+        )
+        result: float = round((1 - (non_localized / len(ml_paths))) * 100, 2)
+        self.localization_percentages[locale.meta['name']] = result
+        return result
 
     def fix_dict(self, dict_: AnyDict, ref_: AnyDict, locale: bool = False) -> AnyDict:
         """
@@ -1139,7 +1141,7 @@ class Manager:
         :param match_: The match to generate the replacement for
         :return: The replacement string
         """
-        if group := match_.group('emoji_name'):
+        if group := match_['emoji_name']:
             return self.e.get(group, default)
         return match_.string
 
@@ -1186,6 +1188,8 @@ class Manager:
         """
         self_: Manager = self
 
+
+
         class _Formatter:
             def __init__(self, ctx_: 'GitBotContext'):
                 self.ctx: 'GitBotContext' = ctx_
@@ -1208,8 +1212,13 @@ class Manager:
                     self_.bot.logger.debug('Prefix mode is append, stripping op sign in \'%s\'', prefix)
                     prefix: str = prefix[1:]
                     absolute: bool = False
-                self.prefix: str = prefix.strip() + ' ' if absolute else self.prefix + prefix.strip() + ' '
+                self.prefix: str = (
+                    f'{prefix.strip()} '
+                    if absolute
+                    else self.prefix + prefix.strip() + ' '
+                )
                 self_.bot.logger.debug('Locale formatting prefix set to \'%s\' in '
                                        '\'%s\'', self.prefix.strip(), self_.get_last_call_from_callstack())
+
 
         return _Formatter(ctx)

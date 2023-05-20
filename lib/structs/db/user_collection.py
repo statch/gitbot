@@ -42,14 +42,12 @@ class UserCollection(AsyncIOMotorCollection):
     @normalize_identity()
     async def getitem(self, _id: Identity, item: str) -> Optional[str]:
         query: dict = await self.find_one({'_id': _id})
-        if query and item in query:
-            return query[item]
-        return None
+        return query[item] if query and item in query else None
 
     @normalize_identity()
     async def setitem(self, _id: Identity, item: str, value: str) -> bool:
         valid: bool = True
-        if item in ('user', 'repo', 'org'):
+        if item in {'user', 'repo', 'org'}:
             valid: bool = await ({'user': self._git.get_user, 'repo': self._git.get_repo, 'org': self._git.get_org}[item])(value) is not None
         elif item == 'locale':
             valid: bool = any(l_['name'] == value for l_ in self._mgr.locale.languages)

@@ -103,10 +103,20 @@ class Gist(commands.Cog):
         most_common: Optional[str] = await self.bot.mgr.get_most_common(extensions)
         if most_common in ['.md', '']:
             return self.bot.mgr.c.rounded
-        for file in files:
-            if all([file['extension'] == most_common, file['language'], file['language']['color']]):
-                return int(file['language']['color'][1:], 16)
-        return self.bot.mgr.c.rounded
+        return next(
+            (
+                int(file['language']['color'][1:], 16)
+                for file in files
+                if all(
+                    [
+                        file['extension'] == most_common,
+                        file['language'],
+                        file['language']['color'],
+                    ]
+                )
+            ),
+            self.bot.mgr.c.rounded,
+        )
 
     @staticmethod
     def extension(ext: str) -> str:

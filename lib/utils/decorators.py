@@ -18,7 +18,7 @@ def _inject_aliases(name: str, **attrs) -> dict:
         return _name, f'-{_name}', f'--{_name}', f'—{_name}', f'——{_name}'
 
     aliases: list[str] = attrs.get('aliases') or []
-    to_add: list[str] = list(sum([gen_aliases(alias) for alias in aliases], ()))
+    to_add: list[str] = list(sum((gen_aliases(alias) for alias in aliases), ()))
     aliases.extend([*to_add, *(gen_aliases(name)[1:])])
     attrs['aliases'] = list(set(aliases))
     return attrs

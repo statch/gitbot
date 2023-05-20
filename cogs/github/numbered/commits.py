@@ -48,13 +48,26 @@ class Commits(commands.Cog):
 
 
         embed: GitBotEmbed = GitBotEmbed(
-            title=self.bot.mgr.e.github + '  ' + ctx.fmt('commits embed title',
-                                                f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`'),
-            description='\n'.join([f'{self._commit_status(c)}[`{c["abbreviatedOid"]}`]({c["url"]}) '
-                                                        f'{self.bot.mgr.truncate(c["messageHeadline"], 53)}' for c in commits]),
-            url=(f'https://github.com/{parsed.slashname}/commits' if not parsed.branch
-                 else f'https://github.com/{parsed.slashname}/commits/{parsed.branch}'),
-            footer=ctx.l.commits.embed.footer
+            title=(
+                f'{self.bot.mgr.e.github}  '
+                + ctx.fmt(
+                    'commits embed title',
+                    f'`{parsed.slashname}{f"/{parsed.branch}" if parsed.branch else ""}`',
+                )
+            ),
+            description='\n'.join(
+                [
+                    f'{self._commit_status(c)}[`{c["abbreviatedOid"]}`]({c["url"]}) '
+                    f'{self.bot.mgr.truncate(c["messageHeadline"], 53)}'
+                    for c in commits
+                ]
+            ),
+            url=(
+                f'https://github.com/{parsed.slashname}/commits'
+                if not parsed.branch
+                else f'https://github.com/{parsed.slashname}/commits/{parsed.branch}'
+            ),
+            footer=ctx.l.commits.embed.footer,
         )
 
         async def _callback(_, _commit):
@@ -116,7 +129,7 @@ class Commits(commands.Cog):
                             if commit['messageBody'] and commit['messageBody'] != commit['messageHeadline']
                             else '')
             empty: str = ctx.l.commit.fields.message.empty if not full_headline and not message else ''
-            message: str = '```' + full_headline + message + empty + '```'
+            message: str = f'```{full_headline}{message}{empty}```'
             embed.add_field(name=f':notepad_spiral: {ctx.l.commit.fields.message.name}:', value=message)
             commit_time: str = ctx.fmt('fields info pushed_at' if commit['pushedDate'] else 'fields info committed_at',
                                        self.bot.mgr.to_github_hyperlink(commit['author']['user']['login']),
@@ -152,7 +165,7 @@ class Commits(commands.Cog):
                                                                               completed=completed,
                                                                               queued=queued,
                                                                               in_progress=in_progress) \
-                              + self._commit_status(commit, False)
+                                  + self._commit_status(commit, False)
             info: str = f'{commit_time}{signature}{committed_via_web}{checks}'
             embed.add_field(name=f':mag_right: {ctx.l.commit.fields.info.name}:', value=info)
             embed.add_field(name=f':gear: {ctx.l.commit.fields.changes.name}:', value=changes)

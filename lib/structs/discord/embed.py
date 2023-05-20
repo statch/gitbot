@@ -209,7 +209,12 @@ class GitBotEmbed(discord.Embed):
             response_callback=callback,
             init_message=initial_message
         )
-        if (result and result[0] and isinstance(result[0][0], discord.Reaction)
-                and result[0][0].is_custom_emoji() and result[0][0].emoji.id == 770244084727283732):
-            return True
-        return False
+        return bool(
+            (
+                result
+                and result[0]
+                and isinstance(result[0][0], discord.Reaction)
+                and result[0][0].is_custom_emoji()
+                and result[0][0].emoji.id == 770244084727283732
+            )
+        )

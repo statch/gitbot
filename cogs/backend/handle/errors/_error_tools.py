@@ -7,7 +7,11 @@ from lib.structs.discord.context import GitBotContext
 
 
 def silenced(ctx: GitBotContext, error) -> bool:
-    return bool(getattr(ctx, f'__silence_{ctx.bot.mgr.to_snake_case(error.__class__.__name__)}_error__', False))
+    return getattr(
+        ctx,
+        f'__silence_{ctx.bot.mgr.to_snake_case(error.__class__.__name__)}_error__',
+        False,
+    )
 
 
 async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:
@@ -39,10 +43,10 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception) -> Optional
                             inline=False)
         elif isinstance(error, commands.CommandNotFound):
             embed: GitBotEmbed = GitBotEmbed(
-                color=0x0384fc,
+                color=0x0384FC,
                 title='Nonexistent command!',
                 description=f'```{(error := str(error))}```',
-                footer='Closest existing command: ' + closest_existing_command_from_error(ctx.bot, error)
+                footer=f'Closest existing command: {closest_existing_command_from_error(ctx.bot, error)}',
             )
         else:
             return

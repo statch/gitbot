@@ -64,15 +64,24 @@ async def joint_pr_issue_list_command(ctx: GitBotContext, repo: Optional[GitHubR
         await handle_none(ctx, 'pull request' if type_ == 'pr' else 'issue', stored, state_l)
         return
 
-    item_strings: list[str] = [make_string(ctx, repo, i, 'pull' if type_ == 'pr' else 'issue',
-                                           max([len(str(i['number'])) for i in items])) for i in items]
+    item_strings: list[str] = [
+        make_string(
+            ctx,
+            repo,
+            i,
+            'pull' if type_ == 'pr' else 'issue',
+            max(len(str(i['number'])) for i in items),
+        )
+        for i in items
+    ]
 
     embed: GitBotEmbed = GitBotEmbed(
-            color=ctx.bot.mgr.c.rounded,
-            title=f'{ctx.bot.mgr.e.github} ' + ctx.bot.mgr.e.get(f'pr_{state_l}') + '  ' + ctx.fmt('title', f'`{state_l}`', f'`{repo}`'),
-            url=f'https://github.com/{repo}/{"pulls" if type_ == "pr" else "issues"}',
-            description='\n'.join(item_strings),
-            footer=ctx.l.repo["pulls" if type_ == 'pr' else 'issues'].footer_tip
+        color=ctx.bot.mgr.c.rounded,
+        title=f"{ctx.bot.mgr.e.github} {ctx.bot.mgr.e.get(f'pr_{state_l}')}  "
+        + ctx.fmt('title', f'`{state_l}`', f'`{repo}`'),
+        url=f'https://github.com/{repo}/{"pulls" if type_ == "pr" else "issues"}',
+        description='\n'.join(item_strings),
+        footer=ctx.l.repo["pulls" if type_ == 'pr' else 'issues'].footer_tip,
     )
 
     async def _callback(_ctx: GitBotContext, selected: dict):

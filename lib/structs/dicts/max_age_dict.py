@@ -29,14 +29,10 @@ class MaxAgeDict(dict):
         return True
 
     def get(self, key: Any, default: Any = None) -> Any:
-        if self.valid(key, delete=True):
-            return super().get(key, default)
-        return default
+        return super().get(key, default) if self.valid(key, delete=True) else default
 
     def age(self, key: Any, default: Any = 0) -> Any:
-        if ts := self._age_map.get(key):
-            return int(time()) - ts
-        return default
+        return int(time()) - ts if (ts := self._age_map.get(key)) else default
 
     def __setitem__(self, key: Any, value: Any) -> None:
         self._age_map[key] = int(time())

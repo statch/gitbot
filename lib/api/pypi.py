@@ -10,22 +10,30 @@ class PyPIAPI:
         self.ses: aiohttp.ClientSession = ses
 
     async def get_project_data(self, project: str) -> Optional[dict]:
-        res: aiohttp.ClientResponse = await self.ses.get(BASE_URL_PYPI + f'/{project}/json')
+        res: aiohttp.ClientResponse = await self.ses.get(
+            f'{BASE_URL_PYPI}/{project}/json'
+        )
         if res.status == 200:
             return await res.json()
 
     async def get_project_version_data(self, project: str, version: str) -> Optional[dict]:
         # This endpoint doesn't make sense, returns the same data as the non-versioned one
-        res: aiohttp.ClientResponse = await self.ses.get(BASE_URL_PYPI + f'/{project}/{version}/json')
+        res: aiohttp.ClientResponse = await self.ses.get(
+            f'{BASE_URL_PYPI}/{project}/{version}/json'
+        )
         if res.status == 200:
             return await res.json()
 
     async def get_project_overall_downloads(self, project: str, mirrors: bool = False) -> Optional[dict]:
-        res: aiohttp.ClientResponse = await self.ses.get(BASE_URL_PYPISTATS + f'/packages/{project.lower()}/overall?mirrors={str(mirrors).lower()}')
+        res: aiohttp.ClientResponse = await self.ses.get(
+            f'{BASE_URL_PYPISTATS}/packages/{project.lower()}/overall?mirrors={str(mirrors).lower()}'
+        )
         if res.status == 200:
             return await res.json()
 
     async def get_project_recent_downloads(self, project: str) -> Optional[dict]:
-        res: aiohttp.ClientResponse = await self.ses.get(BASE_URL_PYPISTATS + f'/packages/{project.lower()}/recent')
+        res: aiohttp.ClientResponse = await self.ses.get(
+            f'{BASE_URL_PYPISTATS}/packages/{project.lower()}/recent'
+        )
         if res.status == 200:
             return await res.json()

@@ -7,8 +7,11 @@ from lib.structs.discord.context import GitBotContext
 
 
 async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
-    match_: tuple = ctx.bot.mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
-    if match_:
+    if match_ := ctx.bot.mgr.opt(
+        re.findall(regex.GITHUB_LINES_URL_RE, url)
+        or re.findall(regex.GITLAB_LINES_URL_RE, url),
+        0,
+    ):
         return await get_text_from_url_and_data(ctx, compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
 
@@ -43,8 +46,7 @@ async def get_text_from_url_and_data(ctx: GitBotContext,
             continue
         lines.append(f'{line}\n')
 
-    text: str = ''.join(lines)
-    if text:
+    if text := ''.join(lines):
         return f"```{extension}\n{text.rstrip()}\n```" if wrap_in_codeblock else text.rstrip(), None
     return '', None
 

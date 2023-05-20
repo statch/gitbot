@@ -31,9 +31,8 @@ class ViewFileButton(discord.ui.Button):
                 return
             if (file := io.BytesIO(await res.content.read())).getbuffer().nbytes > int(7.85 * (1024 ** 2)):
                 return
-            else:
-                self._file: io.BytesIO = file
-                self._filename: str = f'{self.file_url.split("/")[2].replace(".", "_")}.{self.filetype}'
+            self._file: io.BytesIO = file
+            self._filename: str = f'{self.file_url.split("/")[2].replace(".", "_")}.{self.filetype}'
         self._file.seek(0)  # reset file pointer from potential previous reads by discord.py
         self._used_by.add(interaction.user.id)
         await interaction.response.send_message(file=discord.File(self._file, filename=self._filename), ephemeral=True)

@@ -91,15 +91,16 @@ class GitHubLinesButton(discord.ui.Button):
                     self.view.lines_url = self.view.lines_url.replace(f'#L{[previous_l1]}', f'#L{self.view.l1}-{self.view.l2}')
                 else:
                     self.view.lines_url = self.view.lines_url.replace(f'#L{previous_l1}-L{previous_l2}', f'#L{self.view.l1}-L{self.view.l2}')
-        new_match = self.view.parsed.groups()[0:4] + (self.view.l1, self.view.l2)
+        new_match = self.view.parsed.groups()[:4] + (self.view.l1, self.view.l2)
         new, _ = await get_text_from_url_and_data(ctx, compile_url(new_match), new_match)
         if new:
             l_b, l_f = self.get_next_lines(self.view.l1, self.view.l2, False), self.get_next_lines(self.view.l1, self.view.l2, True)
             self.view.set_labels(l_b, l_f)
             # TODO make the line numbers injected below into a hyperlink when the discord devs add support for them back
             await interaction.message.edit(
-                content=f'`#L{self.view.l1}{"-L" + str(self.view.l2) if self.view.l2 != 1 else ""}`\n{new}',
-                view=self.view)
+                content=f'`#L{self.view.l1}{f"-L{str(self.view.l2)}" if self.view.l2 != 1 else ""}`\n{new}',
+                view=self.view,
+            )
 
     @staticmethod
     def get_next_lines(l1: int, l2: int | None, forward: bool) -> tuple[int, int]:

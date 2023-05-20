@@ -112,7 +112,7 @@ class BotInfo(commands.Cog):
     async def stats_command(self, ctx: GitBotContext) -> None:
         ctx.fmt.set_prefix('stats')
         embed: discord.Embed = discord.Embed(color=self.bot.mgr.c.rounded)
-        users: int = sum([x.member_count for x in self.bot.guilds])
+        users: int = sum(x.member_count for x in self.bot.guilds)
         memory: str = f'**{process.memory_info()[0] / 2. ** 30:.3f}GB** RAM'  # memory use in GB... I think
         cpu: str = f'**{psutil.cpu_percent()}%** CPU,'
         embed.add_field(name=f"{self.bot.mgr.e.stats}  {ctx.lp.title}", value=ctx.lp.body,

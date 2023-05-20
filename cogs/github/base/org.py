@@ -68,17 +68,17 @@ class Org(commands.Cog):
         created_at: str = ctx.fmt('created_at', self.bot.mgr.github_to_discord_timestamp(org['created_at'])) + '\n'
         info: str = f"{created_at}{repos}{members}{location}{email}"
         embed.add_field(name=f":mag_right: {ctx.l.org.info.glossary[1]}:", value=info, inline=False)
-        blog: tuple = (org['blog'] if 'blog' in org else None, ctx.l.org.info.glossary[3])
+        blog: tuple = org.get('blog', None), ctx.l.org.info.glossary[3]
         twitter: tuple = (
             f'https://twitter.com/{org["twitter_username"]}' if "twitter_username" in org and org[
                 'twitter_username'] is not None else None,
             "Twitter")
         links: list = [blog, twitter]
-        link_strings: list = []
-        for lnk in links:
-            if lnk[0] is not None and len(lnk[0]) != 0:
-                link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-        if len(link_strings) != 0:
+        if link_strings := [
+            f"- [{lnk[1]}]({lnk[0]})"
+            for lnk in links
+            if lnk[0] is not None and len(lnk[0]) != 0
+        ]:
             embed.add_field(name=f":link: {ctx.l.org.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=org['avatar_url'])
         await ctx.send(embed=embed, view_on_url=org['html_url'])

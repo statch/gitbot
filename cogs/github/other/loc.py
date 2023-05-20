@@ -131,7 +131,7 @@ class LinesOfCode(commands.Cog):
             if k not in ('header', 'SUM'):
                 result: str = result.format(f"{k}: {v['code']}\n{{}}")
                 threshold -= 1
-        result: str = result[:-5] + '```'
+        result: str = f'{result[:-5]}```'
         return result
 
 

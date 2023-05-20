@@ -25,10 +25,20 @@ class Config(commands.Cog):
         item: str = '' if rf else ctx.l.generic.nonexistent.release_feed
         for rfi in rf:
             m: str = '' if not rfi.get('mention') else ' - ' + ctx.bot.mgr.release_feed_mention_to_actual(rfi['mention'])
-            item += ctx.bot.mgr.e.square + ' ' + f'<#{rfi["cid"]}>{m}\n' + \
-                    ('\n'.join([f'⠀⠀- [`{rfr["name"]}`](https://github.com/{rfr["name"]})'
-                                for rfr in rfi['repos']]) if rfi['repos']
-                     else f'⠀⠀- {ctx.l.config.show.feed.no_repos}') + '\n'
+            item += (
+                f'{ctx.bot.mgr.e.square} '
+                + f'<#{rfi["cid"]}>{m}\n'
+                + (
+                    '\n'.join(
+                        [
+                            f'⠀⠀- [`{rfr["name"]}`](https://github.com/{rfr["name"]})'
+                            for rfr in rfi['repos']
+                        ]
+                    )
+                    if rfi['repos']
+                    else f'⠀⠀- {ctx.l.config.show.feed.no_repos}'
+                )
+            ) + '\n'
         return item
 
     @staticmethod
@@ -59,52 +69,53 @@ class Config(commands.Cog):
     @config_command_group.group(name='show', aliases=['s'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_show_command_group(self, ctx: GitBotContext) -> None:
-        if ctx.invoked_subcommand is None:
-            ctx.fmt.set_prefix('config show base')
-            user: GitBotUser = await self.bot.mgr.db.users.find_one({'_id': ctx.author.id}) or {}
-            guild: Optional[GitBotGuild] = None
-            if not isinstance(ctx.channel, discord.DMChannel):
-                guild: Optional[GitBotGuild] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
-            if not user and guild is None or ((guild and len(guild) == 1) and not user):
-                await ctx.error(ctx.l.generic.nonexistent.qa)
-                return
-            lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
-            user_str, org, repo = (ctx.fmt(f'qa list {item}', self.bot.mgr.to_github_hyperlink(user[item], True) if item in user else
-                                           f'`{ctx.l.config.show.base.item_not_set}`') for item in ('user', 'org', 'repo'))
-            accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
-            qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
-            guild_str: str = ''
-            if not isinstance(ctx.channel, discord.DMChannel):
-                feed: str = ctx.l.config.show.base.guild.list.feed + '\n' + '\n'.join([f'{self.bot.mgr.e.square} <#{rfi["cid"]}>'
-                                                                                       for rfi in guild['feed']]) \
+        if ctx.invoked_subcommand is not None:
+            return
+        ctx.fmt.set_prefix('config show base')
+        user: GitBotUser = await self.bot.mgr.db.users.find_one({'_id': ctx.author.id}) or {}
+        guild: Optional[GitBotGuild] = None
+        if not isinstance(ctx.channel, discord.DMChannel):
+            guild: Optional[GitBotGuild] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        if not user and guild is None or ((guild and len(guild) == 1) and not user):
+            await ctx.error(ctx.l.generic.nonexistent.qa)
+            return
+        lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
+        user_str, org, repo = (ctx.fmt(f'qa list {item}', self.bot.mgr.to_github_hyperlink(user[item], True) if item in user else
+                                       f'`{ctx.l.config.show.base.item_not_set}`') for item in ('user', 'org', 'repo'))
+        accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
+        qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
+        guild_str: str = ''
+        if not isinstance(ctx.channel, discord.DMChannel):
+            feed: str = ctx.l.config.show.base.guild.list.feed + '\n' + '\n'.join([f'{self.bot.mgr.e.square} <#{rfi["cid"]}>'
+                                                                                   for rfi in guild['feed']]) \
                     if (guild and guild.get('feed')) else f'{ctx.l.config.show.base.guild.list.feed}' \
                                                           f' `{ctx.l.config.show.base.item_not_configured}`'
-                ctx.fmt.set_prefix('+guild list autoconv')
-                if not guild:
-                    ac: AutomaticConversionSettings = self.bot.mgr.env.autoconv_default
-                else:
-                    ac: AutomaticConversionSettings = {k: (v if k not in (_ac := guild.get('autoconv', {}))
-                                                       else _ac[k]) for k, v in self.bot.mgr.env.autoconv_default.items()}
-                codeblock: str = ctx.fmt('codeblock',
-                                         f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
-                lines: str = ctx.fmt('gh_lines',
-                                     f'`{ctx.l.enum.autoconv.gh_lines[str(ac["gh_lines"])]}`')
-                url: str = ctx.fmt('gh_url', f'`{ctx.l.enum.generic.switch[str(ac["gh_url"])]}`')
-                autoconv: str = (ctx.l.config.show.base.guild.list.autoconv.heading + '\n'
-                                 + '\n'.join([f'{self.bot.mgr.e.square} {aci}' for aci in [codeblock, url, lines]]))
-                guild_str: str = ctx.l.config.show.base.guild.heading + '\n' + '\n'.join([autoconv, feed])
-            shortest_heading_len: int = min(map(len, [ctx.l.config.show.base.accessibility.heading,
-                                                      ctx.l.config.show.base.guild.heading,
-                                                      ctx.l.config.show.base.qa.heading]))
-            linebreak: str = f'\n{self.bot.mgr.gen_separator_line(shortest_heading_len)}\n'
-            embed = discord.Embed(
-                color=self.bot.mgr.c.discord.blurple,
-                title=f"{self.bot.mgr.e.github}  {ctx.l.config.show.base.title}",
-                description=f"{accessibility}{linebreak}{qa}{linebreak if guild_str else ''}{guild_str}"
-            )
-            if guild:
-                embed.set_footer(text=ctx.fmt('!config show base footer', 'git config show feed'))
-            await ctx.send(embed=embed)
+            ctx.fmt.set_prefix('+guild list autoconv')
+            if not guild:
+                ac: AutomaticConversionSettings = self.bot.mgr.env.autoconv_default
+            else:
+                ac: AutomaticConversionSettings = {k: (v if k not in (_ac := guild.get('autoconv', {}))
+                                                   else _ac[k]) for k, v in self.bot.mgr.env.autoconv_default.items()}
+            codeblock: str = ctx.fmt('codeblock',
+                                     f'`{ctx.l.enum.generic.switch[str(ac["codeblock"])]}`')
+            lines: str = ctx.fmt('gh_lines',
+                                 f'`{ctx.l.enum.autoconv.gh_lines[str(ac["gh_lines"])]}`')
+            url: str = ctx.fmt('gh_url', f'`{ctx.l.enum.generic.switch[str(ac["gh_url"])]}`')
+            autoconv: str = (ctx.l.config.show.base.guild.list.autoconv.heading + '\n'
+                             + '\n'.join([f'{self.bot.mgr.e.square} {aci}' for aci in [codeblock, url, lines]]))
+            guild_str: str = ctx.l.config.show.base.guild.heading + '\n' + '\n'.join([autoconv, feed])
+        shortest_heading_len: int = min(map(len, [ctx.l.config.show.base.accessibility.heading,
+                                                  ctx.l.config.show.base.guild.heading,
+                                                  ctx.l.config.show.base.qa.heading]))
+        linebreak: str = f'\n{self.bot.mgr.gen_separator_line(shortest_heading_len)}\n'
+        embed = discord.Embed(
+            color=self.bot.mgr.c.discord.blurple,
+            title=f"{self.bot.mgr.e.github}  {ctx.l.config.show.base.title}",
+            description=f"{accessibility}{linebreak}{qa}{linebreak if guild_str else ''}{guild_str}"
+        )
+        if guild:
+            embed.set_footer(text=ctx.fmt('!config show base footer', 'git config show feed'))
+        await ctx.send(embed=embed)
 
     @config_show_command_group.command(name='feed', aliases=['release', 'f', 'releases'])
     @commands.guild_only()
@@ -416,16 +427,17 @@ class Config(commands.Cog):
         await self.toggle_autoconv_item(ctx, 'gh_url')
 
     def _validate_github_lines_conversion_state(self, state: str | int) -> Optional[int]:
-        if state is not None:
-            _int_state: Optional[int] = state if isinstance(state, int) else (int(state) if state.isnumeric() else None)
-            if _int_state is not None:
-                if _int_state != 0:
-                    _int_state -= 1
-                if _int_state in self.lines_state_map.values():
-                    return _int_state
-            for k, v in self.lines_state_map.items():
-                if state.lower() in k:
-                    return v
+        if state is None:
+            return
+        _int_state: Optional[int] = state if isinstance(state, int) else (int(state) if state.isnumeric() else None)
+        if _int_state is not None:
+            if _int_state != 0:
+                _int_state -= 1
+            if _int_state in self.lines_state_map.values():
+                return _int_state
+        for k, v in self.lines_state_map.items():
+            if state.lower() in k:
+                return v
 
     @config_autoconv_group.command('lines', aliases=['line', 'githublines', 'github-lines', 'gh-lines'])
     @commands.guild_only()
@@ -539,8 +551,7 @@ class Config(commands.Cog):
                                                  rfis: list[ReleaseFeedItem]) -> list[int]:
         numbers: list[int] = self.bot.mgr.get_numbers_in_range_in_str(msg.content, len(rfis))
         channel_ids: list[int] = [int(g) for g in DISCORD_CHANNEL_MENTION_RE.findall(msg.content)]
-        for n in numbers:
-            channel_ids.append(rfis[n - 1]['cid'])
+        channel_ids.extend(rfis[n - 1]['cid'] for n in numbers)
         return channel_ids
 
     @delete_feed_group.command('repo')

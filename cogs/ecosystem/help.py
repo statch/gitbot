@@ -64,10 +64,7 @@ class Help(commands.Cog):
         await ctx.send(embed=self.generate_command_help_embed(ctx, command))
 
     async def send_command_group_help(self, ctx: GitBotContext, command_group: GitBotCommandGroup) -> None:
-        content: CommandGroupHelp = command_group.get_help_content(ctx)
-        if not content:
-            await GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=self.bot.mgr.c.discord.white).send(ctx)
-        else:
+        if content := command_group.get_help_content(ctx):
             # since a group is basically a command with additional attributes, we can somewhat reuse the same embed
             embed: GitBotEmbed = self.generate_command_help_embed(ctx, command_group, content=content)
             embed.title = f'{self.bot.mgr.e.github}   {ctx.l.glossary.command_group}: `{command_group.fullname}`'
@@ -75,6 +72,8 @@ class Help(commands.Cog):
                             value='\n'.join([f':white_small_square: `{self.bot.command_prefix}{c}`'
                                              for c in content['commands']]))
             await embed.send(ctx)
+        else:
+            await GitBotEmbed.from_locale_resource(ctx, 'help no_help_for_command', color=self.bot.mgr.c.discord.white).send(ctx)
 
     async def send_help(self, ctx: GitBotContext) -> None:
         pages: EmbedPages = EmbedPages()

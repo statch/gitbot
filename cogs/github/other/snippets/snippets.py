@@ -17,8 +17,9 @@ class Snippets(commands.Cog):
     async def snippet_command_group(self, ctx: GitBotContext, *, link_or_codeblock: str) -> None:
         ctx.fmt.set_prefix('snippets')
         if ctx.invoked_subcommand is None:
-            codeblock: Optional[str] = self.bot.mgr.extract_content_from_codeblock(link_or_codeblock)
-            if codeblock:
+            if codeblock := self.bot.mgr.extract_content_from_codeblock(
+                link_or_codeblock
+            ):
                 if len(codeblock.splitlines()) > self.bot.mgr.env.carbon_len_threshold:
                     await ctx.error(ctx.fmt('length_limit_exceeded', self.bot.mgr.env.carbon_len_threshold))
                     return

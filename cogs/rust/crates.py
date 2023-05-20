@@ -67,16 +67,16 @@ class Crates(commands.Cog):
                                                                                  '%Y-%m-%dT%H:%M:%S.%f%z')) + '\n'
 
             all_time_downloads: str = f'```rust\n{data["crate"]["downloads"]} //' \
-                                      f' {ctx.l.crates.info.all_time_downloads}```\n'
+                                          f' {ctx.l.crates.info.all_time_downloads}```\n'
             info: str = f'{authors}{created_at}{all_time_downloads}'
             embed.add_field(name=f":mag_right: {ctx.l.crates.info.glossary[1]}:", value=info)
 
             links: list = []
-            link_strings: list = []
-            for lnk in links:
-                if lnk[0] is not None and len(lnk[0]) != 0:
-                    link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-            if len(link_strings) != 0:
+            if link_strings := [
+                f"- [{lnk[1]}]({lnk[0]})"
+                for lnk in links
+                if lnk[0] is not None and len(lnk[0]) != 0
+            ]:
                 embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:",
                                 value='\n'.join(link_strings))
 

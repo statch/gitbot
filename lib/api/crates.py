@@ -15,7 +15,9 @@ class CratesIOAPI:
         self.ses: aiohttp.ClientSession = ses
 
     async def get_crate_data(self, crate: str) -> dict | None:
-        res: aiohttp.ClientResponse = await self.ses.get(BASE_URL_CRATES + f'/crates/{crate}')
+        res: aiohttp.ClientResponse = await self.ses.get(
+            f'{BASE_URL_CRATES}/crates/{crate}'
+        )
         if res.status == 200:
             return await res.json()
 

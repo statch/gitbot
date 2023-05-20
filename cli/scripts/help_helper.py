@@ -84,9 +84,11 @@ def run_help_helper(debug: bool = False):
     for command_name in commands:
         underscored_name: str = command_name.replace(' ', '_')
         if underscored_name not in LOCALE['help']['commands']:
-            command_data = prompt(command_name,
-                                  is_group=(raw_command_list_json.count('"' + command_name + ' ') > 1
-                                            and ' ' not in command_name))
+            command_data = prompt(
+                command_name,
+                is_group=raw_command_list_json.count(f'"{command_name} ') > 1
+                and ' ' not in command_name,
+            )
             while True:
                 if click.confirm(click.style('All good?', blink=True, fg='yellow') + '\n' +
                                  '\n'.join([click.style(f'{k}: {v}', fg='cyan')

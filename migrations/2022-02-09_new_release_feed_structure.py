@@ -2,6 +2,7 @@
 A one-use script to change old-style guild documents into ones with new Multi-Release-Feed functionality.
 """
 
+
 import discord
 import requests
 from pymongo import MongoClient, UpdateOne
@@ -24,6 +25,6 @@ for g in db.find({'hook': {'$exists': True}}):  # Has a top level 'hook' key
     ops.append(UpdateOne(g, {'$set': {'feed': [new_rfi]}, '$unset': {'hook': ''}}))
 
 
-print("Writing " + str(len(ops)))
+print(f"Writing {len(ops)}")
 db.bulk_write(ops, ordered=False)
-print("Updated " + str(len(ops)))
+print(f"Updated {len(ops)}")

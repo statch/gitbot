@@ -79,11 +79,11 @@ class PyPI(commands.Cog):
             docs: tuple = (data['info']['docs_url'] if 'docs_url' in data['info'] and data['info']['docs_url'] else None, ctx.l.pypi.info.glossary[4])
             bugs: tuple = (data['info']['bugtrack_url'] if 'bugtrack_url' in data['info'] and data['info']['bugtrack_url'] else None, ctx.l.pypi.info.glossary[4])
             links: list = [homepage, docs, bugs]
-            link_strings: list = []
-            for lnk in links:
-                if lnk[0] is not None and len(lnk[0]) != 0:
-                    link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-            if len(link_strings) != 0:
+            if link_strings := [
+                f"- [{lnk[1]}]({lnk[0]})"
+                for lnk in links
+                if lnk[0] is not None and len(lnk[0]) != 0
+            ]:
                 embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:", value='\n'.join(link_strings))
 
             if 'license' in data['info'] and data['info']['license']:

@@ -65,7 +65,7 @@ class User(commands.Cog):
                                                              'following'] == 0 else ctx.fmt('following plural', u['following'], u['url'] + '?tab=following')
         if u['following'] == 1:
             following: str = ctx.fmt('following singular', f'{u["url"]}?tab=following')
-        follow: str = followers + f' {ctx.l.user.info.linking_word} ' + following
+        follow: str = f'{followers} {ctx.l.user.info.linking_word} {following}'
 
         repos: str = f"{ctx.l.user.info.repos.no_repos}\n" if u[
                                                          'public_repos'] == 0 else ctx.fmt('repos plural', u['public_repos'], f"{u['url']}?tab=repositories") + '\n'
@@ -80,19 +80,18 @@ class User(commands.Cog):
 
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
         embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
-        w_url: str = u['websiteUrl']
-        if w_url:
+        if w_url := u['websiteUrl']:
             blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', ctx.l.user.info.glossary[3])
         else:
             blog: tuple = (None, ctx.l.glossary.website.capitalize())
         twitter: tuple = ((
             f'https://twitter.com/{u["twitterUsername"]}') if "twitterUsername" in u and u['twitterUsername'] is not None else None, "Twitter")
         links: list = [blog, twitter]
-        link_strings: list = []
-        for lnk in links:
-            if lnk[0] is not None and lnk[0] != '':
-                link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-        if len(link_strings) != 0:
+        if link_strings := [
+            f"- [{lnk[1]}]({lnk[0]})"
+            for lnk in links
+            if lnk[0] is not None and lnk[0] != ''
+        ]:
             embed.add_field(name=f":link: {ctx.l.user.info.glossary[2]}:", value='\n'.join(link_strings), inline=False)
         embed.set_thumbnail(url=u['avatarUrl'])
         # for repo in u['pinnedItems']['nodes']:

@@ -106,11 +106,11 @@ class Repo(commands.Cog):
         homepage: tuple = (
         r['homepageUrl'] if 'homepageUrl' in r and r['homepageUrl'] else None, ctx.l.repo.info.glossary[4])
         links: list = [homepage]
-        link_strings: list = []
-        for lnk in links:
-            if lnk[0] is not None and len(lnk[0]) != 0:
-                link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-        if len(link_strings) != 0:
+        if link_strings := [
+            f"- [{lnk[1]}]({lnk[0]})"
+            for lnk in links
+            if lnk[0] is not None and len(lnk[0]) != 0
+        ]:
             embed.add_field(name=f":link: {ctx.l.repo.info.glossary[2]}:", value='\n'.join(link_strings))
 
         if topics := self.bot.mgr.render_label_like_list(r['topics'][0],
@@ -200,7 +200,11 @@ class Repo(commands.Cog):
     @commands.cooldown(10, 30, commands.BucketType.user)
     async def repo_files_command_two_arg(self, ctx: GitBotContext, repo: str, ref: str, path: str) -> None:
         # different order due to how groups are captured in the regex
-        await self.repo_files_command(ctx, repo_or_path=repo + (path if path.startswith('/') else '/' + path), ref=ref)
+        await self.repo_files_command(
+            ctx,
+            repo_or_path=repo + (path if path.startswith('/') else f'/{path}'),
+            ref=ref,
+        )
 
     @repo_command_group.command(name='download', aliases=['dl'])
     @commands.max_concurrency(10)

@@ -63,7 +63,7 @@ class GitHubAPI:
             return None
         res = await (await self.session.get(f'https://api.ghprofile.me/historic/view?username={name}')).json()
         period: dict = dict(res['payload']['period'])
-        if not res['success'] or sum([int(v) for v in period.values()]) == 0:
+        if not res['success'] or sum(int(v) for v in period.values()) == 0:
             return None
         return GhProfileData(*[int(v) for v in period.values()])
 
@@ -84,7 +84,11 @@ class GitHubAPI:
     @github_cached
     @validate_github_name('user')
     async def get_user_repos(self, user: GitHubUser) -> Optional[list[dict]]:
-        return list(r for r in await self.getitem(f'/users/{user}/repos', []) if r['private'] is False)
+        return [
+            r
+            for r in await self.getitem(f'/users/{user}/repos', [])
+            if r['private'] is False
+        ]
 
     @github_cached
     @validate_github_name('org')
@@ -94,7 +98,11 @@ class GitHubAPI:
     @github_cached
     @validate_github_name('org', default=[])
     async def get_org_repos(self, org: GitHubOrganization) -> list[dict]:
-        return list(r for r in await self.getitem(f'/orgs/{org}/repos', []) if r['private'] is False)
+        return [
+            r
+            for r in await self.getitem(f'/orgs/{org}/repos', [])
+            if r['private'] is False
+        ]
 
     @normalize_repository
     async def get_tree_file(self, repo: GitHubRepository, path: str | None = None, ref: str | None = None) -> dict | list | None:
@@ -102,7 +110,7 @@ class GitHubAPI:
             return None
         if path:
             if path[0] != '/':
-                path = '/' + path
+                path = f'/{path}'
         else:
             path = ''
         return await self.getitem(f'/repos/{repo}/contents{path}' + (f'?ref={ref}' if ref else ''))
@@ -140,9 +148,7 @@ class GitHubAPI:
             try:
                 data: dict = await self.gh.graphql(self.queries.latest_commit, **{'Name': repository, 'Owner': owner})
             except QueryError as e:
-                if 'Repository' in str(e):
-                    return False
-                return None
+                return False if 'Repository' in str(e) else None
             return data['repository']['defaultBranchRef']['target']
 
     @normalize_repository
@@ -155,9 +161,7 @@ class GitHubAPI:
                 data: dict = await self.gh.graphql(self.queries.commit,
                                                    **{'Name': repository, 'Owner': owner, 'Oid': oid})
             except QueryError as e:
-                if 'Repository' in str(e):
-                    return False
-                return None
+                return False if 'Repository' in str(e) else None
             return data['repository']['object']
 
     @normalize_repository
@@ -176,9 +180,7 @@ class GitHubAPI:
                     data = await self.gh.graphql(self.queries.latest_commits_from_ref,
                                                  **{'Name': repository, 'Owner': owner, 'RefName': ref, 'First': 10})
             except QueryError as e:
-                if 'Repository' in str(e):
-                    return 'repo'
-                return 'ref'
+                return 'repo' if 'Repository' in str(e) else 'ref'
             if 'defaultBranchRef' not in data.get('repository', {}) and 'ref' not in data['repository']:
                 return 'ref'
             try:
@@ -192,8 +194,10 @@ class GitHubAPI:
                            size_threshold: int = DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES) -> Optional[bool | bytes]:
         if '/' not in repo or repo.count('/') > 1:
             return None
-        res = await self.session.get(BASE_URL + f'/repos/{repo}/zipball',
-                                     headers={'Authorization': f'token {self.__token}'})
+        res = await self.session.get(
+            f'{BASE_URL}/repos/{repo}/zipball',
+            headers={'Authorization': f'token {self.__token}'},
+        )
         if res.status == 200:
             try:
                 await res.content.readexactly(size_threshold)
@@ -269,9 +273,7 @@ class GitHubAPI:
                                                                            'Owner': owner,
                                                                            'Number': number})
             except QueryError as e:
-                if 'number' in str(e):
-                    return 'number'
-                return 'repo'
+                return 'number' if 'number' in str(e) else 'repo'
         data: dict = data['repository']['pullRequest'] if 'repository' in data else data
         data['labels']: list = [lb['node']['name'] for lb in data['labels']['edges']]
         data['assignees']['users'] = [(u['node']['login'], u['node']['url']) for u in data['assignees']['edges']]
@@ -325,9 +327,7 @@ class GitHubAPI:
                                                                           'Owner': owner,
                                                                           'Number': number})
             except QueryError as e:
-                if 'number' in str(e):
-                    return 'number'
-                return 'repo'
+                return 'number' if 'number' in str(e) else 'repo'
         if isinstance(data, dict):
             if not had_keys_removed:
                 data: dict = data['repository']['issue']

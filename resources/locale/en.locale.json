@@ -31,7 +31,8 @@
     "checks": {
       "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again.",
       "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
-    }
+    },
+    "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git help` for a list of my commands."
@@ -1354,6 +1355,22 @@
         "description": "Verify the integrity of a file against a checksum generated via the specified algorithm",
         "qa_resource": null,
         "required_permissions": []
+      },
+      "auth": {
+        "brief": "Authorize with various services to access more features!",
+        "usage": null,
+        "example": null,
+        "description": "Connect your other accounts to GitBot to access an extended set of features.",
+        "qa_resource": null,
+        "required_permissions": []
+      },
+      "auth_github": {
+        "brief": "Authorize with GitHub to access more features!",
+        "usage": null,
+        "example": null,
+        "description": "Connect your GitHub account to GitBot to access an extended set of features!\nThis command can only be used in DMs or as a slash command.",
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
     "argument_explainers": {
@@ -1470,7 +1487,8 @@
       "repo": "This command can be used without the repo argument if you have a repo saved!\nUse git config to check it out!",
       "user": "This command can be used without the user argument if you have a user saved!\nUse git config to check it out!",
       "org": "This command can be used without the org argument if you have an organization saved!\nUse git config to check it out!"
-    }
+    },
+    "hybrid_disclaimer": "This is a hybrid command - it can be used both normally and as a slash command."
   },
   "dev": {
     "default": {
@@ -1591,6 +1609,13 @@
           "description": "The checksums **don't match!**"
         }
       }
+    }
+  },
+  "auth": {
+    "github": {
+      "title": "Authorize with GitHub",
+      "description": "Connect your GitHub account with GitBot in order to access extended functionality.\n**Click the button below to get started!**",
+      "button": "Authorize with GitHub"
     }
   }
 }

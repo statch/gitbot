@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
 
 class GitHubInfoSelectMenu(discord.ui.Select):
+    __max_run_count__: int = 3
+
     def __init__(self,
                  ctx: 'GitBotContext', item_name: str, label_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]],
                  description_fmt: str | tuple[str, tuple[Callable[[str], str] | str, ...]], data: list[dict],
@@ -43,7 +45,7 @@ class GitHubInfoSelectMenu(discord.ui.Select):
                                          self.ctx.bot.mgr.get_by_key_from_sequence(self.data,
                                                                                    self.value_key, self.values[0])))
         self.run_count += 1
-        if self.run_count >= 3:
+        if self.run_count >= self.__max_run_count__:
             self.disabled = True
         await interaction.response.defer()
 
@@ -55,5 +57,4 @@ class GitHubInfoSelectView(discord.ui.View):
                  callback: Callable[..., Awaitable[['GitBotContext', dict], Any]] | Callable[['GitBotContext', dict], Any],
                  value_key: str | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
-
         self.add_item(GitHubInfoSelectMenu(ctx, item_name, label_fmt, description_fmt, data, callback, value_key))

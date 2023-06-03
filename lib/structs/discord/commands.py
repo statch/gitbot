@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from lib.typehints import ArgumentExplainer, CommandHelp, CommandGroupHelp, LocaleName
 from lib.utils.regex import HELP_PARAMETER_REGEX
 
-__all__: tuple = ('GitBotCommand', 'GitBotCommandGroup', 'GitBotHybridCommand')
+__all__: tuple = ('GitBotCommand', 'GitBotCommandGroup', 'GitBotHybridCommand', 'GitBotHybridCommandGroup')
 
 
 # not used for now, but may come in handy once I get around to refactoring the help system again
@@ -118,3 +118,30 @@ class GitBotCommandGroup(commands.Group, GitBotCommand):
 class GitBotHybridCommand(commands.HybridCommand, GitBotCommand):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
+
+
+class GitBotHybridCommandGroup(commands.HybridGroup, GitBotCommandGroup):
+    def __init__(self, func, **attrs):
+        super().__init__(func, **attrs)
+
+    def command(self, name: str = '', **kwargs) -> Callable:
+        def decorator(func: Callable) -> GitBotHybridCommand:
+            kwargs.setdefault('parent', self)
+            if name:
+                kwargs.setdefault('name', name)
+            result: GitBotHybridCommand = GitBotHybridCommand(func, **kwargs)
+            self.add_command(result)
+            return result
+
+        return decorator
+
+    def group(self, name: str = '', **kwargs) -> Callable:
+        def decorator(func: Callable) -> GitBotHybridCommandGroup:
+            kwargs.setdefault('parent', self)
+            if name:
+                kwargs.setdefault('name', name)
+            result: GitBotHybridCommandGroup = GitBotHybridCommandGroup(func, **kwargs)
+            self.add_command(result)
+            return result
+
+        return decorator

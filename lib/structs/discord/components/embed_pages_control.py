@@ -38,6 +38,6 @@ class EmbedPagesControlView(discord.ui.View):
             await self.pages.to_last_page()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if self.pages.time_since_last_action < 0.65:
-            await asyncio.sleep(0.65 - self.pages.time_since_last_action)
+        if self.pages.time_since_last_action < 0.75:
+            await asyncio.sleep(0.75 - self.pages.time_since_last_action)
         return interaction.user.id == self.context.author.id and not self.pages.should_die

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from lib.typehints.db.user import GitBotUser
+from lib.typehints.db.user import *
 from lib.typehints.db.guild.guild import GitBotGuild
 from lib.structs import DictProxy, DirProxy, CaseInsensitiveDict, MaxAgeDict, FixedSizeOrderedDict
 from lib.typehints.db.guild.autoconv import AutomaticConversionSettings

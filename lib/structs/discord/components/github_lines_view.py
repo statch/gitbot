@@ -7,12 +7,14 @@ from cogs.github.other.snippets._snippet_tools import get_text_from_url_and_data
 if TYPE_CHECKING:
     from lib.structs import GitBotContext
 
+__all__ = ('GitHubLinesView',)
+
 
 class GitHubLinesView(discord.ui.View):
     # children[0] = back button
     # children[1] = forward button
     # children[2] = revert button (return to cached "original message content", which is actually dynamically fetched)
-    children: list['GitHubLinesButton', '_GitHubLinesBackToOriginalButton']
+    children: list['_GitHubLinesButton', '_GitHubLinesBackToOriginalButton']
     __original_url__: str
     __original_l1__: int
     __original_l2__: int | None
@@ -35,10 +37,10 @@ class GitHubLinesView(discord.ui.View):
         self._set_originals()
         _fmt = ctx.l.views.button.github_lines.view_from_to.format  # save some chars
         _b_l1, _b_l2 = max(self.l1 - 25, 1), max(self.l1 - 1, 1)  # precomp backwards values
-        self.add_item(GitHubLinesButton(forward=False,
+        self.add_item(_GitHubLinesButton(forward=False,
                                         label=_fmt(_b_l1, _b_l2) if _b_l1 != _b_l2 else ctx.l.views.button.github_lines.view.format(1),
                                         emoji='⬅️', style=discord.ButtonStyle.gray))
-        self.add_item(GitHubLinesButton(forward=True,
+        self.add_item(_GitHubLinesButton(forward=True,
                                         label=_fmt(max((self.l2 or self.l1) + 1, 1), max((self.l2 or self.l1) + 25, 1)),
                                         emoji='➡️', style=discord.ButtonStyle.gray))
         self.add_item(_GitHubLinesBackToOriginalButton())
@@ -64,7 +66,7 @@ class GitHubLinesView(discord.ui.View):
                                   f' forward label set to {self.children[1].label} for MID {self.ctx.message.id}')
 
 
-class GitHubLinesButton(discord.ui.Button):
+class _GitHubLinesButton(discord.ui.Button):
     view: GitHubLinesView
 
     def __init__(self, forward: bool, **kwargs):
@@ -126,8 +128,8 @@ class _GitHubLinesBackToOriginalButton(discord.ui.Button):
         self.disabled = True  # disable revert button until lines that are displayed are changed again
         self.view.l1, self.view.l2 = self.view.__original_l1__, self.view.__original_l2__
         self.view._url = self.view.__original_url__
-        self.view.set_labels(GitHubLinesButton.get_next_lines(self.view.__original_l1__, self.view.__original_l2__, False),
-                             GitHubLinesButton.get_next_lines(self.view.__original_l1__, self.view.__original_l2__, True))
+        self.view.set_labels(_GitHubLinesButton.get_next_lines(self.view.__original_l1__, self.view.__original_l2__, False),
+                             _GitHubLinesButton.get_next_lines(self.view.__original_l1__, self.view.__original_l2__, True))
         await interaction.message.edit(content=(await get_text_from_url_and_data(
             self.view.ctx, compile_url(self.view.__original_match__.groups()), self.view.__original_match__.groups()
         ))[0], view=self.view)  # send original lines back

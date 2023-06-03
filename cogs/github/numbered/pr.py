@@ -25,7 +25,7 @@ class PullRequest(commands.Cog):
                                    pr_number: Optional[str] = None):
         ctx.fmt.set_prefix('pr')
         if ctx.data:
-            pr: dict = getattr(ctx, 'data')
+            pr: dict = ctx.data
             pr_number: str | int = pr['number']
         else:
             if not pr_number:

@@ -50,10 +50,17 @@ if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.api.github import GitHubAPI
     from lib.structs.discord.bot import GitBot
-from lib.typehints import DictSequence, AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitbotRepoConfig
+from lib.utils.dict_utils import *
+from lib.typehints import AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitbotRepoConfig
 
 
 class Manager:
+    # TODO below are legacy methods that should not need to be bound to Manager (which should not exist anyway)
+    #  Manager should be split up into smaller modules that are imported as needed, but for now this is fine
+    get_nested_key, dict_full_path, get_by_key_from_sequence, get_all_dict_paths, set_nested_key = map(staticmethod, (
+        get_nested_key, dict_full_path, get_by_key_from_sequence, get_all_dict_paths, set_nested_key
+    ))
+
     """
     A class containing database, locale and utility functions
 
@@ -361,29 +368,6 @@ class Manager:
         return default
 
     @staticmethod
-    def get_nested_key(dict_: AnyDict, key: Iterable[str] | str, sep: str = ' ') -> Any:
-        """
-        Get a nested dictionary key
-
-        :param dict_: The dictionary to get the key from
-        :param key: The key to get
-        :param sep: The separator to use if key is a string
-        :return: The value associated with the key
-        """
-        if isinstance(key, str):
-            key = key.split(sep=sep)
-
-        for i, k in enumerate(key):
-            if k.endswith("]"):
-                index_start = k.index("[")
-                index = int(k[index_start + 1:-1])
-                dict_ = dict_[index]
-            else:
-                dict_ = dict_.get(k)
-
-        return dict_
-
-    @staticmethod
     def chunks(iterable: list | tuple, chunk_size: int) -> Generator[list | tuple, None, None]:
         """
         Returns a generator of equally sized chunks from an iterable.
@@ -511,6 +495,10 @@ class Manager:
                     values[field] = inner_fetch
         return template_str.format(**values)
 
+    def build_github_oauth_url(self, user_id: int, secret: str) -> str:
+        return f'https://github.com/login/oauth/authorize?scope={"%20".join(self.env.oauth.github.scopes)}' \
+               f'&client_id={self.env.github_client_id}&state={user_id}:{secret}'
+
     def _setup_db(self) -> None:
         """
         Setup the database connection with ENV vars and a more predictable certificate location.
@@ -559,7 +547,7 @@ class Manager:
             for k, v in env_defaults.items():
                 k: str
                 if not self._maybe_set_env_directive(k, v) and k not in self.env:
-                    self.env[k] = v
+                    self.env[k] = v if not isinstance(v, dict) else DictProxy(v)
                     if isinstance(v, str):
                         os.environ[k.upper()] = v
         self.load_dotenv()
@@ -576,6 +564,8 @@ class Manager:
                 if self.env_directives.get('eval_literal'):
                     if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
                         self.env[binding.key] = parsed
+                    elif isinstance(self.parse_literal(binding.value), dict):
+                        self.env[binding.key] = (parsed := DictProxy(binding.value))
                     else:
                         self.env[binding.key] = (parsed := self.parse_literal(binding.value))
                 else:
@@ -693,33 +683,6 @@ class Manager:
         for k, v in self._int_word_conv_map.items():
             if v == _int:
                 return k
-
-    def dict_full_path(self,
-                       dict_: AnyDict,
-                       key: str,
-                       value: Optional[Any] = None) -> Optional[tuple[str, ...]]:
-        """
-        Get the full path of a dictionary key in the form of a tuple.
-        The value is an optional parameter that can be used to determine which key's path to return if many are present.
-
-        :param dict_: The dictionary to which the key belongs
-        :param key: The key to get the full path to
-        :param value: The optional value for determining if a key is the right one
-        :return: None if key not in dict_ or dict_[key] != value if value is not None else the full path to the key
-        """
-        if hasattr(dict_, 'actual'):
-            dict_: dict = dict_.actual
-
-        def _recursive(__prev: tuple = ()) -> Optional[tuple[str, ...]]:
-            reduced: dict = self.get_nested_key(dict_, __prev)
-            for k, v in reduced.items():
-                if k == key and (value is None or (value is not None and v == value)):
-                    return *__prev, key
-                if isinstance(v, dict):
-                    if ret := _recursive((*__prev, k)):
-                        return ret
-
-        return _recursive()
 
     def extract_content_from_codeblock(self, codeblock: str) -> Optional[str]:
         """
@@ -955,38 +918,6 @@ class Manager:
         except AttributeError:
             return self.locale.master
 
-    def get_by_key_from_sequence(self,
-                                 seq: DictSequence,
-                                 key: str,
-                                 value: Any,
-                                 multiple: bool = False,
-                                 unpack: bool = False) -> Optional[AnyDict | list[AnyDict]]:
-        """
-        Get a dictionary from an iterable, where d[key] == value
-
-        :param seq: The sequence of dicts
-        :param key: The key to check
-        :param value: The wanted value
-        :param multiple: Whether to search for multiple valid dicts, time complexity is always O(n) with this flag
-        :param unpack: Whether the comparison op should be __in__ or __eq__
-        :return: The dictionary with the matching value, if any
-        """
-        matching: list = []
-        if len((_key := key.split())) > 1:
-            key: list = _key
-        for d in seq:
-            if isinstance(key, str):
-                if (key in d) and (d[key] == value) if not unpack else (d[key] in value):
-                    if not multiple:
-                        return d
-                    matching.append(d)
-            else:
-                if (self.get_nested_key(d, key) == value) if not unpack else (self.get_nested_key(d, key) in value):
-                    if not multiple:
-                        return d
-                    matching.append(d)
-        return matching
-
     def populate_generic_numbered_resource(self,
                                            resource: dict,
                                            fmt_str: Optional[str] = None,
@@ -1058,22 +989,6 @@ class Manager:
                 match_: int = fuzz.token_set_ratio(attribute, lv)
                 if lv == attribute or match_ > 80:
                     return locale, match_ == 100
-
-    def get_all_dict_paths(self, d: dict, __path: list[str] | None = None) -> list[list[str]]:
-        """
-        Get all paths in a dictionary
-
-        :param d: The dictionary to get the paths from
-        :return: A list of paths
-        """
-        __path: list = [] if __path is None else __path
-        paths: list = []
-        for k, v in d.items():
-            if isinstance(v, dict):
-                paths.extend(self.get_all_dict_paths(v, __path + [k]))
-            else:
-                paths.append(__path + [k])
-        return paths
 
     def get_localization_percentage(self, locale: str) -> float:
         # TODO some locale items are not supposed to be translated and others sound the same in the target language, this feature is not ready yet

@@ -1,6 +1,6 @@
 from .simple import *
 from .proxies.dir_proxy import DirProxy
-from .proxies.dict_proxy import DictProxy
+from .proxies.dict_proxy import DictProxy, SnakeCaseDictProxy
 from .dicts.case_insensitive_dict import CaseInsensitiveDict, CaseInsensitiveSnakeCaseDict
 from .dicts.fixed_size_ordered_dict import *
 from .dicts.max_age_dict import MaxAgeDict
@@ -13,5 +13,5 @@ from .discord.commands import *
 from .discord.bot import GitBot
 from .discord.context import GitBotContext
 from .discord.pages import *
-from .enums import CheckFailureCode
+from .enums import CheckFailureCode, GitBotCommandState
 from .discord.components import *

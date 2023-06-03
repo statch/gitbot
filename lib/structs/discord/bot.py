@@ -14,7 +14,7 @@ import aiofiles
 import itertools
 import sentry_sdk
 from dotenv import load_dotenv
-from api.github.github import GitHubAPI
+from lib.api.github.github import GitHubAPI
 from lib.api.carbonara import Carbon
 from lib.api.pypi import PyPIAPI
 from lib.api.crates import CratesIOAPI

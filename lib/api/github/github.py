@@ -92,7 +92,7 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
 
 class GitHubQueryDebugInfo:
     __ignorable_error_substrings__: tuple[str, ...] = (
-        # 'Could not resolve to a Repository with the name',
+        'Could not resolve to a Repository with the name',
         'Could not resolve to a User with the login',
         'Could not resolve to a Organization with the login',
         'Not Found',

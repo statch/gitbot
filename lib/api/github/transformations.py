@@ -4,7 +4,7 @@ from typing import TypeVar
 from lib.structs import (DictProxy, SnakeCaseDictProxy, CaseInsensitiveSnakeCaseDict,
                          CaseInsensitiveDict, CaseInsensitiveFixedSizeOrderedDict)
 
-__all__: tuple = ('transform_pull_request', 'transform_repo', 'transform_release', 'transform_user', 'transform_issue')
+__all__: tuple = ('transform_pull_request', 'transform_repo', 'transform_latest_release', 'transform_user', 'transform_issue')
 _Transformable = TypeVar('_Transformable', DictProxy, SnakeCaseDictProxy, CaseInsensitiveSnakeCaseDict,
                          CaseInsensitiveDict, CaseInsensitiveFixedSizeOrderedDict, dict)
 
@@ -35,13 +35,13 @@ def transform_repo(repo_dict: _Transformable) -> _Transformable:
     return repo_dict
 
 
-def transform_release(release_dict: _Transformable) -> _Transformable:
+def transform_latest_release(release_dict: _Transformable) -> _Transformable:
     release_dict = release_dict['repository']
-    release_dict['release'] = release_dict['releases']['nodes'][0] if release_dict['releases']['nodes'] else None
+    release_dict['release'] = release_dict['latestRelease'] if release_dict['latestRelease'] else None
     release_dict['color'] = int(release_dict['primaryLanguage']['color'][1:], 16) if release_dict[
         'primaryLanguage'] else 0x2f3136
     del release_dict['primaryLanguage']
-    del release_dict['releases']
+    del release_dict['latestRelease']
     return release_dict
 
 

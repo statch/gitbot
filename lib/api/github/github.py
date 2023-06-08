@@ -370,7 +370,7 @@ class GitHubAPI:
     @_wrap_proxy
     @normalize_repository
     async def get_latest_release(self, repo: GitHubRepository) -> Optional[_ReturnDict]:
-        return await self.query(self.queries.release, _Repo=repo, transformer=transform_release, on_fail_return=None)
+        return await self.query(self.queries.latest_release, _Repo=repo, transformer=transform_latest_release, on_fail_return=None)
 
     @_wrap_proxy
     @normalize_repository

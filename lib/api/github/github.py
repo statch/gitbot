@@ -92,7 +92,7 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
 
 class GitHubQueryDebugInfo:
     __ignorable_error_substrings__: tuple[str, ...] = (
-        'Could not resolve to a Repository with the name',
+        # 'Could not resolve to a Repository with the name',
         'Could not resolve to a User with the login',
         'Could not resolve to a Organization with the login',
         'Not Found',
@@ -109,14 +109,27 @@ class GitHubQueryDebugInfo:
         The error that was raised by the GitHub API.
     faulty_frame: inspect.FrameInfo
         The frame in which the error was raised.
+    additional_info: dict[str, int | str | bool] | str | None
+        Additional information to be included in the error message.
     """
 
-    def __init__(self, error: BadRequest | QueryError, faulty_frame: inspect.FrameInfo):
+    def __init__(self, error: BadRequest | QueryError, faulty_frame: inspect.FrameInfo,
+                 additional_info: tuple[str, dict[str, int | str | bool]] | str | None = None):
         self.error: BadRequest | QueryError = error
         self.faulty_frame: inspect.FrameInfo = faulty_frame
         self.filename: str = faulty_frame.filename
         self.lineno: int = faulty_frame.lineno
         self.function: str = faulty_frame.function
+        self._additional_info: dict[str, int | str | bool] | str | None = additional_info
+
+    @property
+    def additional_info(self) -> str | None:
+        if self._additional_info is None:
+            return None
+        if isinstance(self._additional_info, tuple):
+            return f'GraphQL query "{self._additional_info[0]}" failed with the following variables:\n' \
+                   f'{" ".join([f"{key}={value};" for key, value in self._additional_info[1].items()])}'
+        return f'REST query path: {self._additional_info}'  # additional info is from a rest call
 
     @property
     def status_code(self) -> int | None:
@@ -130,7 +143,8 @@ class GitHubQueryDebugInfo:
 
         :return: A list of ignorable error substrings/rules that match the error message.
         """
-        return [substring for substring in self.__ignorable_error_substrings__ if substring.casefold() in str(self.error).casefold()]
+        return [substring for substring in self.__ignorable_error_substrings__ if
+                substring.casefold() in str(self.error).casefold()]
 
     @property
     def is_ignorable(self) -> bool:
@@ -178,7 +192,8 @@ class GitHubAPI:
         :param variables: The variables dict to sanitize
         :return: The sanitized variables dict
         """
-        if repo := variables.get('_Repo'):  # _Repo is a special variable that is used to pass the repo name and owner at once
+        if repo := variables.get(
+                '_Repo'):  # _Repo is a special variable that is used to pass the repo name and owner at once
             variables['Owner'], variables['Name'] = repo.split('/') if repo.count('/') == 1 else (repo, repo)
             del variables['_Repo']
         return variables
@@ -202,10 +217,12 @@ class GitHubAPI:
         :param graphql_variables: The variables to pass to the GraphQL query if GraphQL is used.
         :return: The result of the query, or the result of the transformer if one was provided.
         """
+        is_graphql: bool = not query_or_path.startswith('/')
         try:
-            q_res: _ReturnDict = (await (self.gh.getitem(query_or_path) if query_or_path.startswith('/') else
-                                         self.gh.graphql(query_or_path,
-                                                         **self._sanitize_graphql_variables(graphql_variables))))
+            q_res: _ReturnDict = (
+                await (self.gh.getitem(query_or_path) if not is_graphql else self.gh.graphql(query_or_path,
+                                                                                             **self._sanitize_graphql_variables(
+                                                                                                 graphql_variables))))
             transformer = (transformer,) if isinstance(transformer, str) and transformer is not None else transformer
             if isinstance(transformer, tuple):
                 return get_nested_key(q_res, transformer)
@@ -217,7 +234,9 @@ class GitHubAPI:
             # we make some expensive calls here, but it's fine because this is only called on errors
             actual_f_frame: inspect.FrameInfo = [frame for frame in inspect.stack() if frame.function in dir(self) and (
                     frame.function not in self.__non_query_methods__)][0]
-            debug: GitHubQueryDebugInfo = GitHubQueryDebugInfo(e, actual_f_frame)
+            debug: GitHubQueryDebugInfo = GitHubQueryDebugInfo(e, actual_f_frame, (
+                f'{[q_name for q_name, q_content in self.queries.__dict__.items() if q_content == query_or_path][0]}.graphql',
+                graphql_variables) if is_graphql else query_or_path if is_graphql else query_or_path)
             if debug.is_ignorable and on_fail_return != 'default_not_set':
                 self.bot.logger.debug(f'Ignoring GitHub {e.__class__.__name__} in query call {self.__class__.__name__}'
                                       f'.{actual_f_frame.function}(): "{e}" -> ignore conditions matched: {debug.matching_ignore_rules}')
@@ -237,7 +256,7 @@ class GitHubAPI:
                                                     'channel': self.bot.error_log_channel,
                                                     'gh_query_debug': debug})
             await log_error_in_discord(moot_context, e)  # noqa, we don't care that the context isn't real,
-                                                         # we only care that it has the properties we need
+            # we only care that it has the properties we need
             raise e
 
     @_wrap_proxy
@@ -313,13 +332,13 @@ class GitHubAPI:
             key: str = 'defaultBranchRef'
             if not ref:
                 data = await self.query(self.queries.latest_commits_from_default_ref,
-                                 on_fail_return={'Repository': 'repo', '__default__': 'ref'},
-                                 _Repo=repo, First=10)
+                                        on_fail_return={'Repository': 'repo', '__default__': 'ref'},
+                                        _Repo=repo, First=10)
             else:
                 key: str = 'ref'
                 data = await self.query(self.queries.latest_commits_from_ref,
-                                 on_fail_return={'Repository': 'repo', '__default__': 'ref'},
-                                 _Repo=repo, First=10, RefName=ref)
+                                        on_fail_return={'Repository': 'repo', '__default__': 'ref'},
+                                        _Repo=repo, First=10, RefName=ref)
         except QueryError as e:
             if 'Repository' in str(e):
                 return 'repo'

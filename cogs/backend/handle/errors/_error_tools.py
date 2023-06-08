@@ -55,6 +55,8 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception, _actual=Non
         )
         embed.add_field(name='API Response', value=f'```diff\n- {error}```')
         embed.add_field(name='Code Location', value=f'```{ctx.gh_query_debug.code_location}```')
+        if ctx.gh_query_debug.additional_info:
+            embed.add_field(name='Additional Info', value=f'```{ctx.gh_query_debug.additional_info}```')
         if ctx.gh_query_debug.status_code is not None:
             embed.add_field(name='Status Code', value=f'```c\n{error.status_code}```')
         ping_owner: bool = True

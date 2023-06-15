@@ -5,7 +5,7 @@ from lib.typehints import Identity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from lib.manager import Manager
-    from lib.api.github import GitHubAPI
+    from lib.api.github.github import GitHubAPI
 
 
 class UserCollection(AsyncIOMotorCollection):

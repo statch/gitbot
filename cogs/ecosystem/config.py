@@ -5,8 +5,7 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
 from typing import Optional, Literal, Any
-from lib.structs import GitBotEmbed, GitBot
-from structs.enums import GitBotCommandState
+from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 from lib.utils.decorators import normalize_repository
 from lib.structs.discord.context import GitBotContext
@@ -355,16 +354,11 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_locale_command(self, ctx: GitBotContext, locale: Optional[str] = None) -> None:
         ctx.fmt.set_prefix('config locale')
+        to_followup = None
         if locale:
             l_ = self.bot.mgr.get_locale_meta_by_attribute(locale.lower())
             if l_:
                 if not l_[1]:  # If it's not an exact match
-                    async def _callback(_, event):
-                        if event[0].emoji.id == 770244076896256010:
-                            await ctx.info(ctx.l.config.locale.cancelled)
-                            return GitBotCommandState.FAILURE
-                        return GitBotCommandState.SUCCESS
-
                     _match_confirmation_embed: GitBotEmbed = GitBotEmbed(
                         color=0xff009b,
                         title=f'{self.bot.mgr.e.github}  {ctx.l.config.locale.match_confirmation_embed.title}',
@@ -382,7 +376,7 @@ class Config(commands.Cog):
                 self.bot.mgr.locale_cache[ctx.author.id] = l_[0]['name']
                 await ctx.success_embed(ctx.fmt('success', l_[0]['localized_name'].capitalize()))
                 return
-            await ctx.error(ctx.fmt('failure', locale), delete_after=7)
+            to_followup = await ctx.error(ctx.fmt('failure', locale))
 
         def _format(locale_: dict):
             formatted: str = f'{self.bot.mgr.e.square} {locale_["flag"]} {locale_["localized_name"].capitalize()} ([{locale_["author"]["name"]}]({locale_["author"]["url"]}))'
@@ -395,7 +389,7 @@ class Config(commands.Cog):
             description=f"{ctx.fmt('description', f'`git config lang {{{ctx.l.help.argument_explainers.locale.name}}}`')}\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n" + '\n'.join(
                 languages)
         )
-        await ctx.send(embed=embed)
+        await to_followup.reply(embed=embed, mention_author=False) if to_followup else await ctx.send(embed=embed)
 
     @config_command_group.group('autoconv',
                                 aliases=['automatic-conversion', 'auto-conversion', 'auto'],
@@ -528,14 +522,13 @@ class Config(commands.Cog):
             footer=ctx.l.config.delete.feed.channel.flow.confirmation.embed.footer
         )
 
-        confirmation: bool | None = await embed.confirmation(ctx)
-        if confirmation is None:
-            return
-        elif confirmation is False:
-            await ctx.info(ctx.fmt('cancelled', channel.mention))
-        else:
+        confirmation: bool = await embed.confirmation(ctx)
+        if confirmation:
             await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
             await ctx.success(ctx.fmt('success', channel.mention))
+        elif confirmation is False:
+            await ctx.error(ctx.lp.cancelled)
+
 
     def parse_channel_mention_or_number_response(self,
                                                  msg: discord.Message,
@@ -618,14 +611,15 @@ class Config(commands.Cog):
                                     self.bot.mgr.to_github_hyperlink(repo, codeblock=True),
                                     f'<#{present_in[0]["cid"]}>')
             )
-            confirmation: bool | None = await embed.confirmation(ctx)
-            if confirmation is False:
-                await ctx.info(ctx.fmt('cancelled', f'`{repo}`'))
-            elif confirmation is True:
+
+            confirmation: bool = await embed.confirmation(ctx)
+            if confirmation:
                 rfr: ReleaseFeedRepo = self.bot.mgr.get_by_key_from_sequence(present_in[0]['repos'], 'name', repo.lower())
                 await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id},
                                                {'$pull': {f'feed.{guild["feed"].index(present_in[0])}.repos': rfr}})
                 await ctx.success(ctx.fmt('success', f'`{repo.lower()}`', f'<#{present_in[0]["cid"]}>'))
+            elif confirmation is False:
+                await ctx.error(ctx.l.config.delete.feed.repo.multiple.cancelled)
 
     @delete_feed_group.command(name='mention')
     @commands.guild_only()

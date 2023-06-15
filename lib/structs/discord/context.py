@@ -12,12 +12,13 @@ from typing import Optional, Any, Sequence
 from lib.typehints import EmbedLike
 from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
-from lib.structs.discord.commands import GitBotCommand, GitBotGroup, GitBotHybridGroup
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup, GitBotHybridCommandGroup
 from typing import TYPE_CHECKING, Union
 from collections.abc import Awaitable, Callable
 if TYPE_CHECKING:
     from aiohttp import ClientSession
     from lib.structs import CheckFailureCode, GitBot
+    from lib.api.github import GitHubQueryDebugInfo
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
 
@@ -35,14 +36,15 @@ class MessageFormattingStyle(enum.Enum):
 
 class GitBotContext(commands.Context):
     bot: 'GitBot'
-    command: GitBotCommand | GitBotGroup
+    command: GitBotCommand | GitBotCommandGroup
     check_failure_code: Union[int, 'CheckFailureCode'] | None = None
+    gh_query_debug: Optional['GitHubQueryDebugInfo'] = None
     __nocache__: bool = False
     __autoinvoked__: bool = False
     __silence_error_calls__: bool = False
 
     def __init__(self, **attrs):
-        self.command: GitBotCommand | GitBotGroup
+        self.command: GitBotCommand | GitBotCommandGroup
         super().__init__(**attrs)
         self.session: ClientSession = self.bot.session
         self.fmt = self.bot.mgr.fmt(self)
@@ -135,9 +137,9 @@ class GitBotContext(commands.Context):
         """
         Used for root group methods without any additional logic.
         """
-        parent: Optional[GitBotCommand | GitBotGroup] = (self.command.parent if not
+        parent: Optional[GitBotCommand | GitBotCommandGroup] = (self.command.parent if not
                                                                 isinstance(self.command,
-                                                                           (GitBotGroup, GitBotHybridGroup))
+                                                                           (GitBotCommandGroup, GitBotHybridCommandGroup))
                                                          else self.command)
         if parent and (not self.invoked_subcommand or not subcommand_check):
             return await parent.send_help(self)

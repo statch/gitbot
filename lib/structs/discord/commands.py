@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from lib.typehints import ArgumentExplainer, CommandHelp, CommandGroupHelp, LocaleName
 from lib.utils.regex import HELP_PARAMETER_REGEX
 
-__all__: tuple = ('GitBotCommand', 'GitBotGroup', 'GitBotHybridCommand', 'GitBotHybridGroup')
+__all__: tuple = ('GitBotCommand', 'GitBotCommandGroup', 'GitBotHybridCommand', 'GitBotHybridCommandGroup')
 
 
 # not used for now, but may come in handy once I get around to refactoring the help system again
@@ -70,12 +70,8 @@ class GitBotCommand(commands.Command):
     def __repr__(self) -> str:
         return self.__str__()
 
-    @classmethod
-    def from_command(cls, command: commands.Command) -> 'GitBotCommand':
-        return cls(command.callback, **command.__dict__)
 
-
-class GitBotGroup(commands.Group, GitBotCommand):
+class GitBotCommandGroup(commands.Group, GitBotCommand):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
@@ -91,11 +87,11 @@ class GitBotGroup(commands.Group, GitBotCommand):
         return decorator
 
     def group(self, name: str = '', **kwargs) -> Callable:
-        def decorator(func: Callable) -> GitBotGroup:
+        def decorator(func: Callable) -> GitBotCommandGroup:
             kwargs.setdefault('parent', self)
             if name:
                 kwargs.setdefault('name', name)
-            result: GitBotGroup = GitBotGroup(func, **kwargs)
+            result: GitBotCommandGroup = GitBotCommandGroup(func, **kwargs)
             self.add_command(result)
             return result
 
@@ -118,17 +114,13 @@ class GitBotGroup(commands.Group, GitBotCommand):
         if not ctx.invoked_subcommand:
             await ctx.invoke(ctx.bot.get_command('help'), command_or_group=self.fullname)
 
-    @classmethod
-    def from_group(cls, group: commands.Group) -> 'GitBotGroup':
-        return cls(group.callback, **group.__dict__)
-
 
 class GitBotHybridCommand(commands.HybridCommand, GitBotCommand):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
 
-class GitBotHybridGroup(commands.HybridGroup, GitBotGroup):
+class GitBotHybridCommandGroup(commands.HybridGroup, GitBotCommandGroup):
     def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
@@ -144,11 +136,11 @@ class GitBotHybridGroup(commands.HybridGroup, GitBotGroup):
         return decorator
 
     def group(self, name: str = '', **kwargs) -> Callable:
-        def decorator(func: Callable) -> GitBotHybridGroup:
+        def decorator(func: Callable) -> GitBotHybridCommandGroup:
             kwargs.setdefault('parent', self)
             if name:
                 kwargs.setdefault('name', name)
-            result: GitBotHybridGroup = GitBotHybridGroup(func, **kwargs)
+            result: GitBotHybridCommandGroup = GitBotHybridCommandGroup(func, **kwargs)
             self.add_command(result)
             return result
 

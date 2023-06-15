@@ -30,6 +30,9 @@ class CaseInsensitiveDict(dict):
     def __setitem__(self, key: Any, value: Any) -> None:
         super().__setitem__(self._casefold(key), value)
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({super().__repr__()})'
+
 
 class CaseInsensitiveSnakeCaseDict(CaseInsensitiveDict):
     """
@@ -42,4 +45,4 @@ class CaseInsensitiveSnakeCaseDict(CaseInsensitiveDict):
         super().__init__(mapping, **kwargs)
 
     def _casefold(self, key: Any) -> Any:
-        return super()._casefold(''.join(['_' + i.lower() if i.isupper() else i for i in key]).lstrip('_'))
+        return super()._casefold(''.join(['_' + let.lower() if let.isupper() and key[i-1] != '_' else let for i, let in enumerate(key)]).lstrip('_'))

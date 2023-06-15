@@ -110,7 +110,7 @@ async def build_guild_embed(bot: GitBot, guild: discord.Guild, state: bool = Tru
         title=title,
         color=color,
         footer=f"Now in {len(bot.guilds)} guilds",
-        thumbnail=guild.icon.url
+        thumbnail=guild.icon.url if guild.icon else None
     )
     embed.add_field(name='Name', value=str(guild))
     try:
@@ -118,7 +118,7 @@ async def build_guild_embed(bot: GitBot, guild: discord.Guild, state: bool = Tru
     except AttributeError:
         embed.add_field(name='Members', value='`Unknown`')
     embed.add_field(name='ID', value=f"`{str(guild.id)}`")
-    embed.add_field(name='Owner', value=str(await bot.fetch_user(guild.owner_id)))
+    embed.add_field(name='Owner', value=str(guild.owner))
     embed.add_field(name='Created at', value=str(guild.created_at.strftime('%e, %b %Y')))
     embed.add_field(name='Channels', value=str(len(guild.channels) - len(guild.categories)))
     return embed

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from typing import Optional
-from lib.structs import GitBot, GitBotEmbed
+from lib.structs import GitBot, GitBotEmbed, SnakeCaseDictProxy
 from lib.utils.decorators import gitbot_group
 from lib.typehints import GitHubUser
 from lib.structs.discord.context import GitBotContext
@@ -30,9 +30,9 @@ class User(commands.Cog):
             return await ctx.invoke(self.user_command_group)
         ctx.fmt.set_prefix('user info')
         if ctx.data:
-            u: dict = getattr(ctx, 'data')
+            u: SnakeCaseDictProxy = getattr(ctx, 'data')
         else:
-            u: dict = await self.bot.github.get_user(user)
+            u: SnakeCaseDictProxy = await self.bot.github.get_user(user)
         if not u:
             if ctx.invoked_with_stored:
                 await self.bot.mgr.db.users.delitem(ctx, 'user')
@@ -48,7 +48,7 @@ class User(commands.Cog):
         )
 
         contrib_count: Optional[tuple] = u['contributions']
-        orgs_c: int = u['organizations']
+        orgs_c: int = u['organizations_count']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
             embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
         occupation: str = (ctx.l.user.info.company + '\n').format(u['company']) if 'company' in u and u[
@@ -57,19 +57,18 @@ class User(commands.Cog):
         if orgs_c == 1:
             orgs: str = f'{ctx.l.user.info.orgs.singular}\n'
         followers: str = ctx.l.user.info.followers.no_followers if u[
-                                                            'followers'] == 0 else ctx.fmt('followers plural', u['followers'], u['url'] + '?tab=followers')
+                                                            'followers_count'] == 0 else ctx.fmt('followers plural', u['followers_count'], u['url'] + '?tab=followers')
 
-        if u['followers'] == 1:
+        if u['followers_count'] == 1:
             followers: str = ctx.fmt('followers singular', u['url'] + '?tab=followers')
         following: str = ctx.l.user.info.following.no_following if u[
-                                                             'following'] == 0 else ctx.fmt('following plural', u['following'], u['url'] + '?tab=following')
-        if u['following'] == 1:
+                                                             'following_count'] == 0 else ctx.fmt('following plural', u['following_count'], u['url'] + '?tab=following')
+        if u['following_count'] == 1:
             following: str = ctx.fmt('following singular', f'{u["url"]}?tab=following')
         follow: str = followers + f' {ctx.l.user.info.linking_word} ' + following
 
-        repos: str = f"{ctx.l.user.info.repos.no_repos}\n" if u[
-                                                         'public_repos'] == 0 else ctx.fmt('repos plural', u['public_repos'], f"{u['url']}?tab=repositories") + '\n'
-        if u['public_repos'] == 1:
+        repos: str = f"{ctx.l.user.info.repos.no_repos}\n" if u.repositories_count == 0 else ctx.fmt('repos plural', u.repositories_count, f"{u['url']}?tab=repositories") + '\n'
+        if u.repositories_count == 1:
             repos: str = ctx.fmt('repos singular', f"{u['url']}?tab=repositories") + '\n'
         if contrib_count is not None:
             contrib: str = '\n' + ctx.fmt('contributions', contrib_count[0], contrib_count[1]) + '\n'
@@ -79,7 +78,7 @@ class User(commands.Cog):
         joined_at: str = ctx.fmt('joined_at', self.bot.mgr.github_to_discord_timestamp(u['createdAt'])) + '\n'
 
         info: str = f"{joined_at}{repos}{occupation}{orgs}{follow}{contrib}"
-        embed.add_field(name=f":mag_right: {ctx.l.user.info.glossary[1]}:", value=info, inline=False)
+        embed.add_field(name=f':mag_right: {ctx.l.user.info.glossary[1]}:', value=info, inline=False)
         w_url: str = u['websiteUrl']
         if w_url:
             blog: tuple = (w_url if w_url.startswith(('https://', 'http://')) else f'https://{w_url}', ctx.l.user.info.glossary[3])

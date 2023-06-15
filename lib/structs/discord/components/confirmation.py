@@ -14,14 +14,14 @@ class ConfirmationView(discord.ui.View):
         self.value: bool | None = None
         self.context_to_edit: Optional['GitBotContext'] = None
 
-    @discord.ui.button(custom_id='yes', emoji='<:checkmark:770244084727283732>', style=discord.ButtonStyle.green)
+    @discord.ui.button(custom_id='confirmation_yes', emoji='<:checkmark:770244084727283732>', style=discord.ButtonStyle.green)
     async def yes(self, interaction: discord.Interaction, _):
         await interaction.response.defer()
         self.value = True
         self.stop()
         await self.embed.edit_with_state(self.context_to_edit, GitBotCommandState.SUCCESS)
 
-    @discord.ui.button(custom_id='no', emoji='<:failure:770244076896256010>', style=discord.ButtonStyle.red)
+    @discord.ui.button(custom_id='confirmation_no', emoji='<:failure:770244076896256010>', style=discord.ButtonStyle.red)
     async def no(self, interaction: discord.Interaction, _):
         await interaction.response.defer()
         self.value = False

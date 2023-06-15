@@ -71,19 +71,19 @@ class Issue(commands.Cog):
         closed: str = '\n'
         if issue['closed']:
             closed: str = '\n' + ctx.fmt('closed_at', self.bot.mgr.github_to_discord_timestamp(issue['closedAt'])) + '\n'
-        assignees: str = ctx.fmt('assignees plural', issue['assigneeCount'])
-        if issue['assigneeCount'] == 1:
+        assignees: str = ctx.fmt('assignees plural', issue['assignees_count'])
+        if issue['assignees_Count'] == 1:
             assignees: str = ctx.l.issue.assignees.singular
-        elif issue['assigneeCount'] == 0:
+        elif issue['assignees_Count'] == 0:
             assignees: str = ctx.l.issue.assignees.no_assignees
-        comments: str = ctx.fmt('comments plural', issue['commentCount'])
-        if issue['commentCount'] == 1:
+        comments: str = ctx.fmt('comments plural', issue['comments_count'])
+        if issue['comments_Count'] == 1:
             comments: str = ctx.l.issue.comments.singular
-        elif issue['commentCount'] == 0:
+        elif issue['comments_Count'] == 0:
             comments: str = ctx.l.issue.comments.no_comments
         comments_and_assignees: str = f"{comments} {ctx.l.issue.linking_word} {assignees}"
-        participants: str = f"\n{ctx.fmt('participants plural', issue['participantCount'])}" if \
-            issue['participantCount'] != 1 else f"\n{ctx.l.issue.participants.singular}"
+        participants: str = f"\n{ctx.fmt('participants plural', issue['participants_count'])}" if \
+            issue['participants_Count'] != 1 else f"\n{ctx.l.issue.participants.singular}"
         info: str = f"{user}{closed}{comments_and_assignees}{participants}"
         embed.add_field(name=f':mag_right: {ctx.l.issue.glossary[1]}:', value=info, inline=False)
         if issue['labels']:

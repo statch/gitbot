@@ -1,5 +1,7 @@
 import enum
 
+__all__: tuple = ('CheckFailureCode', 'GitBotCommandState',)
+
 
 @enum.unique
 class CheckFailureCode(enum.IntEnum):
@@ -9,8 +11,8 @@ class CheckFailureCode(enum.IntEnum):
 
 @enum.unique
 class GitBotCommandState(enum.Enum):
-    FAILURE: int = 0
-    CONTINUE: int = 1
-    SUCCESS: int = 2
-    TIMEOUT: int = 3
-    CLOSED: int = 4
+    FAILURE: int = 0x01
+    CONTINUE: int = 0x02
+    SUCCESS: int = 0x03
+    TIMEOUT: int = 0x04
+    CLOSED: int = 0x05

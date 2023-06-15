@@ -1,19 +1,21 @@
 import re
 import io
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from aiohttp import ClientResponse
 from lib.utils import regex
-from lib.structs.discord.context import GitBotContext
+
+if TYPE_CHECKING:
+    from lib.structs.discord.context import GitBotContext
 
 
-async def handle_url(ctx: GitBotContext, url: str, **kwargs) -> tuple:
+async def handle_url(ctx: 'GitBotContext', url: str, **kwargs) -> tuple:
     match_: tuple = ctx.bot.mgr.opt(re.findall(regex.GITHUB_LINES_URL_RE, url) or re.findall(regex.GITLAB_LINES_URL_RE, url), 0)
     if match_:
         return await get_text_from_url_and_data(ctx, compile_url(match_), match_, **kwargs)
     return None, ctx.l.snippets.no_lines_mentioned
 
 
-async def get_text_from_url_and_data(ctx: GitBotContext,
+async def get_text_from_url_and_data(ctx: 'GitBotContext',
                                      url: str,
                                      data: tuple,
                                      max_line_count: int = 25,
@@ -57,7 +59,7 @@ def _compile_gitlab_link(data: tuple) -> str:
     return f'https://gitlab.com/{data[1]}/-/raw/{data[2]}/{data[3]}'
 
 
-async def gen_carbon_inmemory(ctx: GitBotContext, code: str, first_line_number: int = 1) -> io.BytesIO:
+async def gen_carbon_inmemory(ctx: 'GitBotContext', code: str, first_line_number: int = 1) -> io.BytesIO:
     return await (await ctx.bot.carbon.generate_basic_image(code, first_line_number)).memoize()
 
 

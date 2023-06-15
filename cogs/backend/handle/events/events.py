@@ -59,7 +59,8 @@ class Events(commands.Cog):
             return
         ctx: GitBotContext = await self.bot.get_context(message)
         if await self.bot.mgr.verify_send_perms(message.channel) and ctx.command is None:
-            if all([self.bot.user in message.mentions, message.reference is None]):
+            # only the bot is mentioned, not a reply, and the message is exactly 21 characters long (just the mention)
+            if all([self.bot.user in message.mentions, message.reference is None, len(message.content) == 21]):
                 embed: GitBotEmbed = GitBotEmbed(
                     color=self.bot.mgr.c.rounded,
                     description=ctx.l.events.mention,

@@ -11,9 +11,10 @@ import logging
 import aiohttp
 import platform
 import aiofiles
+import itertools
 import sentry_sdk
 from dotenv import load_dotenv
-from lib.api.github import GitHubAPI
+from lib.api.github.github import GitHubAPI
 from lib.api.carbonara import Carbon
 from lib.api.pypi import PyPIAPI
 from lib.api.crates import CratesIOAPI
@@ -21,7 +22,7 @@ from lib.manager import Manager
 from time import perf_counter
 from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
-from lib.structs.discord.commands import GitBotCommand, GitBotGroup
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
 from lib.utils.logging_utils import GitBotLoggingStreamHandler
 
 load_dotenv()
@@ -31,13 +32,14 @@ __all__: tuple = ('GitBot',)
 
 class GitBot(commands.Bot):
     session: aiohttp.ClientSession | None = None
-    github: GitHubAPI | None = None
+    github: GitHubAPI | None
     carbon: Carbon | None = None
     pypi: PyPIAPI | None = None
     crates: CratesIOAPI | None = None
     mgr: Manager | None = None
     runtime_vars: dict[str, str] = {}
     statch_guild: discord.Guild | None = None
+    error_log_channel: discord.TextChannel | None = None
 
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
@@ -60,7 +62,7 @@ class GitBot(commands.Bot):
         if not os.path.exists('cloc.pl'):
             self.logger.info('CLOC script not found, downloading...')
             res: aiohttp.ClientResponse = await self.session.get(
-                    'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
+                'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
             async with aiofiles.open('cloc.pl', 'wb') as fp:
                 await fp.write(await res.content.read())
             self.logger.info('CLOC script downloaded.')
@@ -71,24 +73,33 @@ class GitBot(commands.Bot):
         if self.mgr.env.production and (dsn := self.mgr.env.get('sentry_dsn')):
             self.logger.info('Setting up Sentry...')
             sentry_sdk.init(
-                    dsn=dsn,
-                    traces_sample_rate=0.5
+                dsn=dsn,
+                traces_sample_rate=0.5
             )
         else:
-            self.logger.info('Sentry not enabled/configured - skipping.')
+            self.logger.info('Sentry not enabled/configured - skipping')
 
     def _setup_logging(self):
-        logging.basicConfig(level=logging.INFO,
-                            handlers=[GitBotLoggingStreamHandler()])
+        logging.basicConfig(level=logging.INFO, handlers=[GitBotLoggingStreamHandler()], force=True)
         logging.getLogger('asyncio').setLevel(logging.WARNING)
         logging.getLogger('discord.gateway').setLevel(logging.WARNING)
         logging.getLogger('discord.client').setLevel(logging.INFO)
         self.logger: logging.Logger = logging.getLogger('bot')
 
+    @property
+    def github(self) -> GitHubAPI | None:
+        return next(self.__internal_github_instances_cycle) if self.__internal_github_instances else None
+
+    async def _setup_github(self) -> None:
+        self.__internal_github_instances: tuple[GitHubAPI, ...] = (
+            GitHubAPI(self, os.getenv('GITHUB_MAIN'), self.session),
+            GitHubAPI(self, os.getenv('GITHUB_SECONDARY'), self.session)
+        )
+        self.__internal_github_instances_cycle: itertools.cycle = itertools.cycle(self.__internal_github_instances)
+
     async def _setup_services(self) -> None:
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
-        self.github: GitHubAPI = GitHubAPI((os.getenv('GITHUB_MAIN'), os.getenv('GITHUB_SECONDARY')),
-                                           aiohttp.ClientSession(), 'gitbot')
+        await self._setup_github()
         self.mgr: Manager = Manager(self, self.github)
         self.carbon: Carbon = Carbon(self.session)
         self.pypi: PyPIAPI = PyPIAPI(self.session)
@@ -103,7 +114,7 @@ class GitBot(commands.Bot):
         return super().command(*args, **kwargs, cls=GitBotCommand)
 
     def group(self, *args, **kwargs):
-        return super().group(*args, **kwargs, cls=GitBotGroup)
+        return super().group(*args, **kwargs, cls=GitBotCommandGroup)
 
     def _set_runtime_vars(self) -> None:
         self.runtime_vars: dict[str, str] = {
@@ -128,6 +139,7 @@ class GitBot(commands.Bot):
         self._setup_uvloop()
         await self._setup_cloc()
         await self.load_cogs()
+        self.error_log_channel: discord.TextChannel = await self.fetch_channel(self.mgr.env.error_log_channel_id)
         test_guild_id: int | None = self.mgr.env.get('test_guild_id')
         if test_guild := discord.Object(id=test_guild_id) if test_guild_id else None:
             self.tree.copy_global_to(guild=test_guild)
@@ -157,7 +169,7 @@ class GitBot(commands.Bot):
     async def load_cogs(self) -> None:
         for subdir in os.listdir('cogs'):
             if os.path.isdir(f'cogs/{subdir}') and (subdir not in self.mgr.env.production_only_cog_subdirs
-                                                    if not self.mgr.env.production else True):
+            if not self.mgr.env.production else True):
                 await self.load_cogs_from_dir(f'cogs/{subdir}')
 
     async def load_extension(self, name: str, *, package=None):

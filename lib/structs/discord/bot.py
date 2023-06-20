@@ -88,14 +88,14 @@ class GitBot(commands.Bot):
 
     @property
     def github(self) -> GitHubAPI | None:
-        return next(self.__internal_github_instances_cycle) if self.__internal_github_instances else None
+        return next(self.__internal_github_instances_cycle) if self._internal_github_instances else None
 
     async def _setup_github(self) -> None:
-        self.__internal_github_instances: tuple[GitHubAPI, ...] = (
+        self._internal_github_instances: tuple[GitHubAPI, ...] = (
             GitHubAPI(self, os.getenv('GITHUB_MAIN'), self.session),
             GitHubAPI(self, os.getenv('GITHUB_SECONDARY'), self.session)
         )
-        self.__internal_github_instances_cycle: itertools.cycle = itertools.cycle(self.__internal_github_instances)
+        self.__internal_github_instances_cycle: itertools.cycle = itertools.cycle(self._internal_github_instances)
 
     async def _setup_services(self) -> None:
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)

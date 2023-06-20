@@ -45,25 +45,26 @@ class Debug(commands.Cog):
     @restricted()
     @gitbot_command(name='ratelimit', aliases=['rate'], hidden=True)
     async def ratelimit_command(self, ctx: GitBotContext) -> None:
-        data = await self.bot.github.get_ratelimit()
-        rate = data[0]
+        data: list = []
+        for gh in self.bot._internal_github_instances:
+            data.append(await gh.get_ratelimit())
         embed: GitBotEmbed = GitBotEmbed(
             title=f'{self.bot.mgr.e.error}  Rate-limiting'
         )
-        graphql = [g['resources']['graphql'] for g in rate]
-        used_gql = sum(g['used'] for g in graphql)
-        rest = [r['rate'] for r in rate]
-        used_rest = sum(r['used'] for r in rest)
-        search = [s['resources']['search'] for s in rate]
-        used_search = sum(s['used'] for s in search)
+        graphql = [g['resources']['graphql'] for g in data]
+        used_gql = sum(ug['used'] for ug in graphql)
+        rest = [r['rate'] for r in data]
+        used_rest = sum(ur['used'] for ur in rest)
+        search = [s['resources']['search'] for s in data]
+        used_search = sum(us['used'] for us in search)
         embed.add_field(name='REST',
-                        value=f"{used_rest}/{data[1] * 5000}\n\
+                        value=f"{used_rest}/{len(data) * 5000}\n\
                         `{dt.datetime.fromtimestamp(rest[0]['reset']).strftime('%X')}`")
         embed.add_field(name='GraphQL',
-                        value=f"{used_gql}/{data[1] * 5000}\n\
+                        value=f"{used_gql}/{len(data) * 5000}\n\
                         `{dt.datetime.fromtimestamp(graphql[0]['reset']).strftime('%X')}`")
         embed.add_field(name='Search',
-                        value=f"{used_search}/{data[1] * 30}\n\
+                        value=f"{used_search}/{len(data) * 30}\n\
                         `{dt.datetime.fromtimestamp(search[0]['reset']).strftime('%X')}`")
         await ctx.send(embed=embed)
 

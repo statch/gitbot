@@ -1,6 +1,6 @@
 discord.py==2.2.3
 aiohttp==3.8.4
-gidgethub==5.2.1
+gidgethub==5.3.0
 python-dotenv==1.0.0
 python-Levenshtein==0.21.1
 fuzzywuzzy==0.18.0

@@ -153,13 +153,13 @@ def uses_quick_access(resource: str, parameter_name: str):
             index: int = spec.args.index(parameter_name)
             passed: str | None = args[index] if index < len(args) else kwargs.get(parameter_name, None)
             if parameter_name in spec.args and passed is None:
-                stored: str = await ctx.bot.mgr.db.users.getitem(ctx, 'repo')
+                stored: str = await ctx.bot.mgr.db.users.getitem(ctx, resource)
                 if not stored:
-                    await ctx.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await ctx.bot.mgr.db.users.delitem(ctx, resource)
                     await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                     return
                 elif not await ctx.bot.github.rest_get_repo(stored):  # check if repo is valid; rate-limit intensive
-                    await ctx.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await ctx.bot.mgr.db.users.delitem(ctx, resource)
                     await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
                     return
                 if parameter_name in kwargs:

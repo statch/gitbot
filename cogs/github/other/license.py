@@ -23,13 +23,13 @@ class License(commands.Cog):
         embed.add_field(name=ctx.l.license.implementation, value=f'```{license_["implementation"]}```')
         embed.add_field(name=ctx.l.license.permissions,
                         value=''.join([f'{self.bot.mgr.e.circle_green}  {x}\n' for x in license_['permissions']]) if len(
-                              license_['permissions']) != 0 else ctx.l.license.none)
+                              license_['permissions']) != 0 else ctx.l.license.none, inline=True)
         embed.add_field(name=ctx.l.license.conditions,
                         value=''.join([f'{self.bot.mgr.e.circle_yellow}  {x}\n' for x in license_['conditions']]) if len(
-                             license_['conditions']) != 0 else ctx.l.license.none)
+                             license_['conditions']) != 0 else ctx.l.license.none, inline=True)
         embed.add_field(name=ctx.l.license.limitations,
                         value=''.join([f'{self.bot.mgr.e.circle_red}  {x}\n' for x in license_['limitations']]) if len(
-                             license_['limitations']) != 0 else ctx.l.license.none)
+                             license_['limitations']) != 0 else ctx.l.license.none, inline=True)
         await ctx.send(embed=embed, view_on_url=license_['html_url'])
 
 

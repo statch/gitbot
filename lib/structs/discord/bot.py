@@ -15,7 +15,14 @@ import platform
 import aiofiles
 import itertools
 import sentry_sdk
+from sys import version_info
 from dotenv import load_dotenv
+from time import perf_counter
+from discord.ext import commands
+from typing import Any, Literal
+from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from lib.utils.logging_utils import GitBotLoggingStreamHandler
 from lib.api.github.github import GitHubAPI
 from lib.api.carbonara import Carbon
 from lib.api.pypi import PyPIAPI
@@ -23,12 +30,6 @@ from lib.api.crates import CratesIOAPI
 from lib.manager import Manager
 from lib.structs import TypedCache, CacheSchema, SelfHashingCache
 from lib.structs.db import DatabaseProxy
-from time import perf_counter
-from discord.ext import commands
-from typing import Any, Literal
-from lib.structs.discord.context import GitBotContext
-from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from lib.utils.logging_utils import GitBotLoggingStreamHandler
 
 load_dotenv()
 
@@ -61,6 +62,10 @@ class GitBot(commands.Bot):
                          help_command=None, guild_ready_timeout=1,
                          status=discord.Status.online, description='Seamless GitHub-Discord integration.',
                          fetch_offline_members=False, **kwargs)
+
+    @property
+    def runtime_environment(self) -> str | None:
+        return 'production' if self.mgr.env.production else 'preview'
 
     def _setup_uvloop(self):
         if os.name != 'nt':
@@ -112,6 +117,7 @@ class GitBot(commands.Bot):
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
         await self._setup_github()
         self.mgr: Manager = Manager(self, self.github)
+        self.github.requester = self.get_dev_name(with_python_version=False)
         self.db: DatabaseProxy = DatabaseProxy(self)
         self.carbon: Carbon = Carbon(self.session)
         self.pypi: PyPIAPI = PyPIAPI(self.session)
@@ -237,3 +243,30 @@ class GitBot(commands.Bot):
         """
 
         del self.__caches__[cache_name][key]
+
+    def get_dev_name(self,
+                     with_python_version: bool = True, with_commit: bool = True,
+                     with_author: bool = True, short_commit_hash: bool = True,
+                     with_runtime_environment: bool = True, with_discordpy_version: bool = False) -> str:
+        """
+        Get the full dev name of the bot to be used as a sort-of user agent and version string
+
+        :param with_python_version: Include the Python version
+        :param with_commit: Include the current commit hash
+        :param with_author: Include the fact that the bot was made by statch
+        :param short_commit_hash: Use a short commit hash
+        :param with_runtime_environment: Include the runtime environment (e.g. "production" or "preview")
+        :param with_discordpy_version: Include the discord.py version
+        :return: The dev name of the bot
+        """
+
+        ret: str = 'gitbot' + f' ({self.runtime_environment})' if with_runtime_environment else ''
+        if with_author:
+            ret += ' by statch'
+        if with_python_version:
+            ret += '; py {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        if with_discordpy_version:
+            ret += f'; dpy {discord.__version__}'
+        if with_commit:
+            ret += f'; rev {self.mgr.get_current_commit(short=short_commit_hash)}'
+        return ret

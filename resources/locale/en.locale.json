@@ -1376,6 +1376,14 @@
         "description": "Connect your GitHub account to GitBot to access an extended set of features!\nThis command can only be used in DMs or as a slash command.",
         "qa_resource": null,
         "required_permissions": []
+      },
+      "version": {
+        "brief": "Get the current version of GitBot",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
     "argument_explainers": {

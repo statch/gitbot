@@ -23,7 +23,7 @@ class DatabaseProxy:
         self._env: DictProxy = self.bot.mgr.env
         self._ca_cert: str = certifi.where()
         self.client: ma.AsyncIOMotorClient = ma.AsyncIOMotorClient(self._env.db_connection,
-                                                                   appname=self.bot.mgr.bot_dev_name,
+                                                                   appname=self.bot.get_dev_name(),
                                                                    tls=self._env.db_use_tls,
                                                                    tlsCAFile=self._ca_cert,
                                                                    tlsAllowInvalidCertificates=False)

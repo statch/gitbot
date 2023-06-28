@@ -13,7 +13,6 @@ import asyncio
 import functools
 import inspect
 import gidgethub.aiohttp as gh
-from sys import version_info
 from typing import Optional, Callable, Any, Literal, TYPE_CHECKING, LiteralString
 from gidgethub import BadRequest, QueryError
 from datetime import date, datetime
@@ -162,6 +161,7 @@ class GitHubQueryDebugInfo:
 class GitHubAPI:
     __base_url__: str = 'https://api.github.com'
     __non_query_methods__: tuple[str, ...] = ('query', '_sanitize_graphql_variables')
+    requester: str = 'gitbot'
     github_object_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, list)), maxsize=64, max_age=450)
 
     """
@@ -170,16 +170,16 @@ class GitHubAPI:
 
     Parameters
     ----------
-    token: list
-        The GitHub access token to send requests with.
-    requester: str
-        A :class:`str` denoting the author of the requests (ex. 'BigNoob420')
+    bot: GitBot
+        The bot instance.
+    token: str
+        The GitHub API token to use for authorization.
+    session: aiohttp.ClientSession
+        The aiohttp session to use for requests.
     """
 
-    def __init__(self, bot: 'GitBot', token: str, session: aiohttp.ClientSession, requester: str = 'gitbot by statch'):
-        requester += '; Python {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+    def __init__(self, bot: 'GitBot', token: str, session: aiohttp.ClientSession):
         self.bot: 'GitBot' = bot
-        self.requester: str = requester
         self.__token: str = token
         self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
         self.session: aiohttp.ClientSession = session

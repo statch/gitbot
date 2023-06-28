@@ -70,7 +70,6 @@ class Manager:
         self.bot: 'GitBot' = bot
         self.git: 'GitHubAPI' = github
         self._prepare_env()
-        self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
         self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json',))
         self.e: DictProxy = self.load_json('emoji')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)

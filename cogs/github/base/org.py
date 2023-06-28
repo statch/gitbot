@@ -14,7 +14,7 @@ class Org(commands.Cog):
     @gitbot_group(name='org', aliases=['o'], invoke_without_command=True)
     async def org_command_group(self, ctx: GitBotContext, org: Optional[GitHubOrganization] = None) -> None:
         if not org:
-            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'org')
+            stored: Optional[str] = await self.bot.db.users.getitem(ctx, 'org')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.org_info_command, organization=stored)
@@ -35,7 +35,7 @@ class Org(commands.Cog):
             org: dict = await self.bot.github.get_org(organization)
         if not org:
             if ctx.invoked_with_stored:
-                await self.bot.mgr.db.users.delitem(ctx, 'org')
+                await self.bot.db.users.delitem(ctx, 'org')
                 await ctx.error(ctx.l.generic.nonexistent.org.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.org.base)

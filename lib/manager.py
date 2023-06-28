@@ -23,7 +23,6 @@ import zipfile
 import os.path
 import inspect
 import hashlib
-import certifi
 import operator
 import datetime
 import functools
@@ -39,11 +38,8 @@ from discord.ext import commands
 from urllib.parse import quote_plus
 from collections.abc import Collection
 from pipe import traverse, where, select
-from lib.utils.decorators import normalize_identity
 from lib.structs import (DirProxy, DictProxy,
-                         GitCommandData, UserCollection,
-                         TypedCache, SelfHashingCache,
-                         CacheSchema, ParsedRepositoryData)
+                         GitCommandData, ParsedRepositoryData)
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
@@ -51,7 +47,7 @@ if TYPE_CHECKING:
     from lib.api.github import GitHubAPI
     from lib.structs.discord.bot import GitBot
 from lib.utils.dict_utils import *
-from lib.typehints import AnyDict, Identity, GitBotGuild, AutomaticConversionSettings, LocaleName, ReleaseFeedItemMention, GitbotRepoConfig
+from lib.typehints import AnyDict, ReleaseFeedItemMention, GitbotRepoConfig
 
 
 class Manager:
@@ -75,7 +71,6 @@ class Manager:
         self.git: 'GitHubAPI' = github
         self._prepare_env()
         self.bot_dev_name: str = f'gitbot ({"production" if self.env.production else "preview"})'
-        self._setup_db()
         self.l: DirProxy = self.readdir('resources/locale/', '.locale.json', exclude=('index.json',))
         self.e: DictProxy = self.load_json('emoji')
         self.c: DictProxy = self.load_json('colors', lambda k, v: v if not (isinstance(v, str)
@@ -83,12 +78,7 @@ class Manager:
         self.i: DictProxy = self.load_json('images')
         self.locale: DictProxy = self.load_json('locale/index')
         self.licenses: DictProxy = self.load_json('licenses')
-        self.carbon_attachment_cache: SelfHashingCache = SelfHashingCache(max_age=60 * 60)
-        self.autoconv_cache: TypedCache = TypedCache(CacheSchema(key=int, value=dict))
-        self.locale_cache: TypedCache = TypedCache(CacheSchema(key=int, value=str), maxsize=256)
-        self.loc_cache: TypedCache = TypedCache(CacheSchema(key=str, value=(dict, tuple)), maxsize=64, max_age=60 * 7)
         self.locale.master = getattr(self.l, str(self.locale.master))
-        self.db.users = UserCollection(self.db.users, self.git, self)
         self._missing_locale_keys: dict = {l_['name']: [] for l_ in self.locale['languages']}
         self.localization_percentages: dict[str, float | None] = {l_['name']: None for l_ in self.locale['languages']}
         self.__fix_missing_locales()
@@ -197,14 +187,14 @@ class Manager:
         return best[1]
 
     @staticmethod
-    def to_snake_case(string: str) -> str:
+    def to_snake_case(str_: str) -> str:
         """
         Convert a PascalCase string to snake_case
 
-        :param string: The string to convert
+        :param str_: The string to convert
         :return: The converted string
         """
-        return ''.join(['_' + i.lower() if i.isupper() else i for i in string]).lstrip('_')
+        return ''.join(['_' + i.lower() if i.isupper() else i for i in str_]).lstrip('_')
 
     @staticmethod
     def to_github_hyperlink(name: str, codeblock: bool = False) -> str:
@@ -219,26 +209,26 @@ class Manager:
                 else f'[`{name}`](https://github.com/{name.lower()})')
 
     @staticmethod
-    def truncate(string: str, length: int, ending: str = '...', full_word: bool = False) -> str:
+    def truncate(str_: str, length: int, ending: str = '...', full_word: bool = False) -> str:
         """
         Append the ending to the cut string if len(string) exceeds length else return unchanged string.
 
         .. note ::
             The actual length of the **content** of the string equals length - len(ending) without full_word
 
-        :param string: The string to truncate
+        :param str_: The string to truncate
         :param length: The desired length of the string
         :param ending: The ending to append
         :param full_word: Whether to cut in the middle of the last word ("pyth...")
                           or to skip it entirely and append the ending
         :return: The truncated (or unchanged) string
         """
-        if len(string) > length:
+        if len(str_) > length:
             if full_word:
-                string: str = string[:length - len(ending)]
-                return f"{string[:string.rindex(' ')]}{ending}".strip()
-            return string[:length - len(ending)] + ending
-        return string
+                str_: str = str_[:length - len(ending)]
+                return f"{str_[:str_.rindex(' ')]}{ending}".strip()
+            return str_[:length - len(ending)] + ending
+        return str_
 
     @staticmethod
     def flatten(iterable: Iterable) -> Iterable:
@@ -499,18 +489,6 @@ class Manager:
         return f'https://github.com/login/oauth/authorize?scope={"%20".join(self.env.oauth.github.scopes)}' \
                f'&client_id={self.env.github_client_id}&state={user_id}:{secret}'
 
-    def _setup_db(self) -> None:
-        """
-        Setup the database connection with ENV vars and a more predictable certificate location.
-        """
-        self._ca_cert: str = certifi.where()
-        self.db_client: AsyncIOMotorClient = AsyncIOMotorClient(self.env.db_connection,
-                                                                appname=self.bot_dev_name,
-                                                                tls=self.env.db_use_tls,
-                                                                tlsCAFile=self._ca_cert,
-                                                                tlsAllowInvalidCertificates=False)
-        self.db: AsyncIOMotorCollection = getattr(self.db_client, 'store' if self.env.production else 'test')
-
     def _maybe_set_env_directive(self, name: str, value: str | bool | int | list | dict, overwrite: bool = True) -> bool:
         """
         Optionally add an environment directive (behavior config for environment loading)
@@ -518,7 +496,7 @@ class Manager:
         :param name: The name of the env binding
         :param value: The value of the env binding
         :param overwrite: Whether to overwrite an existing directive
-        :return: Whether or not the directive was added or not
+        :return: Whether the directive was added or not
         """
         if isinstance(value, str):
             value: str | bool = self._eval_bool_literal_safe(value)
@@ -639,15 +617,15 @@ class Manager:
         final_size: int = _sizeof(object_)
         return final_size
 
-    def get_numbers_in_range_in_str(self, string: str, max_: int = 10) -> list[int]:
+    def get_numbers_in_range_in_str(self, str_: str, max_: int = 10) -> list[int]:
         """
         Return a list of numbers from str that are < max_
 
-        :param string: The string to search for numbers
+        :param str_: The string to search for numbers
         :param max_: The max_ number to include in the returned list
         :return: The list of numbers
         """
-        return list(self._number_re.findall(string) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
+        return list(self._number_re.findall(str_) | select(lambda ns: int(ns)) | where(lambda n: n <= max_))
 
     _int_word_conv_map: dict = {
         'zero': 0,
@@ -868,55 +846,6 @@ class Manager:
         if os.path.isdir(path):
             return DirProxy(path=path, ext=ext, **kwargs)
         self.bot.logger.debug('Not a directory: "%s"', path)
-
-    @normalize_identity(context_resource='guild')
-    async def get_autoconv_config(self,
-                                  _id: Identity,
-                                  did_exist: bool = False) -> Type[AutomaticConversionSettings] | tuple[AutomaticConversionSettings,
-                                                                                                        bool]:
-        """
-        Get the configured permission for automatic conversion from messages (links, snippets, etc.)
-
-        :param _id: The guild ID to get the permission value for
-        :param did_exist: If to return whether if the guild document existed, or if the value is default
-        :return: The permission value, by default env[AUTOCONV_DEFAULT]
-        """
-        _did_exist: bool = False
-
-        if cached := self.autoconv_cache.get(_id):
-            _did_exist: bool = True
-            permission: AutomaticConversionSettings = cached
-            self.bot.logger.debug('Returning cached value for identity "%d"', _id)
-        else:
-            stored: Optional[GitBotGuild] = await self.db.guilds.find_one({'_id': _id})
-            if stored:
-                permission: AutomaticConversionSettings = stored.get('autoconv', self.env.autoconv_default)
-                _did_exist: bool = True
-            else:
-                permission: AutomaticConversionSettings = self.env.autoconv_default
-            self.autoconv_cache[_id] = permission
-        return permission if not did_exist else (permission, _did_exist)
-
-    @normalize_identity()
-    async def get_locale(self, _id: Identity) -> DictProxy:
-        """
-        Get the locale associated with a user, defaults to the master locale
-
-        :param _id: The user object/ID to get the locale for
-        :return: The locale associated with the user
-        """
-        locale: LocaleName = self.locale.master.meta.name
-        if cached := self.locale_cache.get(_id):
-            locale: LocaleName = cached
-            self.bot.logger.debug('Returning cached value for identity "%d"', _id)
-        else:
-            if stored := await self.db.users.getitem(_id, 'locale'):
-                locale: str = stored
-        try:
-            self.locale_cache[_id] = locale
-            return getattr(self.l, locale)
-        except AttributeError:
-            return self.locale.master
 
     def populate_generic_numbered_resource(self,
                                            resource: dict,

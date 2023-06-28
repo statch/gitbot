@@ -30,7 +30,7 @@ class Auth(commands.Cog):
         view.add_item(discord.ui.Button(label=ctx.fmt('button'),
                                         url=self.bot.mgr.build_github_oauth_url(ctx.author.id, secret),
                                         style=discord.ButtonStyle.link))
-        await self.bot.mgr.db.users.update_one({'_id': ctx.author.id}, {'$set': {'github': {
+        await self.bot.db.users.update_one({'_id': ctx.author.id}, {'$set': {'github': {
             'pending': True,
             'secret': secret,
             'exp': int(time()) + self.bot.mgr.env.oauth.github.auth_timeout

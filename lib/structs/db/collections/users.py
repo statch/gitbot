@@ -54,7 +54,7 @@ class UsersCollection(CollectionWrapper):
             if item in ('user', 'repo', 'org'):
                 valid: bool = await (getattr(self.bot.github, f'get_{item}'))(value) is not None
             elif item == 'locale':
-                valid: bool = any(l_['name'] == value for l_ in self._mgr.locale.languages)
+                valid: bool = any(l_['name'] == value for l_ in self.bot.mgr.locale.languages)
         else:
             valid: bool = True
         if valid:

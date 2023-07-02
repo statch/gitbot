@@ -47,6 +47,8 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
             if codeblock:
                 ctx.bot.logger.debug('Converting MID %d into codeblock...', ctx.message.id)
                 return await ctx.reply(codeblock, mention_author=False, view=GitHubLinesView(ctx, ctx.message.content))
+            else:
+                return await ctx.message.add_reaction('❌')  # only whitespace mentioned or something similar
     _1st_lineno: int = 1 if not match_ else match_.group('first_line_number')
     if codeblock and len(codeblock.splitlines()) < ctx.bot.mgr.env.carbon_len_threshold:
         start: float = time.time()

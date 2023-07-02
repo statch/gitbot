@@ -39,6 +39,7 @@ class GitBotContext(commands.Context):
     command: GitBotCommand | GitBotCommandGroup
     check_failure_code: Union[int, 'CheckFailureCode'] | None = None
     gh_query_debug: Optional['GitHubQueryDebugInfo'] = None
+    lines_total: int | None = None
     __nocache__: bool = False
     __autoinvoked__: bool = False
     __silence_error_calls__: bool = False

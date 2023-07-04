@@ -272,7 +272,7 @@ class Manager:
         Check if the current terminal supports color.
         """
         return (self.env.terminal_supports_color if not isinstance(self.env.terminal_supports_color, str) else
-                self._eval_bool_literal_safe(self.env.terminal_supports_color))
+                self.eval_bool_literal_safe(self.env.terminal_supports_color))
 
     @staticmethod
     def opt(obj: Any, op: Callable | str | int, /, *args, **kwargs) -> Any:
@@ -382,7 +382,7 @@ class Manager:
         return (iterable[i:i + n] for i in range(0, len(iterable), n))
 
     @staticmethod
-    def _eval_bool_literal_safe(literal: str) -> str | bool:
+    def eval_bool_literal_safe(literal: str) -> str | bool:
         """
         Safely convert a string literal to a boolean, or return the string
 
@@ -521,7 +521,7 @@ class Manager:
         :return: Whether or not the directive was added or not
         """
         if isinstance(value, str):
-            value: str | bool = self._eval_bool_literal_safe(value)
+            value: str | bool = self.eval_bool_literal_safe(value)
 
         if (directive := name.lower()).startswith('directive_'):
             if (directive := directive.replace('directive_', '')) not in \
@@ -562,7 +562,7 @@ class Manager:
         if not self._maybe_set_env_directive(binding.key, binding.value):
             try:
                 if self.env_directives.get('eval_literal'):
-                    if isinstance((parsed := self._eval_bool_literal_safe(binding.value)), bool):
+                    if isinstance((parsed := self.eval_bool_literal_safe(binding.value)), bool):
                         self.env[binding.key] = parsed
                     elif isinstance(self.parse_literal(binding.value), dict):
                         self.env[binding.key] = (parsed := DictProxy(binding.value))

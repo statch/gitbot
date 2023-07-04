@@ -28,9 +28,10 @@ from lib.utils.logging_utils import GitBotLoggingStreamHandler
 load_dotenv()
 
 __all__: tuple = ('GitBot',)
+__bot_superclass__ = commands.AutoShardedBot if Manager.eval_bool_literal_safe(os.getenv('PRODUCTION')) else commands.Bot
 
 
-class GitBot(commands.Bot):
+class GitBot(__bot_superclass__):
     session: aiohttp.ClientSession | None = None
     github: GitHubAPI | None
     carbon: Carbon | None = None

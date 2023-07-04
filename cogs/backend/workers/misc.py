@@ -36,7 +36,7 @@ class MiscellaneousBackgroundTasks(commands.Cog):
             next(self.presences_cycle)
         self.bot.logger.info(f'Loaded {len(self.presences)} presences.')
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(seconds=150)
     async def status_changer(self):
         presence: DiscordPresenceData = next(self.presences_cycle)
         await self.bot.change_presence(activity=discord.Activity(type=presence.type, name=presence.name), status=presence.status)

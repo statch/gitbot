@@ -36,7 +36,7 @@ load_dotenv()
 __all__: tuple = ('GitBot',)
 
 
-class GitBot(commands.Bot):
+class GitBot(commands.AutoShardedBot):
     session: aiohttp.ClientSession | None = None
     github: GitHubAPI | None
     carbon: Carbon | None = None

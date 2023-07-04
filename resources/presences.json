@@ -1,0 +1,177 @@
+[
+  {
+    "activity": {
+      "type": "playing",
+      "name": "with code"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "live coding sessions"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "developers' needs"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "pull requests"
+    },
+    "status": "dnd"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "with Git branches"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "coding tutorials"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "your mechanical keyboard"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "CI do your job"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "with GitHub webhooks"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "hackathons"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "GitHub Universe"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "hide and seek with bugs"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "the rise of open-source"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "git blame bingo"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "with infinite loops"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "pull requests rain"
+    },
+    "status": "dnd"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "the codebase evolve"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "the hum of servers"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "developers' success stories"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "the code compile"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "code tutorials"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "error messages"
+    },
+    "status": "dnd"
+  },
+  {
+    "activity": {
+      "type": "watching",
+      "name": "the commit graph grow"
+    },
+    "status": "online"
+  },
+  {
+    "activity": {
+      "type": "listening",
+      "name": "the sound of code compiling"
+    },
+    "status": "idle"
+  },
+  {
+    "activity": {
+      "type": "playing",
+      "name": "with merge conflicts"
+    },
+    "status": "dnd"
+  }
+]

@@ -415,7 +415,7 @@ class GitHubAPI:
                         data: Optional[dict] = None,  # If data isn't None, this method simply acts as a parser
                         had_keys_removed: bool = False) -> _ReturnDict | str:
         if not data:
-            data = await self.query(self.queries.issue, _Repo=repo, Number=number,
+            return await self.query(self.queries.issue, _Repo=repo, Number=number,
                                     on_fail_return={'number': 'number', '__default__': 'repo'},
                                     transformer=transform_issue)
         if isinstance(data, dict):

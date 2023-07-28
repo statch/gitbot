@@ -1,11 +1,11 @@
 discord.py==2.3.1
-aiohttp==3.8.4
+aiohttp==3.8.5
 gidgethub==5.3.0
 python-dotenv==1.0.0
 python-Levenshtein==0.21.1
 fuzzywuzzy==0.18.0
 motor==3.2.0
-dnspython==2.3.0
+dnspython==2.4.1
 psutil==5.9.5
 dblpy==0.4.0
 dlabs.py
@@ -14,13 +14,13 @@ beautifulsoup4==4.12.2
 colorama==0.4.6
 requests==2.31.0
 py-carbon==1.0.4
-sentry-sdk==1.26.0
+sentry-sdk==1.28.1
 aiofiles==23.1.0
 plotly==5.15.0
 pandas
 kaleido==0.2.1
-certifi==2023.5.7
+certifi==2023.7.22
 uvloop==0.17.0; sys_platform == 'linux'
-recordclass==0.18.4
+recordclass==0.19.1
 pipe==2.0
 topggpy==1.4.0

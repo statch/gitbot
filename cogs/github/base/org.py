@@ -49,7 +49,7 @@ class Org(commands.Cog):
         )
 
         mem: list = await self.bot.github.get_org_members(organization)
-        members: str = ctx.fmt('members', len(mem), f"({org['html_url']}/people)") + '\n'
+        members: str = ctx.fmt('members', len(mem), f"{org['html_url']}/people") + '\n'
         if len(mem) == 1:
             members: str = ctx.fmt('one_member', f"{org['html_url']}/people") + '\n'
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'

@@ -97,7 +97,7 @@ class GitHubQueryDebugInfo:
         'Could not resolve to a Organization with the login',
         'Not Found',
         'Could not resolve to a PullRequest with the number of',
-        'Could not resolve to a Issue with the number of',
+        'Could not resolve to an Issue with the number of',
         'Variable $Oid of type GitObjectID! was provided invalid value'
     )
 

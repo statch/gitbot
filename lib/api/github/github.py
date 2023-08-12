@@ -84,8 +84,7 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
                     # note that this does not remove the totalCount field from the dict or anything for that matter,
                     # it just makes it easier to access the value.
                     set_nested_key(result, path[:-2] + (f'{path[-2]}_count',), get_nested_key(result, path))
-            return result
-        return None
+        return result
 
     return wrapper
 

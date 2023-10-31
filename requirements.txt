@@ -14,7 +14,7 @@ beautifulsoup4==4.12.2
 colorama==0.4.6
 requests==2.31.0
 py-carbon==1.0.4
-sentry-sdk==1.28.1
+sentry-sdk==1.33.0
 aiofiles==23.1.0
 plotly==5.15.0
 pandas

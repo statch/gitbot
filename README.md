@@ -1,4 +1,4 @@
-![GitBot Banner](https://media.discordapp.net/attachments/756583860736753774/834755493250727957/gitbot-light-color-nobg.png?width=1440&height=360)
+![GitBot Banner](https://i.imgur.com/3YGuI4J.png)
 
 
 _________________
@@ -73,7 +73,7 @@ _________________
 _________________
 
 <p align="center">
-  <b>© 2020-2023 statch<br/>Not affiliated with <a href="https://github.com/">GitHub Inc.</a></b>
+  <b>© 2020-2024 statch<br/>Not affiliated with <a href="https://github.com/">GitHub Inc.</a></b>
 </p>
 <p align="center">
   <a href="https://www.producthunt.com/posts/gitbot?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gitbot" target="_blank">

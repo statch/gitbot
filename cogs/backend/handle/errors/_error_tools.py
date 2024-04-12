@@ -79,14 +79,17 @@ def format_tb(tb) -> str:
 
 
 def format_args(args: list) -> str:
-    for i, arg in enumerate(args):
-        if repr(arg).startswith('<cogs'):
-            args[i]: str = repr(arg).split()[0].strip('<')
-        elif 'Context' in repr(arg):
-            args[i]: str = 'ctx'
-    return f"[{', '.join(args)}]"
+    if args:
+        for i, arg in enumerate(args):
+            if repr(arg).startswith('<cogs'):
+                args[i]: str = repr(arg).split()[0].strip('<')
+            elif 'Context' in repr(arg):
+                args[i]: str = 'ctx'
+        return f'[{", ".join(args)}]'
+    return 'No arguments'
 
 
 def format_kwargs(kwargs: dict) -> str:
-    items: str = ', '.join([f"{k}=\'{v}\'" for k, v in kwargs.items()])
-    return f'dict({items})' if items else 'No keyword arguments'
+    if kwargs:
+        return 'dict(' + ', '.join([f"{k}=\'{v}\'" for k, v in kwargs.items()]) + ')'
+    return 'No keyword arguments'

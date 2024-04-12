@@ -83,8 +83,7 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
                     # note that this does not remove the totalCount field from the dict or anything for that matter,
                     # it just makes it easier to access the value.
                     set_nested_key(result, path[:-2] + (f'{path[-2]}_count',), get_nested_key(result, path))
-            return result
-        return None
+        return result
 
     return wrapper
 
@@ -96,7 +95,7 @@ class GitHubQueryDebugInfo:
         'Could not resolve to a Organization with the login',
         'Not Found',
         'Could not resolve to a PullRequest with the number of',
-        'Could not resolve to a Issue with the number of',
+        'Could not resolve to an Issue with the number of',
         'Variable $Oid of type GitObjectID! was provided invalid value'
     )
 

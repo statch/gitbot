@@ -28,13 +28,13 @@ class ReleaseFeedWorker(commands.Cog):
         for ud in update_data:
             (_repos := feed[feed.index(ud.rfi)]['repos'])[_repos.index(ud.rfr)] = {'name': ud.rfr['name'],
                                                                                    'tag': ud.tag}
-        await self.bot.mgr.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
+        await self.bot.db.guilds.find_one_and_update({'_id': guild['_id']}, {'$set': {'feed': feed}})
 
     @tasks.loop(minutes=int(environ.get('release_feed_worker_interval', '15')))
     async def release_feed_worker(self) -> None:
         self.iterno += 1
         self.bot.logger.debug('Starting worker cycle %s', self.pretty_iterno)
-        async for guild in self.bot.mgr.db.guilds.find({'feed': {'$exists': True}}):
+        async for guild in self.bot.db.guilds.find({'feed': {'$exists': True}}):
             self.bot.logger.debug('Handling GID %d', guild["_id"])
             guild: GitBotGuild
             changed: bool = False
@@ -100,7 +100,7 @@ class ReleaseFeedWorker(commands.Cog):
             description=f'A repository previously saved as `{repo["name"]}` was **deleted or renamed** by the owner. '
                         f'Please re-add it under the new name.'
         )
-        await self.bot.mgr.db.guilds.update_one(guild, {'$pull': {f'feed.{guild["feed"].index(rfi)}.repos': repo}})
+        await self.bot.db.guilds.update_one(guild, {'$pull': {f'feed.{guild["feed"].index(rfi)}.repos': repo}})
         await self.send_to_rfi(guild, rfi, embed)
 
     @release_feed_worker.before_loop
@@ -118,7 +118,7 @@ class ReleaseFeedWorker(commands.Cog):
                                                                 session=self.bot.session)
             await webhook.send(text, embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar.url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
-            await self.bot.mgr.db.guilds.find_one_and_delete({'_id': guild['_id']})
+            await self.bot.db.guilds.find_one_and_delete({'_id': guild['_id']})
             return False
         return True
 

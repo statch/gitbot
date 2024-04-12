@@ -34,7 +34,7 @@ class PullRequest(commands.Cog):
                     return
                 elif not pr_number and repo.isnumeric():
                     num: str = repo
-                    stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+                    stored: Optional[str] = await self.bot.db.users.getitem(ctx, 'repo')
                     if stored:
                         repo: str = stored
                         pr_number: str = num

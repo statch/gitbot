@@ -34,20 +34,20 @@ class Config(commands.Cog):
     @staticmethod
     async def toggle_autoconv_item(ctx: GitBotContext,
                                    item: Literal['gh_url', 'codeblock']) -> bool:
-        guild: GitBotGuild = await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
+        guild: GitBotGuild = await ctx.bot.db.guilds.find_one({'_id': ctx.guild.id}) or {}
         config: AutomaticConversionSettings = guild.get('autoconv', ctx.bot.mgr.env.autoconv_default)
         config[item] = (state := not (config.get(item, ctx.bot.mgr.env.autoconv_default[item])))  # noqa item is str
         if guild:
-            await ctx.bot.mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
+            await ctx.bot.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
         else:
-            await ctx.bot.mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))  # noqa _id is int
-        ctx.bot.mgr.autoconv_cache[ctx.guild.id] = config
+            await ctx.bot.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))  # noqa _id is int
+        ctx.bot.set_cache_v('autoconv', ctx.guild.id, config)
         await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
         return state
 
     @staticmethod
     async def get_feed_prerequisites(ctx: GitBotContext) -> tuple[GitBotGuild, ReleaseFeed]:
-        guild: GitBotGuild = await ctx.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id}) or {}
+        guild: GitBotGuild = await ctx.bot.db.guilds.find_one({'_id': ctx.guild.id}) or {}
         feed: ReleaseFeed = guild.get('feed', [])
         return guild, feed
 
@@ -61,10 +61,10 @@ class Config(commands.Cog):
     async def config_show_command_group(self, ctx: GitBotContext) -> None:
         if ctx.invoked_subcommand is None:
             ctx.fmt.set_prefix('config show base')
-            user: GitBotUser = await self.bot.mgr.db.users.find_one({'_id': ctx.author.id}) or {}
+            user: GitBotUser = await self.bot.db.users.find_one({'_id': ctx.author.id}) or {}
             guild: Optional[GitBotGuild] = None
             if not isinstance(ctx.channel, discord.DMChannel):
-                guild: Optional[GitBotGuild] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+                guild: Optional[GitBotGuild] = await self.bot.db.guilds.find_one({'_id': ctx.guild.id})
             if not user and guild is None or ((guild and len(guild) == 1) and not user):
                 await ctx.error(ctx.l.generic.nonexistent.qa)
                 return
@@ -111,7 +111,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_show_feed_command(self, ctx: GitBotContext):
         ctx.fmt.set_prefix('config show feed')
-        guild: Optional[dict] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        guild: Optional[dict] = await self.bot.db.guilds.find_one({'_id': ctx.guild.id})
         if guild and 'feed' in guild:
             embed: GitBotEmbed = GitBotEmbed(
                 color=self.bot.mgr.c.discord.blurple,
@@ -145,7 +145,7 @@ class Config(commands.Cog):
         except commands.BadArgument:
             await ctx.error(ctx.l.config.feed.channel.invalid_channel)
             return
-        guild: Optional[GitBotGuild] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        guild: Optional[GitBotGuild] = await self.bot.db.guilds.find_one({'_id': ctx.guild.id})
         success: bool = False
         if guild:
             feed: dict = guild.get('feed', {})
@@ -165,14 +165,14 @@ class Config(commands.Cog):
                     return
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
-                await self.bot.mgr.db.guilds.update_one(guild, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
+                await self.bot.db.guilds.update_one(guild, {'$push': {'feed': ReleaseFeedItem(cid=channel.id,
                                                                                                   hook=hook.url[33:],
                                                                                                   repos=[])}})
                 success: bool = True
         else:
             hook: discord.Webhook = await self.create_webhook(ctx, channel)
             if hook:
-                await self.bot.mgr.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, feed=[ReleaseFeedItem(cid=channel.id,
+                await self.bot.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, feed=[ReleaseFeedItem(cid=channel.id,
                                                                                                             hook=hook.url[33:],
                                                                                                             repos=[])]))
                 success: bool = True
@@ -201,7 +201,7 @@ class Config(commands.Cog):
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
             return
         tag: Optional[str] = (release.get('release') or {'tagName': None}).get('tagName')
-        guild: GitBotGuild = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        guild: GitBotGuild = await self.bot.db.guilds.find_one({'_id': ctx.guild.id})
         if not guild or not guild.get('feed'):
             await ctx.error(ctx.l.generic.nonexistent.release_feed)
             return
@@ -233,7 +233,7 @@ class Config(commands.Cog):
                 mention: str = f'<#{selected_rfi["cid"]}>'
                 if len(selected_rfi['repos']) < 10:
                     if (repo_ := repo_.lower()) not in map(lambda r: r['name'], selected_rfi['repos']):
-                        await self.bot.mgr.db.guilds.update_one(guild,
+                        await self.bot.db.guilds.update_one(guild,
                                                                 {'$push':
                                                                  {f'feed.{guild["feed"].index(selected_rfi)}.repos':
                                                                   ReleaseFeedRepo(name=repo_.lower(), tag=tag)}})
@@ -319,12 +319,12 @@ class Config(commands.Cog):
 
         await ctx.success(ctx.fmt('success', channel.mention, self.bot.mgr.release_feed_mention_to_actual(id_or_enum)),
                           allowed_mentions=discord.AllowedMentions.none())
-        await self.bot.mgr.db.guilds.update_one(guild, {'$set': {f'feed.{guild["feed"].index(rfi)}.mention': id_or_enum}})
+        await self.bot.db.guilds.update_one(guild, {'$set': {f'feed.{guild["feed"].index(rfi)}.mention': id_or_enum}})
 
     @config_command_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_user_command(self, ctx: GitBotContext, user: GitHubUser) -> None:
-        u: bool = await self.bot.mgr.db.users.setitem(ctx, 'user', user)
+        u: bool = await self.bot.db.users.setitem(ctx, 'user', user)
         if u:
             await ctx.success_embed(ctx.fmt('config qa_set user', self.bot.mgr.to_github_hyperlink(user, True)))
         else:
@@ -333,7 +333,7 @@ class Config(commands.Cog):
     @config_command_group.command(name='org', aliases=['organization', 'o'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def config_org_command(self, ctx: GitBotContext, org: GitHubOrganization) -> None:
-        o: bool = await self.bot.mgr.db.users.setitem(ctx, 'org', org)
+        o: bool = await self.bot.db.users.setitem(ctx, 'org', org)
         if o:
             await ctx.success_embed(ctx.fmt('config qa_set org', self.bot.mgr.to_github_hyperlink(org, True)))
         else:
@@ -343,7 +343,7 @@ class Config(commands.Cog):
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
     async def config_repo_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
-        r: bool = await self.bot.mgr.db.users.setitem(ctx, 'repo', repo)
+        r: bool = await self.bot.db.users.setitem(ctx, 'repo', repo)
         if r:
             await ctx.success_embed(ctx.fmt('config qa_set repo', self.bot.mgr.to_github_hyperlink(repo, True)))
         else:
@@ -371,9 +371,9 @@ class Config(commands.Cog):
                     elif confirmation is False:
                         await ctx.info(ctx.l.config.locale.cancelled)
                         return
-                await self.bot.mgr.db.users.setitem(ctx, 'locale', l_[0]['name'])
-                setattr(ctx, 'l', await self.bot.mgr.get_locale(ctx))
-                self.bot.mgr.locale_cache[ctx.author.id] = l_[0]['name']
+                await self.bot.db.users.setitem(ctx, 'locale', l_[0]['name'])
+                setattr(ctx, 'l', await self.bot.db.users.get_locale(ctx))
+                self.bot.set_cache_v('locale', ctx.author.id, l_[0]['name'])  # update the cache with the new locale
                 await ctx.success_embed(ctx.fmt('success', l_[0]['localized_name'].capitalize()))
                 return
             to_followup = await ctx.error(ctx.fmt('failure', locale))
@@ -432,7 +432,7 @@ class Config(commands.Cog):
     async def config_autoconv_lines_command(self, ctx: GitBotContext, skip_state: Optional[str] = None) -> None:
         ctx.fmt.set_prefix('config autoconv gh_lines')
         skip_state: Optional[int] = self._validate_github_lines_conversion_state(skip_state)
-        guild: Optional[GitBotGuild] = await self.bot.mgr.db.guilds.find_one({'_id': ctx.guild.id})
+        guild: Optional[GitBotGuild] = await self.bot.db.guilds.find_one({'_id': ctx.guild.id})
         if skip_state is None:
             embed: GitBotEmbed = GitBotEmbed(
                 color=self.bot.mgr.c.rounded,
@@ -466,12 +466,12 @@ class Config(commands.Cog):
             if guild:
                 config: AutomaticConversionSettings = guild.get('autoconv', self.bot.mgr.env.autoconv_default)
                 config['gh_lines'] = actual_state
-                await self.bot.mgr.db.guilds.update_one({'_id': guild['_id']}, {'$set': {'autoconv.gh_lines': actual_state}})
+                await self.bot.db.guilds.update_one({'_id': guild['_id']}, {'$set': {'autoconv.gh_lines': actual_state}})
             else:
                 config: AutomaticConversionSettings = self.bot.mgr.env.autoconv_default
                 config['gh_lines'] = actual_state
-                await self.bot.mgr.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
-            self.bot.mgr.autoconv_cache[ctx.guild.id] = config
+                await self.bot.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
+            self.bot.set_cache_v('autoconv', ctx.guild.id, config)
             await ctx.success(ctx.lp.results[_str])
 
     @config_command_group.group(name='delete', aliases=['d', 'del'])
@@ -524,12 +524,10 @@ class Config(commands.Cog):
 
         confirmation: bool = await embed.confirmation(ctx)
         if confirmation:
-            await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
+            await self.bot.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
             await ctx.success(ctx.fmt('success', channel.mention))
         elif confirmation is False:
-            await ctx.error(ctx.lp.cancelled)
-
-
+            await ctx.error(ctx.lp.cancelled.format(channel.mention))
     def parse_channel_mention_or_number_response(self,
                                                  msg: discord.Message,
                                                  rfis: list[ReleaseFeedItem]) -> list[int]:
@@ -592,7 +590,7 @@ class Config(commands.Cog):
                 ud: dict = {f'feed.{guild["feed"].index(to_delete[n])}.repos':
                             self.bot.mgr.get_by_key_from_sequence(rf['repos'],
                                                          'name', repo.lower()) for n, rf in enumerate(to_delete)}
-                await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': ud})
+                await self.bot.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': ud})
                 result_embed: GitBotEmbed = GitBotEmbed(
                     color=self.bot.mgr.c.discord.green,
                     title=ctx.l.config.delete.feed.repo.multiple.success.title,
@@ -615,7 +613,7 @@ class Config(commands.Cog):
             confirmation: bool = await embed.confirmation(ctx)
             if confirmation:
                 rfr: ReleaseFeedRepo = self.bot.mgr.get_by_key_from_sequence(present_in[0]['repos'], 'name', repo.lower())
-                await self.bot.mgr.db.guilds.update_one({'_id': ctx.guild.id},
+                await self.bot.db.guilds.update_one({'_id': ctx.guild.id},
                                                {'$pull': {f'feed.{guild["feed"].index(present_in[0])}.repos': rfr}})
                 await ctx.success(ctx.fmt('success', f'`{repo.lower()}`', f'<#{present_in[0]["cid"]}>'))
             elif confirmation is False:
@@ -664,7 +662,7 @@ class Config(commands.Cog):
 
         if to_delete:
             to_delete: ReleaseFeedItem = self.bot.mgr.get_by_key_from_sequence(feed, 'cid', to_delete)
-            await self.bot.mgr.db.guilds.update_one({'_id': guild['_id']},
+            await self.bot.db.guilds.update_one({'_id': guild['_id']},
                                            {'$set': {f'feed.{feed.index(to_delete)}.mention': None}})
             await ctx.success(ctx.fmt('success',
                                       self.bot.mgr.release_feed_mention_to_actual(to_delete['mention']),
@@ -673,7 +671,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='user', aliases=['u'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_user_command(self, ctx: GitBotContext) -> None:
-        deleted: bool = await self.bot.mgr.db.users.delitem(ctx, 'user')
+        deleted: bool = await self.bot.db.users.delitem(ctx, 'user')
         if deleted:
             await ctx.success(ctx.l.config.delete.user.success)
         else:
@@ -682,7 +680,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='org', aliases=['o', 'organization'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_org_command(self, ctx: GitBotContext) -> None:
-        deleted: bool = await self.bot.mgr.db.users.delitem(ctx, 'org')
+        deleted: bool = await self.bot.db.users.delitem(ctx, 'org')
         if deleted:
             await ctx.success(ctx.l.config.delete.org.success)
         else:
@@ -691,7 +689,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='repo', aliases=['r'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_repo_command(self, ctx: GitBotContext) -> None:
-        deleted: bool = await self.bot.mgr.db.users.delitem(ctx, 'repo')
+        deleted: bool = await self.bot.db.users.delitem(ctx, 'repo')
         if deleted:
             await ctx.success(ctx.l.config.delete.repo.success)
         else:
@@ -700,7 +698,7 @@ class Config(commands.Cog):
     @delete_field_group.command(name='language', aliases=['lang', 'locale'])
     @commands.cooldown(5, 30, commands.BucketType.user)
     async def delete_locale_command(self, ctx: GitBotContext) -> None:
-        await self.bot.mgr.db.users.delitem(ctx, 'locale')
+        await self.bot.db.users.delitem(ctx, 'locale')
         await ctx.success(ctx.l.config.delete.locale)
 
     @delete_field_group.command(name='all', aliases=['a'])
@@ -708,7 +706,7 @@ class Config(commands.Cog):
     async def delete_entire_record_command(self, ctx: GitBotContext) -> None:
         # This command's naming is confusing to users.
         # It should either be removed or reworked to better reflect its effect on users' config values
-        query: dict = await self.bot.mgr.db.users.find_one_and_delete({'_id': ctx.author.id})
+        query: dict = await self.bot.db.users.find_one_and_delete({'_id': ctx.author.id})
         if not query:
             await ctx.error(ctx.l.config.delete.all.not_saved)
             return

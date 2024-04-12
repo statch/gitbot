@@ -124,6 +124,10 @@ class BotInfo(commands.Cog):
                         value=ctx.fmt('stats code body', LINES_OF_CODE, f'{platform.system()} {platform.release()}'))
         await ctx.send(embed=embed)
 
+    @gitbot_command(name='version', aliases=['ver'])
+    async def version_command(self, ctx: GitBotContext) -> None:
+        await GitBotEmbed(description=f'```kt\n{self.bot.get_dev_name(with_discordpy_version=True)}```').send(ctx)
+
 
 async def setup(bot: GitBot) -> None:
     await bot.add_cog(BotInfo(bot))

@@ -32,7 +32,9 @@
       "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again.",
       "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
     },
-    "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**"
+    "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**",
+    "github_auth_pending": "You already have a GitHub authorization pending! **Please complete it first.**",
+    "command_disabled": "This command is currently **disabled!** Check back in soon or ask around in the support server."
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git help` for a list of my commands."
@@ -529,6 +531,10 @@
     "show": {
       "base": {
         "title": "Your GitBot Config",
+        "github": {
+          "logged_in_as": "You're logged into GitHub as {0}",
+            "not_logged_in": "You're not logged into GitHub"
+        },
         "qa": {
           "heading": "**Quick Access:**",
           "list": {
@@ -1371,6 +1377,14 @@
         "description": "Connect your GitHub account to GitBot to access an extended set of features!\nThis command can only be used in DMs or as a slash command.",
         "qa_resource": null,
         "required_permissions": []
+      },
+      "version": {
+        "brief": "Get the current version of GitBot",
+        "usage": null,
+        "example": null,
+        "description": null,
+        "qa_resource": null,
+        "required_permissions": []
       }
     },
     "argument_explainers": {
@@ -1615,7 +1629,13 @@
     "github": {
       "title": "Authorize with GitHub",
       "description": "Connect your GitHub account with GitBot in order to access extended functionality.\n**Click the button below to get started!**",
-      "button": "Authorize with GitHub"
+      "button": "Authorize with GitHub",
+      "overwrite_confirmation": {
+        "title": "Are you sure?",
+        "description": "You already have a GitHub account connected: {0}.\n**Do you wish to overwrite it?**",
+        "footer": "Click the appropriate button below to confirm/cancel.",
+        "cancelled": "Operation cancelled, nothing was changed."
+      }
     }
   }
 }

@@ -20,7 +20,7 @@ async def pull_request_list(ctx: GitBotContext, repo: Optional[GitHubRepository]
 async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -> None:
     if item is None:
         if stored:
-            await ctx.bot.mgr.db.users.delitem(ctx, 'repo')
+            await ctx.bot.db.users.delitem(ctx, 'repo')
             await ctx.error(ctx.l.generic.nonexistent.repo.saved_repo_unavailable)
         else:
             await ctx.error(ctx.l.generic.nonexistent.repo.base)
@@ -34,7 +34,6 @@ async def handle_none(ctx: GitBotContext, item: str, stored: bool, state: str) -
 def make_string(ctx: GitBotContext, repo: GitHubRepository, issue_or_pr: dict, path: str, pad_at: int) -> str:
     url: str = f'https://github.com/{repo}/{path}/{issue_or_pr["number"]}/'
     padding: str = ' ' * (pad_at - len(str(issue_or_pr['number'])))
-    em: str = ctx.bot.mgr.e.get(f'pr_{issue_or_pr["state"].lower()}')
     return f'[`{padding}#{issue_or_pr["number"]}`]({url}) [' \
            f'{ctx.bot.mgr.truncate(issue_or_pr["title"], 70)}]({url})'
 
@@ -51,7 +50,7 @@ async def joint_pr_issue_list_command(ctx: GitBotContext, repo: Optional[GitHubR
         repo = None
     stored: bool = False
     if not repo:
-        repo: Optional[str] = await ctx.bot.mgr.db.users.getitem(ctx, 'repo')
+        repo: Optional[str] = await ctx.bot.db.users.getitem(ctx, 'repo')
         if not repo:
             await ctx.error(ctx.l.generic.nonexistent.repo.qa)
             return

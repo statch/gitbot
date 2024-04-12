@@ -61,6 +61,8 @@ class Errors(commands.Cog):
                                                 f'{ctx.prefix}config feed channel {{channel}}'))
             case commands.RoleNotFound:
                 await ctx.error(ctx.fmt('role_not_found', error.argument))
+            case commands.DisabledCommand:
+                await ctx.error(ctx.l.errors.command_disabled)
             case _:
                 if (not self.bot.mgr.env.production) and not getattr(ctx, '__autoinvoked__', False):
                     raise error

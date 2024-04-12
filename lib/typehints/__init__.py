@@ -34,7 +34,8 @@ __all__: tuple = (
     'ArgumentExplainer',
     'CommandGroupHelp',
     'CratesIOCrate',
-    'ReleaseFeedItemMention'
+    'ReleaseFeedItemMention',
+    'GitbotRepoConfig'
 )
 
 AnyDict = dict | DictProxy | CaseInsensitiveDict | MaxAgeDict | FixedSizeOrderedDict

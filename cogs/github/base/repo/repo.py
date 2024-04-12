@@ -19,7 +19,7 @@ class Repo(commands.Cog):
     @normalize_repository
     async def repo_command_group(self, ctx: GitBotContext, repo: Optional[GitHubRepository] = None) -> None:
         if not repo:
-            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+            stored: Optional[str] = await self.bot.db.users.getitem(ctx, 'repo')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.repo_info_command, repo=stored)
@@ -41,7 +41,7 @@ class Repo(commands.Cog):
             r: Optional[dict] = await self.bot.github.get_repo(repo)
         if not r:
             if ctx.invoked_with_stored:
-                await self.bot.mgr.db.users.delitem(ctx, 'repo')
+                await self.bot.db.users.delitem(ctx, 'repo')
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.repo.base)
@@ -132,7 +132,7 @@ class Repo(commands.Cog):
     async def repo_files_command(self, ctx: GitBotContext, repo_or_path: GitHubRepository | None = None, ref: str | None = None) -> None:
         ctx.fmt.set_prefix('repo files')
         if repo_or_path is not None and repo_or_path.startswith('/'):
-            stored_repo: str = await ctx.bot.mgr.db.users.getitem(ctx, 'repo')
+            stored_repo: str = await ctx.bot.db.users.getitem(ctx, 'repo')
             if not stored_repo:
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                 return
@@ -161,7 +161,7 @@ class Repo(commands.Cog):
             link: str = f'https://github.com/{repo_or_path}'
         embeds: list = []
 
-        def make_embed(items: list, footer: str | None = None) -> GitBotEmbed:
+        def make_embed(items: list, ftr: str | None = None) -> GitBotEmbed:
             return GitBotEmbed(
                     color=self.bot.mgr.c.rounded,
                     title=f'{self.bot.mgr.e.branch}  `{repo}`' + (f' ({ref})' if ref else ''),
@@ -169,7 +169,7 @@ class Repo(commands.Cog):
                             f'{self.bot.mgr.e.file}  [`{f["name"]}`]({f["html_url"]})' if f['type'] == 'file' else
                             f'{self.bot.mgr.e.folder}  [`{f["name"]}`]({f["html_url"]})' for f in items) + ('\n' + f'```{path}```' if path else ''),
                     url=link,
-                    footer=footer
+                    footer=ftr
             )
 
         total = len(src)

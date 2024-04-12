@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
 Custom Discord bot interface implementation for GitBot
 ~~~~~~~~~~~~~~~~~~~
@@ -13,17 +15,21 @@ import platform
 import aiofiles
 import itertools
 import sentry_sdk
+from sys import version_info
 from dotenv import load_dotenv
+from time import perf_counter
+from discord.ext import commands
+from typing import Any, Literal
+from lib.structs.discord.context import GitBotContext
+from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
+from lib.utils.logging_utils import GitBotLoggingStreamHandler
 from lib.api.github.github import GitHubAPI
 from lib.api.carbonara import Carbon
 from lib.api.pypi import PyPIAPI
 from lib.api.crates import CratesIOAPI
 from lib.manager import Manager
-from time import perf_counter
-from discord.ext import commands
-from lib.structs.discord.context import GitBotContext
-from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup
-from lib.utils.logging_utils import GitBotLoggingStreamHandler
+from lib.structs import TypedCache, CacheSchema, SelfHashingCache
+from lib.structs.db import DatabaseProxy
 
 load_dotenv()
 
@@ -40,6 +46,12 @@ class GitBot(commands.AutoShardedBot):
     runtime_vars: dict[str, str] = {}
     statch_guild: discord.Guild | None = None
     error_log_channel: discord.TextChannel | None = None
+    __caches__: dict[str, TypedCache | SelfHashingCache] = {
+        'autoconv': TypedCache(CacheSchema(key=int, value=dict)),
+        'locale': TypedCache(CacheSchema(key=int, value=str), maxsize=256),
+        'carbon': SelfHashingCache(max_age=60 * 60),
+        'loc': TypedCache(CacheSchema(key=str, value=(dict, tuple)), maxsize=64, max_age=60 * 7)
+    }
 
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
@@ -50,6 +62,10 @@ class GitBot(commands.AutoShardedBot):
                          help_command=None, guild_ready_timeout=1,
                          status=discord.Status.online, description='Seamless GitHub-Discord integration.',
                          fetch_offline_members=False, **kwargs)
+
+    @property
+    def runtime_environment(self) -> str | None:
+        return 'production' if self.mgr.env.production else 'preview'
 
     def _setup_uvloop(self):
         if os.name != 'nt':
@@ -62,7 +78,7 @@ class GitBot(commands.AutoShardedBot):
         if not os.path.exists('cloc.pl'):
             self.logger.info('CLOC script not found, downloading...')
             res: aiohttp.ClientResponse = await self.session.get(
-                'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.pl')
+                'https://github.com/AlDanial/cloc/releases/download/v1.96/cloc-1.96.pl')
             async with aiofiles.open('cloc.pl', 'wb') as fp:
                 await fp.write(await res.content.read())
             self.logger.info('CLOC script downloaded.')
@@ -101,6 +117,8 @@ class GitBot(commands.AutoShardedBot):
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
         await self._setup_github()
         self.mgr: Manager = Manager(self, self.github)
+        self.github.requester = self.get_dev_name(with_python_version=False)
+        self.db: DatabaseProxy = DatabaseProxy(self)
         self.carbon: Carbon = Carbon(self.session)
         self.pypi: PyPIAPI = PyPIAPI(self.session)
         self.crates: CratesIOAPI = CratesIOAPI(self.session)
@@ -145,6 +163,7 @@ class GitBot(commands.AutoShardedBot):
             self.tree.copy_global_to(guild=test_guild)
         if self.mgr.env.sync_commands_on_startup:
             await self.tree.sync(guild=test_guild)
+            self.logger.info('Synced command tree.')
         await self.setup_statch_specific()
 
     async def close(self) -> None:
@@ -182,3 +201,72 @@ class GitBot(commands.AutoShardedBot):
     async def reload_extension(self, name: str, *, package=None):
         await super().reload_extension(name, package=package)
         self.logger.info('Reloaded extension: "%s"', name)
+
+    def get_cache(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc']) -> TypedCache | SelfHashingCache | None:
+        """
+        Get a cache by name
+
+        :param cache_name: The name of the cache
+        :return: The cache with the given name
+        """
+
+        return self.__caches__.get(cache_name)
+
+    def get_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any) -> Any:
+        """
+        Get a cache value by cache name and key
+
+        :param cache_name: The name of the cache
+        :param key: The key to look up
+        :return: The value with the given name and key
+        """
+
+        return self.__caches__.get(cache_name, {}).get(key)
+
+    def set_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any, value: Any) -> None:
+        """
+        Set a cache value
+
+        :param cache_name: The cache where the value should be set
+        :param key: The key of the value
+        :param value: The value to set
+        """
+
+        self.__caches__[cache_name][key] = value
+
+    def del_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any) -> None:
+        """
+        Delete a cache value
+
+        :param cache_name: The cache from which the value should be deleted
+        :param key: The key of the value
+        """
+
+        del self.__caches__[cache_name][key]
+
+    def get_dev_name(self,
+                     with_python_version: bool = True, with_commit: bool = True,
+                     with_author: bool = True, short_commit_hash: bool = True,
+                     with_runtime_environment: bool = True, with_discordpy_version: bool = False) -> str:
+        """
+        Get the full dev name of the bot to be used as a sort-of user agent and version string
+
+        :param with_python_version: Include the Python version
+        :param with_commit: Include the current commit hash
+        :param with_author: Include the fact that the bot was made by statch
+        :param short_commit_hash: Use a short commit hash
+        :param with_runtime_environment: Include the runtime environment (e.g. "production" or "preview")
+        :param with_discordpy_version: Include the discord.py version
+        :return: The dev name of the bot
+        """
+
+        ret: str = 'gitbot' + f' ({self.runtime_environment})' if with_runtime_environment else ''
+        if with_author:
+            ret += ' by statch'
+        if with_python_version:
+            ret += '; py {v.major}.{v.minor}.{v.micro}'.format(v=version_info)
+        if with_discordpy_version:
+            ret += f'; dpy {discord.__version__}'
+        if with_commit:
+            ret += f'; rev {self.mgr.get_current_commit(short=short_commit_hash)}'
+        return ret

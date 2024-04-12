@@ -25,7 +25,7 @@ class Issue(commands.Cog):
                     await ctx.error(ctx.l.issue.stored_no_number)
                     return
                 num: str = repo
-                stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+                stored: Optional[str] = await self.bot.db.users.getitem(ctx, 'repo')
                 if stored:
                     repo: str = stored
                     issue_number: str = num

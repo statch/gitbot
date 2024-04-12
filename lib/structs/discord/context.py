@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
 Custom Discord context interface implementation for GitBot
 ~~~~~~~~~~~~~~~~~~~
@@ -15,6 +17,7 @@ from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup, GitBotHybridCommandGroup
 from typing import TYPE_CHECKING, Union
 from collections.abc import Awaitable, Callable
+
 if TYPE_CHECKING:
     from aiohttp import ClientSession
     from lib.structs import CheckFailureCode, GitBot
@@ -132,15 +135,13 @@ class GitBotContext(commands.Context):
         return await GitBotEmbed.success(text, **kwargs).send(self)
 
     async def prepare(self) -> None:
-        self.l = await self.bot.mgr.get_locale(self)  # noqa
+        self.l = await self.bot.db.users.get_locale(self)  # noqa
 
     async def group_help(self, subcommand_check: bool = True):
         """
         Used for root group methods without any additional logic.
         """
         parent: Optional[GitBotCommand | GitBotCommandGroup] = (self.command.parent if not
-                                                                isinstance(self.command,
-                                                                           (GitBotCommandGroup, GitBotHybridCommandGroup))
-                                                         else self.command)
+        isinstance(self.command, (GitBotCommandGroup, GitBotHybridCommandGroup)) else self.command)
         if parent and (not self.invoked_subcommand or not subcommand_check):
             return await parent.send_help(self)

@@ -25,10 +25,10 @@ def silence_errors(func):
 @commands.max_concurrency(6, wait=True)
 async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message]:
     codeblock: Optional[str] = None
-    config: AutomaticConversionSettings = await ctx.bot.mgr.get_autoconv_config(ctx)  # noqa
+    config: AutomaticConversionSettings = await ctx.bot.db.guilds.get_autoconv_config(ctx)  # noqa
     match_ = None  # put the match_ name in the namespace
-    if (attachment_url := ctx.bot.mgr.carbon_attachment_cache.get(ctx.message.content)) and config['gh_lines'] == 2:
-        ctx.bot.logger.debug('Responding with cached asset URL')
+    if (attachment_url := ctx.bot.get_cache_v('carbon', ctx.message.content)) and (config['gh_lines'] == 2 or config.get('codeblock', False)):
+        ctx.bot.logger.debug(f'Responding with cached asset URL to MID %d - %s', ctx.message.id, attachment_url)
         return await ctx.reply(attachment_url, mention_author=False)
     elif (result := ctx.bot.mgr.extract_content_from_codeblock(ctx.message.content)) and config.get('codeblock', False):
         ctx.bot.logger.debug('Converting codeblock in MID %d into carbon snippet...', ctx.message.id)
@@ -57,7 +57,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
                                                                                                 codeblock, _1st_lineno)),
                                                  mention_author=False)
         ctx.bot.logger.debug('Carbon asset generation elapsed: %ds', time.time() - start)
-        ctx.bot.mgr.carbon_attachment_cache[ctx.message.content] = reply.attachments[0].url
+        ctx.bot.set_cache_v('carbon', ctx.message.content, reply.attachments[0].url)
         return reply
 
 
@@ -70,7 +70,7 @@ async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Messa
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(10, wait=True)
 async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
-    if (await ctx.bot.mgr.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
+    if (await ctx.bot.db.guilds.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
         ctx.bot.logger.debug('Invoking command(s) "%s" with kwargs: %s', str(cmd_data.command), str(cmd_data.kwargs))
         ctx.__autoinvoked__ = True
         if isinstance(cmd_data.command, commands.Command):

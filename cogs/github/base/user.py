@@ -14,7 +14,7 @@ class User(commands.Cog):
     @gitbot_group(name='user', aliases=['u'], invoke_without_command=True)
     async def user_command_group(self, ctx: GitBotContext, user: Optional[str] = None) -> None:
         if not user:
-            stored: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'user')
+            stored: Optional[str] = await self.bot.db.users.getitem(ctx, 'user')
             if stored:
                 ctx.invoked_with_stored = True
                 await ctx.invoke(self.user_info_command, user=stored)
@@ -35,7 +35,7 @@ class User(commands.Cog):
             u: SnakeCaseDictProxy = await self.bot.github.get_user(user)
         if not u:
             if ctx.invoked_with_stored:
-                await self.bot.mgr.db.users.delitem(ctx, 'user')
+                await self.bot.db.users.delitem(ctx, 'user')
                 await ctx.error(ctx.l.generic.nonexistent.user.qa_changed)
             else:
                 await ctx.error(ctx.l.generic.nonexistent.user.base)

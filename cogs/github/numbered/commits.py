@@ -28,9 +28,9 @@ class Commits(commands.Cog):
         if repo and not (_re_result := REPOSITORY_NAME_RE.match(repo)):
             maybe_ref: str = repo
         if not repo or not _re_result:
-            repo: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+            repo: Optional[str] = await self.bot.db.users.getitem(ctx, 'repo')
             if not repo:
-                await self.bot.mgr.db.users.delitem(ctx, 'repo')
+                await self.bot.db.users.delitem(ctx, 'repo')
                 await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                 return
 
@@ -80,9 +80,9 @@ class Commits(commands.Cog):
                 repo = None
                 self.bot.logger.debug('oid "%s" matched in place of the repo param, switching arguments', oid)
             if not repo:
-                repo: Optional[str] = await self.bot.mgr.db.users.getitem(ctx, 'repo')
+                repo: Optional[str] = await self.bot.db.users.getitem(ctx, 'repo')
                 if not repo:
-                    await self.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await self.bot.db.users.delitem(ctx, 'repo')
                     await ctx.error(ctx.l.generic.nonexistent.repo.qa)
                     return
                 is_stored: bool = True
@@ -94,7 +94,7 @@ class Commits(commands.Cog):
             if commit is False:
                 if is_stored and oid:
                     await ctx.error(await ctx.error(ctx.l.generic.nonexistent.repo.qa_changed))
-                    await self.bot.mgr.db.users.delitem(ctx, 'repo')
+                    await self.bot.db.users.delitem(ctx, 'repo')
                 else:
                     await ctx.error(ctx.l.generic.nonexistent.repo.base)
             else:

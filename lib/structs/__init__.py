@@ -7,7 +7,6 @@ from .dicts.max_age_dict import MaxAgeDict
 from .caches.typedcache import *
 from .caches.self_hashing_cache import SelfHashingCache
 from .caches.base_cache import BaseCache
-from .db.user_collection import UserCollection
 from .discord.embed import *
 from .discord.commands import *
 from .discord.bot import GitBot

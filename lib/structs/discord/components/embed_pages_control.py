@@ -12,7 +12,6 @@ class EmbedPagesControlView(discord.ui.View):
         self.context: 'GitBotContext' = pages.context
         self.pages: 'EmbedPages' = pages
 
-
     @discord.ui.button(custom_id='first', emoji='⏮', style=discord.ButtonStyle.grey)
     async def to_first_page(self, interaction: discord.Interaction, _):
         await interaction.response.defer()

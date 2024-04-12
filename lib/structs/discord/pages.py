@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from lib.structs.discord.context import GitBotContext
     from lib.structs.discord.bot import GitBot
 from lib.structs.discord.embed import GitBotEmbed
-from structs.enums import GitBotCommandState
+from lib.structs.enums import GitBotCommandState
 from lib.structs.discord.components import EmbedPagesControlView
 
 

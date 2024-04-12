@@ -8,9 +8,9 @@ A non-native replacement for the embed object provided in discord.ext.commands
 
 import discord
 import asyncio
+from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
 from lib.utils.regex import MARKDOWN_EMOJI_RE
 from lib.structs.discord.components import ConfirmationView
-from typing import Callable, Optional, Awaitable, Any, TYPE_CHECKING
 from lib.structs.proxies.dict_proxy import DictProxy
 from lib.structs.enums import GitBotCommandState
 
@@ -106,7 +106,8 @@ class GitBotEmbed(discord.Embed):
                                                     ctx.l.generic.failure,
                                                     _embed)
                 case GitBotCommandState.TIMEOUT:
-                    self._input_with_timeout_update(ctx.bot.mgr.c.discord.yellow, ':warning:', ctx.l.generic.inactive, _embed)
+                    self._input_with_timeout_update(ctx.bot.mgr.c.discord.yellow, ':warning:', ctx.l.generic.inactive,
+                                                    _embed)
             await ctx.message.edit(embed=_embed)
 
     def _input_with_timeout_update(self,
@@ -175,8 +176,8 @@ class GitBotEmbed(discord.Embed):
                 state: GitBotCommandState = (callback_result if not isinstance(callback_result, tuple)
                                              else callback_result[0])
                 return_args = None if not isinstance(callback_result, tuple) else callback_result[1:]
-                if antispam >= antispam_threshold-1 and with_antispam:
-                    state:  GitBotCommandState = GitBotCommandState.FAILURE
+                if antispam >= antispam_threshold - 1 and with_antispam:
+                    state: GitBotCommandState = GitBotCommandState.FAILURE
                 if state is GitBotCommandState.CONTINUE:
                     antispam += 1
                     continue

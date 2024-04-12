@@ -11,11 +11,11 @@ class Auth(commands.Cog):
     def __init__(self, bot: GitBot):
         self.bot: GitBot = bot
 
-    @gitbot_hybrid_group(name='auth', aliases=['a'], invoke_without_command=True)
+    @gitbot_hybrid_group(name='auth', aliases=['a'], invoke_without_command=True, enabled=False, hidden=True)
     async def auth(self, ctx: GitBotContext) -> None:
         await ctx.group_help()
 
-    @auth.command(name='github', aliases=['gh'], description='Authorize with GitHub to access extended functionality')
+    @auth.command(name='github', aliases=['gh'], description='Authorize with GitHub to access extended functionality', enabled=False, hidden=True)
     async def auth_github_command(self, ctx: GitBotContext) -> None | discord.Message:
         if not ctx.interaction and not isinstance(ctx.channel, discord.DMChannel):
             return await ctx.error(ctx.l.errors.use_in_private)

@@ -33,7 +33,8 @@
       "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
     },
     "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**",
-    "github_auth_pending": "You already have a GitHub authorization pending! **Please complete it first.**"
+    "github_auth_pending": "You already have a GitHub authorization pending! **Please complete it first.**",
+    "command_disabled": "This command is currently **disabled!** Check back in soon or ask around in the support server."
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git help` for a list of my commands."

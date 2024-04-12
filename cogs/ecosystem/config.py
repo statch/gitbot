@@ -527,9 +527,7 @@ class Config(commands.Cog):
             await self.bot.db.guilds.update_one({'_id': ctx.guild.id}, {'$pull': {'feed': rfi}})
             await ctx.success(ctx.fmt('success', channel.mention))
         elif confirmation is False:
-            await ctx.error(ctx.lp.cancelled)
-
-
+            await ctx.error(ctx.lp.cancelled.format(channel.mention))
     def parse_channel_mention_or_number_response(self,
                                                  msg: discord.Message,
                                                  rfis: list[ReleaseFeedItem]) -> list[int]:

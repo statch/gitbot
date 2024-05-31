@@ -127,10 +127,11 @@ class _GitHubLinesButton(discord.ui.Button):
             if l_f[0] >= l_f[1]:
                 l_f, self.view.forward_b.disabled = None, True
             self.view.set_labels(l_b, l_f)
-            # TODO make the line numbers injected below into a hyperlink when the discord devs add support for them back
+            # TODO hyperlinks work fine for the most part but sometimes they get decoupled from the actual displayed linenos
+            #    i suspect it is connected with the l2 None/not None condition and replacement above
             await interaction.message.edit(
-                content=f'`#L{self.view.l1}{"-L" + str(self.view.l2) if self.view.l2 != 1 else ""}`\n{new}',
-                view=self.view)
+                content=f'[`#L{self.view.l1}{"-L" + str(self.view.l2) if self.view.l2 != 1 else ""}`]({self.view.lines_url})\n{new}',
+                view=self.view, suppress=True)  # suppress=True to prevent link previews
 
     @staticmethod
     def get_next_lines(l1: int, l2: int | None, forward: bool, forward_upper_bound: int | None = None) -> tuple[int, int]:

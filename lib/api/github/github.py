@@ -87,6 +87,29 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
 
     return wrapper
 
+def _flatten_nodes(func: Callable) -> Callable[..., DictProxy | SnakeCaseDictProxy | None]:
+    """
+    Flattens the nodes field in the response dict by copying the value up one level and removing the old key
+
+    :param func: The function to wrap (must return a dict-like interface)
+    :return: The wrapped functions output, with the nodes field flattened and removed
+    """
+
+    @functools.wraps(func)
+    async def wrapper(*args: tuple, **kwargs: dict) -> Any:
+        result: dict | None = await func(*args, **kwargs)
+        if result is not None and isinstance(result, (DictProxy, SnakeCaseDictProxy, dict)):
+            result = SnakeCaseDictProxy(result)
+            paths: list[tuple[str, ...]] = get_all_dict_paths(result)
+            for path in paths:
+                if path[-1] == 'nodes' and len(get_nested_key(result, path[:-1])) == 1:  # noqa
+                    # this dict path contains a nodes field in the last position -
+                    # we flatten it by copying the dict item up one level and effectively replacing the nodes field with it
+                    set_nested_key(result, path[:-2] + (f'{path[-2]}',), get_nested_key(result, path))
+        return result
+
+    return wrapper
+
 
 class GitHubQueryDebugInfo:
     __ignorable_error_substrings__: tuple[str, ...] = (
@@ -437,3 +460,15 @@ class GitHubAPI:
         return await self.query(self.queries.user, Login=user, FromTime=YEAR_START,
                                 ToTime=datetime.utcnow().strftime('%Y-%m-%dT%XZ'),
                                 on_fail_return=None, transformer=transform_user)
+
+    @_wrap_proxy
+    @normalize_repository
+    async def get_latest_n_releases(self, repo: GitHubRepository, n: int = 5) -> list[_ReturnDict]:
+        return await self.query(self.queries.latest_releases, _Repo=repo, N=n,
+                                on_fail_return=[], transformer=('repository', 'releases', 'nodes'))
+
+    @_wrap_proxy
+    @_flatten_nodes
+    @normalize_repository
+    async def get_latest_n_releases_with_repo(self, repo: GitHubRepository, n: int = 5) -> list[_ReturnDict]:
+        return await self.query(self.queries.latest_releases, _Repo=repo, N=n, on_fail_return=None, transformer=transform_latest_release)

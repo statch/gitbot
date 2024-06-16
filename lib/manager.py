@@ -43,9 +43,11 @@ from lib.structs import (DirProxy, DictProxy,
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection  # noqa
 from typing import Optional, Callable, Any, Reversible, Iterable, Type, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
+    from cogs.backend.workers.release_feed import ReleaseFeedWorker
     from lib.structs.discord.context import GitBotContext
     from lib.api.github import GitHubAPI
     from lib.structs.discord.bot import GitBot
+    from lib.typehints import ReleaseFeedItem, ReleaseFeedRepo
 from lib.utils.dict_utils import *
 from lib.typehints import AnyDict, ReleaseFeedItemMention, GitbotRepoConfig
 
@@ -1056,3 +1058,12 @@ class Manager:
                                        '\'%s\'', self.prefix.strip(), self_.get_last_call_from_callstack())
 
         return _Formatter(ctx)
+
+    async def handle_backlog_request(self, ctx: 'GitBotContext', rfi: 'ReleaseFeedItem', rfr: 'ReleaseFeedRepo', n: int) -> int:
+        backlog = await self.bot.github.get_latest_n_releases_with_repo(rfr['name'], n)
+        rf_worker: 'ReleaseFeedWorker' = self.bot.get_cog('ReleaseFeedWorker')  # noqa
+        for release in reversed(backlog['releases']):
+            # the release is weirdly wrapped for parity (laziness)
+            backlog['release'] = release  # since we iterate sequentially, we can just overwrite the key each time
+            await rf_worker.handle_feed_repo({'_id': ctx.guild.id}, rfr, rfi, backlog, no_mention=True)
+        return len(backlog['releases'])

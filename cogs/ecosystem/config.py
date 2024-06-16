@@ -5,7 +5,7 @@ from lib.typehints import (GitHubRepository, GitHubOrganization,
                            ReleaseFeedRepo, AutomaticConversionSettings,
                            GitBotUser)
 from typing import Optional, Literal, Any
-from lib.structs import GitBotEmbed, GitBotCommandState, GitBot
+from lib.structs import GitBotEmbed, GitBotCommandState, GitBot, ReleaseFeedBacklogView
 from lib.utils.regex import DISCORD_CHANNEL_MENTION_RE
 from lib.utils.decorators import normalize_repository
 from lib.structs.discord.context import GitBotContext
@@ -233,13 +233,12 @@ class Config(commands.Cog):
                 mention: str = f'<#{selected_rfi["cid"]}>'
                 if len(selected_rfi['repos']) < 10:
                     if (repo_ := repo_.lower()) not in map(lambda r: r['name'], selected_rfi['repos']):
-                        await self.bot.db.guilds.update_one(guild,
-                                                                {'$push':
-                                                                 {f'feed.{guild["feed"].index(selected_rfi)}.repos':
-                                                                  ReleaseFeedRepo(name=repo_.lower(), tag=tag)}})
+                        rfr: ReleaseFeedRepo = ReleaseFeedRepo(name=repo_, tag=tag)
+                        await self.bot.db.guilds.update_one(guild, {'$push':
+                                                            {f'feed.{guild["feed"].index(selected_rfi)}.repos': rfr}})
                         await ctx.success(ctx.fmt('success',
                                                   f'`{repo_}`',
-                                                  mention))
+                                                  mention), view=ReleaseFeedBacklogView(ctx, selected_rfi, rfr))
                         return GitBotCommandState.SUCCESS
                     else:
                         await ctx.error(ctx.fmt('already_logged', f'`{repo_}`', mention))
@@ -548,6 +547,7 @@ class Config(commands.Cog):
         if not guild or not feed:
             return await ctx.error(ctx.l.generic.nonexistent.release_feed)
         present_in: list[ReleaseFeedItem] = []
+        repo: str = repo.lower()
         for rfi in feed:
             if repo in [rfr['name'].lower() for rfr in rfi['repos']]:
                 present_in.append(rfi)

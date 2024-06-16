@@ -1,0 +1,31 @@
+query($Name: String!, $Owner: String!, $N: Int!) {
+  repository(name: $Name, owner: $Owner) {
+    url
+    usesCustomOpenGraphImage
+    openGraphImageUrl
+    primaryLanguage {
+      color
+    }
+    releases(first: $N, orderBy: {field: CREATED_AT, direction: DESC}) {
+      nodes {
+        isDraft
+        releaseAssets {
+          totalCount
+        }
+        descriptionHTML
+        publishedAt
+        tagName
+        url
+        createdAt
+        isPrerelease
+        isLatest
+        publishedAt
+        name
+        author {
+          login
+          url
+        }
+      }
+    }
+  }
+}

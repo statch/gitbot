@@ -533,7 +533,7 @@
         "title": "Your GitBot Config",
         "github": {
           "logged_in_as": "You're logged into GitHub as {0}",
-            "not_logged_in": "You're not logged into GitHub"
+          "not_logged_in": "You're not logged into GitHub"
         },
         "qa": {
           "heading": "**Quick Access:**",
@@ -651,7 +651,24 @@
         "invalid_channel": "{0} is not a valid **channel number/mention** from the list! Send another one, or type `cancel` to exit.",
         "success": "New {0} releases will now be logged in {1}!",
         "cancelled": "Adding a repo to the release feed **cancelled.**",
-        "already_logged": "{0} releases are **already being logged** in {1}!"
+        "already_logged": "{0} releases are **already being logged** in {1}!",
+        "backlog": {
+          "button": {
+            "label": "Fetch some previous releases?"
+          },
+          "select": {
+            "placeholder": "Select a number of releases to fetch",
+            "options": {
+              "one": "Just one",
+              "five": "A few...",
+              "ten": "A whole lot!"
+            }
+          },
+          "how_many": "How many releases would you like to fetch?",
+          "fetching": "Fetching a backlog of available releases...",
+          "fetched": "**Done!** I managed to fetch a backlog of `{0}` releases; they're waiting in {1} right now.",
+          "no_backlog": "The repo doesn't have any releases to fetch, so your feed will be empty for now."
+        }
       },
       "mention": {
         "embed": {

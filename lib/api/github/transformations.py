@@ -37,11 +37,14 @@ def transform_repo(repo_dict: _Transformable) -> _Transformable:
 
 def transform_latest_release(release_dict: _Transformable) -> _Transformable:
     release_dict = release_dict['repository']
-    release_dict['release'] = release_dict['latestRelease'] if release_dict['latestRelease'] else None
+    release_dict['release'] = release_dict['latestRelease'] if release_dict.get('latestRelease') else None  # .get for parity with backlog fetching
     release_dict['color'] = int(release_dict['primaryLanguage']['color'][1:], 16) if release_dict[
         'primaryLanguage'] else 0x2f3136
-    del release_dict['primaryLanguage']
-    del release_dict['latestRelease']
+    try:   # parity with backlog fetching
+        del release_dict['primaryLanguage']
+        del release_dict['latestRelease']
+    except KeyError:
+        pass
     return release_dict
 
 

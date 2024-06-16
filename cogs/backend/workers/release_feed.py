@@ -65,7 +65,7 @@ class ReleaseFeedWorker(commands.Cog):
                                guild: GitBotGuild,
                                repo: ReleaseFeedRepo,
                                rfi: ReleaseFeedItem,
-                               new_release: dict) -> None:
+                               new_release: dict, no_mention: bool = False) -> None:
         stage: str = 'prerelease' if new_release['release']['isPrerelease'] else 'release'
         if new_release['release']['isDraft']:
             stage += ' draft'
@@ -91,7 +91,7 @@ class ReleaseFeedWorker(commands.Cog):
         embed.add_field(name=':notepad_spiral: Body:', value=body, inline=False)
         embed.add_field(name=':mag_right: Info:', value=info)
         await self.send_to_rfi(guild, rfi, embed,
-                               self.bot.mgr.release_feed_mention_to_actual(rfi['mention']) if rfi.get('mention') else None)
+                               self.bot.mgr.release_feed_mention_to_actual(rfi['mention']) if rfi.get('mention') and not no_mention else None)
 
     async def handle_missing_feed_repo(self, guild: GitBotGuild, rfi: ReleaseFeedItem, repo: ReleaseFeedRepo) -> None:
         embed: discord.Embed = discord.Embed(

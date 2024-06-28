@@ -10,11 +10,15 @@ from gidgethub import BadRequest, QueryError
 if TYPE_CHECKING:
     from lib.structs import GitBot
 
+
 def silenced(ctx: GitBotContext, error) -> bool:
     return bool(getattr(ctx, f'__silence_{ctx.bot.mgr.to_snake_case(error.__class__.__name__)}_error__', False))
 
 
-async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message:
+async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.CommandNotFound) -> discord.Message | None:
+    if len(ctx.message.content) == (len(ctx.prefix) + 3) and 'gud' in ctx.message.content:
+        await ctx.message.add_reaction('🤣')
+        return
     ctx.fmt.set_prefix('errors command_not_found')
     embed: GitBotEmbed = GitBotEmbed(
         color=0x0384fc,

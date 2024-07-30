@@ -16,7 +16,7 @@ requests==2.32.3
 py-carbon==1.0.4
 sentry-sdk==1.42.0
 aiofiles==24.1.0
-plotly==5.15.0
+plotly==5.23.0
 pandas
 kaleido==0.2.1
 certifi==2024.6.2

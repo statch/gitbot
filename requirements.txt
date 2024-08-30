@@ -19,7 +19,7 @@ aiofiles==24.1.0
 plotly==5.23.0
 pandas
 kaleido==0.2.1
-certifi==2024.7.4
+certifi==2024.8.30
 uvloop==0.19.0; sys_platform == 'linux'
 recordclass==0.22.1
 pipe==2.0

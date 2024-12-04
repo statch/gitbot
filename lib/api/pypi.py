@@ -6,7 +6,7 @@ BASE_URL_PYPISTATS: str = 'https://pypistats.org/api'
 
 
 class PyPIAPI:
-    def __init__(self, ses: aiohttp.ClientSession = aiohttp.ClientSession()):
+    def __init__(self, ses: aiohttp.ClientSession):
         self.ses: aiohttp.ClientSession = ses
 
     async def get_project_data(self, project: str) -> Optional[dict]:

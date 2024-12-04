@@ -70,27 +70,31 @@ async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Messa
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(10, wait=True)
 async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
-    if (await ctx.bot.db.guilds.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
-        ctx.bot.logger.debug('Invoking command(s) "%s" with kwargs: %s', str(cmd_data.command), str(cmd_data.kwargs))
-        ctx.__autoinvoked__ = True
-        if isinstance(cmd_data.command, commands.Command):
-            return await ctx.invoke(cmd_data.command, **cmd_data.kwargs)
-        else:
-            nonce: int = id(ctx)
-            for command, kwargs in zip(cmd_data.command, cmd_data.kwargs):
-                ctx.bot.logger.debug('Running output checks with nonce: %d for command "%s"', nonce, str(command))
-                ctx.send = functools.partial(ctx.send, nonce=nonce)
-                await ctx.invoke(command, **kwargs)
-                try:
-                    message = await ctx.bot.wait_for('message',
-                                                     check=lambda msg: (msg.channel.id == ctx.channel.id
-                                                                        and msg.author.id == ctx.bot.user.id),
-                                                     timeout=1.5)
-                    if message.nonce == nonce:
-                        return message
-                    continue
-                except Exception: # noqa - we really don't care
-                    continue
+    try:
+        if (await ctx.bot.db.guilds.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
+            ctx.bot.logger.debug('Invoking command(s) "%s" with kwargs: %s', str(cmd_data.command), str(cmd_data.kwargs))
+            ctx.__autoinvoked__ = True
+            if isinstance(cmd_data.command, commands.Command):
+                return await ctx.invoke(cmd_data.command, **cmd_data.kwargs)
+            else:
+                nonce: int = id(ctx)
+                for command, kwargs in zip(cmd_data.command, cmd_data.kwargs):
+                    ctx.bot.logger.debug('Running output checks with nonce: %d for command "%s"', nonce, str(command))
+                    ctx.send = functools.partial(ctx.send, nonce=nonce)
+                    await ctx.invoke(command, **kwargs)
+                    try:
+                        message = await ctx.bot.wait_for('message',
+                                                         check=lambda msg: (msg.channel.id == ctx.channel.id
+                                                                            and msg.author.id == ctx.bot.user.id),
+                                                         timeout=1.5)
+                        if message.nonce == nonce:
+                            return message
+                        continue
+                    except Exception: # noqa - we really don't care
+                        continue
+    finally:
+        if ctx.bot_permissions.manage_messages:
+            await ctx.message.edit(suppress=True)
 
 
 @silence_errors

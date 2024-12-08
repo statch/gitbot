@@ -70,8 +70,8 @@ async def handle_codeblock_message(ctx: GitBotContext) -> Optional[discord.Messa
 @commands.cooldown(3, 20, commands.BucketType.guild)
 @commands.max_concurrency(10, wait=True)
 async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
-    try:
-        if (await ctx.bot.db.guilds.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
+    if (await ctx.bot.db.guilds.get_autoconv_config(ctx)).get('gh_url') and (cmd_data := await ctx.bot.mgr.get_link_reference(ctx)):
+        try:
             ctx.bot.logger.debug('Invoking command(s) "%s" with kwargs: %s', str(cmd_data.command), str(cmd_data.kwargs))
             ctx.__autoinvoked__ = True
             if isinstance(cmd_data.command, commands.Command):
@@ -92,9 +92,10 @@ async def resolve_url_command(ctx: GitBotContext) -> Optional[discord.Message]:
                         continue
                     except Exception: # noqa - we really don't care
                         continue
-    finally:
-        if ctx.bot_permissions.manage_messages:
-            await ctx.message.edit(suppress=True)
+        finally:
+            if ctx.bot_permissions.manage_messages:
+                await ctx.message.edit(suppress=True)
+
 
 
 @silence_errors

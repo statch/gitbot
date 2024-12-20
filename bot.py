@@ -15,7 +15,7 @@ from discord.ext import commands
 from lib.structs.discord.context import GitBotContext
 from lib.structs.discord.bot import GitBot
 
-# all of the configuration is handled inside the class, there is no real need to pass anything here
+# all the configuration is handled inside the class, there is no real need to pass anything here
 bot = GitBot()
 
 
@@ -72,6 +72,7 @@ async def global_check(ctx: GitBotContext) -> bool:
 async def before_invoke(ctx: GitBotContext):
     if str(ctx.command) not in bot.mgr.env.no_typing_commands:
         await ctx.channel.typing()
+    # ctx.gh overwrites will be handled here
 
 
 if __name__ == '__main__':

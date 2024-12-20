@@ -11,7 +11,7 @@ import discord
 import enum
 from discord.ext import commands
 from typing import Optional, Any, Sequence
-from lib.typehints import EmbedLike
+from lib.typehints import EmbedLike, LocaleDictProxyDef
 from lib.structs import DictProxy
 from lib.structs.discord.embed import GitBotEmbed
 from lib.structs.discord.commands import GitBotCommand, GitBotCommandGroup, GitBotHybridCommandGroup
@@ -21,7 +21,7 @@ from collections.abc import Awaitable, Callable
 if TYPE_CHECKING:
     from aiohttp import ClientSession
     from lib.structs import CheckFailureCode, GitBot
-    from lib.api.github import GitHubQueryDebugInfo
+    from lib.api.github import GitHubQueryDebugInfo, GitHubAPI
 
 __all__: tuple = ('MessageFormattingStyle', 'GitBotContext')
 
@@ -38,23 +38,25 @@ class MessageFormattingStyle(enum.Enum):
 
 
 class GitBotContext(commands.Context):
+    l: LocaleDictProxyDef | None
     bot: 'GitBot'
     command: GitBotCommand | GitBotCommandGroup
     check_failure_code: Union[int, 'CheckFailureCode'] | None = None
     gh_query_debug: Optional['GitHubQueryDebugInfo'] = None
     lines_total: int | None = None
+    gh: 'GitHubAPI'
     __nocache__: bool = False
     __autoinvoked__: bool = False
     __silence_error_calls__: bool = False
 
     def __init__(self, **attrs):
-        self.command: GitBotCommand | GitBotCommandGroup
         super().__init__(**attrs)
         self.session: ClientSession = self.bot.session
         self.fmt = self.bot.mgr.fmt(self)
         self.l = None  # noqa
         self.data: Optional[dict] = None  # field used by chained invocations and quick access
         self.invoked_with_stored: bool = False
+        self.gh: 'GitHubAPI' = self.bot.github  # overwritten in bot.py before_invoke hook
 
     def _format_content(self, content: str, style: MessageFormattingStyle | str) -> str:
         match MessageFormattingStyle(style):

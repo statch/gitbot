@@ -2,6 +2,9 @@
 *.last.json
 *.locale.last.json
 
+# GitBot dev flow
+resources/gen/*
+
 # PyCharm Stuff
 .idea/
 

@@ -46,7 +46,7 @@ class Events(commands.Cog):
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         await self.bot.db.guilds.find_one_and_delete({'_id': guild.id})
         try:
-            self.bot.del_cache_v('autoconv', guild.id)
+            self.bot.del_cache_value('autoconv', guild.id)
         except KeyError:
             pass
         embed_l: GitBotEmbed = await build_guild_embed(self.bot, guild, False)

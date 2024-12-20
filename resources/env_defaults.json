@@ -23,7 +23,8 @@
     "github": {
       "scopes": [
         "user:email",
-        "read:user"
+        "read:user",
+        "repo"
       ],
       "auth_timeout": 150
     }

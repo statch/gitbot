@@ -1,7 +1,9 @@
 import os
 import sys
 import click
+import typeshi
 import subprocess
+from lib.structs.proxies.dict_proxy import DictProxy
 from .config import PYTHON_COMMAND_LINE, APP_ROOT_DIR
 from .scripts import run_help_helper
 
@@ -29,6 +31,17 @@ def start(no_new_window: bool = False):
 @cli.group('dev', help='Commands related to the development of the bot')
 def dev():
     pass
+
+
+@dev.command('generate-locale-defs')
+def generate_locale_defs():
+    if not os.path.exists('resources/gen/'):
+        os.makedirs('resources/gen/')
+    typeshi.save_declaration_module_from_json(
+        'Locale', 'resources/locale/en.locale.json', 'resources/gen/locale_schema.py',
+        inherit_cls=DictProxy
+    )
+    print(f'Wrote locale schema to resources/gen/locale_schema.py')
 
 
 @dev.command('update', help='Update the local code using git')

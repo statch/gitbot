@@ -85,7 +85,7 @@ class LinesOfCode(commands.Cog):
         return c_removed
 
     async def process_repo(self, ctx: GitBotContext, repo: GitHubRepository) -> Optional[tuple[dict, int | None]]:
-        if (not ctx.__nocache__) and (cached := self.bot.get_cache_v('loc', repo := repo.lower())):
+        if (not ctx.__nocache__) and (cached := self.bot.get_cache_value('loc', repo := repo.lower())):
             return cached
         tmp_zip_path: str = f'./tmp/{ctx.message.id}.zip'
         tmp_dir_path: str = tmp_zip_path[:-4]
@@ -112,7 +112,7 @@ class LinesOfCode(commands.Cog):
         except subprocess.CalledProcessError as e:
             self.bot.logger.error('the CLOC script failed with exit code %d', e.returncode)
         else:
-            self.bot.set_cache_v('loc', repo, (output, c_removed))
+            self.bot.set_cache_value('loc', repo, (output, c_removed))
             return output, c_removed
         finally:
             try:

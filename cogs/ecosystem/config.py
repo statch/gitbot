@@ -41,7 +41,7 @@ class Config(commands.Cog):
             await ctx.bot.db.guilds.update_one({'_id': guild['_id']}, {'$set': {f'autoconv.{item}': state}})
         else:
             await ctx.bot.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))  # noqa _id is int
-        ctx.bot.set_cache_v('autoconv', ctx.guild.id, config)
+        ctx.bot.set_cache_value('autoconv', ctx.guild.id, config)
         await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
         if not ctx.bot_permissions.read_message_history:
             await ctx.hint(ctx.l.generic.hints.read_message_history_permission)
@@ -73,8 +73,8 @@ class Config(commands.Cog):
             lang: str = ctx.fmt('accessibility list locale', f'`{ctx.l.meta.localized_name.capitalize()}`')
             user_str, org, repo = (ctx.fmt(f'qa list {item}', self.bot.mgr.to_github_hyperlink(user[item], True) if item in user else
                                            f'`{ctx.l.config.show.base.item_not_set}`') for item in ('user', 'org', 'repo'))
-            accessibility: list = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
-            qa: list = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
+            accessibility: str = ctx.l.config.show.base.accessibility.heading + '\n' + '\n'.join([lang])
+            qa: str = ctx.l.config.show.base.qa.heading + '\n' + '\n'.join([user_str, org, repo])
             guild_str: str = ''
             if not isinstance(ctx.channel, discord.DMChannel):
                 feed: str = ctx.l.config.show.base.guild.list.feed + '\n' + '\n'.join([f'{self.bot.mgr.e.square} <#{rfi["cid"]}>'
@@ -374,7 +374,7 @@ class Config(commands.Cog):
                         return
                 await self.bot.db.users.setitem(ctx, 'locale', l_[0]['name'])
                 setattr(ctx, 'l', await self.bot.db.users.get_locale(ctx))
-                self.bot.set_cache_v('locale', ctx.author.id, l_[0]['name'])  # update the cache with the new locale
+                self.bot.set_cache_value('locale', ctx.author.id, l_[0]['name'])  # update the cache with the new locale
                 await ctx.success_embed(ctx.fmt('success', l_[0]['localized_name'].capitalize()))
                 return
             to_followup = await ctx.error(ctx.fmt('failure', locale))
@@ -472,7 +472,7 @@ class Config(commands.Cog):
                 config: AutomaticConversionSettings = self.bot.mgr.env.autoconv_default
                 config['gh_lines'] = actual_state
                 await self.bot.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
-            self.bot.set_cache_v('autoconv', ctx.guild.id, config)
+            self.bot.set_cache_value('autoconv', ctx.guild.id, config)
             await ctx.success(ctx.lp.results[_str])
             if not ctx.bot_permissions.read_message_history:
                 await ctx.hint(ctx.l.generic.hints.read_message_history_permission)

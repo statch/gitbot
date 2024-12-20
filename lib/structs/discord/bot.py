@@ -34,6 +34,7 @@ from lib.structs.db import DatabaseProxy
 load_dotenv()
 
 __all__: tuple = ('GitBot',)
+_CacheNameT = Literal['autoconv', 'locale', 'carbon', 'loc']
 
 
 class GitBot(commands.AutoShardedBot):
@@ -56,7 +57,8 @@ class GitBot(commands.AutoShardedBot):
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
         self.user_id_blacklist: set = set()
-        super().__init__(command_prefix=f'{os.getenv("PREFIX")} ', case_insensitive=True,
+        super().__init__(command_prefix=commands.when_mentioned_or(f'{os.getenv("PREFIX")} '),
+                         case_insensitive=True,
                          intents=discord.Intents(messages=True, message_content=True, guilds=True,
                                                  guild_reactions=True),
                          help_command=None, guild_ready_timeout=1,
@@ -202,7 +204,8 @@ class GitBot(commands.AutoShardedBot):
         await super().reload_extension(name, package=package)
         self.logger.info('Reloaded extension: "%s"', name)
 
-    def get_cache(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc']) -> TypedCache | SelfHashingCache | None:
+    def get_cache(self,
+                  cache_name: _CacheNameT) -> TypedCache | SelfHashingCache | None:
         """
         Get a cache by name
 
@@ -212,7 +215,7 @@ class GitBot(commands.AutoShardedBot):
 
         return self.__caches__.get(cache_name)
 
-    def get_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any) -> Any:
+    def get_cache_value(self, cache_name: _CacheNameT, key: Any) -> Any:
         """
         Get a cache value by cache name and key
 
@@ -223,7 +226,7 @@ class GitBot(commands.AutoShardedBot):
 
         return self.__caches__.get(cache_name, {}).get(key)
 
-    def set_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any, value: Any) -> None:
+    def set_cache_value(self, cache_name: _CacheNameT, key: Any, value: Any) -> None:
         """
         Set a cache value
 
@@ -234,7 +237,7 @@ class GitBot(commands.AutoShardedBot):
 
         self.__caches__[cache_name][key] = value
 
-    def del_cache_v(self, cache_name: Literal['autoconv', 'locale', 'carbon', 'loc'], key: Any) -> None:
+    def del_cache_value(self, cache_name: _CacheNameT, key: Any) -> None:
         """
         Delete a cache value
 

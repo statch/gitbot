@@ -39,9 +39,9 @@ class UsersCollection(CollectionWrapper):
         return False
 
     @normalize_identity()
-    async def getitem(self, _id: Identity, item: str | Iterable[str]) -> Optional[
+    async def getitem(self, _id: Identity, item: str | Iterable[str], query_additional_kwargs: Optional[dict] = None) -> Optional[
         str | dict | list | bool | int | float]:
-        query: Optional[dict] = await self.find_one({'_id': _id})
+        query: Optional[dict] = await self.find_one({'_id': _id, **(query_additional_kwargs or {})})
         if query and (ret := get_nested_key(query, item)) is not None:
             return ret
         return None
@@ -75,14 +75,14 @@ class UsersCollection(CollectionWrapper):
         :return: The locale associated with the user
         """
         locale: LocaleName = self.bot.mgr.locale.master.meta.name
-        if cached := self.bot.get_cache_v('locale', _id):
+        if cached := self.bot.get_cache_value('locale', _id):
             locale: LocaleName = cached
             self.bot.logger.debug('Returning cached locale for identity "%d"', _id)
         else:
             if stored := await self.getitem(_id, 'locale'):
                 locale: str = stored
         try:
-            self.bot.set_cache_v('locale', _id, locale)
+            self.bot.set_cache_value('locale', _id, locale)
             return getattr(self.bot.mgr.l, locale)
         except AttributeError:
             return self.bot.mgr.locale.master

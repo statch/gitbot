@@ -87,6 +87,7 @@ def _flatten_total_counts(func: Callable) -> Callable[..., DictProxy | SnakeCase
 
     return wrapper
 
+
 def _flatten_nodes(func: Callable) -> Callable[..., DictProxy | SnakeCaseDictProxy | None]:
     """
     Flattens the nodes field in the response dict by copying the value up one level and removing the old key
@@ -223,10 +224,10 @@ class GitHubAPI:
 
     async def query(self,
                     query_or_path: str,
-                    transformer: tuple[LiteralString, ...] | str | Callable[[dict], dict] | None = None,
+                    transformer: tuple[str, ...] | str | Callable[[dict], dict] | None = None,
                     on_fail_return: _GitHubAPIQueryWrapOnFailReturnDefaultConditionDict |
                                     _GitHubAPIQueryWrapOnFailReturnDefaultNotSet | bool | list | None = 'default_not_set',
-                    **graphql_variables) -> _ReturnDict | list[_ReturnDict] | str | None:
+                    **graphql_variables) -> _ReturnDict | list[_ReturnDict] | str | bool | None:
         """
         Wraps a GitHub API query call, handling errors and returning the result.
         The request method is chosen between REST and GraphQL based on the query_or_path parameter -
@@ -393,7 +394,8 @@ class GitHubAPI:
     @_wrap_proxy
     @normalize_repository
     async def get_latest_release(self, repo: GitHubRepository) -> Optional[_ReturnDict]:
-        return await self.query(self.queries.latest_release, _Repo=repo, transformer=transform_latest_release, on_fail_return=None)
+        return await self.query(self.queries.latest_release, _Repo=repo, transformer=transform_latest_release,
+                                on_fail_return=None)
 
     @_wrap_proxy
     @normalize_repository
@@ -471,4 +473,5 @@ class GitHubAPI:
     @_flatten_nodes
     @normalize_repository
     async def get_latest_n_releases_with_repo(self, repo: GitHubRepository, n: int = 5) -> list[_ReturnDict]:
-        return await self.query(self.queries.latest_releases, _Repo=repo, N=n, on_fail_return=None, transformer=transform_latest_release)
+        return await self.query(self.queries.latest_releases, _Repo=repo, N=n, on_fail_return=None,
+                                transformer=transform_latest_release)

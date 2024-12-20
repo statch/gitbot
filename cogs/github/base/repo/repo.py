@@ -38,7 +38,7 @@ class Repo(commands.Cog):
         if ctx.data:
             r: dict = getattr(ctx, 'data')
         else:
-            r: Optional[dict] = await self.bot.github.get_repo(repo)
+            r: Optional[dict] = await ctx.gh.get_repo(repo)
         if not r:
             if ctx.invoked_with_stored:
                 await self.bot.db.users.delitem(ctx, 'repo')

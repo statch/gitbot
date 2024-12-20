@@ -27,7 +27,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
     codeblock: Optional[str] = None
     config: AutomaticConversionSettings = await ctx.bot.db.guilds.get_autoconv_config(ctx)  # noqa
     match_ = None  # put the match_ name in the namespace
-    if (attachment_url := ctx.bot.get_cache_v('carbon', ctx.message.content)) and (config['gh_lines'] == 2 or config.get('codeblock', False)):
+    if (attachment_url := ctx.bot.get_cache_value('carbon', ctx.message.content)) and (config['gh_lines'] == 2 or config.get('codeblock', False)):
         ctx.bot.logger.debug(f'Responding with cached asset URL to MID %d - %s', ctx.message.id, attachment_url)
         return await ctx.reply(attachment_url, mention_author=False)
     elif (result := ctx.bot.mgr.extract_content_from_codeblock(ctx.message.content)) and config.get('codeblock', False):
@@ -57,7 +57,7 @@ async def silent_snippet_command(ctx: GitBotContext) -> Optional[discord.Message
                                                                                                 codeblock, _1st_lineno)),
                                                  mention_author=False)
         ctx.bot.logger.debug('Carbon asset generation elapsed: %ds', time.time() - start)
-        ctx.bot.set_cache_v('carbon', ctx.message.content, reply.attachments[0].url)
+        ctx.bot.set_cache_value('carbon', ctx.message.content, reply.attachments[0].url)
         return reply
 
 

@@ -42,7 +42,7 @@ class GuildsCollection(CollectionWrapper):
         """
         _did_exist: bool = False
 
-        if cached := self.bot.get_cache_v('autoconv', _id):
+        if cached := self.bot.get_cache_value('autoconv', _id):
             _did_exist: bool = True
             permission: AutomaticConversionSettings = cached
             self.bot.logger.debug('Returning cached auto values for identity "%d"', _id)
@@ -53,5 +53,5 @@ class GuildsCollection(CollectionWrapper):
                 _did_exist: bool = True
             else:
                 permission: AutomaticConversionSettings = self.bot.mgr.env.autoconv_default
-            self.bot.set_cache_v('autoconv', _id, permission)
+            self.bot.set_cache_value('autoconv', _id, permission)
         return permission if not did_exist else (permission, _did_exist)

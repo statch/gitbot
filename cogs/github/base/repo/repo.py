@@ -203,6 +203,7 @@ class Repo(commands.Cog):
         await self.repo_files_command(ctx, repo_or_path=repo + (path if path.startswith('/') else '/' + path), ref=ref)
 
     @repo_command_group.command(name='download', aliases=['dl'])
+    @commands.bot_has_permissions(manage_messages=True)
     @commands.max_concurrency(10)
     @commands.cooldown(5, 30, commands.BucketType.user)
     @normalize_repository
@@ -224,6 +225,7 @@ class Repo(commands.Cog):
                     content=f"{self.bot.mgr.e.error}  {ctx.fmt('file_too_big', f'https://github.com/{repo}')}")
 
     @repo_command_group.command(name='issues')
+    @commands.bot_has_permissions(read_message_history=True)
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def issue_list_command(self,
@@ -233,6 +235,7 @@ class Repo(commands.Cog):
         await issue_list(ctx, repo, state)
 
     @repo_command_group.command(name='pulls', aliases=['prs', 'pull', 'pr'])
+    @commands.bot_has_permissions(read_message_history=True)
     @commands.cooldown(5, 40, commands.BucketType.user)
     @normalize_repository
     async def pull_request_list_command(self,
@@ -243,6 +246,7 @@ class Repo(commands.Cog):
 
     # signature from cogs.github.numbered.commits.Commits.commits
     @repo_command_group.command(name='commits')
+    @commands.bot_has_permissions(read_message_history=True)
     @commands.cooldown(5, 40, commands.BucketType.user)
     async def commit_list_command(self,
                                   ctx: GitBotContext,
@@ -250,6 +254,7 @@ class Repo(commands.Cog):
         await ctx.invoke(self.bot.get_command('commits'), repo=repo)
 
     @repo_command_group.command(name='loc')
+    @commands.bot_has_permissions(read_message_history=True)
     @commands.cooldown(8, 60)
     async def loc_command(self, ctx: GitBotContext, repo: GitHubRepository) -> None:
         await ctx.invoke(self.bot.get_command('loc'), repo=repo)

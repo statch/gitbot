@@ -28,8 +28,8 @@ class DatabaseProxy:
                                                                    tlsCAFile=self._ca_cert,
                                                                    tlsAllowInvalidCertificates=False)
         self._actual_db: ma.AsyncIOMotorDatabase = self.client.get_database('store' if self._env.production else 'test')
-        self.users: ma.AsyncIOMotorCollection = UsersCollection(self)
-        self.guilds: ma.AsyncIOMotorCollection = GuildsCollection(self)
+        self.users: UsersCollection = UsersCollection(self)
+        self.guilds: GuildsCollection = GuildsCollection(self)
 
 
     @property

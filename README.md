@@ -3,7 +3,7 @@
 
 _________________
 <p align="center">
-  <b>Building a dev community on Discord? GitBot can help. </b><br/>Come chat or ask questions in <a href="https://discord.statch.org">our server.</a></p>
+  <b>Building a dev community on Discord? GitBot can help. </b><br/>Come chat or ask questions in <a href="https://discord.com/invite/3e5fwpA")>our server!</a></p>
 <h3 align="center">
   </a><a href="https://discord.com/oauth2/authorize?client_id=761269120691470357&permissions=449428442176&scope=bot%20applications.commands"><span>&#128279;</span> Invite GitBot</a> <span>&#183;</span> <a href="https://statch.org/gitbot">Website </a><span>&#183;</span> <a href="https://statch.org/gitbot/legal">Terms of Service</a>
 </h3>

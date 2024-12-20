@@ -13,7 +13,7 @@ import asyncio
 import functools
 import inspect
 import gidgethub.aiohttp as gh
-from typing import Optional, Callable, Any, Literal, TYPE_CHECKING, LiteralString
+from typing import Optional, Callable, Any, Literal, TYPE_CHECKING
 from gidgethub import BadRequest, QueryError
 import datetime
 from lib.structs import DirProxy, TypedCache, CacheSchema, DictProxy, SnakeCaseDictProxy

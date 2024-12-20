@@ -152,12 +152,12 @@ class Config(commands.Cog):
         if guild:
             feed: dict = guild.get('feed', {})
             if len(feed) >= 5:
-                embed_limit_reached: discord.Embed = discord.Embed(
+                embed_limit_reached: GitBotEmbed = GitBotEmbed(
                     color=self.bot.mgr.c.discord.yellow,
-                    title=ctx.l.config.feed.channel.embeds.channel_limit_reached_embed.title,
-                    description=ctx.l.config.feed.embeds.channel.channel_limit_reached_embed.description
+                    title=ctx.l.config.feed.channel.channel_limit_reached_embed.title,
+                    description=ctx.l.config.feed.channel.channel_limit_reached_embed.description
                 )
-                embed_limit_reached.set_footer(text=ctx.l.config.feed.channel.embeds.channel_limit_reached_embed.footer,
+                embed_limit_reached.set_footer(text=ctx.l.config.feed.channel.channel_limit_reached_embed.footer,
                                                icon_url=self.bot.user.avatar.url)
                 await ctx.send(embed=embed_limit_reached)
                 return

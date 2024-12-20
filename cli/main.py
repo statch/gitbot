@@ -1,9 +1,11 @@
 import os
 import sys
+import json
 import click
 import typeshi
 import subprocess
 from lib.structs.proxies.dict_proxy import DictProxy
+from lib.structs.proxies.dir_proxy import DirProxy
 from .config import PYTHON_COMMAND_LINE, APP_ROOT_DIR
 from .scripts import run_help_helper
 
@@ -43,6 +45,19 @@ def generate_locale_defs():
     )
     print(f'Wrote locale schema to resources/gen/locale_schema.py')
 
+@dev.command('generate-graphql-query-def')
+def generate_query_dirproxy_def():
+    if not os.path.exists('resources/gen/'):
+        os.makedirs('resources/gen/')
+    query_names: list[str] = list(map(lambda fn: fn[:-8], filter(lambda fn: fn.endswith('.graphql'), os.listdir('resources/queries/'))))
+    with open('tmp/gql.json', 'w+') as f:
+        json.dump({q: '_str' for q in query_names}, f)
+    typeshi.save_declaration_module_from_json(
+        'GraphQLQueries', 'tmp/gql.json', 'resources/gen/gql_queries_schema.py',
+        inherit_cls=DirProxy, literals_where_possible=False
+    )
+    os.remove('tmp/gql.json')
+    print(f'Wrote query directory schema to resources/gen/gql_queries_schema.py')
 
 @dev.command('update', help='Update the local code using git')
 def update():

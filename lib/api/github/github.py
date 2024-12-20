@@ -16,9 +16,9 @@ import gidgethub.aiohttp as gh
 from typing import Optional, Callable, Any, Literal, TYPE_CHECKING
 from gidgethub import BadRequest, QueryError
 import datetime
-from lib.structs import DirProxy, TypedCache, CacheSchema, DictProxy, SnakeCaseDictProxy
+from lib.structs import TypedCache, CacheSchema, DictProxy, SnakeCaseDictProxy
 from lib.utils.decorators import normalize_repository, validate_github_name
-from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
+from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser, GraphQLQueriesDirProxyDef
 from lib.utils import get_nested_key, get_all_dict_paths, set_nested_key
 from cogs.backend.handle.errors._error_tools import log_error_in_discord
 from .transformations import *
@@ -204,7 +204,7 @@ class GitHubAPI:
     def __init__(self, bot: 'GitBot', token: str, session: aiohttp.ClientSession):
         self.bot: 'GitBot' = bot
         self.__token: str = token
-        self.queries: DirProxy = DirProxy('./resources/queries/', ('.gql', '.graphql'))
+        self.queries: GraphQLQueriesDirProxyDef = GraphQLQueriesDirProxyDef('./resources/queries/', ('.gql', '.graphql'))
         self.session: aiohttp.ClientSession = session
         self.gh: gh.GitHubAPI = gh.GitHubAPI(session=self.session, requester=self.requester, oauth_token=self.__token)
 

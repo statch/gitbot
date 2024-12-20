@@ -6,7 +6,7 @@ from lib.structs import DictProxy, DirProxy, CaseInsensitiveDict, MaxAgeDict, Fi
 from lib.typehints.db.guild.autoconv import AutomaticConversionSettings
 from lib.typehints.generic import *
 from lib.typehints.locale.help import *
-from lib.typehints.locale.localedef_wfallback import LocaleDictProxyDef
+from lib.typehints.resource_defs_wfallbacks import *
 from lib.typehints.db.guild.release_feed import *
 from lib.typehints.gitbot_config import *
 
@@ -37,7 +37,8 @@ __all__: tuple = (
     'CratesIOCrate',
     'ReleaseFeedItemMention',
     'GitbotRepoConfig',
-    'LocaleDictProxyDef'
+    'LocaleDictProxyDef',
+    'GraphQLQueriesDirProxyDef'
 )
 
 AnyDict = dict | DictProxy | CaseInsensitiveDict | MaxAgeDict | FixedSizeOrderedDict

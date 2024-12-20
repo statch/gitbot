@@ -1,12 +1,12 @@
 website:
 - changed-files:
-  - any-glob-to-any-file: docs/**/*
+  - any-glob-to-any-file: ['docs/**/*']
 cogs:
 - changed-files:
-  - any-glob-to-any-file: cogs/**/*
+  - any-glob-to-any-file: ['cogs/**/*']
 root:
 - changed-files:
-  - any-glob-to-any-file: ./*
+  - any-glob-to-any-file: ['./*']
 locale:
 - changed-files:
-  - any-glob-to-any-file: resources/locale/**/*
+  - any-glob-to-any-file: ['resources/locale/**/*']

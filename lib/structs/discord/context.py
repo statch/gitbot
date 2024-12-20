@@ -131,6 +131,8 @@ class GitBotContext(commands.Context):
         if not self.__silence_error_calls__:
             return await self.send(*args, style=MessageFormattingStyle.ERROR, **kwargs)
 
+    hint = error  # hints are presumed to be error-like in nature since they are shown in case of misconfiguration
+
     async def success_embed(self, text: str, **kwargs) -> discord.Message:
         return await GitBotEmbed.success(text, **kwargs).send(self)
 

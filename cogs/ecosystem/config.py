@@ -43,6 +43,8 @@ class Config(commands.Cog):
             await ctx.bot.db.guilds.insert_one(GitBotGuild(_id=ctx.guild.id, autoconv=config))  # noqa _id is int
         ctx.bot.set_cache_v('autoconv', ctx.guild.id, config)
         await ctx.success(ctx.l.config.autoconv.toggles.get(item).get(str(state)))
+        if not ctx.bot_permissions.read_message_history:
+            await ctx.hint(ctx.l.generic.hints.read_message_history_permission)
         return state
 
     @staticmethod
@@ -472,6 +474,8 @@ class Config(commands.Cog):
                 await self.bot.db.guilds.insert_one({'_id': ctx.guild.id, 'autoconv': config})
             self.bot.set_cache_v('autoconv', ctx.guild.id, config)
             await ctx.success(ctx.lp.results[_str])
+            if not ctx.bot_permissions.read_message_history:
+                await ctx.hint(ctx.l.generic.hints.read_message_history_permission)
 
     @config_command_group.group(name='delete', aliases=['d', 'del'])
     @commands.cooldown(5, 30, commands.BucketType.user)

@@ -98,6 +98,9 @@
     "view": {
       "on_github": "View on GitHub",
       "more": "View on {0}"
+    },
+    "hints": {
+      "read_message_history_permission": "***Hint:** I'm going to need the `Read Message History` permission to work properly!*"
     }
   },
   "enum": {

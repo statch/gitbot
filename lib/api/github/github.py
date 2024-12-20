@@ -15,7 +15,7 @@ import inspect
 import gidgethub.aiohttp as gh
 from typing import Optional, Callable, Any, Literal, TYPE_CHECKING, LiteralString
 from gidgethub import BadRequest, QueryError
-from datetime import date, datetime
+import datetime
 from lib.structs import DirProxy, TypedCache, CacheSchema, DictProxy, SnakeCaseDictProxy
 from lib.utils.decorators import normalize_repository, validate_github_name
 from lib.typehints import GitHubRepository, GitHubOrganization, GitHubUser
@@ -26,7 +26,7 @@ from .transformations import *
 if TYPE_CHECKING:
     from lib.structs.discord.bot import GitBot
 
-YEAR_START: str = f'{date.today().year}-01-01T00:00:30Z'
+YEAR_START: str = f'{datetime.date.today().year}-01-01T00:00:01Z'
 DISCORD_UPLOAD_SIZE_THRESHOLD_BYTES: int = int(7.85 * (1024 ** 2))  # 7.85mb
 
 _ReturnDict = SnakeCaseDictProxy | dict
@@ -458,7 +458,7 @@ class GitHubAPI:
     @validate_github_name('user')
     async def get_user(self, user: GitHubUser) -> Optional[_ReturnDict]:
         return await self.query(self.queries.user, Login=user, FromTime=YEAR_START,
-                                ToTime=datetime.utcnow().strftime('%Y-%m-%dT%XZ'),
+                                ToTime=datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%dT%XZ'),
                                 on_fail_return=None, transformer=transform_user)
 
     @_wrap_proxy

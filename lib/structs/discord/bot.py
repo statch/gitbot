@@ -14,7 +14,6 @@ import aiohttp
 import platform
 import aiofiles
 import itertools
-import sentry_sdk
 from sys import version_info
 from dotenv import load_dotenv
 from time import perf_counter
@@ -87,16 +86,6 @@ class GitBot(commands.AutoShardedBot):
         else:
             self.logger.info('CLOC script found, skipping download.')
 
-    def _setup_sentry(self) -> None:
-        if self.mgr.env.production and (dsn := self.mgr.env.get('sentry_dsn')):
-            self.logger.info('Setting up Sentry...')
-            sentry_sdk.init(
-                dsn=dsn,
-                traces_sample_rate=0.5
-            )
-        else:
-            self.logger.info('Sentry not enabled/configured - skipping')
-
     def _setup_logging(self):
         logging.basicConfig(level=logging.INFO, handlers=[GitBotLoggingStreamHandler()], force=True)
         logging.getLogger('asyncio').setLevel(logging.WARNING)
@@ -155,7 +144,6 @@ class GitBot(commands.AutoShardedBot):
         await self._setup_services()
         self.logger.setLevel(getattr(logging, self.mgr.env.log_level.upper(), self.mgr.env.log_level))
         self._set_runtime_vars()
-        self._setup_sentry()
         self._setup_uvloop()
         await self._setup_cloc()
         await self.load_cogs()

@@ -300,7 +300,7 @@ class Manager:
         return obj
 
     @staticmethod
-    async def verify_send_perms(channel: discord.TextChannel) -> bool:
+    async def verify_send_perms(channel: discord.abc.Messageable | discord.abc.GuildChannel) -> bool:
         """
         Check if the client can comfortably send a message to a channel
 
@@ -309,14 +309,8 @@ class Manager:
         """
         if isinstance(channel, discord.DMChannel):
             return True
-        if isinstance(channel, discord.Thread):
-            return False
-        perms: list = list(iter(channel.permissions_for(channel.guild.me)))
-        overwrites: list = list(iter(channel.overwrites_for(channel.guild.me)))  # weird inspection, keep an eye on this
-        if all(req in perms + overwrites for req in [('send_messages', True),
-                                                     ('read_messages', True),
-                                                     ('read_message_history', True)]) \
-                or ('administrator', True) in perms:
+        permissions = channel.permissions_for(channel.guild.me)
+        if (permissions.send_messages and permissions.read_messages and permissions.read_message_history) or permissions.administrator:
             return True
         return False
 

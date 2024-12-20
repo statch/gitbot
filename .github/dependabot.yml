@@ -3,12 +3,13 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
     labels:
       - "dependabot-bump"
       - "pip-bump"
     reviewers:
-      - "itsmewulf"
+      - "seven7ty"
     commit-message:
       prefix: "pip"
       prefix-development: "pip dev"
@@ -16,21 +17,22 @@ updates:
     pull-request-branch-name:
       separator: "-"
     assignees:
-      - "itsmewulf"
+      - "seven7ty"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
     labels:
       - "dependabot-bump"
       - "gh-actions-bump"
     reviewers:
-      - "itsmewulf"
+      - "seven7ty"
     commit-message:
       prefix: "github actions"
       include: "scope"
     pull-request-branch-name:
       separator: "-"
     assignees:
-      - "itsmewulf"
+      - "seven7ty"

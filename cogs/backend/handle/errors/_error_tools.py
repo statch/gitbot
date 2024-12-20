@@ -24,7 +24,7 @@ async def respond_to_command_doesnt_exist(ctx: GitBotContext, error: commands.Co
         color=0x0384fc,
         title=ctx.l.errors.command_not_found.title,
         description=ctx.fmt('description',
-                            f'```haskell\n{str(ctx.bot.command_prefix).strip()} '
+                            f'```haskell\n{str(ctx.prefix).strip()} '
                             f'{(closest_existing_command_from_error(ctx.bot, error))}```'),
         footer=ctx.l.errors.command_not_found.footer
     )
@@ -74,7 +74,7 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception, _actual=Non
 
 def closest_existing_command_from_error(bot: 'GitBot', error: commands.CommandNotFound | str) -> str:
     return str(bot.mgr.get_closest_match_from_iterable(
-        (error := str(error))[error.index('"') + 1:error.rindex('"')],
+        (error := error.args[0])[error.index('"') + 1:error.rindex('"')],
         filter(lambda cmd: cmd not in bot.mgr.env.hidden_commands, map(str, bot.walk_commands()))))
 
 

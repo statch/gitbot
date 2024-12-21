@@ -56,7 +56,7 @@ class GitBot(commands.AutoShardedBot):
     def __init__(self, **kwargs):
         self.__init_start: float = perf_counter()
         self.user_id_blacklist: set = set()
-        super().__init__(command_prefix=commands.when_mentioned_or(f'{os.getenv("PREFIX")} '),
+        super().__init__(command_prefix=f'{os.getenv("PREFIX")} ',
                          case_insensitive=True,
                          intents=discord.Intents(messages=True, message_content=True, guilds=True,
                                                  guild_reactions=True),

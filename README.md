@@ -73,7 +73,7 @@ _________________
 _________________
 
 <p align="center">
-  <b>© 2020-2024 statch<br/>Not affiliated with <a href="https://github.com/">GitHub Inc.</a></b>
+  <b>© 2020-2025 statch<br/>Not affiliated with <a href="https://github.com/">GitHub Inc.</a></b>
 </p>
 <p align="center">
   <a href="https://www.producthunt.com/posts/gitbot?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gitbot" target="_blank">

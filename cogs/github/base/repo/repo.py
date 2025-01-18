@@ -145,7 +145,7 @@ class Repo(commands.Cog):
             path: str = repo_or_path[len(repo):] if is_tree else None
         src: list = await self.bot.github.get_tree_file(repo, path, ref)
         if not src:
-            if is_tree:
+            if is_tree and src is None:
                 await ctx.error(ctx.l.generic.nonexistent.path)
             elif ref:
                 await ctx.error(ctx.l.generic.nonexistent.repo.or_ref.format(f'`{ref}`'))

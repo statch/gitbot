@@ -120,6 +120,7 @@ class GitHubQueryDebugInfo:
         'Not Found',
         'Could not resolve to a PullRequest with the number of',
         'Could not resolve to an Issue with the number of',
+        'No commit found for the ref',
         'Variable $Oid of type GitObjectID! was provided invalid value'
     )
 
@@ -307,7 +308,7 @@ class GitHubAPI:
 
     @normalize_repository
     async def get_tree_file(self, repo: GitHubRepository, path: str | None = None,
-                            ref: str | None = None) -> _ReturnDict | list[_ReturnDict] | None:
+                            ref: str | None = None) -> _ReturnDict | list[_ReturnDict] | None | Literal[False]:
         if repo.count('/') != 1:
             return None
         if path:
@@ -315,7 +316,8 @@ class GitHubAPI:
                 path = '/' + path
         else:
             path = ''
-        return await self.query(f'/repos/{repo}/contents{path}' + (f'?ref={ref}' if ref else ''), on_fail_return=None)
+        return await self.query(f'/repos/{repo}/contents{path}' + (f'?ref={ref}' if ref else ''),
+                                on_fail_return={'ref': False, '__default__': None})
 
     @github_cached
     @validate_github_name('user', default=[])

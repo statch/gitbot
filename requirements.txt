@@ -4,7 +4,7 @@ gidgethub==5.3.0
 python-dotenv==1.0.0
 python-Levenshtein==0.26.1
 fuzzywuzzy==0.18.0
-motor==3.6.0
+motor==3.6.1
 dnspython==2.6.1
 psutil==6.1.1
 dblpy==0.4.0

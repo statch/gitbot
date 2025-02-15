@@ -6,7 +6,7 @@ python-Levenshtein==0.26.1
 fuzzywuzzy==0.18.0
 motor==3.7.0
 dnspython==2.6.1
-psutil==6.1.1
+psutil==7.0.0
 dblpy==0.4.0
 dlabs.py
 statcord.py==3.1.1

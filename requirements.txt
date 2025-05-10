@@ -20,6 +20,6 @@ pandas
 kaleido==0.2.1
 certifi==2025.1.31
 uvloop==0.21.0; sys_platform == 'linux'
-recordclass==0.22.1
+recordclass==0.23.1
 pipe==2.0
 topggpy==1.4.0

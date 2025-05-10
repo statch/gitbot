@@ -21,9 +21,14 @@ class Config(commands.Cog):
         }
 
     @staticmethod
-    def construct_release_feed_list(ctx: GitBotContext, rf: ReleaseFeed) -> str:
+    async def construct_release_feed_list(ctx: GitBotContext, rf: ReleaseFeed) -> str:
         item: str = '' if rf else ctx.l.generic.nonexistent.release_feed
         for rfi in rf:
+            if rfi['cid'] not in map(lambda c: c.id, ctx.guild.channels):
+                await ctx.bot.db.guilds.update_one({'_id': ctx.guild.id},
+                                                   {'$pull': {'feed': {'cid': rfi['cid']}}})
+                ctx.bot.logger.debug('Removed channel %d from feed in GID %d', rfi['cid'], ctx.guild.id)
+                continue
             m: str = '' if not rfi.get('mention') else ' - ' + ctx.bot.mgr.release_feed_mention_to_actual(rfi['mention'])
             item += ctx.bot.mgr.e.square + ' ' + f'<#{rfi["cid"]}>{m}\n' + \
                     ('\n'.join([f'⠀⠀- [`{rfr["name"]}`](https://github.com/{rfr["name"]})'
@@ -118,7 +123,7 @@ class Config(commands.Cog):
             embed: GitBotEmbed = GitBotEmbed(
                 color=self.bot.mgr.c.discord.blurple,
                 title=f"{self.bot.mgr.e.github}  {ctx.l.config.show.feed.title}",
-                description=self.construct_release_feed_list(ctx, guild['feed']),
+                description=await self.construct_release_feed_list(ctx, guild['feed']),
                 footer=ctx.fmt('footer', f'git config feed channel {{{ctx.l.help.argument_explainers.channel.name}}}'))
             await embed.send(ctx)
         else:

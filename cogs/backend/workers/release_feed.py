@@ -118,7 +118,7 @@ class ReleaseFeedWorker(commands.Cog):
                                                                 session=self.bot.session)
             await webhook.send(text, embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar.url)
         except (discord.errors.NotFound, discord.errors.Forbidden, discord.errors.HTTPException):
-            await self.bot.db.guilds.find_one_and_delete({'_id': guild['_id']})
+            await self.bot.db.guilds.update_one({'_id': guild['_id']}, {'$pull': {'feed': {'hook': rfi['hook']}}})
             return False
         return True
 

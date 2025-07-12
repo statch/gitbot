@@ -17,7 +17,7 @@ py-carbon==1.0.4
 aiofiles==24.1.0
 plotly==6.0.1
 pandas
-kaleido==0.2.1
+kaleido==1.0.0
 certifi==2025.1.31
 uvloop==0.21.0; sys_platform == 'linux'
 recordclass==0.22.1

@@ -29,7 +29,7 @@
     "channel_not_found": "I can't seem to find a channel named `{0}`...\n**Does it exist and do I have access?**",
     "role_not_found": "I can't seem to find a role named `{0}`...",
     "checks": {
-      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server! Set the right permissions for me and try again.",
+      "bot_cant_manage_release_feed_channels": "**I can't manage (each of) the release feed channels** configured in this server!\nSet the right permissions for me (`manage channel` on each release feed channel and `manage webhooks` server-wide), then try again.",
       "guild_has_no_release_feeds": "**This server doesn't have any release feeds configured!** Use `{0}` to add one."
     },
     "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**",

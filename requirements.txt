@@ -1,4 +1,4 @@
-discord.py==2.5.2
+discord.py==2.6.3
 aiohttp==3.11.14
 gidgethub==5.3.0
 python-dotenv==1.0.0

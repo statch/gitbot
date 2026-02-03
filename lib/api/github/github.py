@@ -369,6 +369,8 @@ class GitHubAPI:
             if 'Repository' in str(e):
                 return 'repo'
             return 'ref'
+        if isinstance(data, str):
+            return data
         if 'defaultBranchRef' not in data.get('repository', {}) and 'ref' not in data['repository']:
             return 'ref'
         try:

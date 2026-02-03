@@ -43,55 +43,56 @@ class PyPI(commands.Cog):
     async def project_info_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
         ctx.fmt.set_prefix('pypi info')
         data: Optional[dict] = await self.bot.pypi.get_project_data(project.lower())
-        if data:
-            gravatar: str = self.bot.mgr.construct_gravatar_url(data['info']['author_email'],
-                                                                default=self.bot.mgr.i.pip_logo)
-            embed: GitBotEmbed = GitBotEmbed(
-                    color=0x3572a5,
-                    title=f'{data["info"]["name"]} `{data["info"]["version"]}`',
-                    url=data['info']['project_url'],
-                    thumbnail=gravatar
-            )
+        if not data:
+            return await ctx.error(ctx.l.generic.nonexistent.python_package)
+        gravatar: str = (self.bot.mgr.construct_gravatar_url(data['info']['author_email'],
+                                                            default=self.bot.mgr.i.pip_logo)
+                         if data['info']['author_email'] else self.bot.mgr.i.pip_logo)
+        embed: GitBotEmbed = GitBotEmbed(
+                color=0x3572a5,
+                title=f'{data["info"]["name"]} `{data["info"]["version"]}`',
+                url=data['info']['project_url'],
+                thumbnail=gravatar
+        )
 
-            if data['info']['summary'] is not None and len(data['info']['summary']) != 0:
-                embed.add_field(name=f":notepad_spiral: {ctx.l.pypi.info.glossary[0]}:",
-                                value=f"```{data['info']['summary'].strip()}```")
-            author: str = ctx.fmt('author', f'[{(author := data["info"]["author"])}]'
-                                            f'({await self.bot.mgr.ensure_http_status(f"https://pypi.org/user/{author}", alt="")})') + '\n'
+        if data['info']['summary'] is not None and len(data['info']['summary']) != 0:
+            embed.add_field(name=f":notepad_spiral: {ctx.l.pypi.info.glossary[0]}:",
+                            value=f"```{data['info']['summary'].strip()}```")
+        author: str = ctx.fmt('author', f'[{(author := data["info"]["author"])}]'
+                                        f'({await self.bot.mgr.ensure_http_status(f"https://pypi.org/user/{author}", alt="")})') + '\n'
 
-            first_release = (None, None)
-            for tag_name, release in data['releases'].items():
-                if (v := parse_version(tag_name)) and first_release[0] is None or first_release[0] > v:
-                    first_release = v, release
-            first_uploaded_at: str = f''
-            first_release: tuple[..., list | ...] | list[..., list | ...]
-            if first_release[1]:
-                first_uploaded_at: str = ctx.fmt('first_upload',
-                                                 self.bot.mgr.external_to_discord_timestamp(
-                                                         first_release[1][0]["upload_time"],
-                                                         "%Y-%m-%dT%H:%M:%S")) + '\n'
+        first_release = (None, None)
+        for tag_name, release in data['releases'].items():
+            if (v := parse_version(tag_name)) and first_release[0] is None or first_release[0] > v:
+                first_release = v, release
+        first_uploaded_at: str = f''
+        first_release: tuple[..., list | ...] | list[..., list | ...]
+        if first_release[1]:
+            first_uploaded_at: str = ctx.fmt('first_upload',
+                                             self.bot.mgr.external_to_discord_timestamp(
+                                                     first_release[1][0]["upload_time"],
+                                                     "%Y-%m-%dT%H:%M:%S")) + '\n'
 
-            requires_python: str = ctx.fmt('requires_python', f'`{data["info"]["requires_python"]}`') + '\n'
-            info: str = f'{author}{first_uploaded_at}{requires_python}'
-            embed.add_field(name=f":mag_right: {ctx.l.pypi.info.glossary[1]}:", value=info)
+        requires_python: str = ctx.fmt('requires_python', f'`{data["info"]["requires_python"]}`') + '\n'
+        info: str = f'{author}{first_uploaded_at}{requires_python}'
+        embed.add_field(name=f":mag_right: {ctx.l.pypi.info.glossary[1]}:", value=info)
 
-            homepage: tuple = (data['info']['home_page'] if 'home_page' in data['info'] and data['info']['home_page'] else None, ctx.l.pypi.info.glossary[3])
-            docs: tuple = (data['info']['docs_url'] if 'docs_url' in data['info'] and data['info']['docs_url'] else None, ctx.l.pypi.info.glossary[4])
-            bugs: tuple = (data['info']['bugtrack_url'] if 'bugtrack_url' in data['info'] and data['info']['bugtrack_url'] else None, ctx.l.pypi.info.glossary[4])
-            links: list = [homepage, docs, bugs]
-            link_strings: list = []
-            for lnk in links:
-                if lnk[0] is not None and len(lnk[0]) != 0:
-                    link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
-            if len(link_strings) != 0:
-                embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:", value='\n'.join(link_strings))
+        homepage: tuple = (data['info']['home_page'] if 'home_page' in data['info'] and data['info']['home_page'] else None, ctx.l.pypi.info.glossary[3])
+        docs: tuple = (data['info']['docs_url'] if 'docs_url' in data['info'] and data['info']['docs_url'] else None, ctx.l.pypi.info.glossary[4])
+        bugs: tuple = (data['info']['bugtrack_url'] if 'bugtrack_url' in data['info'] and data['info']['bugtrack_url'] else None, ctx.l.pypi.info.glossary[4])
+        links: list = [homepage, docs, bugs]
+        link_strings: list = []
+        for lnk in links:
+            if lnk[0] is not None and len(lnk[0]) != 0:
+                link_strings.append(f"- [{lnk[1]}]({lnk[0]})")
+        if len(link_strings) != 0:
+            embed.add_field(name=f":link: {ctx.l.pypi.info.glossary[2]}:", value='\n'.join(link_strings))
 
-            if 'license' in data['info'] and data['info']['license']:
-                embed.set_footer(text=ctx.fmt('license', data['info']['license']))
+        if 'license' in data['info'] and data['info']['license']:
+            embed.set_footer(text=self.bot.mgr.truncate(ctx.fmt('license', data['info']['license']), length=90, full_word=True))
 
-            await ctx.send(embed=embed, view_on_url=data['info']['project_url'])
-        else:
-            await ctx.error(ctx.l.generic.nonexistent.python_package)
+        await ctx.send(embed=embed, view_on_url=data['info']['project_url'])
+
 
     @pypi_command_group.command('downloads', aliases=['dl', 'stats', 'statistics'])
     @commands.cooldown(3, 30, commands.BucketType.user)

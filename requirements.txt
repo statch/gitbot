@@ -14,7 +14,7 @@ beautifulsoup4==4.13.3
 colorama==0.4.6
 requests==2.33.0
 py-carbon==1.0.4
-aiofiles==24.1.0
+aiofiles==25.1.0
 plotly==6.3.0
 pandas
 kaleido==0.2.1

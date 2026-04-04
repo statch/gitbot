@@ -19,7 +19,7 @@ plotly==6.3.0
 pandas
 kaleido==1.2.0
 certifi==2025.8.3
-uvloop==0.21.0; sys_platform == 'linux'
+uvloop==0.22.1; sys_platform == 'linux'
 recordclass==0.24
 pipe==2.0
 topggpy==1.4.0

@@ -232,7 +232,7 @@ class Manager:
         return str_
 
     @staticmethod
-    def sanitize_codeblock_content(content: str, neutralize_mentions: bool = True) -> str:
+    def sanitize_codeblock_content(content: str | None, neutralize_mentions: bool = True) -> str:
         """
         Harden untrusted text for Discord fenced code blocks.
 
@@ -240,7 +240,9 @@ class Manager:
         :param neutralize_mentions: Whether to prevent mention abuse
         :return: The sanitized text
         """
-        content: str = content.replace('```', '`\u200b``')
+        if not content:
+            return ''
+        content = content.replace('```', '`\u200b``')
         if neutralize_mentions:
             content = content.replace('@', '@\u200b')
         return content

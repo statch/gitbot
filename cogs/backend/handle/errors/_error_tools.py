@@ -42,10 +42,12 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception, _actual=Non
         )
         message: str = ctx.bot.mgr.sanitize_codeblock_content(str(error))
         tb: str = ctx.bot.mgr.sanitize_codeblock_content(format_tb(error.__traceback__))
+        sanitized_args: str = ctx.bot.mgr.sanitize_codeblock_content(format_args(ctx.args))
+        sanitized_kwargs: str = ctx.bot.mgr.sanitize_codeblock_content(format_kwargs(ctx.kwargs))
         embed.add_field(name='Message', value=f'```{message}```')
         embed.add_field(name='Traceback', value=f'```{tb}```')
         embed.add_field(name='Arguments',
-                        value=f'```properties\nargs={ctx.bot.mgr.sanitize_codeblock_content(format_args(ctx.args))}\nkwargs={ctx.bot.mgr.sanitize_codeblock_content(format_kwargs(ctx.kwargs))}```')
+                        value=f'```properties\nargs={sanitized_args}\nkwargs={sanitized_kwargs}```')
     elif isinstance(error, commands.CommandNotFound):
         error_text: str = ctx.bot.mgr.sanitize_codeblock_content(str(error))
         embed: GitBotEmbed = GitBotEmbed(

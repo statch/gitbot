@@ -242,7 +242,7 @@ class Manager:
         """
         if not content:
             return ''
-        content = content.replace('```', '`\u200b``')
+        content = content.replace('```', '`\u200b`\u200b`')
         if neutralize_mentions:
             content = content.replace('@', '@\u200b')
         return content

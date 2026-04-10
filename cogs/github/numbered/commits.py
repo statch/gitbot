@@ -115,8 +115,8 @@ class Commits(commands.Cog):
             message: str = (f"{self.bot.mgr.truncate(commit['messageBody'], 247, full_word=True)}"
                             if commit['messageBody'] and commit['messageBody'] != commit['messageHeadline']
                             else '')
-            full_headline: str = self.bot.mgr.sanitize_codeblock_content(full_headline)
-            message: str = self.bot.mgr.sanitize_codeblock_content(message)
+            full_headline = self.bot.mgr.sanitize_codeblock_content(full_headline)
+            message = self.bot.mgr.sanitize_codeblock_content(message)
             empty: str = ctx.l.commit.fields.message.empty if not full_headline and not message else ''
             message: str = '```' + full_headline + message + empty + '```'
             embed.add_field(name=f':notepad_spiral: {ctx.l.commit.fields.message.name}:', value=message)

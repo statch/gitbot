@@ -50,7 +50,7 @@ async def get_text_from_url_and_data(ctx: 'GitBotContext',
     if text:
         text = text.rstrip()
         if wrap_in_codeblock:
-            text = ctx.bot.mgr.sanitize_codeblock_content(text)
+            text = ctx.bot.mgr.sanitize_codeblock_content(text, neutralize_mentions=False)
             return f"```{extension}\n{text}\n```", None
         return text, None
     return '', None

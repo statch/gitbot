@@ -56,8 +56,9 @@ class PyPI(commands.Cog):
         )
 
         if data['info']['summary'] is not None and len(data['info']['summary']) != 0:
+            summary: str = self.bot.mgr.sanitize_codeblock_content(data['info']['summary'].strip())
             embed.add_field(name=f":notepad_spiral: {ctx.l.pypi.info.glossary[0]}:",
-                            value=f"```{data['info']['summary'].strip()}```")
+                            value=f"```{summary}```")
         author: str = ctx.fmt('author', f'[{(author := data["info"]["author"])}]'
                                         f'({await self.bot.mgr.ensure_http_status(f"https://pypi.org/user/{author}", alt="")})') + '\n'
 

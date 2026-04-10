@@ -90,7 +90,7 @@ class Gist(commands.Cog):
 
         stargazers_and_comments = f'{stargazers} and {comments}'
         info: str = f'{created_at}{updated_at}{stargazers_and_comments}'
-        content: str = self.bot.mgr.truncate(first_file['text'], 749, ' [...]').replace('`', '\u200b`')
+        content: str = self.bot.mgr.sanitize_codeblock_content(self.bot.mgr.truncate(first_file['text'], 749, ' [...]'))
         embed.add_field(name=f':notepad_spiral: {ctx.l.gist.glossary[0]}:', value=f"```{self.extension(first_file['extension'])}\n{content}```")
         embed.add_field(name=f":mag_right: {ctx.l.gist.glossary[1]}:", value=info)
 

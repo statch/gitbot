@@ -64,6 +64,7 @@ class Issue(commands.Cog):
         else:
             body = None
         if body:
+            body = self.bot.mgr.sanitize_codeblock_content(body)
             embed.add_field(name=f':notepad_spiral: {ctx.l.issue.glossary[0]}:', value=f"```{body}```", inline=False)
         user: str = ctx.fmt('created_at',
                             self.bot.mgr.to_github_hyperlink(issue['author']['login']),

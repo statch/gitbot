@@ -60,8 +60,9 @@ class Repo(commands.Cog):
         open_issues: int = r['issues']['totalCount']
 
         if r['description'] is not None and len(r['description']) != 0:
+            description: str = self.bot.mgr.sanitize_codeblock_content(re.sub(MARKDOWN_EMOJI_RE, '', r['description']).strip())
             embed.add_field(name=f":notepad_spiral: {ctx.l.repo.info.glossary[0]}:",
-                            value=f"```{re.sub(MARKDOWN_EMOJI_RE, '', r['description']).strip()}```")
+                            value=f"```{description}```")
 
         watchers: str = ctx.fmt('watchers plural', watch, f"{r['url']}/watchers") if watch != 1 else ctx.fmt(
             'watchers singular', f"{r['url']}/watchers")
@@ -162,12 +163,13 @@ class Repo(commands.Cog):
         embeds: list = []
 
         def make_embed(items: list, ftr: str | None = None) -> GitBotEmbed:
+            sanitized_path: str | None = self.bot.mgr.sanitize_codeblock_content(path) if path else None
             return GitBotEmbed(
                     color=self.bot.mgr.c.rounded,
                     title=f'{self.bot.mgr.e.branch}  `{repo}`' + (f' ({ref})' if ref else ''),
                     description='\n'.join(
                             f'{self.bot.mgr.e.file}  [`{f["name"]}`]({f["html_url"]})' if f['type'] == 'file' else
-                            f'{self.bot.mgr.e.folder}  [`{f["name"]}`]({f["html_url"]})' for f in items) + ('\n' + f'```{path}```' if path else ''),
+                            f'{self.bot.mgr.e.folder}  [`{f["name"]}`]({f["html_url"]})' for f in items) + ('\n' + f'```{sanitized_path}```' if sanitized_path else ''),
                     url=link,
                     footer=ftr
             )

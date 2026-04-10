@@ -53,8 +53,9 @@ class Crates(commands.Cog):
             )
 
             if (crate_desc := data['crate']['description']) is not None and len(crate_desc) != 0:
+                crate_desc = self.bot.mgr.sanitize_codeblock_content(crate_desc.strip())
                 embed.add_field(name=f":notepad_spiral: {ctx.l.crates.info.glossary[0]}:",
-                                value=f"```{crate_desc.strip()}```")
+                                value=f"```{crate_desc}```")
 
             more_authors: str = f' {ctx.fmt("more_authors", f"[{len(owners) - 5}]({crate_url})")}' if len(
                 owners) > 5 else ''

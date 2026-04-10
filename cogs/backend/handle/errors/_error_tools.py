@@ -40,15 +40,18 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception, _actual=Non
             color=0xda4353,
             title=f'Error in `{ctx.command}` command'
         )
-        embed.add_field(name='Message', value=f'```{error}```')
-        embed.add_field(name='Traceback', value=f'```{format_tb(error.__traceback__)}```')
+        message: str = ctx.bot.mgr.sanitize_codeblock_content(str(error))
+        tb: str = ctx.bot.mgr.sanitize_codeblock_content(format_tb(error.__traceback__))
+        embed.add_field(name='Message', value=f'```{message}```')
+        embed.add_field(name='Traceback', value=f'```{tb}```')
         embed.add_field(name='Arguments',
-                        value=f'```properties\nargs={format_args(ctx.args)}\nkwargs={format_kwargs(ctx.kwargs)}```')
+                        value=f'```properties\nargs={ctx.bot.mgr.sanitize_codeblock_content(format_args(ctx.args))}\nkwargs={ctx.bot.mgr.sanitize_codeblock_content(format_kwargs(ctx.kwargs))}```')
     elif isinstance(error, commands.CommandNotFound):
+        error_text: str = ctx.bot.mgr.sanitize_codeblock_content(str(error))
         embed: GitBotEmbed = GitBotEmbed(
             color=0x0384fc,
             title='Nonexistent command!',
-            description=f'```{(error := str(error))}```',
+            description=f'```{error_text}```',
             footer='Closest existing command: ' + closest_existing_command_from_error(ctx.bot, error)
         )
     elif isinstance(error, (BadRequest, QueryError)):
@@ -57,10 +60,13 @@ async def log_error_in_discord(ctx: GitBotContext, error: Exception, _actual=Non
             title='GitHub API Error!',
             footer='The logs may contain more information.'
         )
-        embed.add_field(name='API Response', value=f'```diff\n- {error}```')
-        embed.add_field(name='Code Location', value=f'```{ctx.gh_query_debug.code_location}```')
+        api_response: str = ctx.bot.mgr.sanitize_codeblock_content(str(error))
+        code_location: str = ctx.bot.mgr.sanitize_codeblock_content(ctx.gh_query_debug.code_location)
+        embed.add_field(name='API Response', value=f'```diff\n- {api_response}```')
+        embed.add_field(name='Code Location', value=f'```{code_location}```')
         if ctx.gh_query_debug.additional_info:
-            embed.add_field(name='Additional Info', value=f'```{ctx.gh_query_debug.additional_info}```')
+            additional_info: str = ctx.bot.mgr.sanitize_codeblock_content(ctx.gh_query_debug.additional_info)
+            embed.add_field(name='Additional Info', value=f'```{additional_info}```')
         if ctx.gh_query_debug.status_code is not None:
             embed.add_field(name='Status Code', value=f'```c\n{error.status_code}```')
         ping_owner: bool = True

@@ -66,8 +66,9 @@ class PullRequest(commands.Cog):
         )
         embed.set_thumbnail(url=pr['author']['avatarUrl'])
         if all(['bodyText' in pr and pr['bodyText'], len(pr['bodyText'])]):
+            body: str = self.bot.mgr.sanitize_codeblock_content(self.bot.mgr.truncate(pr['bodyText'], 387, full_word=True))
             embed.add_field(name=':notepad_spiral: Body:',
-                            value=f"```{self.bot.mgr.truncate(pr['bodyText'], 387, full_word=True)}```",
+                            value=f"```{body}```",
                             inline=False)
         user: str = ctx.fmt('created_at',
                             self.bot.mgr.to_github_hyperlink(pr['author']['login']),

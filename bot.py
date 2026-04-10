@@ -27,14 +27,16 @@ async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
                 getattr(bot, f'{op}_extension')(str(ext))
                 done += 1
         except commands.ExtensionError as e:
-            await ctx.error(f'**Exception during batch-{op}ing:**\n```{e}```')
+            error: str = bot.mgr.sanitize_codeblock_content(str(e))
+            await ctx.error(f'**Exception during batch-{op}ing:**\n```{error}```')
         else:
             await ctx.success(f'All extensions **successfully {op}ed.** ({done})')
     else:
         try:
             getattr(bot, f'{op}_extension')(cog)
         except commands.ExtensionError as e:
-            await ctx.error(f'**Exception while {op}ing** `{cog}`**:**\n```{e}```')
+            error: str = bot.mgr.sanitize_codeblock_content(str(e))
+            await ctx.error(f'**Exception while {op}ing** `{cog}`**:**\n```{error}```')
         else:
             await ctx.success(f'**Successfully {op}ed** `{cog}`.')
 

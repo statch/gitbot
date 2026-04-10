@@ -50,7 +50,8 @@ class User(commands.Cog):
         contrib_count: Optional[tuple] = u['contributions']
         orgs_c: int = u['organizations_count']
         if "bio" in u and u['bio'] is not None and len(u['bio']) > 0:
-            embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{u['bio']}```")
+            bio: str = self.bot.mgr.sanitize_codeblock_content(u['bio'])
+            embed.add_field(name=f":notepad_spiral: {ctx.l.user.info.glossary[0]}:", value=f"```{bio}```")
         occupation: str = (ctx.l.user.info.company + '\n').format(u['company']) if 'company' in u and u[
             'company'] is not None else ctx.l.user.info.no_company + '\n'
         orgs: str = (ctx.l.user.info.orgs.plural.format(orgs_c) if orgs_c != 0 else ctx.l.user.info.orgs.no_orgs) + '\n'

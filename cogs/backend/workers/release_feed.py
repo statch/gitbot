@@ -79,7 +79,8 @@ class ReleaseFeedWorker(commands.Cog):
 
         if body := new_release['release']['descriptionHTML']:
             body: str = ' '.join(BeautifulSoup(body, features='html.parser').getText().split())
-            body: str = f"```{self.bot.mgr.truncate(body, 400, full_word=True)}```".strip()
+            body = self.bot.mgr.sanitize_codeblock_content(self.bot.mgr.truncate(body, 400, full_word=True))
+            body: str = f"```{body}```".strip()
 
         author: dict = new_release["release"]["author"]
         author: str = f'Created by [{author["login"]}]({author["url"]}) on ' \

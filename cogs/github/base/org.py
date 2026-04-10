@@ -54,7 +54,8 @@ class Org(commands.Cog):
             members: str = ctx.fmt('one_member', f"{org['html_url']}/people") + '\n'
         email: str = f"Email: {org['email']}\n" if 'email' in org and org["email"] is not None else '\n'
         if org['description'] is not None and len(org['description']) > 0:
-            embed.add_field(name=f":notepad_spiral: {ctx.l.org.info.glossary[0]}:", value=f"```{org['description']}```")
+            description: str = self.bot.mgr.sanitize_codeblock_content(org['description'])
+            embed.add_field(name=f":notepad_spiral: {ctx.l.org.info.glossary[0]}:", value=f"```{description}```")
         repos: str = f"{ctx.l.org.info.repos.no_repos}\n" if org['public_repos'] == 0 else ctx.fmt('repos plural',
                                                                                                    org['public_repos'],
                                                                                                    f"{org['url']}?tab=repositories") + '\n'

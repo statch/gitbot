@@ -232,6 +232,20 @@ class Manager:
         return str_
 
     @staticmethod
+    def sanitize_codeblock_content(content: str, neutralize_mentions: bool = True) -> str:
+        """
+        Harden untrusted text for Discord fenced code blocks.
+
+        :param content: The text to sanitize
+        :param neutralize_mentions: Whether to prevent mention abuse
+        :return: The sanitized text
+        """
+        content: str = content.replace('```', '`\u200b``')
+        if neutralize_mentions:
+            content = content.replace('@', '@\u200b')
+        return content
+
+    @staticmethod
     def flatten(iterable: Iterable) -> Iterable:
         return list(iterable | traverse)
 

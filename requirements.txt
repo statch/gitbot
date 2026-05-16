@@ -15,7 +15,7 @@ colorama==0.4.6
 requests==2.33.0
 py-carbon==1.0.4
 aiofiles==25.1.0
-plotly==6.3.0
+plotly==6.7.0
 pandas
 kaleido==1.2.0
 certifi==2025.8.3

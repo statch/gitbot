@@ -1,1 +1,2 @@
 typeshi==2.0.1
+pandas-stubs

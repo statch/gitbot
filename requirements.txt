@@ -16,7 +16,7 @@ requests==2.33.0
 py-carbon==1.0.4
 aiofiles==25.1.0
 pandas
-certifi==2026.6.17
+certifi==2026.7.22
 uvloop==0.21.0; sys_platform == 'linux'
 recordclass==0.24
 pipe==2.0

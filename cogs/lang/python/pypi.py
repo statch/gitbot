@@ -1,9 +1,5 @@
-import io
+import asyncio
 import discord
-import plotly.express as px
-import plotly.io
-import plotly.graph_objects as go
-import pandas as pd
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from typing import Optional
@@ -11,6 +7,7 @@ from pkg_resources import parse_version
 from lib.typehints import PyPIProject
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
+from cogs.lang._download_visualization import gen_downloads_chart_inmemory
 
 
 class PyPI(commands.Cog):
@@ -93,38 +90,41 @@ class PyPI(commands.Cog):
 
         await ctx.send(embed=embed, view_on_url=data['info']['project_url'])
 
-
     @pypi_command_group.command('downloads', aliases=['dl', 'stats', 'statistics'])
     @commands.cooldown(3, 30, commands.BucketType.user)
     @commands.max_concurrency(7)
     async def project_downloads_command(self, ctx: GitBotContext, project: PyPIProject) -> None:
         ctx.fmt.set_prefix('pypi downloads')
+
         downloads_overall: Optional[dict] = await self.bot.pypi.get_project_overall_downloads(project)
-        if downloads_overall and (data := downloads_overall['data']):
-            downloads_recent: dict = (await self.bot.pypi.get_project_recent_downloads(project))['data']
-            df: pd.DataFrame = pd.DataFrame({'date': [item['date'] for item in data],
-                                             'downloads': [item['downloads'] for item in data]})
-            fig: go.Figure = px.line(df,
-                                     x='date',
-                                     y='downloads',
-                                     labels={'date': ctx.l.pypi.downloads.glossary[0],
-                                             'downloads': ctx.l.pypi.downloads.glossary[1]},
-                                     template='plotly_dark')
+        downloads_recent_raw: Optional[dict] = await self.bot.pypi.get_project_recent_downloads(project)
+
+        if downloads_overall is False or downloads_recent_raw is False:
+            return await ctx.info(ctx.l.errors.external_ratelimit)
+        if downloads_overall and downloads_overall.get('data') and downloads_recent_raw and downloads_recent_raw.get(
+                'data'):
+            data: list = downloads_overall['data']
+            downloads_recent: dict = downloads_recent_raw['data']
+
             embed: GitBotEmbed = GitBotEmbed(
                     color=self.bot.mgr.c.rounded,
                     title=ctx.fmt('title', project, len(data) - 1),
                     url=f'https://pypistats.org/packages/{project.replace(".", "-").lower()}',
-                    description=f'{ctx.fmt("stats yesterday", downloads_recent["last_day"])}\n'
-                                f'{ctx.fmt("stats last_week", downloads_recent["last_week"])}\n'
-                                f'{ctx.fmt("stats last_month", downloads_recent["last_month"])}',
+                    description=f'{ctx.fmt("stats yesterday", format(downloads_recent.get("last_day", 0), ',d'))}\n'
+                                f'{ctx.fmt("stats last_week", format(downloads_recent.get("last_week", 0)), ',d')}\n'
+                                f'{ctx.fmt("stats last_month", format(downloads_recent.get("last_month", 0), ',d'))}',
                     thumbnail=self.bot.mgr.i.pip_logo,
                     footer=ctx.l.pypi.downloads.footer
             )
-            await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
-                                                                                            format='png',
-                                                                                            engine='kaleido')),
-                                                           filename=f'{project}-downloads-overall.png'),
-                            mention_author=False, view_on_url=f'https://pypistats.org/packages/{project.replace(".", "-").lower()}')
+
+            chart_buf = await self.bot.loop.run_in_executor(None, gen_downloads_chart_inmemory, ctx, data)
+
+            await ctx.reply(
+                    embed=embed,
+                    file=discord.File(fp=chart_buf, filename=f'{project}-downloads-overall.png'),
+                    mention_author=False,
+                    view_on_url=f'https://pypistats.org/packages/{project.replace(".", "-").lower()}'
+            )
         else:
             await ctx.error(ctx.l.generic.nonexistent.python_package)
 

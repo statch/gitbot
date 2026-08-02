@@ -1,15 +1,11 @@
-import io
 import discord
-import plotly.express as px
-import plotly.io
-import plotly.graph_objects as go
-import pandas as pd
 from discord.ext import commands
 from lib.utils.decorators import gitbot_group
 from typing import Optional
 from lib.typehints import CratesIOCrate
 from lib.structs import GitBotEmbed, GitBot
 from lib.structs.discord.context import GitBotContext
+from cogs.lang._download_visualization import gen_downloads_chart_inmemory
 
 
 class Crates(commands.Cog):
@@ -101,14 +97,6 @@ class Crates(commands.Cog):
         ctx.fmt.set_prefix('crates downloads')
         data: Optional[list] = await self.bot.crates.get_crate_downloads(project)
         if data:
-            df: pd.DataFrame = pd.DataFrame({'date': [item['date'] for item in data],
-                                             'downloads': [item['downloads'] for item in data]})
-            fig: go.Figure = px.line(df,
-                                     x='date',
-                                     y='downloads',
-                                     labels={'date': ctx.l.crates.downloads.glossary[0],
-                                             'downloads': ctx.l.crates.downloads.glossary[1]},
-                                     template='plotly_dark')
             yesterday_dl: int = data[-1]['downloads']
             last_week_dl: int = sum(item['downloads'] for item in data[-7:])
             last_month_dl: int = sum(item['downloads'] for item in data[-30:])
@@ -122,9 +110,9 @@ class Crates(commands.Cog):
                     thumbnail=self.bot.mgr.i.crates_logo,
                     footer=ctx.l.crates.downloads.footer
             )
-            await ctx.reply(embed=embed, file=discord.File(fp=io.BytesIO(plotly.io.to_image(fig,
-                                                                                            format='png',
-                                                                                            engine='kaleido')),
+            chart_buf = await self.bot.loop.run_in_executor(None, gen_downloads_chart_inmemory, ctx, data)
+
+            await ctx.reply(embed=embed, file=discord.File(fp=chart_buf,
                                                            filename=f'{project}-downloads-overall.png'),
                             mention_author=False, view_on_url=f'https://crates.io/crates/{project.replace(".", "-").lower()}')
         else:

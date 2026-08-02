@@ -23,8 +23,8 @@ async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
     if (cog := cog.lower()) == 'all':
         done: int = 0
         try:
-            for ext in bot.extensions:
-                getattr(bot, f'{op}_extension')(str(ext))
+            for ext in list(bot.extensions):  # cast to list to avoid concurrent modification error
+                await getattr(bot, f'{op}_extension')(str(ext))  # hacky, but works - bot.(reload/unload/load)(cog)
                 done += 1
         except commands.ExtensionError as e:
             await ctx.error(f'**Exception during batch-{op}ing:**\n```{e}```')
@@ -32,7 +32,7 @@ async def do_cog_op(ctx: GitBotContext, cog: str, op: str) -> None:
             await ctx.success(f'All extensions **successfully {op}ed.** ({done})')
     else:
         try:
-            getattr(bot, f'{op}_extension')(cog)
+            await getattr(bot, f'{op}_extension')(cog)
         except commands.ExtensionError as e:
             await ctx.error(f'**Exception while {op}ing** `{cog}`**:**\n```{e}```')
         else:

@@ -222,7 +222,7 @@ class Config(commands.Cog):
         )
 
         async def _callback(_, res: discord.Message, repo_: str):
-            indexes: list[dict] = [dict(number=ind + 1, rfi=rfi) for ind, rfi in enumerate(guild['feed'])]
+            indices: list[dict] = [dict(number=ind + 1, rfi=rfi) for ind, rfi in enumerate(guild['feed'])]
             if res.content.lower() in ('quit', 'cancel'):
                 await ctx.error(ctx.l.config.feed.repo.cancelled)
                 return GitBotCommandState.FAILURE
@@ -231,11 +231,11 @@ class Config(commands.Cog):
             async def _try_convert() -> Optional[dict]:
                 try:
                     channel: discord.TextChannel = await commands.TextChannelConverter().convert(ctx, res.content)
-                    return self.bot.mgr.get_by_key_from_sequence(indexes, 'rfi cid', channel.id)
+                    return self.bot.mgr.get_by_key_from_sequence(indices, 'rfi cid', channel.id)
                 except commands.BadArgument:
                     return
 
-            if selected_index := (self.bot.mgr.validate_index(res.content, indexes) or await _try_convert()):
+            if selected_index := (self.bot.mgr.validate_index(res.content, indices) or await _try_convert()):
                 selected_rfi: ReleaseFeedItem = selected_index['rfi']
                 mention: str = f'<#{selected_rfi["cid"]}>'
                 if len(selected_rfi['repos']) < 10:

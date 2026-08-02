@@ -34,7 +34,8 @@
     },
     "use_in_private": "For your safety, use this command **only in a DM with me, or via a slash command!**",
     "github_auth_pending": "You already have a GitHub authorization pending! **Please complete it first.**",
-    "command_disabled": "This command is currently **disabled!** Check back in soon or ask around in the support server."
+    "command_disabled": "This command is currently **disabled!** Check back in soon or ask around in the support server.",
+    "external_ratelimit": "We've hit a bit of a ratelimit wall, wait a few seconds and try again?"
   },
   "events": {
     "mention": ":tada: **Hi! I'm GitBot.**\nMy prefix is `git`\nType `git help` for a list of my commands."

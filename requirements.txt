@@ -2,7 +2,7 @@ discord.py==2.6.3
 aiohttp==3.14.3
 gidgethub==5.3.0
 python-dotenv==1.0.0
-python-Levenshtein==0.27.1
+python-Levenshtein==0.27.4
 fuzzywuzzy==0.18.0
 motor==3.7.0
 dnspython==2.8.0

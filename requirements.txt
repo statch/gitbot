@@ -18,7 +18,7 @@ aiofiles==25.1.0
 pandas
 certifi==2026.7.22
 uvloop==0.21.0; sys_platform == 'linux'
-recordclass==0.24
+recordclass==0.24.1
 pipe==2.0
 topggpy==1.4.0
 matplotlib==3.11.1

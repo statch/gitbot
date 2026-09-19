@@ -21,4 +21,4 @@ uvloop==0.21.0; sys_platform == 'linux'
 recordclass==0.24
 pipe==2.0
 topggpy==1.4.0
-matplotlib==3.11.1
+matplotlib==3.11.2
